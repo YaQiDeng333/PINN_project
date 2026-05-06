@@ -1,0 +1,43 @@
+# Python cache and bytecode
+__pycache__/
+.pycache_test/
+*.py[cod]
+*$py.class
+
+# Test and tooling caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtual environments and dependency caches
+.venv/
+venv/
+env/
+ENV/
+.pydeps/
+
+# Temporary files
+.tmp/
+tmp/
+temp/
+*.tmp
+*.log
+
+# Generated datasets and large numeric artifacts
+data/*.npz
+data/*.npy
+*.npz
+*.npy
+
+# Local editor and OS metadata
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Local environment files
+.env
+.env.*
+!.env.example
