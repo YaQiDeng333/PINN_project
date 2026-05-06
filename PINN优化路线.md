@@ -1,45 +1,4 @@
-# PINN_project
-
-PINN/MFL 缺陷边界形状反演实验项目。当前流程包含数据生成、Bz 信号与坐标联合输入的 PINN 训练，以及测试集定量评估。
-
-## 项目文件
-
-- `data_generator_v2.py`：生成 train / val / test 数据集，并保存 signals、mu_maps、defect_types、metadata、metadata_keys、x、y。
-- `train_pinn.py`：训练 BzEncoder + Fourier 坐标特征 + MLP 的 PINN 模型，输入为 Bz 信号和空间坐标，输出为 μ(x,y)。
-- `evaluate_pinn.py`：加载测试集和 checkpoint，输出 MSE、MAE、IoU、Dice、面积误差、中心误差等评估指标。
-- `PINN优化路线.md`：独立的优化路线文档，内容已合并到本 README。
-
-训练数据、模型权重和评估图表属于生成物，默认不提交到 Git：
-
-- `data/`
-- `checkpoints/`
-- `results/`
-- `*.npz`
-- `*.pt`
-
-## 基本使用
-
-本项目脚本统一使用 `pinn_mfl` 环境解释器运行。
-
-生成数据集：
-
-```powershell
-& "C:\Users\19166\anaconda3\envs\pinn_mfl\python.exe" data_generator_v2.py --train-samples 1000 --val-samples 200 --test-samples 200 --seed 42
-```
-
-训练模型：
-
-```powershell
-& "C:\Users\19166\anaconda3\envs\pinn_mfl\python.exe" train_pinn.py --epochs 20 --batch-size 8
-```
-
-评估模型：
-
-```powershell
-& "C:\Users\19166\anaconda3\envs\pinn_mfl\python.exe" evaluate_pinn.py --checkpoint checkpoints/best_model.pt --test-data data/training_data_test.npz
-```
-
-## PINN 缺陷边界形状反演 / 漏磁反演优化路线
+# PINN 缺陷边界形状反演 / 漏磁反演优化路线
 
 ## 当前进度
 

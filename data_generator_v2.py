@@ -23,6 +23,7 @@ METADATA_DTYPE = np.dtype([
     ('lift_off', 'f4'),
     ('noise_level', 'f4'),
 ])
+METADATA_KEYS = np.array(METADATA_DTYPE.names)
 
 
 def _init_metadata(num_samples):
@@ -44,6 +45,13 @@ def _as_range(value):
 def _sample_uniform(rng, value):
     low, high = _as_range(value)
     return float(rng.uniform(low, high)) if high > low else low
+
+
+def _safe_project_path(path):
+    output_path = os.path.abspath(os.path.join(PROJECT_DIR, path))
+    if os.path.commonpath([PROJECT_DIR, output_path]) != PROJECT_DIR:
+        raise ValueError(f'Output path must stay inside project directory: {output_path}')
+    return output_path
 
 
 def _generate_dataset(num_samples=1, grid_size=(100, 200), seed=None,
@@ -162,13 +170,8 @@ def _generate_dataset(num_samples=1, grid_size=(100, 200), seed=None,
 
 
 def _save_dataset(dataset, output_path):
-    output_path = os.path.abspath(os.path.join(PROJECT_DIR, output_path))
-    if os.path.commonpath([PROJECT_DIR, output_path]) != PROJECT_DIR:
-        raise ValueError(f'Output path must stay inside project directory: {output_path}')
-
-    output_dir = os.path.dirname(output_path)
-    if output_dir:
-        os.makedirs(output_dir, exist_ok=True)
+    output_path = _safe_project_path(output_path)
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
     np.savez_compressed(
         output_path,
@@ -176,6 +179,7 @@ def _save_dataset(dataset, output_path):
         mu_maps=dataset['mu_maps'],
         defect_types=dataset['defect_types'],
         metadata=dataset['metadata'],
+        metadata_keys=METADATA_KEYS,
         x=dataset['x'],
         y=dataset['y'],
     )
@@ -219,7 +223,7 @@ def generate_dataset_splits(train_samples=1000, val_samples=200, test_samples=20
 def visualize_random_sample(npz_path='data/training_data_train.npz', seed=None):
     import matplotlib.pyplot as plt
 
-    data = np.load(npz_path, allow_pickle=False)
+    data = np.load(_safe_project_path(npz_path), allow_pickle=False)
     signals = data['signals']
     mu_maps = data['mu_maps']
     defect_types = data['defect_types']

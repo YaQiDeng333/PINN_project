@@ -1,6 +1,5 @@
 # Python cache and bytecode
 __pycache__/
-.pycache_test/
 *.py[cod]
 *$py.class
 
@@ -25,11 +24,18 @@ temp/
 *.tmp
 *.log
 
-# Generated datasets and large numeric artifacts
-data/*.npz
-data/*.npy
+# Generated datasets and numeric artifacts
+data/
 *.npz
 *.npy
+
+# Model checkpoints and training outputs
+checkpoints/
+results/
+runs/
+*.pt
+*.pth
+*.ckpt
 
 # Local editor and OS metadata
 .vscode/
