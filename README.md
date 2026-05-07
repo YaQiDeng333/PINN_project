@@ -88,11 +88,17 @@
 * `x`：x 坐标
 * `y`：y 坐标
 
-第七步第一版新增复杂缺陷小样本数据集：
+第七步已生成正式规模复杂缺陷数据集：
 
 * `data/training_data_v3_complex_train.npz`
 * `data/training_data_v3_complex_val.npz`
 * `data/training_data_v3_complex_test.npz`
+
+样本数量：
+
+* train = 1000
+* val = 200
+* test = 200
 
 v3 complex 数据集新增缺陷类型：
 
@@ -146,6 +152,10 @@ v3 complex metadata 在旧字段基础上新增：
 * `results/previews/data_v3_complex_check_002.png`
 * `results/previews/data_v3_complex_check_003.png`
 * `results/previews/data_v3_complex_check_004.png`
+
+正式规模 v3 complex 数据集检查摘要：
+
+* `results/summaries/v3_complex_dataset_summary.txt`
 
 ## 常用运行命令
 
@@ -205,13 +215,13 @@ v3 complex metadata 在旧字段基础上新增：
 
 ## 下一步计划
 
-当前状态：第七步复杂缺陷扩展第一版已完成，默认最佳 baseline 仍为 `checkpoints/best_model_tv_5e-6.pt`。
+当前状态：正式规模 v3 complex 复杂缺陷数据集已生成并通过检查，默认最佳 baseline 仍为 `checkpoints/best_model_tv_5e-6.pt`。
 
 下一步等待用户确认。可选方向以 `NEXT_STEP.md` 为准：
 
-1. 生成完整规模 v3 complex 数据集；
-2. 基于 v3 complex train / val 训练新的复杂缺陷模型；
-3. 继续改进复杂缺陷生成质量或 metadata 表达。
+1. 基于 v3 complex train / val 训练新的复杂缺陷模型；
+2. 使用 v3 complex val 集选择参数；
+3. 使用 v3 complex test 集做阶段性最终评估，并与 simple baseline 分开记录。
 
 ## 文档索引
 

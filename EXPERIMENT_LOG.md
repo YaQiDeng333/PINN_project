@@ -283,6 +283,97 @@ test = 200
 
 ---
 
+## 第七步：正式规模 v3 complex 数据集生成
+
+### 实验目的
+
+在小样本复杂缺陷数据集验证通过后，生成正式规模 v3 complex train / val / test 数据集，用于后续复杂缺陷模型训练。
+
+### 修改文件
+
+* data/training_data_v3_complex_train.npz
+* data/training_data_v3_complex_val.npz
+* data/training_data_v3_complex_test.npz
+* results/summaries/v3_complex_dataset_summary.txt
+* README.md
+* PINN优化路线.md
+* NEXT_STEP.md
+* EXPERIMENT_LOG.md
+
+### 运行命令
+
+& "C:\Users\19166\anaconda3\envs\pinn_mfl\python.exe" data_generator_v2.py --complex --train-samples 1000 --val-samples 200 --test-samples 200
+
+### 输出数据集
+
+* data/training_data_v3_complex_train.npz
+* data/training_data_v3_complex_val.npz
+* data/training_data_v3_complex_test.npz
+
+### 样本数量
+
+* train = 1000
+* val = 200
+* test = 200
+
+### defect_types 分布
+
+train：
+
+* multi_defect = 331
+* polygon = 348
+* rotated_rect = 321
+
+val：
+
+* multi_defect = 71
+* polygon = 72
+* rotated_rect = 57
+
+test：
+
+* multi_defect = 62
+* polygon = 75
+* rotated_rect = 63
+
+### 检查结果
+
+* 三个 npz 文件均存在；
+* 样本数量正确；
+* 每个 npz 均包含 signals、mu_maps、defect_types、metadata、metadata_keys、x、y；
+* train signals shape = (1000, 200)，mu_maps shape = (1000, 100, 200)；
+* val signals shape = (200, 200)，mu_maps shape = (200, 100, 200)；
+* test signals shape = (200, 200)，mu_maps shape = (200, 100, 200)；
+* metadata 新字段和 metadata_keys 正常；
+* 每个样本缺陷 mask 非空；
+* signals 和 mu_maps 均无 NaN / Inf。
+
+### 检查摘要
+
+已保存：
+
+results/summaries/v3_complex_dataset_summary.txt
+
+### 当前结论
+
+正式规模 v3 complex 数据集已生成并通过检查。
+
+旧 simple 数据集未覆盖：
+
+* data/training_data_train.npz
+* data/training_data_val.npz
+* data/training_data_test.npz
+
+本步骤未重新训练模型，未覆盖 checkpoints。
+
+当前推荐模型仍为 checkpoints/best_model_tv_5e-6.pt。
+
+### 下一步建议
+
+建议下一步基于 v3 complex train / val 训练新的复杂缺陷模型，使用新的 checkpoint 文件名，不覆盖当前 simple baseline。
+
+---
+
 ## 历史补录：第一步 data_generator 数据集生成
 
 ### 目标

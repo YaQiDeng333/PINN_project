@@ -107,6 +107,19 @@
   已保存 5 张可视化检查图到 results/previews/data_v3_complex_check_*.png。
   结论：复杂缺陷生成第一版已跑通；尚未重新训练模型，当前推荐 baseline 仍为 checkpoints/best_model_tv_5e-6.pt。
 
+* [x] 第七步：生成正式规模 v3 complex 数据集
+  目标：在第七步复杂缺陷生成逻辑验证通过后，生成正式规模复杂缺陷数据集。
+  已完成：生成 train=1000、val=200、test=200 的 v3 complex 数据集；
+  输出文件为 data/training_data_v3_complex_train.npz、data/training_data_v3_complex_val.npz、
+  data/training_data_v3_complex_test.npz。
+  三个 split 均包含 signals、mu_maps、defect_types、metadata、metadata_keys、x、y；
+  样本数量、shape、metadata 新字段、metadata_keys、缺陷 mask 非空、signals / mu_maps 无 NaN / Inf 均检查通过。
+  defect_types 分布：train 中 multi_defect=331、polygon=348、rotated_rect=321；
+  val 中 multi_defect=71、polygon=72、rotated_rect=57；
+  test 中 multi_defect=62、polygon=75、rotated_rect=63。
+  检查摘要已保存到 results/summaries/v3_complex_dataset_summary.txt。
+  旧 simple 数据集未覆盖，未重新训练模型，当前推荐 baseline 仍为 checkpoints/best_model_tv_5e-6.pt。
+
 ## 推荐执行顺序
 
 1. data_generator_v2.py：批量样本 + metadata + train/val/test
@@ -121,9 +134,9 @@
 
 ## 后续建议
 
-1. 生成完整规模 v3 complex 数据集。
-2. 基于 v3 complex train / val 重新训练模型，保存为新的 checkpoint，不覆盖当前 baseline。
-3. 使用 v3 complex test 做阶段性最终评估，并和当前 simple baseline 分开记录。
+1. 基于 v3 complex train / val 重新训练模型，保存为新的 checkpoint，不覆盖当前 baseline。
+2. 使用 v3 complex test 做阶段性最终评估，并和当前 simple baseline 分开记录。
+3. 训练前确认 train_pinn.py 的输入数据路径和输出 checkpoint / results 路径均指向新文件名。
 
 ## 当前下一步
 
