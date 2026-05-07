@@ -17,6 +17,30 @@ plt.rcParams['axes.unicode_minus'] = False
 PROJECT_DIR = os.path.abspath(os.path.dirname(__file__))
 MU_SCALE = 1000.0
 B0 = 1.5
+DATASET_CONFIGS = {
+    'simple': {
+        'train_data': 'data/training_data_train.npz',
+        'val_data': 'data/training_data_val.npz',
+        'checkpoint_path': 'checkpoints/best_model_tv.pt',
+        'physics_checkpoint_path': 'checkpoints/best_model_tv_phy.pt',
+        'loss_curve_path': 'results/loss_curve_tv.png',
+        'physics_loss_curve_path': 'results/loss_curve_tv_phy.png',
+        'preview_path': 'results/reconstruction_preview_tv.png',
+        'physics_preview_path': 'results/reconstruction_preview_tv_phy.png',
+        'physics_loss_log_path': 'results/physics_loss_log.csv',
+    },
+    'v3_complex': {
+        'train_data': 'data/training_data_v3_complex_train.npz',
+        'val_data': 'data/training_data_v3_complex_val.npz',
+        'checkpoint_path': 'checkpoints/best_model_v3_complex_tv.pt',
+        'physics_checkpoint_path': 'checkpoints/best_model_v3_complex_tv_phy.pt',
+        'loss_curve_path': 'results/loss_curves/loss_curve_v3_complex_tv.png',
+        'physics_loss_curve_path': 'results/loss_curves/loss_curve_v3_complex_tv_phy.png',
+        'preview_path': 'results/previews/reconstruction_preview_v3_complex_tv.png',
+        'physics_preview_path': 'results/previews/reconstruction_preview_v3_complex_tv_phy.png',
+        'physics_loss_log_path': 'results/archive/physics_loss_log_v3_complex.csv',
+    },
+}
 
 
 def project_path(*parts):
@@ -24,6 +48,12 @@ def project_path(*parts):
     if os.path.commonpath([PROJECT_DIR, path]) != PROJECT_DIR:
         raise ValueError(f'Path must stay inside project directory: {path}')
     return path
+
+
+def ensure_parent_dir(path):
+    parent_dir = os.path.dirname(path)
+    if parent_dir:
+        os.makedirs(parent_dir, exist_ok=True)
 
 
 class MFLDataset(Dataset):
@@ -385,16 +415,26 @@ def compute_lbfgs_metrics(model, signals, mu_targets, coords, criterion, lambda_
     }
 
 
+def configure_dataset_paths(args):
+    config = DATASET_CONFIGS[args.dataset]
+    if args.train_data is None:
+        args.train_data = config['train_data']
+    if args.val_data is None:
+        args.val_data = config['val_data']
+
+
 def configure_adam_paths(args):
+    configure_dataset_paths(args)
+    config = DATASET_CONFIGS[args.dataset]
     use_physics = args.mode == 'adam_tv_phy'
     if args.checkpoint_path is None:
-        args.checkpoint_path = 'checkpoints/best_model_tv_phy.pt' if use_physics else 'checkpoints/best_model_tv.pt'
+        args.checkpoint_path = config['physics_checkpoint_path'] if use_physics else config['checkpoint_path']
     if args.loss_curve_path is None:
-        args.loss_curve_path = 'results/loss_curve_tv_phy.png' if use_physics else 'results/loss_curve_tv.png'
+        args.loss_curve_path = config['physics_loss_curve_path'] if use_physics else config['loss_curve_path']
     if args.preview_path is None:
-        args.preview_path = 'results/reconstruction_preview_tv_phy.png' if use_physics else 'results/reconstruction_preview_tv.png'
+        args.preview_path = config['physics_preview_path'] if use_physics else config['preview_path']
     if args.physics_loss_log_path is None:
-        args.physics_loss_log_path = 'results/physics_loss_log.csv'
+        args.physics_loss_log_path = config['physics_loss_log_path']
     if use_physics and not args.init_checkpoint:
         args.init_checkpoint = 'checkpoints/best_model_tv_5e-6.pt'
 
@@ -458,11 +498,16 @@ def train_adam_tv(args=None):
     loss_log_rows = []
     best_val_loss = float('inf')
     checkpoint_path = project_path(args.checkpoint_path)
+    ensure_parent_dir(checkpoint_path)
+    effective_lambda_phy = args.lambda_phy if use_physics else 0.0
 
     print('Model: BzEncoder(signal -> latent) + Fourier(x,y) + MLP -> mu(x,y)')
+    print(f'Dataset: {args.dataset}')
+    print(f'Train data: {args.train_data}')
+    print(f'Val data: {args.val_data}')
     print(f'Train samples: {len(train_dataset)} | Val samples: {len(val_dataset)} | Points/map: {total_points}')
     print(f'lambda_tv: {args.lambda_tv:.2e}')
-    print(f'lambda_phy: {args.lambda_phy:.2e}')
+    print(f'lambda_phy: {effective_lambda_phy:.2e}')
 
     for epoch in range(1, args.epochs + 1):
         train_metrics = run_epoch(
@@ -474,7 +519,7 @@ def train_adam_tv(args=None):
             lambda_tv=args.lambda_tv,
             grid_shape=grid_shape,
             device=device,
-            lambda_phy=args.lambda_phy if use_physics else 0.0,
+            lambda_phy=effective_lambda_phy,
             physics_dataset=train_dataset if use_physics else None,
             sensor_x=sensor_x if use_physics else None,
         )
@@ -517,6 +562,8 @@ def train_adam_tv(args=None):
 
     loss_curve_path = project_path(args.loss_curve_path)
     val_vis_path = project_path(args.preview_path)
+    ensure_parent_dir(loss_curve_path)
+    ensure_parent_dir(val_vis_path)
     physics_losses_for_plot = train_physics_losses if use_physics else None
     save_loss_curve(
         train_mse_losses,
@@ -537,6 +584,7 @@ def train_adam_tv(args=None):
     )
     if use_physics:
         physics_loss_log_path = project_path(args.physics_loss_log_path)
+        ensure_parent_dir(physics_loss_log_path)
         save_physics_loss_log(loss_log_rows, physics_loss_log_path)
 
     print(f'Best val mse loss: {best_val_loss:.6e}')
@@ -551,6 +599,7 @@ def refine_with_lbfgs(args=None):
     if args is None:
         args = parse_args()
 
+    configure_dataset_paths(args)
     os.makedirs(project_path('checkpoints'), exist_ok=True)
     os.makedirs(project_path('results'), exist_ok=True)
 
@@ -601,8 +650,12 @@ def refine_with_lbfgs(args=None):
     val_mse_losses = []
     best_val_loss = float('inf')
     checkpoint_path = project_path(args.lbfgs_checkpoint_path)
+    ensure_parent_dir(checkpoint_path)
 
     print('Mode: L-BFGS refine from TV checkpoint')
+    print(f'Dataset: {args.dataset}')
+    print(f'Train data: {args.train_data}')
+    print(f'Val data: {args.val_data}')
     print(f'refine_train_samples: {refine_train_count} | refine_val_samples: {refine_val_count}')
     print(
         f'lbfgs_lr: {args.lbfgs_lr} | max_iter: {args.lbfgs_max_iter} | '
@@ -669,6 +722,8 @@ def refine_with_lbfgs(args=None):
 
     loss_curve_path = project_path(args.lbfgs_loss_curve_path)
     preview_path = project_path(args.lbfgs_preview_path)
+    ensure_parent_dir(loss_curve_path)
+    ensure_parent_dir(preview_path)
     save_loss_curve(train_mse_losses, train_tv_losses, train_total_losses, val_mse_losses, loss_curve_path)
     save_validation_visualization(
         model=model,
@@ -698,9 +753,10 @@ def run_full_process(args=None):
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Train Bz + coordinate PINN for MFL inversion.')
-    parser.add_argument('--mode', choices=['adam_tv', 'adam_tv_phy', 'lbfgs_refine'], default='adam_tv_phy')
-    parser.add_argument('--train-data', default='data/training_data_train.npz')
-    parser.add_argument('--val-data', default='data/training_data_val.npz')
+    parser.add_argument('--mode', choices=['adam_tv', 'adam_tv_phy', 'lbfgs_refine'], default='adam_tv')
+    parser.add_argument('--dataset', choices=sorted(DATASET_CONFIGS), default='simple')
+    parser.add_argument('--train-data', default=None)
+    parser.add_argument('--val-data', default=None)
     parser.add_argument('--epochs', type=int, default=20)
     parser.add_argument('--batch-size', type=int, default=4)
     parser.add_argument('--latent-dim', type=int, default=64)

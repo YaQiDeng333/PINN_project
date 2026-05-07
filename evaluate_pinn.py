@@ -11,6 +11,16 @@ from train_pinn import MFLDataset, MU_SCALE, PINN, build_coord_grid, project_pat
 
 
 MASK_THRESHOLD = 500.0
+EVAL_DATASETS = {
+    'simple': 'data/training_data_test.npz',
+    'v3_complex': 'data/training_data_v3_complex_test.npz',
+}
+
+
+def ensure_parent_dir(path):
+    parent_dir = os.path.dirname(path)
+    if parent_dir:
+        os.makedirs(parent_dir, exist_ok=True)
 
 
 def load_model(checkpoint_path, signal_length, device):
@@ -178,6 +188,8 @@ def save_comparison_figure(pred_mu, true_mu, pred_mask, true_mask, x, y, sample_
 
 
 def evaluate_test_set(args):
+    if args.test_data is None:
+        args.test_data = EVAL_DATASETS[args.dataset]
     os.makedirs(project_path('results'), exist_ok=True)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -247,15 +259,19 @@ def evaluate_test_set(args):
     avg = average_metrics(rows)
 
     output_prefix = f'{args.output_prefix}_' if args.output_prefix else ''
-    metrics_txt = project_path('results', f'{output_prefix}evaluation_metrics.txt')
-    metrics_csv = project_path('results', f'{output_prefix}evaluation_metrics.csv')
+    metrics_txt = project_path(args.metrics_txt) if args.metrics_txt else project_path('results', f'{output_prefix}evaluation_metrics.txt')
+    metrics_csv = project_path(args.metrics_csv) if args.metrics_csv else project_path('results', f'{output_prefix}evaluation_metrics.csv')
+    ensure_parent_dir(metrics_txt)
+    ensure_parent_dir(metrics_csv)
     save_metrics_txt(avg, rows, metrics_txt, args.checkpoint, args.mask_threshold)
     save_metrics_csv(rows, metrics_csv)
 
     figure_paths = []
+    figures_dir = project_path(args.figures_dir) if args.figures_dir else project_path('results')
+    os.makedirs(figures_dir, exist_ok=True)
     for sample_idx in sorted(figures):
         pred_mu, true_mu, pred_mask, true_mask, defect_type = figures[sample_idx]
-        output_path = project_path('results', f'{output_prefix}evaluation_sample_{sample_idx:03d}.png')
+        output_path = os.path.join(figures_dir, f'{output_prefix}evaluation_sample_{sample_idx:03d}.png')
         save_comparison_figure(
             pred_mu=pred_mu,
             true_mu=true_mu,
@@ -283,9 +299,13 @@ def evaluate_test_set(args):
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Evaluate Bz + coordinate PINN on the test set.')
-    parser.add_argument('--test-data', default='data/training_data_test.npz')
+    parser.add_argument('--dataset', choices=sorted(EVAL_DATASETS), default='simple')
+    parser.add_argument('--test-data', default=None)
     parser.add_argument('--checkpoint', '--model', dest='checkpoint', default='checkpoints/best_model.pt')
     parser.add_argument('--output_prefix', '--output-prefix', dest='output_prefix', default='')
+    parser.add_argument('--metrics-txt', default=None)
+    parser.add_argument('--metrics-csv', default=None)
+    parser.add_argument('--figures-dir', default=None)
     parser.add_argument('--batch-size', type=int, default=4)
     parser.add_argument('--point-chunk', type=int, default=4096)
     parser.add_argument('--mask-threshold', type=float, default=MASK_THRESHOLD)

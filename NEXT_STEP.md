@@ -1,114 +1,67 @@
 NEXT_STEP
 
-当前状态
+当前状态（最新）
 
-正式规模 v3 complex 复杂缺陷数据集已生成并通过检查。
+第 7.7 步：v3 complex 延长训练与专用 lambda_tv 扫描已完成。
 
-当前默认最佳 baseline
+当前推荐 v3 complex 模型
 
-默认 baseline 模型：
+checkpoints/best_model_v3_complex_tv_sweep_2e-6.pt
 
-checkpoints/best_model_tv_5e-6.pt
+推荐配置
 
-默认 lambda_tv：
+mode = adam_tv
 
-5e-6
+epochs = 50
 
-默认 lambda_phy：
+lambda_tv = 2e-6
 
-0
+lambda_phy = 0
 
-默认是否启用 L-BFGS：
+L-BFGS = disabled
 
-否。L-BFGS 仅保留为 optional refine 实验，不作为默认推荐方案。
+推荐依据
 
-v3 complex 数据集
+该模型由 v3_complex 专用 lambda_tv 扫描选出，选择依据是 val_iou、val_dice、val_mae 综合排序。
 
-已生成：
+test 集确认结果显示，相比第 7.5 步 20 epoch v3 baseline：
 
-data/training_data_v3_complex_train.npz
+MSE、IoU、Dice、area_error、center_error 改善；
 
-data/training_data_v3_complex_val.npz
+MAE 变差。
 
-data/training_data_v3_complex_test.npz
+第 7.7 步关键输出
 
-样本数量：
+results/summaries/v3_complex_long_training_summary.txt
 
-train = 1000
+results/summaries/v3_complex_lambda_tv_sweep_summary.txt
 
-val = 200
+results/metrics/evaluation_metrics_v3_complex_tv_long.csv
 
-test = 200
+results/metrics/v3_complex_long_metrics_by_type.csv
 
-检查摘要：
+results/metrics/v3_complex_lambda_tv_sweep.csv
 
-results/summaries/v3_complex_dataset_summary.txt
+results/metrics/evaluation_metrics_v3_complex_tv_sweep_2e-6_test.csv
 
-defect_types 分布
+results/metrics/v3_complex_sweep_2e-6_test_metrics_by_type.csv
 
-train：
+当前判断
 
-multi_defect = 331
+100 epoch 长训练没有成为默认推荐：它只改善 MSE 和 center_error，但 MAE、IoU、Dice、area_error 变差。
 
-polygon = 348
+lambda_tv=2e-6 的 sweep 模型改善了整体 IoU / Dice，并明显改善 polygon 的 IoU / Dice。
 
-rotated_rect = 321
-
-val：
-
-multi_defect = 71
-
-polygon = 72
-
-rotated_rect = 57
-
-test：
-
-multi_defect = 62
-
-polygon = 75
-
-rotated_rect = 63
-
-验证结论
-
-三个 npz 均存在。
-
-样本数量正确。
-
-signals / mu_maps / metadata / metadata_keys 正常。
-
-每个样本缺陷 mask 非空。
-
-signals 和 mu_maps 无 NaN / Inf。
-
-旧 simple 数据集未覆盖。
+multi_defect 仍然困难：MSE / MAE 和 mask 类指标没有稳定改善，只有 center_error 略好。
 
 当前下一步
 
-建议进入 v3 complex 模型训练阶段，但需等待用户确认。
+暂不进入 physics_loss、L-BFGS 或模型结构大改。
 
-建议要求：
+建议先围绕当前推荐 v3_complex 模型做更细的误差诊断，重点看：
 
-1. 不覆盖当前 simple baseline 模型；
-2. 使用新的 checkpoint 文件名，例如 checkpoints/best_model_v3_complex_tv.pt；
-3. 使用新的 results 输出前缀或文件名；
-4. 主要基于 v3 complex val 集选择参数；
-5. v3 complex test 集只用于阶段性最终评估；
-6. simple baseline 和 complex baseline 分开记录。
+1. polygon 仍然漏检的样本；
+2. multi_defect 的多目标分离失败样本；
+3. 是否需要针对复杂缺陷调整训练采样或 loss 权重。
 
-执行约束
-
-不要覆盖旧数据集：
-
-data/training_data_train.npz
-
-data/training_data_val.npz
-
-data/training_data_test.npz
-
-不要覆盖旧 checkpoints。
-
-不要修改 evaluate_pinn.py 的评价指标逻辑。
-
-如果修改 train_pinn.py，应保持原 simple 数据训练流程可用。
+如果后续确认训练策略已经到瓶颈，再进入模型结构优化。

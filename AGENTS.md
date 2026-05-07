@@ -12,6 +12,38 @@
 4. EXPERIMENT_LOG.md
 5. CURRENT_BASELINE.md，如果存在
 
+## 每次任务开始前必须读取的项目文档
+
+每次开始任何任务前，必须先阅读以下文件：
+
+1. README.md
+2. PINN优化路线.md
+3. NEXT_STEP.md
+4. EXPERIMENT_LOG.md
+5. CURRENT_BASELINE.md，如果存在
+6. 术语说明.md，如果存在
+7. results/summaries/ 中与当前任务相关的 summary 文件，如果存在
+
+阅读后再开始修改代码或执行命令。
+
+如果任务涉及：
+
+* 数据生成：还要阅读 data_generator_v2.py
+* 训练：还要阅读 train_pinn.py
+* 评估：还要阅读 evaluate_pinn.py
+* 参数扫描：还要阅读 parameter_sweep.py
+* Git 提交：还要先检查 .gitignore 和 git status
+
+每次完成阶段性任务后，必须检查是否需要更新：
+
+1. README.md
+2. PINN优化路线.md
+3. NEXT_STEP.md
+4. EXPERIMENT_LOG.md
+5. CURRENT_BASELINE.md
+
+不要每次要求用户重复提醒。
+
 ## 文档同步规则
 
 每次完成以下任意情况后，必须检查并更新 README.md：

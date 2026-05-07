@@ -120,6 +120,46 @@
   检查摘要已保存到 results/summaries/v3_complex_dataset_summary.txt。
   旧 simple 数据集未覆盖，未重新训练模型，当前推荐 baseline 仍为 checkpoints/best_model_tv_5e-6.pt。
 
+* [x] 第 7.5 步：v3_complex 复杂缺陷模型训练
+  目标：使用 v3_complex train / val 数据集训练新的复杂缺陷 baseline，并与旧 simple baseline 分开记录。
+  已完成：在 train_pinn.py 中新增 --dataset v3_complex 选择，默认读取
+  data/training_data_v3_complex_train.npz 和 data/training_data_v3_complex_val.npz；
+  在 evaluate_pinn.py 中新增可选输出路径参数，用于将 v3 complex 评估结果保存到 results/metrics 和 results/previews。
+  训练配置为 mode=adam_tv、lambda_tv=5e-6、epochs=20、默认不启用 L-BFGS、默认不启用 physics_loss。
+  已保存模型 checkpoints/best_model_v3_complex_tv.pt、
+  loss 曲线 results/loss_curves/loss_curve_v3_complex_tv.png、
+  预测对比图 results/previews/reconstruction_preview_v3_complex_tv.png。
+  v3 complex test 指标：MSE=2.07475147e+04、MAE=4.36197426e+01、
+  IoU=2.76481934e-01、Dice=3.97991681e-01、
+  area_error=4.26162950e-01、center_error=1.34338298e+00。
+  训练摘要已保存到 results/summaries/v3_complex_training_summary.txt。
+  结论：复杂缺陷 baseline 已跑通；旧 simple baseline 仍保留为 checkpoints/best_model_tv_5e-6.pt，
+  新复杂缺陷 baseline 为 checkpoints/best_model_v3_complex_tv.pt，两者对应不同数据集，不直接混用。
+
+* [x] 第 7.6 步：v3_complex 复杂缺陷 baseline 诊断分析
+  目标：分析 checkpoints/best_model_v3_complex_tv.pt 在不同复杂缺陷类型上的表现差异。
+  已完成：按 defect_type 统计 rotated_rect、polygon、multi_defect 的 MSE、MAE、IoU、Dice、area_error、center_error 和样本数；
+  同时按 metadata 中的 num_defects、complexity_level、num_vertices 做简单分组统计。
+  诊断结果保存到 results/metrics/v3_complex_metrics_by_type.csv、
+  results/metrics/v3_complex_worst_samples.csv、
+  results/summaries/v3_complex_diagnosis_summary.txt，
+  最差样本图保存到 results/previews/v3_complex_worst_samples/。
+  结论：polygon 的 IoU 和 Dice 最低，IoU=2.20801408e-01，Dice=3.16226151e-01；
+  multi_defect 的 MSE、MAE、center_error 较差，但不是唯一拖低整体结果的原因。
+  下一步建议先增加 epoch 或对 v3_complex 单独扫描 lambda_tv，暂不进入 physics_loss、L-BFGS 或模型结构大改。
+
+* [x] 第 7.7 步：v3_complex 延长训练与专用 lambda_tv 扫描
+  目标：不改数据生成器、不改评价指标、不加 physics_loss / L-BFGS / 新模型结构，先验证复杂缺陷 baseline 是否只是训练不充分或 TV 权重不合适。
+  已完成：使用 v3_complex 数据集训练 100 epoch 长训练模型 checkpoints/best_model_v3_complex_tv_long.pt；
+  该模型 test 指标为 MSE=2.06158473e+04、MAE=4.73349950e+01、IoU=2.75949820e-01、Dice=3.95393491e-01、
+  area_error=4.32650875e-01、center_error=1.30235745e+00。
+  长训练只改善了 MSE 和 center_error，MAE、IoU、Dice、area_error 变差，因此不作为默认推荐。
+  随后完成 v3_complex 专用 lambda_tv 扫描：0、1e-6、2e-6、5e-6、1e-5，每组 50 epoch，并主要基于 val 集选择参数。
+  val IoU / Dice / MAE 综合排序推荐 lambda_tv=2e-6，对应模型 checkpoints/best_model_v3_complex_tv_sweep_2e-6.pt。
+  该模型 test 指标为 MSE=2.07377174e+04、MAE=4.44655262e+01、IoU=2.95272047e-01、Dice=4.21885407e-01、
+  area_error=3.94517442e-01、center_error=1.32594189e+00。
+  结论：lambda_tv=2e-6 是当前 v3_complex 推荐配置；polygon IoU/Dice 有改善，multi_defect 仍是主要难点之一。
+
 ## 推荐执行顺序
 
 1. data_generator_v2.py：批量样本 + metadata + train/val/test
@@ -131,12 +171,16 @@
 7. train_pinn.py：物理一致性 Loss
 8. results/metrics + results/summaries：物理一致性 Loss 效果验证与对比总结
 9. data_generator_v2.py：复杂缺陷扩展第一版
+10. train_pinn.py + evaluate_pinn.py：v3 complex 复杂缺陷 baseline 训练与评估
+11. results/metrics + results/summaries：v3 complex 复杂缺陷 baseline 诊断分析
+12. train_pinn.py + evaluate_pinn.py：v3 complex 延长训练与 lambda_tv 专用扫描
 
 ## 后续建议
 
-1. 基于 v3 complex train / val 重新训练模型，保存为新的 checkpoint，不覆盖当前 baseline。
-2. 使用 v3 complex test 做阶段性最终评估，并和当前 simple baseline 分开记录。
-3. 训练前确认 train_pinn.py 的输入数据路径和输出 checkpoint / results 路径均指向新文件名。
+1. 当前 v3_complex 推荐模型固定为 checkpoints/best_model_v3_complex_tv_sweep_2e-6.pt，推荐 lambda_tv=2e-6。
+2. multi_defect 的 MSE / MAE 和 mask 类指标仍偏弱，polygon 虽有改善但仍低于 rotated_rect。
+3. 下一步建议先做针对 polygon / multi_defect 的误差诊断或训练策略分析；暂不进入新的 physics_loss 或 L-BFGS。
+4. 模型结构优化可以作为后续方向，但建议在确认数据难点和训练策略后再做。
 
 ## 当前下一步
 
