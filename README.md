@@ -633,3 +633,55 @@ v4 test 整体指标：MSE=3.56734905e+04，MAE=6.02042826e+01，IoU=3.25826098e
 
 * `results/metrics/v4_smallpoly_weight_area_combo.csv`
 * `results/summaries/v4_smallpoly_weight_area_combo_summary.txt`
+---
+
+## 最新实验状态：第 7.18 步
+
+第 7.18 步已完成后处理与阈值分析，分析对象为第 7.17 步推荐的 v4 small polygon / area-aware 候选：
+
+`checkpoints/best_model_v4_w5_dice003_area004.pt`
+
+本轮不重新训练，不修改模型结构，也不修改 `evaluate_pinn.py` 中现有标准指标定义。
+
+主要结论：
+
+* 标准 mask threshold=500 时，area_error = 0.911511，pred_area > true_area = 191 / 200；
+* threshold=300 时，area_error 降至 0.292975，pred_area > true_area 降至 114 / 200；
+* threshold=300 时，small polygon `pred_area=0` 仍为 0 / 25；
+* threshold=450 的 IoU / Dice 更高，分别为 0.354303 / 0.497498；
+* 连通域过滤 remove < 5 / 10 / 20 pixels 基本没有额外收益；
+* 后处理可作为可选评估方案，但不替代标准 `evaluate_pinn.py` 流程。
+
+相关输出：
+
+* `results/metrics/v4_postprocess_threshold_sweep.csv`
+* `results/metrics/v4_postprocess_component_filter.csv`
+* `results/summaries/v4_postprocess_analysis_summary.txt`
+* `results/previews/v4_postprocess_examples/`
+
+当前全项目推荐 baseline 不变：
+
+`checkpoints/best_model_v3_complex_tv_sweep_2e-6.pt`
+---
+
+## 最新实验状态：第 7.18.5 步
+
+第 7.18.5 步已完成训练随机种子支持，为第 7.19 模型结构优化实验做准备。
+
+`train_pinn.py` 新增：
+
+* `--seed` 参数；
+* 默认值 `42`；
+* `set_seed(seed)`，同步设置 Python random、NumPy、PyTorch 和 CUDA 随机种子；
+* Adam 训练中 `DataLoader(shuffle=True)` 使用固定 `torch.Generator()`；
+* 训练启动时打印当前 seed。
+
+从本步开始，后续训练默认固定 `seed=42`。第 7.19 及之后的结构对比实验必须固定 seed，关键结论建议做 repeat 验证。
+
+第 7.18 的后处理阈值分析还说明，当前模型预测 μ 值存在校准偏软问题：缺陷区域常预测为 μ≈200–400，而不是接近真实 μ≈1。因此 threshold=300 能显著降低 area_error。这是模型输出校准问题，不是单纯评估阈值问题。
+
+常用示例：
+
+```powershell
+& "C:\Users\19166\anaconda3\envs\pinn_mfl\python.exe" train_pinn.py --dataset v4_balanced_complex --seed 42
+```

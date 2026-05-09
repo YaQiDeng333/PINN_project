@@ -515,3 +515,69 @@ v4_balanced_complex 的 `lambda_dice` 扫描已完成。
 ## 下一步建议
 
 暂不继续扩大 loss 调参，也不直接进入 focal loss 或 oversampling。建议先围绕模型结构或后处理方案制定下一阶段计划；如果继续比较 loss，需要加入 seed / repeat 验证来降低训练随机性影响。
+---
+
+## 当前最新状态：第 7.18 步已完成
+
+已完成 v4 small polygon / area-aware 候选模型的后处理与阈值分析。
+
+分析模型：
+
+`checkpoints/best_model_v4_w5_dice003_area004.pt`
+
+分析数据集：
+
+`data/training_data_v4_balanced_complex_test.npz`
+
+主要结论：
+
+* 标准 threshold=500 时，area_error = 0.911511，pred_area > true_area = 191 / 200；
+* threshold=300 时，area_error 降至 0.292975，pred_area > true_area 降至 114 / 200；
+* threshold=300 下 small polygon `pred_area=0` 仍为 0 / 25；
+* IoU / Dice 最优更接近 threshold=450；
+* 连通域过滤 remove < 5 / 10 / 20 pixels 基本没有额外收益；
+* 后处理可作为可选评估方案，但不替代标准评价指标，也不切换 baseline。
+
+输出文件：
+
+* `results/metrics/v4_postprocess_threshold_sweep.csv`
+* `results/metrics/v4_postprocess_component_filter.csv`
+* `results/summaries/v4_postprocess_analysis_summary.txt`
+* `results/previews/v4_postprocess_examples/`
+
+当前全项目推荐 baseline 仍为：
+
+`checkpoints/best_model_v3_complex_tv_sweep_2e-6.pt`
+
+## 下一步建议
+
+进入第 7.19 步：模型结构优化方案设计。建议先制定方案，不要直接大改代码。重点考虑：
+
+1. 多尺度坐标特征；
+2. 更强的 BzEncoder；
+3. polygon 边界表达能力；
+4. 小目标缺陷的 mask 解码能力；
+5. 为 `train_pinn.py` 增加 `--seed` 参数，提高后续实验可复现性。
+---
+
+## 当前最新状态：第 7.18.5 步已完成
+
+已完成 `train_pinn.py` 的训练随机种子支持。
+
+新增能力：
+
+* `--seed` 参数；
+* 默认 `seed = 42`；
+* 训练启动时打印当前 seed；
+* Adam 训练的 shuffle DataLoader 使用固定 `torch.Generator()`；
+* `set_seed(seed)` 同步设置 Python random、NumPy、PyTorch 和 CUDA 随机种子。
+
+说明：
+
+第 7.15–7.17 的结果显示，相同配置存在训练随机性波动。因此从第 7.18.5 开始，后续模型结构优化实验默认固定 `seed=42`。
+
+第 7.18 后处理阈值分析还说明，模型预测 μ 值存在校准偏软问题：缺陷区域常预测为 μ≈200–400，而不是接近真实 μ≈1。因此 threshold=300 能显著降低 area_error。这说明问题不只是评估阈值，而是模型输出校准和边界表达能力不足。
+
+## 下一步建议
+
+进入第 7.19 步：模型结构优化方案设计。先制定方案，不直接大改代码。后续结构对比必须固定 `--seed 42`，关键结论建议做 repeat 验证。

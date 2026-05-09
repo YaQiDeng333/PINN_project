@@ -1,6 +1,7 @@
 import argparse
 import csv
 import os
+import random
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -66,6 +67,16 @@ def ensure_parent_dir(path):
     parent_dir = os.path.dirname(path)
     if parent_dir:
         os.makedirs(parent_dir, exist_ok=True)
+
+
+def set_seed(seed):
+    if seed is None:
+        return
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
 
 
 class MFLDataset(Dataset):
@@ -553,12 +564,14 @@ def train_adam_tv(args=None):
     if args is None:
         args = parse_args()
 
+    set_seed(args.seed)
     configure_adam_paths(args)
     os.makedirs(project_path('checkpoints'), exist_ok=True)
     os.makedirs(project_path('results'), exist_ok=True)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f'Using device: {device}')
+    print(f'Using random seed: {args.seed}')
 
     use_physics = args.mode == 'adam_tv_phy'
     raw_train = np.load(project_path(args.train_data), allow_pickle=False)
@@ -594,7 +607,15 @@ def train_adam_tv(args=None):
     total_points = coords.shape[0]
     grid_shape = train_dataset.mu_maps.shape[1:]
 
-    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=0)
+    train_generator = torch.Generator()
+    train_generator.manual_seed(args.seed)
+    train_loader = DataLoader(
+        train_dataset,
+        batch_size=args.batch_size,
+        shuffle=True,
+        num_workers=0,
+        generator=train_generator,
+    )
     val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False, num_workers=0)
     sensor_x = torch.from_numpy(train_dataset.x).to(device)
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
@@ -765,12 +786,14 @@ def refine_with_lbfgs(args=None):
     if args is None:
         args = parse_args()
 
+    set_seed(args.seed)
     configure_dataset_paths(args)
     os.makedirs(project_path('checkpoints'), exist_ok=True)
     os.makedirs(project_path('results'), exist_ok=True)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f'Using device: {device}')
+    print(f'Using random seed: {args.seed}')
     print(f'Loading L-BFGS initial checkpoint: {args.lbfgs_init_checkpoint}')
 
     raw_train = np.load(project_path(args.train_data), allow_pickle=False)
@@ -927,6 +950,7 @@ def parse_args():
     parser.add_argument('--batch-size', type=int, default=4)
     parser.add_argument('--latent-dim', type=int, default=64)
     parser.add_argument('--lr', type=float, default=1e-3)
+    parser.add_argument('--seed', type=int, default=42)
     parser.add_argument(
         '--loss-type',
         choices=['mse', 'weighted_mse', 'weighted_mse_dice', 'weighted_mse_dice_area'],

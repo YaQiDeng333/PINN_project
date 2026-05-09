@@ -520,3 +520,52 @@ test 指标：
 `checkpoints/best_model_v3_complex_tv_sweep_2e-6.pt`
 
 后续建议暂停继续扩大 loss 调参，转向模型结构或后处理方案讨论；如继续做 loss 对比，需要加入 seed / repeat 验证。
+---
+
+## 第 7.18 步补充：后处理与阈值分析
+
+第 7.18 步已完成。分析对象为第 7.17 步推荐的 v4 small polygon / area-aware 候选：
+
+`checkpoints/best_model_v4_w5_dice003_area004.pt`
+
+本轮不重新训练，不修改 `data_generator_v2.py`，不修改模型结构，不修改 `evaluate_pinn.py` 中 MSE、MAE、IoU、Dice、area_error、center_error 的标准定义。
+
+主要发现：
+
+* 标准 threshold=500 时，overall area_error = 0.911511，pred_area > true_area = 191 / 200；
+* threshold=300 时，overall area_error = 0.292975，pred_area > true_area = 114 / 200；
+* threshold=300 时，polygon area_error = 0.390191，medium polygon area_error = 0.543884；
+* threshold=300 时，small polygon `pred_area=0` 仍为 0 / 25；
+* threshold=450 的 IoU / Dice 最高，分别为 0.354303 / 0.497498；
+* 连通域过滤 remove < 5 / 10 / 20 pixels 基本没有额外收益。
+
+结论：
+
+降低 mask threshold 可以明显缓解预测面积系统性偏大，尤其改善 polygon / medium polygon 的 area_error。但 threshold 调整存在 trade-off：threshold=300 面积误差最佳，threshold=450 IoU / Dice 更好。连通域过滤不是主要改进方向。
+
+后处理可作为可选评估方案，不替代标准评价流程，也不切换全项目 baseline。当前全项目推荐 baseline 仍为：
+
+`checkpoints/best_model_v3_complex_tv_sweep_2e-6.pt`
+
+后续建议进入第 7.19 步：模型结构优化方案设计，并考虑给 `train_pinn.py` 增加 `--seed` 参数。
+---
+
+## 第 7.18.5 步补充：训练随机种子 seed 支持
+
+第 7.18.5 步已完成。为了支撑第 7.19 模型结构优化实验的可复现对比，`train_pinn.py` 已新增 `--seed` 参数。
+
+实现内容：
+
+* 默认 `--seed 42`；
+* 新增 `set_seed(seed)`；
+* 同步设置 Python random、NumPy、PyTorch 和 CUDA 随机种子；
+* Adam 训练的 `DataLoader(shuffle=True)` 使用固定 `torch.Generator()`；
+* 训练启动时打印当前 seed。
+
+说明：
+
+第 7.15–7.17 的实验表明，相同配置存在随机性波动。因此第 7.19 及之后的结构对比实验必须固定 seed，默认使用 `42`。
+
+第 7.18 后处理阈值分析说明，当前模型预测 μ 值存在校准偏软问题：缺陷区常预测到 μ≈200–400，而不是接近真实 μ≈1。threshold=300 能显著降低 area_error，说明该问题是模型输出校准与边界表达问题，不是单纯评估阈值问题。
+
+下一步进入第 7.19：模型结构优化方案设计。

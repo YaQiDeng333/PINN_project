@@ -567,3 +567,55 @@ v4 test 关键指标：
 当前全项目推荐 baseline 不变：
 
 `checkpoints/best_model_v3_complex_tv_sweep_2e-6.pt`
+---
+
+## 第 7.18 步记录：后处理与阈值分析
+
+本节仅记录诊断结果，不切换当前全项目推荐 baseline。
+
+分析对象：
+
+`checkpoints/best_model_v4_w5_dice003_area004.pt`
+
+分析数据集：
+
+`data/training_data_v4_balanced_complex_test.npz`
+
+标准 threshold=500：
+
+* IoU = 3.51332857e-01
+* Dice = 4.96197269e-01
+* area_error = 9.11510936e-01
+* pred_area > true_area = 191 / 200
+* polygon area_error = 1.42830383e+00
+* small polygon pred_area=0 = 0 / 25
+
+后处理 threshold=300：
+
+* IoU = 3.37844546e-01
+* Dice = 4.75547692e-01
+* area_error = 2.92974545e-01
+* pred_area > true_area = 114 / 200
+* polygon area_error = 3.90190968e-01
+* small polygon pred_area=0 = 0 / 25
+
+结论：
+
+降低 mask threshold 可以明显改善面积高估，threshold=300 是本轮 area_error 最优后处理候选；threshold=450 的 IoU / Dice 更高。连通域过滤基本没有额外收益。后处理仅作为可选评估方案，不替代标准评价指标，也不切换当前全项目 baseline。
+
+当前全项目推荐 baseline 仍为：
+
+`checkpoints/best_model_v3_complex_tv_sweep_2e-6.pt`
+---
+
+## 第 7.18.5 步记录：训练随机种子 seed 支持
+
+本节仅记录流程改进，不切换当前全项目推荐 baseline。
+
+`train_pinn.py` 已新增 `--seed` 参数，默认值为 `42`。后续训练启动时会打印当前 seed，并对 Python random、NumPy、PyTorch 和 CUDA 随机种子进行设置。Adam 训练的 shuffle DataLoader 也使用固定 `torch.Generator()`。
+
+该改动用于提高后续第 7.19 模型结构优化实验的可复现性，不改变当前推荐模型。
+
+当前全项目推荐 baseline 仍为：
+
+`checkpoints/best_model_v3_complex_tv_sweep_2e-6.pt`

@@ -1295,3 +1295,119 @@ symmetric 细扫中，面积指标最好的候选是 `lambda_area=0.07`：
 ### 下一步
 
 建议暂停继续扩大 loss 调参。若继续验证，需要增加 seed / repeat；更建议转向模型结构或后处理方案讨论。
+## 第 7.18 步：后处理与阈值分析
+
+### 目标
+
+在不重新训练、不修改模型结构和不修改 `evaluate_pinn.py` 标准指标定义的前提下，分析第 7.17 步 v4 small polygon / area loss 候选模型的预测面积偏大问题，判断是否可以通过 mask threshold 或连通域后处理改善 area_error。
+
+### 修改内容
+
+本轮未修改训练代码、评价指标定义或数据生成器。使用离线分析流程加载第 7.17 推荐候选：
+
+* checkpoint = `checkpoints/best_model_v4_w5_dice003_area004.pt`
+* dataset = `data/training_data_v4_balanced_complex_test.npz`
+* 原始训练配置 = defect_weight=5, lambda_dice=0.03, lambda_area=0.04, area_loss_type=symmetric
+
+扫描 mask threshold：
+
+* 300
+* 350
+* 400
+* 450
+* 500
+* 550
+* 600
+
+并在最佳 threshold 上测试连通域过滤：
+
+* 不处理
+* remove components < 5 pixels
+* remove components < 10 pixels
+* remove components < 20 pixels
+
+### 输出文件
+
+* `results/metrics/v4_postprocess_threshold_sweep.csv`
+* `results/metrics/v4_postprocess_component_filter.csv`
+* `results/summaries/v4_postprocess_analysis_summary.txt`
+* `results/previews/v4_postprocess_examples/`
+
+### 关键指标 / 结果
+
+标准 threshold=500：
+
+* IoU = 0.351333
+* Dice = 0.496197
+* area_error = 0.911511
+* pred_area > true_area = 191 / 200
+* polygon area_error = 1.428304
+* small polygon pred_area=0 = 0 / 25
+
+area_error 最优 threshold=300：
+
+* IoU = 0.337845
+* Dice = 0.475548
+* area_error = 0.292975
+* pred_area > true_area = 114 / 200
+* polygon area_error = 0.390191
+* small polygon pred_area=0 = 0 / 25
+* medium polygon area_error = 0.543884
+
+IoU / Dice 最优 threshold 在本轮为 450：
+
+* IoU = 0.354303
+* Dice = 0.497498
+* area_error = 0.685771
+
+连通域过滤在 threshold=300 下基本没有额外收益：remove < 5 pixels 与不处理结果相同，remove < 10 / 20 pixels 只带来极小变化。
+
+### 结论
+
+降低 mask threshold 可以明显缓解 pred_area 系统性偏大，并显著降低 overall area_error、polygon area_error 和 medium polygon area_error。若本阶段以面积误差为主，threshold=300 是最佳后处理候选；若更重视 IoU / Dice，threshold=450 更接近最优。
+
+small polygon 在 threshold=300 下仍保持 `pred_area=0 = 0 / 25`，没有重新漏检。连通域过滤不值得作为当前主要方案，因为预测区域主要不是由极小孤立连通域造成的。
+
+本轮后处理可作为可选评估方案，但不应替换标准 `evaluate_pinn.py` 指标定义，也不足以替代模型结构改进。当前全项目 baseline 不切换，仍为 `checkpoints/best_model_v3_complex_tv_sweep_2e-6.pt`。
+
+### 下一步
+
+建议进入第 7.19 步：模型结构优化方案设计。优先讨论多尺度坐标特征、边界表达能力、Bz encoder 表达能力，以及是否给 `train_pinn.py` 增加 `--seed` 参数和 repeat 实验机制。
+---
+
+## 第 7.18.5 步：训练随机种子 seed 支持
+
+### 目标
+
+在进入第 7.19 模型结构优化前，先给 `train_pinn.py` 增加 `--seed` 参数，降低后续结构对比实验中的训练随机性影响。
+
+### 修改内容
+
+* `train_pinn.py` 新增 `--seed` 参数，默认值为 `42`。
+* 新增 `set_seed(seed)` 函数，设置：
+  * `random.seed(seed)`
+  * `numpy.random.seed(seed)`
+  * `torch.manual_seed(seed)`
+  * CUDA 可用时设置 `torch.cuda.manual_seed_all(seed)`
+* Adam 训练的 `DataLoader(shuffle=True)` 使用固定 `torch.Generator()`，并执行 `generator.manual_seed(seed)`。
+* Adam 训练和 L-BFGS refine 启动时打印 `Using random seed: 42`。
+
+### 输出文件
+
+本步不重新训练，不生成新 checkpoint，不生成新 metrics。
+
+### 关键指标 / 结果
+
+当时未单独记录具体指标。本步是可复现性基础设施修改。
+
+### 结论
+
+第 7.15 到第 7.17 的实验显示，相同配置可能出现训练随机性波动。因此从第 7.18.5 开始，训练默认固定 `seed=42`。后续第 7.19 模型结构优化实验必须固定 seed，并尽量在关键对比中做 repeat 验证。
+
+第 7.12–7.17 的历史模型是在 `--seed` 参数加入之前训练的，因此即使后续使用相同超参数重新训练，指标也可能因 seed 固定方式不同而不完全一致。
+
+第 7.18 后处理阈值分析还说明：模型预测的 μ 值存在校准偏软问题，缺陷区域常被预测为 μ≈200–400，而不是接近真实 μ≈1。因此 threshold=300 能显著降低 area_error。这是模型输出校准问题，不是单纯评估阈值问题。
+
+### 下一步
+
+进入第 7.19 步：模型结构优化方案设计。先制定方案，不直接大改代码。
