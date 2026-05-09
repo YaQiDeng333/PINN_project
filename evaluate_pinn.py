@@ -14,6 +14,7 @@ MASK_THRESHOLD = 500.0
 EVAL_DATASETS = {
     'simple': 'data/training_data_test.npz',
     'v3_complex': 'data/training_data_v3_complex_test.npz',
+    'v4_balanced_complex': 'data/training_data_v4_balanced_complex_test.npz',
 }
 
 

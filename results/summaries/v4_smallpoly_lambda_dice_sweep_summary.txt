@@ -1,0 +1,47 @@
+第 7.13B 步：v4_balanced_complex lambda_dice 扫描总结
+
+实验目的
+在 defect_weight=5、lambda_tv=0、weighted_mse_dice Loss 下扫描 lambda_dice，寻找 small polygon 检出率、overall IoU/Dice 和 multi_defect center_error 之间的折中点。
+
+固定配置
+- dataset: v4_balanced_complex
+- loss_type: weighted_mse_dice
+- defect_weight: 5
+- lambda_tv: 0
+- epochs: 100
+- physics_loss: off
+- L-BFGS: off
+- oversampling: off
+
+扫描结果
+
+| lambda_dice | val IoU | val Dice | val small pred_area=0 | test IoU | test Dice | test area_error | test center_error | test small IoU | test small Dice | test small pred_area=0 | test small area_error | test multi_defect center_error |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 0.01 | 0.356818 | 0.504003 | 3/22 | 0.352374 | 0.497960 | 0.955309 | 1.102411 | 0.121329 | 0.198119 | 6/25 | 1.364354 | 0.901821 |
+| 0.03 | 0.354343 | 0.501614 | 0/22 | 0.352032 | 0.497474 | 1.002027 | 1.110970 | 0.109439 | 0.183385 | 0/25 | 1.595121 | 0.877951 |
+| 0.05 | 0.340829 | 0.478096 | 0/22 | 0.325826 | 0.464347 | 0.612111 | 1.244407 | 0.126015 | 0.201116 | 0/25 | 0.683719 | 1.155174 |
+| 0.1 | 0.355435 | 0.498313 | 0/22 | 0.347153 | 0.490156 | 0.819991 | 1.230242 | 0.115628 | 0.189560 | 0/25 | 1.321318 | 1.188533 |
+
+与第 7.12B weighted MSE w5 对比
+- weighted MSE w5: test IoU=0.339081, Dice=0.477603, area_error=0.838024, center_error=1.173076。
+- weighted MSE w5 small polygon: pred_area=0 为 12/25, IoU=0.065485, Dice=0.104443, area_error=0.929900。
+- weighted MSE w5 multi_defect center_error=1.087309。
+
+结论
+- lambda_dice=0.01 的 overall IoU/Dice 最高，但 small polygon 仍有 6/25 完全漏检，不满足本阶段优先目标。
+- lambda_dice=0.03 在 val/test 上保持接近 0.01 的 overall IoU/Dice，同时 small polygon pred_area=0 降为 0/25，multi_defect center_error 也是本次扫描中最低。
+- lambda_dice=0.05 的 small polygon IoU/Dice 和 area_error 最好，但 overall IoU/Dice 明显下降，multi_defect center_error 变差。
+- lambda_dice=0.1 的 small polygon 漏检为 0，但 overall 和 multi_defect 都不如 0.03。
+
+推荐
+- 本轮推荐 lambda_dice=0.03，推荐模型为 checkpoints/best_model_v4_smallpoly_w5_dice_0p03.pt。
+- 该模型作为 v4 small polygon 专项候选，不切换全项目 CURRENT_BASELINE。
+- 暂不建议立刻加入 focal loss 或 oversampling。当前 weighted MSE + soft Dice 已经解决 small polygon 完全漏检问题，但面积误差仍偏大，下一步更适合先做预测面积偏大的原因分析或更温和的 Dice/面积约束设计。
+
+输出文件
+- results/metrics/v4_smallpoly_lambda_dice_sweep.csv
+- results/summaries/v4_smallpoly_lambda_dice_sweep_summary.txt
+- checkpoints/best_model_v4_smallpoly_w5_dice_0p01.pt
+- checkpoints/best_model_v4_smallpoly_w5_dice_0p03.pt
+- checkpoints/best_model_v4_smallpoly_w5_dice_0p05.pt
+- checkpoints/best_model_v4_smallpoly_w5_dice_0p1.pt

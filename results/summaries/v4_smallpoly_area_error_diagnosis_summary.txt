@@ -1,0 +1,111 @@
+# 第 7.14 步：v4 small polygon area_error 诊断总结
+
+## 诊断对象
+
+* 模型：`checkpoints/best_model_v4_smallpoly_w5_dice_0p03.pt`
+* 数据集：`data/training_data_v4_balanced_complex_test.npz`
+* 指标来源：`results/metrics/evaluation_metrics_v4_smallpoly_w5_dice_0p03.csv`
+* mask 阈值：`mu < 500`
+
+## 整体面积行为
+
+* 测试样本数：200
+* mean area_ratio = 1.989118
+* median area_ratio = 1.806303
+* pred_area > true_area：190 / 200
+* pred_area < true_area：10 / 200
+* pred_area == true_area：0 / 200
+
+结论：`lambda_dice=0.03` 模型存在明显系统性面积高估，主要表现为预测 mask 普遍大于真实 mask。
+
+## 按 defect_type 统计
+
+| defect_type | count | mean true_area | mean pred_area | mean area_ratio | mean area_error | mean IoU | mean Dice |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| circle | 15 | 18.000126 | 24.213017 | 1.450339 | 0.491255 | 0.582564 | 0.720646 |
+| ellipse | 15 | 14.613491 | 23.091245 | 1.992614 | 1.005337 | 0.353891 | 0.498197 |
+| multi_defect | 60 | 19.385844 | 30.565749 | 1.650540 | 0.667843 | 0.395680 | 0.561370 |
+| polygon | 60 | 5.373339 | 10.650997 | 2.465778 | 1.478094 | 0.217343 | 0.330679 |
+| rect | 15 | 9.322382 | 19.131034 | 2.197054 | 1.197054 | 0.369986 | 0.537113 |
+| rotated_rect | 20 | 10.778148 | 18.965307 | 1.903837 | 0.903837 | 0.426299 | 0.591579 |
+| triangle | 15 | 11.066458 | 20.093423 | 1.877844 | 0.877844 | 0.366822 | 0.535760 |
+
+结论：area_error 最大的 defect_type 是 `polygon`，不是 multi_defect。
+
+## polygon 按 area_bin 统计
+
+| area_bin | count | mean true_area | mean pred_area | mean area_ratio | mean area_error | mean IoU | mean Dice |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| large | 14 | 14.973154 | 23.495213 | 1.649455 | 0.649455 | 0.412545 | 0.574932 |
+| medium | 21 | 3.964271 | 11.251076 | 2.863950 | 1.891204 | 0.215666 | 0.340333 |
+| small | 25 | 1.181058 | 2.954169 | 2.588454 | 1.595121 | 0.109439 | 0.183385 |
+
+结论：small polygon 是明显问题，但 mean area_error 最高的是 medium polygon。small polygon 的 IoU / Dice 最低，说明它仍是检出质量最差的区域；medium polygon 则是面积高估最严重的区域。
+
+## polygon 按 num_vertices 统计
+
+| num_vertices | count | mean area_ratio | mean area_error | mean IoU | mean Dice |
+|---|---:|---:|---:|---:|---:|
+| 5 | 18 | 2.539434 | 1.571230 | 0.216962 | 0.328322 |
+| 6 | 12 | 2.261568 | 1.275457 | 0.233388 | 0.348793 |
+| 7 | 12 | 2.354738 | 1.354738 | 0.168308 | 0.269472 |
+| 8 | 9 | 2.438158 | 1.438158 | 0.243047 | 0.365154 |
+| 9 | 9 | 2.766418 | 1.766418 | 0.236391 | 0.357209 |
+
+结论：面积高估不是简单随顶点数单调恶化。9 顶点和 5 顶点的 area_error 较高，但 7 顶点的 IoU / Dice 更差。
+
+## multi_defect 按 num_defects 统计
+
+| num_defects | count | mean area_ratio | mean area_error | mean IoU | mean Dice |
+|---|---:|---:|---:|---:|---:|
+| 2 | 24 | 1.742525 | 0.761069 | 0.376606 | 0.537715 |
+| 3 | 36 | 1.589217 | 0.605693 | 0.408396 | 0.577140 |
+
+结论：multi_defect 不是本轮 area_error 的主要来源。3 缺陷样本的面积误差反而低于 2 缺陷样本。
+
+## 按 complexity_level 统计
+
+| complexity_level | count | mean area_ratio | mean area_error | mean IoU | mean Dice |
+|---|---:|---:|---:|---:|---:|
+| 1 | 60 | 1.879463 | 0.892872 | 0.418316 | 0.574541 |
+| 2 | 80 | 2.325293 | 1.334530 | 0.269582 | 0.391752 |
+| 3 | 60 | 1.650540 | 0.667843 | 0.395680 | 0.561370 |
+
+结论：complexity_level=2 最差，这与 polygon / rotated_rect 等单复杂缺陷的面积高估更相关，而不是 multi_defect level 3 主导。
+
+## area_error 最大的 10 个样本
+
+最差 10 个样本中：
+
+* polygon：9 个
+* ellipse：1 个
+* polygon area_bin：small 6 个，medium 3 个；另 1 个 ellipse 不属于 polygon area_bin
+* complexity_level：level 2 为 9 个，level 1 为 1 个
+
+详细列表见：`results/metrics/v4_smallpoly_area_error_worst10.csv`
+
+可视化目录：`results/previews/v4_smallpoly_area_error_worst10/`
+
+## 对问题的回答
+
+1. area_error 偏大不是纯全局随机波动，而是有系统性面积高估，同时集中体现在 polygon 类样本。
+2. area_error 不是只来自 small polygon。small polygon 的 IoU / Dice 最低，但 mean area_error 最高的是 medium polygon。
+3. 主要来源是 polygon；multi_defect 不是本轮 area_error 的主因，rotated_rect 也不是最差类型。
+4. 存在系统性 pred_area > true_area：190 / 200 个样本预测面积大于真实面积。
+5. `lambda_dice=0.03` 仍是当前最平衡候选，因为它让 small polygon 完全漏检降到 0 / 25，同时 overall IoU / Dice 和 multi_defect center_error 相比 weighted MSE w5 改善。
+6. 建议下一步考虑 area-aware loss，但要作为可选小项，不要替换已有主流程。
+7. 最小改动方案：新增 `lambda_area`，基于 soft mask 面积计算 `area_loss = mean(abs(pred_soft_area - target_area) / (target_area + eps))`，只在 `weighted_mse_dice_area` 或显式参数打开时启用，不改变 evaluate_pinn.py 指标定义。
+8. 也建议先快速验证 `defect_weight=3` 或 `defect_weight=4`，因为当前问题是过分割，降低 defect 权重可能减少 pred_area 系统性偏大。
+9. 仍然不建议切换 `CURRENT_BASELINE.md`。当前全项目推荐 baseline 保持 `checkpoints/best_model_v3_complex_tv_sweep_2e-6.pt`。
+
+## 输出文件
+
+* `results/metrics/v4_smallpoly_area_error_per_sample.csv`
+* `results/metrics/v4_smallpoly_area_error_by_type.csv`
+* `results/metrics/v4_smallpoly_area_error_by_area_bin.csv`
+* `results/metrics/v4_smallpoly_area_error_by_vertices.csv`
+* `results/metrics/v4_smallpoly_area_error_by_num_defects.csv`
+* `results/metrics/v4_smallpoly_area_error_by_complexity.csv`
+* `results/metrics/v4_smallpoly_area_error_worst10.csv`
+* `results/summaries/v4_smallpoly_area_error_diagnosis_summary.txt`
+* `results/previews/v4_smallpoly_area_error_worst10/`

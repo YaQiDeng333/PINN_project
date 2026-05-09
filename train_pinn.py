@@ -16,6 +16,7 @@ plt.rcParams['axes.unicode_minus'] = False
 
 PROJECT_DIR = os.path.abspath(os.path.dirname(__file__))
 MU_SCALE = 1000.0
+MASK_THRESHOLD = 500.0
 B0 = 1.5
 DATASET_CONFIGS = {
     'simple': {
@@ -39,6 +40,17 @@ DATASET_CONFIGS = {
         'preview_path': 'results/previews/reconstruction_preview_v3_complex_tv.png',
         'physics_preview_path': 'results/previews/reconstruction_preview_v3_complex_tv_phy.png',
         'physics_loss_log_path': 'results/archive/physics_loss_log_v3_complex.csv',
+    },
+    'v4_balanced_complex': {
+        'train_data': 'data/training_data_v4_balanced_complex_train.npz',
+        'val_data': 'data/training_data_v4_balanced_complex_val.npz',
+        'checkpoint_path': 'checkpoints/best_model_v4_balanced_complex_tv.pt',
+        'physics_checkpoint_path': 'checkpoints/best_model_v4_balanced_complex_tv_phy.pt',
+        'loss_curve_path': 'results/loss_curves/loss_curve_v4_balanced_complex_tv.png',
+        'physics_loss_curve_path': 'results/loss_curves/loss_curve_v4_balanced_complex_tv_phy.png',
+        'preview_path': 'results/previews/reconstruction_preview_v4_balanced_complex_tv.png',
+        'physics_preview_path': 'results/previews/reconstruction_preview_v4_balanced_complex_tv_phy.png',
+        'physics_loss_log_path': 'results/archive/physics_loss_log_v4_balanced_complex.csv',
     },
 }
 
@@ -198,6 +210,49 @@ def physics_loss(mu_pred_map, target_signals, sensor_x, depth, lift_off, signal_
     return torch.mean((bz_pred - target_signals) ** 2)
 
 
+def normalized_defect_threshold():
+    return MASK_THRESHOLD / MU_SCALE
+
+
+def compute_weighted_mse_loss(pred, target, defect_weight):
+    defect_threshold = normalized_defect_threshold()
+    defect_mask = target < defect_threshold
+    weights = torch.ones_like(target)
+    weights = torch.where(defect_mask, weights * defect_weight, weights)
+    return torch.mean(weights * (pred - target) ** 2)
+
+
+def compute_soft_dice_loss(pred, target, eps=1e-6):
+    defect_threshold = normalized_defect_threshold()
+    target_mask = (target < defect_threshold).to(dtype=pred.dtype)
+    pred_soft_mask = torch.clamp(1.0 - pred / defect_threshold, min=0.0, max=1.0)
+
+    pred_flat = pred_soft_mask.reshape(pred.shape[0], -1)
+    target_flat = target_mask.reshape(target.shape[0], -1)
+    intersection = torch.sum(pred_flat * target_flat, dim=1)
+    pred_sum = torch.sum(pred_flat, dim=1)
+    target_sum = torch.sum(target_flat, dim=1)
+    dice = (2.0 * intersection + eps) / (pred_sum + target_sum + eps)
+    return torch.mean(1.0 - dice)
+
+
+def compute_area_loss(pred, target, area_loss_type='symmetric', eps=1e-6):
+    defect_threshold = normalized_defect_threshold()
+    target_mask = (target < defect_threshold).to(dtype=pred.dtype)
+    pred_soft_mask = torch.clamp(1.0 - pred / defect_threshold, min=0.0, max=1.0)
+
+    pred_area = torch.sum(pred_soft_mask.reshape(pred.shape[0], -1), dim=1)
+    true_area = torch.sum(target_mask.reshape(target.shape[0], -1), dim=1)
+    area_diff = pred_area - true_area
+    if area_loss_type == 'symmetric':
+        area_penalty = torch.abs(area_diff)
+    elif area_loss_type == 'over_only':
+        area_penalty = torch.relu(area_diff)
+    else:
+        raise ValueError(f'Unsupported area_loss_type: {area_loss_type}')
+    return torch.mean(area_penalty / (true_area + eps))
+
+
 def get_batch_physics_params(dataset, indices, device):
     indices_np = indices.detach().cpu().numpy()
     depth = torch.from_numpy(dataset.depths[indices_np]).to(device)
@@ -217,9 +272,17 @@ def run_epoch(
     lambda_phy=0.0,
     physics_dataset=None,
     sensor_x=None,
+    loss_type='mse',
+    defect_weight=10.0,
+    lambda_dice=0.05,
+    lambda_area=0.0,
+    area_loss_type='symmetric',
 ):
     model.train()
-    total_mse_loss = 0.0
+    total_unweighted_mse_loss = 0.0
+    total_weighted_mse_loss = 0.0
+    total_soft_dice_loss = 0.0
+    total_area_loss = 0.0
     total_tv_loss = 0.0
     total_physics_loss = 0.0
     total_total_loss = 0.0
@@ -232,7 +295,26 @@ def run_epoch(
         optimizer.zero_grad()
         pred = model(signals, coords)
         pred_map = pred.reshape(signals.shape[0], *grid_shape)
-        mse = criterion(pred, mu_targets)
+        unweighted_mse = criterion(pred, mu_targets)
+        soft_dice = pred.new_tensor(0.0)
+        area = pred.new_tensor(0.0)
+        if loss_type == 'weighted_mse':
+            weighted_mse = compute_weighted_mse_loss(pred, mu_targets, defect_weight)
+            data_loss = weighted_mse
+        elif loss_type == 'weighted_mse_dice':
+            weighted_mse = compute_weighted_mse_loss(pred, mu_targets, defect_weight)
+            soft_dice = compute_soft_dice_loss(pred, mu_targets)
+            data_loss = weighted_mse + lambda_dice * soft_dice
+        elif loss_type == 'weighted_mse_dice_area':
+            weighted_mse = compute_weighted_mse_loss(pred, mu_targets, defect_weight)
+            soft_dice = compute_soft_dice_loss(pred, mu_targets)
+            area = compute_area_loss(pred, mu_targets, area_loss_type=area_loss_type)
+            data_loss = weighted_mse + lambda_dice * soft_dice + lambda_area * area
+        elif loss_type == 'mse':
+            weighted_mse = unweighted_mse
+            data_loss = unweighted_mse
+        else:
+            raise ValueError(f'Unsupported loss_type: {loss_type}')
         tv = tv_loss(pred_map * MU_SCALE)
         phy = pred.new_tensor(0.0)
         if lambda_phy > 0.0:
@@ -248,12 +330,15 @@ def run_epoch(
                 signal_mean=physics_dataset.signal_mean,
                 signal_std=physics_dataset.signal_std,
             )
-        total = mse + lambda_tv * tv + lambda_phy * phy
+        total = data_loss + lambda_tv * tv + lambda_phy * phy
         total.backward()
         optimizer.step()
 
         batch_size = signals.shape[0]
-        total_mse_loss += mse.item() * batch_size
+        total_unweighted_mse_loss += unweighted_mse.item() * batch_size
+        total_weighted_mse_loss += weighted_mse.item() * batch_size
+        total_soft_dice_loss += soft_dice.item() * batch_size
+        total_area_loss += area.item() * batch_size
         total_tv_loss += tv.item() * batch_size
         total_physics_loss += phy.item() * batch_size
         total_total_loss += total.item() * batch_size
@@ -261,7 +346,11 @@ def run_epoch(
 
     total_samples = max(total_samples, 1)
     return {
-        'mse_loss': total_mse_loss / total_samples,
+        'mse_loss': total_unweighted_mse_loss / total_samples,
+        'unweighted_mse_loss': total_unweighted_mse_loss / total_samples,
+        'weighted_mse_loss': total_weighted_mse_loss / total_samples,
+        'soft_dice_loss': total_soft_dice_loss / total_samples,
+        'area_loss': total_area_loss / total_samples,
         'tv_loss': total_tv_loss / total_samples,
         'physics_loss': total_physics_loss / total_samples,
         'total_loss': total_total_loss / total_samples,
@@ -308,18 +397,27 @@ def save_loss_curve(
     val_mse_losses,
     output_path,
     train_physics_losses=None,
+    train_weighted_mse_losses=None,
+    train_soft_dice_losses=None,
+    train_area_losses=None,
 ):
     plt.figure(figsize=(8, 5))
-    plt.plot(train_mse_losses, label='Train MSE Loss')
+    plt.plot(train_mse_losses, label='Train Unweighted MSE Loss')
+    if train_weighted_mse_losses is not None:
+        plt.plot(train_weighted_mse_losses, label='Train Weighted MSE Loss')
+    if train_soft_dice_losses is not None:
+        plt.plot(train_soft_dice_losses, label='Train Soft Dice Loss')
+    if train_area_losses is not None:
+        plt.plot(train_area_losses, label='Train Area Loss')
     plt.plot(train_tv_losses, label='Train TV Loss')
     if train_physics_losses is not None:
         plt.plot(train_physics_losses, label='Train Physics Loss')
     plt.plot(train_total_losses, label='Train Total Loss')
-    plt.plot(val_mse_losses, label='Val MSE Loss')
+    plt.plot(val_mse_losses, label='Val Unweighted MSE Loss')
     plt.yscale('log')
     plt.xlabel('Epoch')
     plt.ylabel('Loss')
-    plt.title('Training with TV Loss')
+    plt.title('Training Loss Curve')
     plt.grid(True, alpha=0.3)
     plt.legend()
     plt.tight_layout()
@@ -328,7 +426,19 @@ def save_loss_curve(
 
 
 def save_physics_loss_log(rows, output_path):
-    fieldnames = ['epoch', 'mse_loss', 'tv_loss', 'physics_loss', 'total_loss', 'val_mse_loss']
+    fieldnames = [
+        'epoch',
+        'mse_loss',
+        'unweighted_mse_loss',
+        'weighted_mse_loss',
+        'soft_dice_loss',
+        'area_loss',
+        'tv_loss',
+        'physics_loss',
+        'total_loss',
+        'val_mse_loss',
+        'val_unweighted_mse_loss',
+    ]
     with open(output_path, 'w', encoding='utf-8', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
@@ -491,6 +601,9 @@ def train_adam_tv(args=None):
     criterion = nn.MSELoss()
 
     train_mse_losses = []
+    train_weighted_mse_losses = []
+    train_soft_dice_losses = []
+    train_area_losses = []
     train_tv_losses = []
     train_physics_losses = []
     train_total_losses = []
@@ -506,6 +619,14 @@ def train_adam_tv(args=None):
     print(f'Train data: {args.train_data}')
     print(f'Val data: {args.val_data}')
     print(f'Train samples: {len(train_dataset)} | Val samples: {len(val_dataset)} | Points/map: {total_points}')
+    print(f'loss_type: {args.loss_type}')
+    if args.loss_type in ('weighted_mse', 'weighted_mse_dice', 'weighted_mse_dice_area'):
+        print(f'defect_weight: {args.defect_weight:.2f}')
+    if args.loss_type in ('weighted_mse_dice', 'weighted_mse_dice_area'):
+        print(f'lambda_dice: {args.lambda_dice:.2e}')
+    if args.loss_type == 'weighted_mse_dice_area':
+        print(f'lambda_area: {args.lambda_area:.2e}')
+        print(f'area_loss_type: {args.area_loss_type}')
     print(f'lambda_tv: {args.lambda_tv:.2e}')
     print(f'lambda_phy: {effective_lambda_phy:.2e}')
 
@@ -522,6 +643,11 @@ def train_adam_tv(args=None):
             lambda_phy=effective_lambda_phy,
             physics_dataset=train_dataset if use_physics else None,
             sensor_x=sensor_x if use_physics else None,
+            loss_type=args.loss_type,
+            defect_weight=args.defect_weight,
+            lambda_dice=args.lambda_dice,
+            lambda_area=args.lambda_area,
+            area_loss_type=args.area_loss_type,
         )
         val_loss = evaluate(
             model=model,
@@ -532,6 +658,9 @@ def train_adam_tv(args=None):
         )
 
         train_mse_losses.append(train_metrics['mse_loss'])
+        train_weighted_mse_losses.append(train_metrics['weighted_mse_loss'])
+        train_soft_dice_losses.append(train_metrics['soft_dice_loss'])
+        train_area_losses.append(train_metrics['area_loss'])
         train_tv_losses.append(train_metrics['tv_loss'])
         train_physics_losses.append(train_metrics['physics_loss'])
         train_total_losses.append(train_metrics['total_loss'])
@@ -539,19 +668,45 @@ def train_adam_tv(args=None):
         loss_log_rows.append({
             'epoch': epoch,
             'mse_loss': f'{train_metrics["mse_loss"]:.8e}',
+            'unweighted_mse_loss': f'{train_metrics["unweighted_mse_loss"]:.8e}',
+            'weighted_mse_loss': f'{train_metrics["weighted_mse_loss"]:.8e}',
+            'soft_dice_loss': f'{train_metrics["soft_dice_loss"]:.8e}',
+            'area_loss': f'{train_metrics["area_loss"]:.8e}',
             'tv_loss': f'{train_metrics["tv_loss"]:.8e}',
             'physics_loss': f'{train_metrics["physics_loss"]:.8e}',
             'total_loss': f'{train_metrics["total_loss"]:.8e}',
             'val_mse_loss': f'{val_loss:.8e}',
+            'val_unweighted_mse_loss': f'{val_loss:.8e}',
         })
-        print(
-            f'Epoch {epoch:03d}/{args.epochs:03d} | '
-            f'mse_loss: {train_metrics["mse_loss"]:.6e} | '
-            f'tv_loss: {train_metrics["tv_loss"]:.6e} | '
-            f'physics_loss: {train_metrics["physics_loss"]:.6e} | '
-            f'total_loss: {train_metrics["total_loss"]:.6e} | '
-            f'val_mse_loss: {val_loss:.6e}'
-        )
+        if args.loss_type == 'weighted_mse':
+            print(
+                f'Epoch {epoch:03d}/{args.epochs:03d} | '
+                f'weighted_mse_loss: {train_metrics["weighted_mse_loss"]:.6e} | '
+                f'unweighted_mse_loss: {train_metrics["unweighted_mse_loss"]:.6e} | '
+                f'tv_loss: {train_metrics["tv_loss"]:.6e} | '
+                f'physics_loss: {train_metrics["physics_loss"]:.6e} | '
+                f'total_loss: {train_metrics["total_loss"]:.6e} | '
+                f'val_unweighted_mse_loss: {val_loss:.6e}'
+            )
+        elif args.loss_type in ('weighted_mse_dice', 'weighted_mse_dice_area'):
+            print(
+                f'Epoch {epoch:03d}/{args.epochs:03d} | '
+                f'weighted_mse_loss: {train_metrics["weighted_mse_loss"]:.6e} | '
+                f'unweighted_mse_loss: {train_metrics["unweighted_mse_loss"]:.6e} | '
+                f'soft_dice_loss: {train_metrics["soft_dice_loss"]:.6e} | '
+                f'area_loss: {train_metrics["area_loss"]:.6e} | '
+                f'total_loss: {train_metrics["total_loss"]:.6e} | '
+                f'val_unweighted_mse_loss: {val_loss:.6e}'
+            )
+        else:
+            print(
+                f'Epoch {epoch:03d}/{args.epochs:03d} | '
+                f'mse_loss: {train_metrics["mse_loss"]:.6e} | '
+                f'tv_loss: {train_metrics["tv_loss"]:.6e} | '
+                f'physics_loss: {train_metrics["physics_loss"]:.6e} | '
+                f'total_loss: {train_metrics["total_loss"]:.6e} | '
+                f'val_mse_loss: {val_loss:.6e}'
+            )
 
         if val_loss < best_val_loss:
             best_val_loss = val_loss
@@ -572,6 +727,17 @@ def train_adam_tv(args=None):
         val_mse_losses,
         loss_curve_path,
         train_physics_losses=physics_losses_for_plot,
+        train_weighted_mse_losses=(
+            train_weighted_mse_losses
+            if args.loss_type in ('weighted_mse', 'weighted_mse_dice', 'weighted_mse_dice_area')
+            else None
+        ),
+        train_soft_dice_losses=(
+            train_soft_dice_losses
+            if args.loss_type in ('weighted_mse_dice', 'weighted_mse_dice_area')
+            else None
+        ),
+        train_area_losses=train_area_losses if args.loss_type == 'weighted_mse_dice_area' else None,
     )
     save_validation_visualization(
         model=model,
@@ -761,6 +927,15 @@ def parse_args():
     parser.add_argument('--batch-size', type=int, default=4)
     parser.add_argument('--latent-dim', type=int, default=64)
     parser.add_argument('--lr', type=float, default=1e-3)
+    parser.add_argument(
+        '--loss-type',
+        choices=['mse', 'weighted_mse', 'weighted_mse_dice', 'weighted_mse_dice_area'],
+        default='mse',
+    )
+    parser.add_argument('--defect-weight', type=float, default=10.0)
+    parser.add_argument('--lambda-dice', type=float, default=0.05)
+    parser.add_argument('--lambda-area', type=float, default=0.0)
+    parser.add_argument('--area-loss-type', choices=['symmetric', 'over_only'], default='symmetric')
     parser.add_argument('--lambda-tv', type=float, default=5e-6)
     parser.add_argument('--lambda-phy', type=float, default=1e-4)
     parser.add_argument('--init-checkpoint', default='')

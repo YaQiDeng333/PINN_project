@@ -1,0 +1,86 @@
+# 第 7.16 步：面积约束细化实验总结
+
+## 实验目的
+
+在第 7.15 步 `lambda_area=0.05` 基础上继续细化面积约束：
+
+1. 对 symmetric area loss 进行 `lambda_area = 0.04 / 0.05 / 0.07` 细扫；
+2. 新增 `over_only` 面积约束，只惩罚 `pred_soft_area > true_area`；
+3. 判断是否能进一步降低 `pred_area > true_area` 数量，同时保持 small polygon 不漏检。
+
+## 固定配置
+
+* dataset = v4_balanced_complex
+* loss_type = weighted_mse_dice_area
+* defect_weight = 5
+* lambda_dice = 0.03
+* lambda_tv = 0
+* epochs = 100
+* physics_loss：未启用
+* L-BFGS：未启用
+* focal loss：未启用
+* oversampling：未启用
+* 模型结构：未修改
+* evaluate_pinn.py 指标定义：未修改
+
+## 代码改动
+
+* `train_pinn.py` 新增参数 `--area-loss-type symmetric / over_only`。
+* 默认 `area_loss_type = symmetric`，避免影响第 7.15 和旧训练流程。
+* `over_only` 定义：
+
+```text
+over_area_loss = mean(relu(pred_soft_area - true_area) / (true_area + eps))
+```
+
+* loss curve 标题从固定的 `Training with TV Loss` 改为更通用的 `Training Loss Curve`。
+
+## 扫描结果
+
+| area_loss_type | lambda_area | val IoU | val Dice | val area_error | test IoU | test Dice | test area_error | pred_area>true | polygon area_error | small pred_area=0 | small IoU | small Dice | medium polygon area_error | multi_defect center_error |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| symmetric | 0.04 | 0.353919 | 0.500046 | 0.769097 | 0.350750 | 0.494049 | 0.801724 | 185/200 | 0.956451 | 0/25 | 0.153233 | 0.250296 | 1.256038 | 1.055765 |
+| symmetric | 0.05 | 0.350553 | 0.495319 | 0.863233 | 0.342805 | 0.482709 | 0.877466 | 189/200 | 1.188546 | 0/25 | 0.124218 | 0.206374 | 1.510788 | 0.870915 |
+| symmetric | 0.07 | 0.355646 | 0.500496 | 0.750479 | 0.345279 | 0.486961 | 0.691137 | 186/200 | 0.926742 | 0/25 | 0.132712 | 0.219758 | 1.203071 | 0.992382 |
+| over_only | 0.05 | 0.356001 | 0.497815 | 0.728706 | 0.344640 | 0.484005 | 0.672181 | 166/200 | 0.964758 | 14/25 | 0.035722 | 0.056543 | 1.174013 | 1.001312 |
+
+## 结论
+
+### symmetric 细扫
+
+`symmetric lambda_area=0.07` 是 symmetric 细扫中面积指标最好的候选：
+
+* test area_error = 0.691137，为 symmetric 组最低；
+* polygon area_error = 0.926742，为 symmetric 组最低；
+* medium polygon area_error = 1.203071，为 symmetric 组最低；
+* small polygon pred_area=0 仍为 0/25；
+* 代价是 test IoU / Dice 低于 `lambda_area=0.04`。
+
+如果更重视 IoU/Dice，`lambda_area=0.04` 更平衡；如果本阶段以面积约束为主，`lambda_area=0.07` 更合适。
+
+### over_only 对比
+
+`over_only lambda_area=0.05` 更能降低 `pred_area > true_area` 数量：
+
+* symmetric 0.04 / 0.05 / 0.07 分别为 185 / 189 / 186；
+* over_only 0.05 降到 166 / 200；
+* overall area_error 也降到 0.672181，为本轮最低。
+
+但 `over_only` 代价很大：small polygon `pred_area=0` 回升到 14/25，small polygon IoU / Dice 明显下降。因此 `over_only` 不适合作为当前推荐候选。
+
+## 当前建议
+
+1. 不建议使用 `over_only` 作为当前方案，因为它牺牲了第 7.13B 已解决的 small polygon 漏检目标。
+2. symmetric 方向可以保留，当前面积约束候选优先看 `lambda_area=0.07`，但其 IoU / Dice 有下降。
+3. 继续调 area loss 的收益已经开始变小，且出现了 IoU/Dice 与 area_error 的 trade-off。
+4. 建议暂停继续扩大 loss 调参，先让 Claude Code review 第 7.16 实现和结果；如果继续实验，优先考虑 `defect_weight=3 / 4` 与 symmetric `lambda_area=0.04 / 0.07` 的组合，而不是进入 focal loss 或 oversampling。
+5. 当前不切换全项目 baseline，仍保持 `checkpoints/best_model_v3_complex_tv_sweep_2e-6.pt`。
+
+## 输出文件
+
+* `results/metrics/v4_smallpoly_area_loss_refine.csv`
+* `results/summaries/v4_smallpoly_area_loss_refine_summary.txt`
+* `checkpoints/best_model_v4_smallpoly_w5_dice_area_refine_0p04.pt`
+* `checkpoints/best_model_v4_smallpoly_w5_dice_area_refine_0p05.pt`
+* `checkpoints/best_model_v4_smallpoly_w5_dice_area_refine_0p07.pt`
+* `checkpoints/best_model_v4_smallpoly_w5_dice_area_over_0p05.pt`

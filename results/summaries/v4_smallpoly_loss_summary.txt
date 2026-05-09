@@ -1,0 +1,67 @@
+﻿# 第 7.12A 步 v4 small polygon defect-weighted MSE 摘要
+
+## 实验设置
+
+* 数据集：v4_balanced_complex train / val / test
+* 模型结构：沿用 BzEncoder + Fourier feature + MLP，未修改
+* loss_type：weighted_mse
+* defect_weight：10.0
+* weighted MSE：defect_mask = normalized_mu_target < 0.5；缺陷像素权重为 10.0，背景像素权重为 1.0
+* lambda_tv：0
+* physics_loss：未启用
+* L-BFGS：未启用
+* epoch：100
+* checkpoint：checkpoints/best_model_v4_balanced_complex_smallpoly_loss.pt
+
+## 输出文件
+
+* checkpoints/best_model_v4_balanced_complex_smallpoly_loss.pt
+* results/loss_curves/loss_curve_v4_smallpoly_loss.png
+* results/previews/reconstruction_preview_v4_smallpoly_loss.png
+* results/metrics/evaluation_metrics_v4_smallpoly_loss.csv
+* results/metrics/evaluation_metrics_v4_smallpoly_loss.txt
+* results/summaries/v4_smallpoly_loss_summary.txt
+
+## 整体 test 指标
+
+| 指标 | weighted MSE | v4 lambda_tv=0 | 变化 |
+|---|---:|---:|---:|
+| MSE | 4.10216735e+04 | 2.41644578e+04 | +1.68572157e+04 |
+| MAE | 7.83255570e+01 | 5.09550103e+01 | +2.73705467e+01 |
+| IoU | 3.22104979e-01 | 2.73743067e-01 | +4.83619121e-02 |
+| Dice | 4.67866207e-01 | 3.87241381e-01 | +8.06248264e-02 |
+| area_error | 1.34222578e+00 | 4.90251054e-01 | +8.51974727e-01 |
+| center_error | 1.14444251e+00 | 1.38652205e+00 | -2.42079544e-01 |
+
+## 重点分组
+
+| 分组 | 样本数 | IoU | Dice | MAE | area_error | center_error |
+|---|---:|---:|---:|---:|---:|---:|
+| rotated_rect | 20 | 3.83105255e-01 | 5.31749818e-01 | 7.06085651e+01 | 1.28493638e+00 | 1.09357655e+00 |
+| polygon | 60 | 2.13777746e-01 | 3.30787212e-01 | 5.61389047e+01 | 2.04767070e+00 | 1.21169240e+00 |
+| polygon_small | 25 | 1.36334593e-01 | 2.26148223e-01 | 3.65284303e+01 | 2.11830820e+00 | 1.20889777e+00 |
+| polygon_medium | 21 | 1.88606366e-01 | 3.06180590e-01 | 6.22705572e+01 | 2.66866676e+00 | 1.28740692e+00 |
+| polygon_large | 14 | 3.89826160e-01 | 5.54552482e-01 | 8.19601301e+01 | 9.90038231e-01 | 1.10311105e+00 |
+| multi_defect | 60 | 3.59930976e-01 | 5.22815080e-01 | 1.01780220e+02 | 7.58240933e-01 | 9.98214696e-01 |
+
+## small polygon 漏检检查
+
+* small polygon 样本数：25
+* pred_area = 0 的 small polygon 样本数：0
+* pred_area = 0 比例：0.00000000e+00
+* small polygon IoU：1.36334593e-01
+* small polygon Dice：2.26148223e-01
+
+## 与第 7.11 v4 lambda_tv=0 对比
+
+* 第 7.11 v4 lambda_tv=0：overall IoU=2.73743067e-01，Dice=3.87241381e-01，MAE=5.09550103e+01，center_error=1.38652205e+00。
+* 第 7.12A weighted MSE：overall IoU=3.22104979e-01，Dice=4.67866207e-01，MAE=7.83255570e+01，center_error=1.14444251e+00。
+* polygon：IoU 从 1.16992269e-01 变为 2.13777746e-01，Dice 从 1.69966771e-01 变为 3.30787212e-01。
+* small polygon：IoU 从 0.00000000e+00 变为 1.36334593e-01，Dice 从 0.00000000e+00 变为 2.26148223e-01。
+* multi_defect center_error 从 1.81483585e+00 变为 9.98214696e-01。
+
+## 结论
+
+* small polygon 不再全部 pred_area=0，weighted MSE 对漏检有改善。
+* defect_weight=10.0 明显提高了整体 IoU/Dice 和 center_error 表现，但 MSE、MAE、area_error 明显变差，说明模型更倾向扩大或增强缺陷区域。
+* 当前不切换 CURRENT_BASELINE；建议下一步做 defect_weight 小范围扫描，例如 5 / 10 / 20 / 50，并主要基于 val 集选择。

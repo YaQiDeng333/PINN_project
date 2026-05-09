@@ -160,6 +160,43 @@
   area_error=3.94517442e-01、center_error=1.32594189e+00。
   结论：lambda_tv=2e-6 是当前 v3_complex 推荐配置；polygon IoU/Dice 有改善，multi_defect 仍是主要难点之一。
 
+* [x] 第 7.8 步：polygon / multi_defect 细诊断
+  目标：不重新训练、不改模型结构、不改评价指标，基于当前 v3_complex 推荐模型细分分析 polygon 和 multi_defect 的失败原因。
+  已完成：基于 data/training_data_v3_complex_test.npz、checkpoints/best_model_v3_complex_tv_sweep_2e-6.pt、
+  results/metrics/evaluation_metrics_v3_complex_tv_sweep_2e-6_test.csv，按 polygon 的 num_vertices、multi_defect 的 num_defects、
+  以及全体样本的 complexity_level 做分组统计。
+  输出保存到 results/metrics/v3_complex_polygon_by_vertices.csv、
+  results/metrics/v3_complex_multi_defect_by_count.csv、
+  results/metrics/v3_complex_by_complexity_level.csv、
+  results/metrics/v3_complex_polygon_worst10.csv、
+  results/metrics/v3_complex_multi_defect_worst10.csv、
+  results/summaries/v3_complex_fine_diagnosis_summary.txt，
+  最差样本图保存到 results/previews/v3_complex_fine_diagnosis/。
+  结论：polygon 不是顶点数越多越差，5 顶点样本 IoU/Dice 最低；polygon 最差 10 个样本全部 pred_area=0，说明主要是漏检。
+  multi_defect 从 2 个缺陷到 3 个缺陷时 MSE、MAE、area_error、center_error 明显变差；complexity_level=3 的 MSE/MAE/area_error/center_error 也更差。
+
+* [x] 第 7.9 步：v4 balanced complex 数据增强与样本平衡
+  目标：暂不改模型结构和评价指标，先修正复杂缺陷数据分布，重点补 polygon 漏检和 multi_defect 三缺陷样本。
+  已完成实现：data_generator_v2.py 新增 --dataset v4_balanced_complex；
+  输出 data/training_data_v4_balanced_complex_train.npz、data/training_data_v4_balanced_complex_val.npz、
+  data/training_data_v4_balanced_complex_test.npz。
+  小样本阶段曾使用 train=50、val=10、test=10 做验证；正式阶段已生成 train=1000、val=200、test=200。
+  v4 规则：complexity_level 按 level1/2/3 约 30%/40%/30% 分配；
+  level2 中 polygon/rotated_rect 约 75%/25%；polygon 中 5 顶点权重最高；
+  polygon 记录 mask_pixels、signal_peak_to_peak、signal_snr，并要求 mask_pixels >= 30、signal_snr >= 5；
+  multi_defect 中 2/3 缺陷按 40%/60% 分配，并限制组件过度重叠。
+  Claude Code review 后已修复 area_bin 阈值和 polygon 双层 retry 问题：
+  area_bin 阈值改为 small < 120、120 <= medium < 500、large >= 500；
+  polygon 生成改为样本级单层有限重试，仍同时检查 mask_pixels 和 signal_snr。
+  修复后小样本 train 中 polygon area_bin 分布为 small=8、medium=4、large=3。
+  Claude Code 复审通过后，已使用 seed=7904 生成正式规模 v4 balanced complex 数据集：
+  train=1000、val=200、test=200。
+  正式 train 中 defect_types 分布为 circle=75、ellipse=75、multi_defect=300、polygon=300、rect=75、rotated_rect=100、triangle=75；
+  polygon area_bin 分布为 small=124、medium=103、large=73；
+  multi_defect 的 2/3 缺陷分布为 120/180；complexity_level 分布为 1=300、2=400、3=300。
+  检查通过：metadata_keys 与 metadata 字段一致，无 NaN / Inf，无空 mask，polygon 均满足 mask_pixels >= 30 和 signal_snr >= 5。
+  结论：正式规模 v4 数据集已生成；当前未重新训练模型，当前 v3_complex 推荐模型仍为 checkpoints/best_model_v3_complex_tv_sweep_2e-6.pt。
+
 ## 推荐执行顺序
 
 1. data_generator_v2.py：批量样本 + metadata + train/val/test
@@ -174,14 +211,312 @@
 10. train_pinn.py + evaluate_pinn.py：v3 complex 复杂缺陷 baseline 训练与评估
 11. results/metrics + results/summaries：v3 complex 复杂缺陷 baseline 诊断分析
 12. train_pinn.py + evaluate_pinn.py：v3 complex 延长训练与 lambda_tv 专用扫描
+13. results/metrics + results/summaries：polygon / multi_defect 细诊断
+14. data_generator_v2.py：v4 balanced complex 数据增强与样本平衡
 
 ## 后续建议
 
 1. 当前 v3_complex 推荐模型固定为 checkpoints/best_model_v3_complex_tv_sweep_2e-6.pt，推荐 lambda_tv=2e-6。
-2. multi_defect 的 MSE / MAE 和 mask 类指标仍偏弱，polygon 虽有改善但仍低于 rotated_rect。
-3. 下一步建议先做针对 polygon / multi_defect 的误差诊断或训练策略分析；暂不进入新的 physics_loss 或 L-BFGS。
-4. 模型结构优化可以作为后续方向，但建议在确认数据难点和训练策略后再做。
+2. v4 balanced complex 正式规模数据集已生成并通过检查。
+3. 下一步建议训练独立 v4 baseline，不覆盖 v3_complex 推荐模型。
+4. 暂不进入新的 physics_loss、L-BFGS 或模型结构大改。
 
 ## 当前下一步
 
 详见 `NEXT_STEP.md`。
+
+---
+
+## 第 7.10 步补充：v4_balanced_complex baseline 训练
+
+已完成 v4_balanced_complex 正式数据集上的 baseline 训练：
+
+* 模型：checkpoints/best_model_v4_balanced_complex_tv.pt
+* lambda_tv = 2e-6
+* epoch = 100
+* physics_loss：未启用
+* L-BFGS：未启用
+* v4 test：MSE=2.39571663e+04，MAE=4.88803274e+01，IoU=2.67902294e-01，Dice=3.81393009e-01，area_error=4.79983772e-01，center_error=1.41093149e+00
+
+分类型诊断显示 polygon 仍然最弱，尤其 small polygon 出现明显漏检；multi_defect 的 center_error 仍偏高。当前不更新 CURRENT_BASELINE.md，v3_complex 推荐模型仍保持为 checkpoints/best_model_v3_complex_tv_sweep_2e-6.pt。
+
+建议下一步：进行 v4_balanced_complex 专属 lambda_tv 小范围扫描，优先关注 polygon/small area_bin 和 multi_defect center_error。
+
+---
+
+## 第 7.11 步补充：v4_balanced_complex 专属 lambda_tv 扫描
+
+已完成 v4_balanced_complex 专属 lambda_tv 扫描：
+
+* 候选值：0、5e-7、1e-6、2e-6、5e-6、1e-5
+* 每组训练：50 epoch
+* physics_loss：未启用
+* L-BFGS：未启用
+* 模型结构：未修改
+* 评价指标定义：未修改
+
+输出文件：
+
+* results/metrics/v4_balanced_complex_lambda_tv_sweep.csv
+* results/summaries/v4_balanced_complex_lambda_tv_sweep_summary.txt
+
+按 val_iou、val_dice、val_mae、val_area_error、val_center_error 综合排序，本轮推荐候选为：
+
+* lambda_tv = 0
+* 模型：checkpoints/best_model_v4_balanced_complex_tv_sweep_0.pt
+
+该候选 test 指标：
+
+* MSE = 2.41644578e+04
+* MAE = 5.09550103e+01
+* IoU = 2.73743067e-01
+* Dice = 3.87241381e-01
+* area_error = 4.90251054e-01
+* center_error = 1.38652205e+00
+
+结论：v4 sweep 没有解决 small polygon 漏检问题，small polygon IoU/Dice 仍为 0；multi_defect center_error 比第 7.10 v4 baseline 略有改善，但仍不优于当前 v3_complex 推荐模型。v4 sweep 候选未明显超过 checkpoints/best_model_v3_complex_tv_sweep_2e-6.pt，因此不切换 CURRENT_BASELINE.md。
+
+后续建议：不要继续只扩大 lambda_tv 扫描，下一步应进入模型结构或训练策略优化方案设计，重点解决 small polygon 漏检和 multi_defect 分离/定位问题。
+
+---
+
+## 第 7.12A 步补充：small polygon defect-weighted MSE Loss
+
+已完成 small polygon 漏检专项第一轮实验：
+
+* `train_pinn.py` 新增 `--loss-type mse / weighted_mse`，默认仍为 `mse`。
+* 新增 `--defect-weight`，默认值为 `10.0`。
+* 本轮配置：v4_balanced_complex、`loss_type=weighted_mse`、`defect_weight=10.0`、`lambda_tv=0`、100 epoch。
+* 未修改 data_generator_v2.py。
+* 未修改 evaluate_pinn.py 的评价指标定义。
+* 未修改模型结构。
+* 未启用 physics_loss、L-BFGS、soft Dice 或 oversampling。
+
+输出文件：
+
+* checkpoints/best_model_v4_balanced_complex_smallpoly_loss.pt
+* results/loss_curves/loss_curve_v4_smallpoly_loss.png
+* results/previews/reconstruction_preview_v4_smallpoly_loss.png
+* results/metrics/evaluation_metrics_v4_smallpoly_loss.csv
+* results/metrics/evaluation_metrics_v4_smallpoly_loss.txt
+* results/summaries/v4_smallpoly_loss_summary.txt
+
+test 整体指标：
+
+* MSE = 4.10216735e+04
+* MAE = 7.83255570e+01
+* IoU = 3.22104979e-01
+* Dice = 4.67866207e-01
+* area_error = 1.34222578e+00
+* center_error = 1.14444251e+00
+
+关键结论：
+
+* small polygon 不再全部漏检，pred_area = 0 的样本数为 0 / 25；
+* small polygon IoU = 1.36334593e-01，Dice = 2.26148223e-01；
+* overall IoU、Dice、center_error 相比第 7.11 v4 `lambda_tv=0` 候选改善；
+* MSE、MAE、area_error 明显变差，说明 `defect_weight=10.0` 可能使预测缺陷区域偏大；
+* 当前不切换 CURRENT_BASELINE.md，v3_complex 推荐模型仍为 checkpoints/best_model_v3_complex_tv_sweep_2e-6.pt。
+
+后续建议：进入 defect_weight 小范围扫描，候选值 5 / 10 / 20 / 50；暂不加入 soft Dice、oversampling、physics_loss、L-BFGS 或模型结构改动。
+
+---
+
+## 第 7.12B 步补充：v4 small polygon defect_weight 扫描
+
+已完成 defect-weighted MSE 的权重扫描：
+
+* 候选值：2、3、5、7、10
+* 每组训练：100 epoch
+* loss_type：weighted_mse
+* lambda_tv：0
+* physics_loss：未启用
+* L-BFGS：未启用
+* Dice Loss：未启用
+* oversampling：未启用
+* 模型结构：未修改
+* 评价指标定义：未修改
+
+输出文件：
+
+* results/metrics/v4_smallpoly_defect_weight_sweep.csv
+* results/summaries/v4_smallpoly_defect_weight_sweep_summary.txt
+* checkpoints/best_model_v4_smallpoly_w2.pt
+* checkpoints/best_model_v4_smallpoly_w3.pt
+* checkpoints/best_model_v4_smallpoly_w5.pt
+* checkpoints/best_model_v4_smallpoly_w7.pt
+* checkpoints/best_model_v4_smallpoly_w10.pt
+
+本轮推荐候选：
+
+* defect_weight = 5
+* 模型：checkpoints/best_model_v4_smallpoly_w5.pt
+
+该候选 test 指标：
+
+* MSE = 3.12321945e+04
+* MAE = 6.23678583e+01
+* IoU = 3.39080635e-01
+* Dice = 4.77603301e-01
+* area_error = 8.38023859e-01
+* center_error = 1.17307553e+00
+* small polygon IoU = 6.54854895e-02
+* small polygon Dice = 1.04442883e-01
+* small polygon pred_area=0：12 / 25
+* multi_defect center_error = 1.08730941e+00
+
+结论：`defect_weight=5` 比 `defect_weight=10` 的面积误差明显更低，同时 small polygon 不再全部漏检；但该模型仍不切换为全项目当前 baseline，当前 v3_complex 推荐模型仍为 checkpoints/best_model_v3_complex_tv_sweep_2e-6.pt。
+
+后续建议：先让 Claude Code review 第 7.12A / 7.12B；暂不直接进入 Dice Loss。review 通过后，再以 `defect_weight=5` 为基础讨论 soft Dice / focal 类 loss。
+
+---
+
+## 第 7.13 步补充：weighted MSE + soft Dice Loss
+
+已完成 soft Dice Loss 第一轮实验：
+
+* `train_pinn.py` 新增 `--loss-type weighted_mse_dice`
+* `train_pinn.py` 新增 `--lambda-dice`
+* 默认 `--loss-type` 仍为 `mse`
+* weighted MSE 缺陷阈值改为 `MASK_THRESHOLD / MU_SCALE`，含义仍为真实 `μ_r < 500`
+* 训练配置：v4_balanced_complex、`defect_weight=5`、`lambda_dice=0.05`、`lambda_tv=0`、100 epoch
+* 未修改 data_generator_v2.py
+* 未修改 evaluate_pinn.py 的评价指标定义
+* 未修改模型结构，未启用 physics_loss、L-BFGS 或 oversampling
+
+输出文件：
+
+* checkpoints/best_model_v4_smallpoly_w5_dice.pt
+* results/loss_curves/loss_curve_v4_smallpoly_w5_dice.png
+* results/previews/reconstruction_preview_v4_smallpoly_w5_dice.png
+* results/metrics/evaluation_metrics_v4_smallpoly_w5_dice.csv
+* results/metrics/evaluation_metrics_v4_smallpoly_w5_dice.txt
+* results/summaries/v4_smallpoly_w5_dice_summary.txt
+
+test 指标：
+
+* MSE = 3.56734905e+04
+* MAE = 6.02042826e+01
+* IoU = 3.25826098e-01
+* Dice = 4.64347405e-01
+* area_error = 6.12110696e-01
+* center_error = 1.24440727e+00
+
+关键结论：
+
+* small polygon pred_area=0 从 12 / 25 降到 0 / 25；
+* small polygon IoU 从 6.54854895e-02 升到 1.26014768e-01；
+* small polygon Dice 从 1.04442883e-01 升到 2.01116176e-01；
+* overall area_error 从 8.38023859e-01 降到 6.12110696e-01；
+* overall IoU / Dice 下降；
+* multi_defect center_error 从 1.08730941e+00 升到 1.15517406e+00；
+* 当前不切换 CURRENT_BASELINE.md。
+
+后续建议：进入 `lambda_dice` 小范围扫描，暂不切换 baseline。
+
+---
+
+## 第 7.13B 步补充：v4 small polygon lambda_dice 扫描已完成
+
+在 `defect_weight=5`、`lambda_tv=0`、`weighted_mse_dice` 配置下完成 `lambda_dice = 0.01 / 0.03 / 0.05 / 0.1` 扫描。
+
+本轮推荐 v4 small polygon 专项候选：
+
+`checkpoints/best_model_v4_smallpoly_w5_dice_0p03.pt`
+
+对应 `lambda_dice = 0.03`。
+
+关键结论：
+* small polygon 完全漏检降为 0 / 25；
+* overall IoU / Dice 相比第 7.12B weighted MSE w5 恢复并提升；
+* multi_defect center_error 改善；
+* area_error 仍偏大；
+* 不切换全项目 CURRENT_BASELINE。
+
+当前全项目推荐模型仍为：
+
+`checkpoints/best_model_v3_complex_tv_sweep_2e-6.pt`
+---
+
+## 第 7.14 步补充：area_error 诊断已完成
+
+已对 `checkpoints/best_model_v4_smallpoly_w5_dice_0p03.pt` 完成 area_error 诊断。
+
+关键结论：
+* pred_area 系统性大于 true_area：190 / 200；
+* mean area_ratio = 1.989118，median area_ratio = 1.806303；
+* area_error 主要集中在 polygon；
+* small polygon 的 IoU / Dice 最低，但 mean area_error 最高的是 medium polygon；
+* worst10 中 9 个是 polygon；
+* multi_defect 不是本轮 area_error 主因；
+* `lambda_dice=0.03` 仍是当前 v4 small polygon 最平衡候选，但不切换全项目 baseline。
+
+下一步建议先降低 `defect_weight` 到 3 或 4 做快速验证；如果仍存在明显过分割，再考虑可选 `area-aware loss`。
+---
+
+## 第 7.15 步补充：area-aware loss 面积约束实验已完成
+
+已在 `train_pinn.py` 中加入可选 `weighted_mse_dice_area` loss 和 `--lambda-area` 参数。默认 `--loss-type` 仍为 `mse`，不影响旧训练流程。
+
+本轮扫描 `lambda_area = 0.005 / 0.01 / 0.03 / 0.05`，固定 `defect_weight=5`、`lambda_dice=0.03`、`lambda_tv=0`。
+
+推荐 v4 area-aware 专项候选：
+
+`checkpoints/best_model_v4_smallpoly_w5_dice_area_0p05.pt`
+
+对应 `lambda_area = 0.05`。
+
+关键结论：
+* overall area_error 明显下降；
+* polygon area_error 和 medium polygon area_error 明显下降；
+* small polygon 仍保持 0 / 25 漏检；
+* overall IoU / Dice 轻微下降；
+* multi_defect center_error 略有变差；
+* area-aware loss 仍未完全消除 pred_area 系统性偏大；
+* 当前不切换全项目 CURRENT_BASELINE。
+
+当前全项目推荐模型仍为：
+
+`checkpoints/best_model_v3_complex_tv_sweep_2e-6.pt`
+---
+
+## 第 7.16 步补充：面积约束细化实验已完成
+
+已完成 symmetric `lambda_area=0.04 / 0.05 / 0.07` 细扫，并新增 `over_only` 面积约束对比。
+
+关键结论：
+* symmetric `lambda_area=0.07` 的 area_error、polygon area_error 和 medium polygon area_error 最低，同时 small polygon pred_area=0 仍为 0 / 25；
+* `over_only lambda_area=0.05` 将 pred_area > true_area 降到 166 / 200，但 small polygon pred_area=0 回升到 14 / 25；
+* over_only 不适合作为当前推荐方案；
+* 当前不切换全项目 baseline。
+
+当前全项目推荐模型仍为：
+
+`checkpoints/best_model_v3_complex_tv_sweep_2e-6.pt`
+---
+
+## 第 7.17 步补充：symmetric area loss 组合验证
+
+第 7.17 步已完成。验证范围限定在 v4_balanced_complex 数据集上，不修改数据生成器、评价指标定义或模型结构，不启用 physics_loss、L-BFGS、focal loss 或 oversampling。
+
+固定配置：
+
+* loss_type = weighted_mse_dice_area
+* lambda_dice = 0.03
+* lambda_tv = 0
+* area_loss_type = symmetric
+* epochs = 100
+
+组合验证结果显示：
+
+* `defect_weight=5, lambda_area=0.04` 是本轮综合表现最好的 v4 small polygon / area loss 候选；
+* 模型路径：`checkpoints/best_model_v4_w5_dice003_area004.pt`；
+* small polygon `pred_area=0` 保持为 0 / 25；
+* overall IoU / Dice 和 multi_defect center_error 在本轮四组中最好；
+* polygon area_error 没有继续下降，不如第 7.16 步的 symmetric `lambda_area=0.07`。
+
+因此，本轮不切换全项目 baseline。当前推荐 baseline 仍以 `CURRENT_BASELINE.md` 为准：
+
+`checkpoints/best_model_v3_complex_tv_sweep_2e-6.pt`
+
+后续建议暂停继续扩大 loss 调参，转向模型结构或后处理方案讨论；如继续做 loss 对比，需要加入 seed / repeat 验证。
