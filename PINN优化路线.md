@@ -569,3 +569,20 @@ test 指标：
 第 7.18 后处理阈值分析说明，当前模型预测 μ 值存在校准偏软问题：缺陷区常预测到 μ≈200–400，而不是接近真实 μ≈1。threshold=300 能显著降低 area_error，说明该问题是模型输出校准与边界表达问题，不是单纯评估阈值问题。
 
 下一步进入第 7.19：模型结构优化方案设计。
+
+## 第 7.19 步补充：模型结构优化方案设计
+
+第 7.19 步已完成方案设计，未修改模型代码，未重新训练。方案文件：
+
+* `MODEL_STRUCTURE_PLAN.md`
+
+主要结论：
+
+* 第 7.12-7.18 的 loss 与后处理实验说明，small polygon 漏检已经得到明显缓解；
+* area-aware loss 和 threshold 调整能降低 area_error，但继续调 loss 收益递减；
+* threshold=300 明显降低 area_error，说明当前模型输出 μ 值偏软，缺陷区域常停留在 `μ_r≈200-400`；
+* 当前输出层实际是 `Linear + Softplus`，Softplus 有下界但无上界；缺陷端要逼近 `mu_norm≈0.001` 时需要很负的 pre-activation，可能导致输出偏软；
+* 当前问题更像是输出校准和 decoder 表达能力问题，不是单纯评价阈值问题；
+* 第 7.20 拆成 7.20A / 7.20B：7.20A 只做输出 μ 参数化校准，保持当前 decoder 不变；7.20B 只有在 7.20A 有效或部分有效后，再考虑轻量增强 decoder。
+
+第 7.20A 状态：准备开始。要求固定 `seed=42`，使用 v4_balanced_complex 数据集，不启用 physics_loss，不启用 L-BFGS，不切换 CURRENT_BASELINE。

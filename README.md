@@ -685,3 +685,32 @@ v4 test 整体指标：MSE=3.56734905e+04，MAE=6.02042826e+01，IoU=3.25826098e
 ```powershell
 & "C:\Users\19166\anaconda3\envs\pinn_mfl\python.exe" train_pinn.py --dataset v4_balanced_complex --seed 42
 ```
+
+## 第 7.19 步：模型结构优化方案
+
+第 7.19 步已完成方案设计，未修改训练代码，未重新训练模型。新增方案文档：
+
+* `MODEL_STRUCTURE_PLAN.md`：记录当前结构分析、输出 μ 偏软问题定位、推荐结构优化方案和第 7.20A / 7.20B 实施计划。
+
+当前关键判断：
+
+* 第 7.12-7.18 的 loss 和后处理实验已经缓解 small polygon 漏检；
+* 但第 7.18 后处理阈值分析显示，缺陷区域预测 μ 值常停留在 `μ_r≈200-400`，没有接近真实缺陷 `μ_r≈1`；
+* 当前输出层实际是 `Linear + Softplus`。Softplus 有下界但无上界，缺陷端要逼近 `mu_norm≈0.001` 时需要很负的 pre-activation，可能导致输出偏软；
+* threshold=300 能显著降低 area_error，说明这是模型输出校准和边界表达问题，不应只靠修改评价阈值解决；
+* 下一步建议进入第 7.20A：输出 μ 参数化校准实验。
+
+第 7.20A 推荐方向：
+
+* 保留 BzEncoder 和 Fourier feature；
+* 新增可选 `calibrated_mu` 模型变体；
+* 让 decoder 先预测 defect probability，再映射到归一化 μ 范围 `[0.001, 1.0]`；
+* 保持当前 decoder 结构不变，即 `128 / 128 / 64 + Tanh`；
+* 固定 `seed=42` 做旧结构和新结构 A/B 对比；
+* 不启用 physics_loss，不启用 L-BFGS，不切换 CURRENT_BASELINE。
+
+第 7.20B 暂不立即执行。只有当第 7.20A 有效或部分有效后，再考虑增强 decoder，例如 `256 / 256 / 128 / 64 + SiLU`。
+
+文档索引补充：
+
+* `MODEL_STRUCTURE_PLAN.md`：第 7.19 模型结构优化方案和第 7.20A / 7.20B 实施计划。

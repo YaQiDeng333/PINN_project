@@ -1,5 +1,51 @@
 NEXT_STEP
 
+## 当前最新下一步（以此为准）
+
+第 7.20A 步：输出 μ 参数化校准实验。
+
+第 7.19 步已经完成方案设计，详见 `MODEL_STRUCTURE_PLAN.md`。核心判断是：第 7.12-7.18 的实验已经说明 weighted MSE、soft Dice Loss、area-aware loss 和后处理阈值可以缓解 small polygon 漏检和面积误差，但缺陷区域预测 μ 值仍偏软，常停留在 `μ_r≈200-400`，而不是接近真实缺陷 `μ_r≈1`。当前输出层实际是 `Linear + Softplus`，有下界但无上界；缺陷端要逼近 `mu_norm≈0.001` 时需要很负的 pre-activation，可能导致输出偏软。因此下一步应优先单独验证输出参数化，而不是继续扩大 loss 调参。
+
+第 7.20A 推荐实验：
+
+* 数据集：`data/training_data_v4_balanced_complex_train.npz`、`data/training_data_v4_balanced_complex_val.npz`、`data/training_data_v4_balanced_complex_test.npz`
+* 固定 seed：`42`
+* loss 配置：`weighted_mse_dice_area`
+* `defect_weight = 5`
+* `lambda_dice = 0.03`
+* `lambda_area = 0.04`
+* `lambda_tv = 0`
+* `area_loss_type = symmetric`
+* 不启用 physics_loss
+* 不启用 L-BFGS
+* 不切换 CURRENT_BASELINE
+
+第 7.20A 最小实现方向：
+
+1. 在 `train_pinn.py` 中新增模型结构开关，例如 `--model-variant baseline / calibrated_mu`；
+2. 默认仍为 `baseline`，保证旧训练流程不受影响；
+3. 新增 calibrated μ 输出参数化，让 decoder 先预测 defect probability，再映射到物理合理的归一化 μ 范围 `[0.001, 1.0]`；
+4. 保持当前 decoder 结构不变，即 `128 / 128 / 64 + Tanh`；
+5. 如需评估新 checkpoint，仅对 `evaluate_pinn.py` 做兼容模型变体加载的最小修改，不改变 MSE、MAE、IoU、Dice、area_error、center_error 定义。
+
+建议第 7.20A 做公平 A/B：
+
+1. 旧结构 + seed=42 + 同一 loss 配置；
+2. calibrated_mu 输出参数化 + 当前 decoder + seed=42 + 同一 loss 配置。
+
+第 7.20B 暂不立即执行。只有当第 7.20A 有效或部分有效后，再考虑增强 decoder，例如 `256 / 256 / 128 / 64 + SiLU`，避免一次性同时改变输出参数化和 decoder 容量。
+
+重点观察：
+
+* standard threshold=500 下的 overall IoU / Dice / area_error；
+* polygon area_error；
+* small polygon `pred_area=0` 数量；
+* true defect pixels 上预测 μ_r 是否更接近低 μ 区间；
+* threshold=300 与 threshold=500 的 area_error 差距是否缩小；
+* multi_defect center_error 是否恶化。
+
+---
+
 当前状态（最新）
 
 第 7.9 步：v4 balanced complex 正式规模数据集生成已完成。

@@ -40,6 +40,9 @@ runs/
 # Local editor and OS metadata
 .vscode/
 .idea/
+.claude/
+.claudian/
+.obsidian/
 .DS_Store
 Thumbs.db
 
