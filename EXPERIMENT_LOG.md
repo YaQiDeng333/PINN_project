@@ -1549,3 +1549,59 @@ enhanced decoder 说明 decoder 容量确实会影响 μ 校准，并能改善 D
 ### 下一步
 
 建议先做 seed repeat 验证该 trade-off 是否稳定。若 repeat 后仍确认 enhanced decoder 会稳定加重面积高估，则应考虑更温和的 decoder 或专门的输出校准 / 面积校准策略，而不是继续单纯增大 decoder。
+
+---
+
+## 第 7.21 步：calibrated_mu decoder 多 seed 配对重复实验
+
+### 目标
+
+对 `calibrated_mu + standard decoder` 和 `calibrated_mu + enhanced decoder` 做 3 个 seed 的配对重复实验，验证第 7.20B 中 “μ 校准 / Dice 略改善但 area_error 恶化” 的 trade-off 是否稳定。本实验不用于更新 baseline。
+
+### 修改内容
+
+* 复用第 7.20A 的 standard seed=42 checkpoint；
+* 复用第 7.20B 的 enhanced seed=42 checkpoint；
+* 补跑 standard seed=123、standard seed=2026、enhanced seed=123、enhanced seed=2026；
+* 使用同一 v4 test set 统一评估 6 组模型；
+* 汇总单 seed 指标、mean ± std 和同 seed paired difference；
+* 未修改 `CURRENT_BASELINE.md`。
+
+### 输出文件
+
+* `checkpoints/best_model_v4_calibrated_mu_standard_decoder_seed123_w5_dice003_area004.pt`
+* `checkpoints/best_model_v4_calibrated_mu_standard_decoder_seed2026_w5_dice003_area004.pt`
+* `checkpoints/best_model_v4_calibrated_mu_enhanced_decoder_seed123_w5_dice003_area004.pt`
+* `checkpoints/best_model_v4_calibrated_mu_enhanced_decoder_seed2026_w5_dice003_area004.pt`
+* `results/metrics/v4_calibrated_mu_decoder_seed_repeat.csv`
+* `results/summaries/v4_calibrated_mu_decoder_seed_repeat_summary.txt`
+
+### 关键指标 / 结果
+
+固定配置：`dataset=v4_balanced_complex`、`model_variant=calibrated_mu`、`loss_type=weighted_mse_dice_area`、`defect_weight=5`、`lambda_dice=0.03`、`lambda_area=0.04`、`area_loss_type=symmetric`、`lambda_tv=0`、`epochs=100`。
+
+| decoder_variant | MSE | MAE | IoU | Dice | area_error | center_error |
+|---|---:|---:|---:|---:|---:|---:|
+| standard mean ± std | 3.177953e+04 ± 9.684922e+02 | 64.071944 ± 5.078808 | 0.348739 ± 0.004885 | 0.491443 ± 0.004296 | 0.829989 ± 0.164446 | 1.129777 ± 0.009350 |
+| enhanced mean ± std | 3.242061e+04 ± 7.778385e+02 | 57.576270 ± 1.424945 | 0.354685 ± 0.002091 | 0.500730 ± 0.002992 | 0.953397 ± 0.007471 | 1.125450 ± 0.004811 |
+
+paired difference mean（enhanced - standard）：
+
+* ΔMSE = +641.074535
+* ΔMAE = -6.495674
+* ΔIoU = +0.005946
+* ΔDice = +0.009287
+* Δarea_error = +0.123408
+* Δcenter_error = -0.004326
+
+### 结论
+
+enhanced decoder 的 trade-off 在多 seed 下稳定存在：MAE 稳定改善，IoU / Dice 在多 seed 均值和 paired mean 上小幅稳定改善，small polygon IoU=0 数量下降，small `pred_area=0` 问题也改善。
+
+但 enhanced decoder 的 area_error 稳定恶化，`pred_area>true_area` 数量增加或保持更高水平，说明 enhanced decoder 存在更明显的面积高估问题。
+
+因此第 7.21 不切换 `CURRENT_BASELINE`。如果 enhanced 继续表现为 area_error 恶化，后续不应继续单纯加宽 decoder。
+
+### 下一步
+
+后续是否进入 post-processing / area calibration / threshold calibration，由主线对话决定。

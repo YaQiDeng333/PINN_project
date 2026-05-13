@@ -2,25 +2,11 @@ NEXT_STEP
 
 ## 当前最新状态（以此为准）
 
-第 7.20B 步：`calibrated_mu` 轻量 decoder 增强实验已完成。
+第 7.21 步：`calibrated_mu` standard vs enhanced decoder 多 seed 配对重复实验已完成。
 
-本轮在第 7.20A 的基础上只增强 decoder，不改 BzEncoder、不改 Fourier feature、不加入新 loss、不启用 physics_loss 或 L-BFGS。`train_pinn.py` 新增 `--decoder-variant standard / enhanced`，默认仍为 `standard`。
+本轮不重新设计路线、不切换 baseline，只验证第 7.20B 中 “enhanced decoder 改善部分 μ 校准 / Dice，但 area_error 恶化” 的 trade-off 是否稳定。
 
-关键结论：
-
-* enhanced decoder 结构为 `256 / 256 / 128 / 64 + SiLU`；
-* standard decoder 复用第 7.20A checkpoint：`checkpoints/best_model_v4_calibrated_mu_seed42_w5_dice003_area004.pt`；
-* enhanced decoder 新模型：`checkpoints/best_model_v4_calibrated_mu_enhanced_decoder_seed42_w5_dice003_area004.pt`；
-* enhanced decoder 让 defect_mu_mean 从约 361 降到约 333，defect_mu_median 从约 262 降到约 238；
-* enhanced decoder 小幅改善 Dice、small polygon IoU / Dice、small polygon IoU=0 数量和 multi_defect center_error；
-* 但 area_error 从 0.6401 升到 0.9582，polygon area_error 从 0.7938 升到 1.4199，pred_area > true_area 从 182 / 200 增加到 189 / 200；
-* 当前不切换 `CURRENT_BASELINE`。
-
-## 当前下一步建议
-
-进入第 7.20C 或第 7.21：seed repeat / 稳定性验证。
-
-建议优先固定同一配置做 repeat：
+固定配置：
 
 * dataset = `v4_balanced_complex`
 * model_variant = `calibrated_mu`
@@ -31,9 +17,32 @@ NEXT_STEP
 * lambda_area = 0.04
 * lambda_tv = 0
 * area_loss_type = `symmetric`
-* seeds 可选：42 / 123 / 2024
+* seeds = 42 / 123 / 2026
 
-目标是判断第 7.20B 中“μ 校准改善但 area_error 恶化”的 trade-off 是否稳定存在。暂不建议直接继续增大 decoder。
+复用与新训练：
+
+* standard seed=42 复用第 7.20A checkpoint：`checkpoints/best_model_v4_calibrated_mu_seed42_w5_dice003_area004.pt`
+* enhanced seed=42 复用第 7.20B checkpoint：`checkpoints/best_model_v4_calibrated_mu_enhanced_decoder_seed42_w5_dice003_area004.pt`
+* seed=123 和 seed=2026 的 standard / enhanced 四组为本轮补跑。
+
+关键结论：
+
+* enhanced decoder 在 3 个 seed 上均降低 MAE，并提高 Dice；
+* enhanced decoder 在多 seed 均值和 paired mean 上小幅稳定改善 IoU / Dice；
+* enhanced decoder 在 3 个 seed 上均降低 defect_mu_mean / defect_mu_median；
+* enhanced decoder 让 small polygon IoU=0 数量下降，并改善 small `pred_area=0` 问题；
+* enhanced decoder 在 3 个 seed 上均增加 area_error；
+* enhanced decoder 的 `pred_area>true_area` 数量增加或保持更高水平，说明 enhanced decoder 存在更明显的面积高估问题；
+* enhanced decoder 的 mean area_error = 0.953397，standard 的 mean area_error = 0.829989；
+* enhanced - standard 的 mean ΔDice = +0.009287，mean Δarea_error = +0.123408；
+* 说明第 7.20B 中的 decoder trade-off 稳定存在；
+* 当前不切换 `CURRENT_BASELINE`。
+
+## 当前下一步
+
+第 7.21 不用于更新 baseline，只用于验证 decoder variant trade-off 是否稳定。
+
+如果 enhanced 继续表现为 area_error 恶化，后续不应继续单纯加宽 decoder，应转向 area calibration / threshold calibration / post-processing 方向。后续具体方向由主线对话决定。
 
 ---
 

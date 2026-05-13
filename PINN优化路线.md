@@ -665,3 +665,43 @@ test 指标：
 结论：enhanced decoder 能进一步改善 μ 校准和部分 mask 指标，但显著恶化 area_error，特别是 polygon / medium polygon 面积误差。当前不切换全项目 baseline。
 
 当前下一步：建议做 seed repeat / 稳定性验证，确认该 trade-off 是否稳定，再决定是否继续结构优化。
+
+---
+
+## 第 7.21 步：calibrated_mu decoder 多 seed 配对重复实验
+
+状态：已完成。
+
+目标：对 `calibrated_mu + standard decoder` 和 `calibrated_mu + enhanced decoder` 做多 seed 配对重复，验证第 7.20B 中的 decoder trade-off 是否稳定。本实验不用于更新 baseline。
+
+实验设计：
+
+* seeds = 42 / 123 / 2026
+* decoder_variant = `standard` / `enhanced`
+* standard seed=42 复用第 7.20A checkpoint
+* enhanced seed=42 复用第 7.20B checkpoint
+* seed=123 和 seed=2026 为本轮补跑
+* dataset = `v4_balanced_complex`
+* model_variant = `calibrated_mu`
+* loss_type = `weighted_mse_dice_area`
+* defect_weight = 5
+* lambda_dice = 0.03
+* lambda_area = 0.04
+* lambda_tv = 0
+* area_loss_type = `symmetric`
+
+结果摘要：
+
+* standard mean Dice = 0.491443，enhanced mean Dice = 0.500730；
+* standard mean area_error = 0.829989，enhanced mean area_error = 0.953397；
+* paired mean ΔDice = +0.009287；
+* paired mean Δarea_error = +0.123408；
+* enhanced decoder 在 3 个 seed 上均降低 MAE，并降低 defect_mu_mean / defect_mu_median；
+* enhanced decoder 在多 seed 均值和 paired mean 上小幅稳定改善 IoU / Dice；
+* enhanced decoder 让 small polygon IoU=0 数量下降，并改善 small `pred_area=0` 问题；
+* enhanced decoder 在 3 个 seed 上均增加 area_error。
+* enhanced decoder 的 `pred_area>true_area` 数量增加或保持更高水平，说明 enhanced decoder 存在更明显的面积高估问题。
+
+结论：enhanced decoder 对 μ 校准、MAE 和 IoU / Dice 的改善具有一定稳定性，但面积高估恶化也稳定存在。因此 enhanced decoder 不更新 `CURRENT_BASELINE`。后续不应继续单纯加宽 decoder，应转向 area calibration / threshold calibration / post-processing 方向。
+
+当前下一步：后续是否进入 post-processing / area calibration / threshold calibration，由主线对话决定。
