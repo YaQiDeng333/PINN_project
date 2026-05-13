@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import DataLoader, Dataset, Subset
 
@@ -18,6 +19,8 @@ plt.rcParams['axes.unicode_minus'] = False
 PROJECT_DIR = os.path.abspath(os.path.dirname(__file__))
 MU_SCALE = 1000.0
 MASK_THRESHOLD = 500.0
+MU_NORM_MIN = 1.0 / MU_SCALE
+MU_NORM_MAX = 1.0
 B0 = 1.5
 DATASET_CONFIGS = {
     'simple': {
@@ -157,8 +160,13 @@ class BzEncoder(nn.Module):
 
 
 class PINN(nn.Module):
-    def __init__(self, signal_length, coord_feature_dim=84, latent_dim=64):
+    def __init__(self, signal_length, coord_feature_dim=84, latent_dim=64, model_variant='baseline'):
         super().__init__()
+        if model_variant not in ('baseline', 'calibrated_mu'):
+            raise ValueError(f'Unsupported model_variant: {model_variant}')
+        self.model_variant = model_variant
+        self.mu_min = MU_NORM_MIN
+        self.mu_max = MU_NORM_MAX
         self.bz_encoder = BzEncoder(signal_length=signal_length, latent_dim=latent_dim)
         self.decoder = nn.Sequential(
             nn.Linear(coord_feature_dim + latent_dim, 128),
@@ -168,7 +176,6 @@ class PINN(nn.Module):
             nn.Linear(128, 64),
             nn.Tanh(),
             nn.Linear(64, 1),
-            nn.Softplus(),
         )
 
     def forward(self, bz_signal, coords):
@@ -179,7 +186,12 @@ class PINN(nn.Module):
         coord_features = feature_mapping(coords)
         bz_features = bz_latent.unsqueeze(1).expand(-1, coord_features.shape[1], -1)
         features = torch.cat([bz_features, coord_features], dim=-1)
-        return self.decoder(features).squeeze(-1)
+        logits = self.decoder(features).squeeze(-1)
+        if self.model_variant == 'baseline':
+            return F.softplus(logits)
+
+        defect_prob = torch.sigmoid(logits)
+        return self.mu_min + (self.mu_max - self.mu_min) * (1.0 - defect_prob)
 
 
 def tv_loss(mu_pred_map):
@@ -500,16 +512,22 @@ def load_checkpoint_model(checkpoint_path, signal_length, fallback_latent_dim, d
         state_dict = checkpoint['model_state_dict']
         checkpoint_args = checkpoint.get('args', {})
         latent_dim = int(checkpoint_args.get('latent_dim', fallback_latent_dim))
+        model_variant = checkpoint_args.get('model_variant', 'baseline')
         signal_mean = checkpoint.get('signal_mean')
         signal_std = checkpoint.get('signal_std')
     else:
         state_dict = checkpoint
         checkpoint_args = {}
         latent_dim = fallback_latent_dim
+        model_variant = 'baseline'
         signal_mean = None
         signal_std = None
 
-    model = PINN(signal_length=signal_length, latent_dim=latent_dim).to(device)
+    model = PINN(
+        signal_length=signal_length,
+        latent_dim=latent_dim,
+        model_variant=model_variant,
+    ).to(device)
     try:
         model.load_state_dict(state_dict)
     except RuntimeError:
@@ -585,6 +603,11 @@ def train_adam_tv(args=None):
             fallback_latent_dim=args.latent_dim,
             device=device,
         )
+        if args.model_variant != model.model_variant:
+            print(
+                f'Warning: --model-variant={args.model_variant} but checkpoint is '
+                f'{model.model_variant}, using checkpoint variant'
+            )
         if signal_mean is None or signal_std is None:
             train_dataset_for_stats = MFLDataset(args.train_data)
             signal_mean = train_dataset_for_stats.signal_mean
@@ -595,6 +618,7 @@ def train_adam_tv(args=None):
         model = PINN(
             signal_length=train_dataset.signals.shape[1],
             latent_dim=args.latent_dim,
+            model_variant=args.model_variant,
         ).to(device)
 
     val_dataset = MFLDataset(
@@ -636,6 +660,9 @@ def train_adam_tv(args=None):
     effective_lambda_phy = args.lambda_phy if use_physics else 0.0
 
     print('Model: BzEncoder(signal -> latent) + Fourier(x,y) + MLP -> mu(x,y)')
+    print(f'model_variant: {model.model_variant}')
+    if model.model_variant == 'calibrated_mu':
+        print(f'calibrated_mu range: [{MU_NORM_MIN:.6f}, {MU_NORM_MAX:.6f}] normalized mu')
     print(f'Dataset: {args.dataset}')
     print(f'Train data: {args.train_data}')
     print(f'Val data: {args.val_data}')
@@ -951,6 +978,7 @@ def parse_args():
     parser.add_argument('--latent-dim', type=int, default=64)
     parser.add_argument('--lr', type=float, default=1e-3)
     parser.add_argument('--seed', type=int, default=42)
+    parser.add_argument('--model-variant', choices=['baseline', 'calibrated_mu'], default='baseline')
     parser.add_argument(
         '--loss-type',
         choices=['mse', 'weighted_mse', 'weighted_mse_dice', 'weighted_mse_dice_area'],

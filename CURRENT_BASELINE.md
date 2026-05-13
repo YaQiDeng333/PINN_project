@@ -431,7 +431,52 @@ v4 test 指标：
 当前全项目推荐 baseline 仍为：
 
 `checkpoints/best_model_v3_complex_tv_sweep_2e-6.pt`
+
 ---
+
+## 第 7.20A 步记录：calibrated_mu 输出 μ 参数化校准
+
+本节仅记录实验结果，不切换当前全项目推荐 baseline。
+
+实验数据集：
+
+`data/training_data_v4_balanced_complex_train.npz`
+
+`data/training_data_v4_balanced_complex_val.npz`
+
+`data/training_data_v4_balanced_complex_test.npz`
+
+固定配置：
+
+* seed = 42
+* loss_type = weighted_mse_dice_area
+* defect_weight = 5
+* lambda_dice = 0.03
+* lambda_area = 0.04
+* area_loss_type = symmetric
+* lambda_tv = 0
+
+对比模型：
+
+* baseline：`checkpoints/best_model_v4_baseline_seed42_w5_dice003_area004.pt`
+* calibrated_mu：`checkpoints/best_model_v4_calibrated_mu_seed42_w5_dice003_area004.pt`
+
+calibrated_mu test 指标：
+
+* MSE = 3.06620221e+04
+* MAE = 5.87495580e+01
+* IoU = 3.54232016e-01
+* Dice = 4.96098795e-01
+* area_error = 6.40109928e-01
+* center_error = 1.13673565e+00
+
+实验结论：
+
+`calibrated_mu` 相比 baseline seed=42 改善了 IoU、Dice、center_error、polygon area_error 和 small polygon 指标，缺陷区预测 μ_r 均值也从约 399 降到约 361。但 area_error 几乎不变，`pred_area > true_area` 数量增加到 182 / 200，因此不切换当前全项目 baseline。
+
+当前全项目推荐 baseline 仍为：
+
+`checkpoints/best_model_v3_complex_tv_sweep_2e-6.pt`
 
 ## 第 7.14 步记录：area_error 诊断
 

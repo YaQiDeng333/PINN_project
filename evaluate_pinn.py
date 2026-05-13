@@ -29,18 +29,25 @@ def load_model(checkpoint_path, signal_length, device):
 
     if isinstance(checkpoint, dict) and 'model_state_dict' in checkpoint:
         state_dict = checkpoint['model_state_dict']
-        latent_dim = int(checkpoint.get('args', {}).get('latent_dim', 64))
+        checkpoint_args = checkpoint.get('args', {})
+        latent_dim = int(checkpoint_args.get('latent_dim', 64))
+        model_variant = checkpoint_args.get('model_variant', 'baseline')
         signal_mean = float(checkpoint.get('signal_mean', 0.0))
         signal_std = float(checkpoint.get('signal_std', 1.0))
         checkpoint_info = checkpoint
     else:
         state_dict = checkpoint
         latent_dim = 64
+        model_variant = 'baseline'
         signal_mean = None
         signal_std = None
         checkpoint_info = {'model_state_dict': checkpoint}
 
-    model = PINN(signal_length=signal_length, latent_dim=latent_dim).to(device)
+    model = PINN(
+        signal_length=signal_length,
+        latent_dim=latent_dim,
+        model_variant=model_variant,
+    ).to(device)
     try:
         model.load_state_dict(state_dict)
     except RuntimeError:
@@ -121,6 +128,12 @@ def compute_sample_metrics(pred_mu, true_mu, x_grid, y_grid, threshold=MASK_THRE
     }, pred_mask, true_mask
 
 
+def compute_mu_calibration(pred_mu, true_mask):
+    defect_values = pred_mu[true_mask]
+    background_values = pred_mu[~true_mask]
+    return defect_values.astype(np.float64), background_values.astype(np.float64)
+
+
 def average_metrics(rows):
     metric_names = ['mse', 'mae', 'iou', 'dice', 'area_error', 'center_error']
     return {
@@ -145,6 +158,9 @@ def save_metrics_csv(rows, output_path):
     fieldnames = [
         'sample_index',
         'defect_type',
+        'area_bin',
+        'num_defects',
+        'complexity_level',
         'mse',
         'mae',
         'iou',
@@ -157,11 +173,99 @@ def save_metrics_csv(rows, output_path):
         'pred_center_y',
         'true_center_x',
         'true_center_y',
+        'pred_area_gt_true',
     ]
     with open(output_path, 'w', encoding='utf-8', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(rows)
+
+
+def safe_nanmean(rows, key):
+    values = [row[key] for row in rows if key in row]
+    if not values:
+        return float('nan')
+    return float(np.nanmean(values))
+
+
+def summarize_mu_values(values):
+    if values.size == 0:
+        return {
+            'mean': float('nan'),
+            'median': float('nan'),
+            'p10': float('nan'),
+            'p90': float('nan'),
+            'min': float('nan'),
+            'max': float('nan'),
+        }
+    return {
+        'mean': float(np.mean(values)),
+        'median': float(np.median(values)),
+        'p10': float(np.percentile(values, 10)),
+        'p90': float(np.percentile(values, 90)),
+        'min': float(np.min(values)),
+        'max': float(np.max(values)),
+    }
+
+
+def build_summary_row(args, checkpoint_info, avg, rows, defect_mu_values, background_mu_values):
+    checkpoint_args = checkpoint_info.get('args', {}) if isinstance(checkpoint_info, dict) else {}
+    model_variant = checkpoint_args.get('model_variant', 'baseline')
+    polygon_rows = [row for row in rows if row['defect_type'] == 'polygon']
+    small_polygon_rows = [
+        row for row in polygon_rows
+        if str(row.get('area_bin', '')) == 'small'
+    ]
+    medium_polygon_rows = [
+        row for row in polygon_rows
+        if str(row.get('area_bin', '')) == 'medium'
+    ]
+    multi_defect_rows = [row for row in rows if row['defect_type'] == 'multi_defect']
+
+    defect_stats = summarize_mu_values(defect_mu_values)
+    background_stats = summarize_mu_values(background_mu_values)
+    summary_name = args.summary_name or model_variant
+
+    return {
+        'model_name': summary_name,
+        'model_variant': model_variant,
+        'checkpoint': args.checkpoint,
+        'test_samples': len(rows),
+        'mse': avg['mse'],
+        'mae': avg['mae'],
+        'iou': avg['iou'],
+        'dice': avg['dice'],
+        'area_error': avg['area_error'],
+        'center_error': avg['center_error'],
+        'polygon_area_error': safe_nanmean(polygon_rows, 'area_error'),
+        'small_polygon_count': len(small_polygon_rows),
+        'small_polygon_pred_area_zero_count': sum(row['pred_area'] == 0.0 for row in small_polygon_rows),
+        'small_polygon_iou': safe_nanmean(small_polygon_rows, 'iou'),
+        'small_polygon_dice': safe_nanmean(small_polygon_rows, 'dice'),
+        'medium_polygon_area_error': safe_nanmean(medium_polygon_rows, 'area_error'),
+        'multi_defect_center_error': safe_nanmean(multi_defect_rows, 'center_error'),
+        'pred_area_gt_true_count': sum(row['pred_area'] > row['true_area'] for row in rows),
+        'defect_mu_mean': defect_stats['mean'],
+        'defect_mu_median': defect_stats['median'],
+        'defect_mu_p10': defect_stats['p10'],
+        'defect_mu_p90': defect_stats['p90'],
+        'defect_mu_min': defect_stats['min'],
+        'defect_mu_max': defect_stats['max'],
+        'background_mu_mean': background_stats['mean'],
+        'background_mu_median': background_stats['median'],
+    }
+
+
+def save_summary_csv(summary_row, output_path, append=False):
+    fieldnames = list(summary_row.keys())
+    ensure_parent_dir(output_path)
+    file_exists = os.path.exists(output_path)
+    mode = 'a' if append else 'w'
+    with open(output_path, mode, encoding='utf-8', newline='') as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        if not append or not file_exists:
+            writer.writeheader()
+        writer.writerow(summary_row)
 
 
 def save_comparison_figure(pred_mu, true_mu, pred_mask, true_mask, x, y, sample_idx, defect_type, output_path):
@@ -213,6 +317,8 @@ def evaluate_test_set(args):
 
     rows = []
     figures = {}
+    defect_mu_chunks = []
+    background_mu_chunks = []
     figure_indices = set(np.linspace(0, len(test_dataset) - 1, min(args.num_figures, len(test_dataset)), dtype=int))
 
     print(f'Using device: {device}')
@@ -240,10 +346,20 @@ def evaluate_test_set(args):
                 Y,
                 threshold=args.mask_threshold,
             )
+            defect_values, background_values = compute_mu_calibration(pred_maps[batch_pos], true_mask)
+            if defect_values.size:
+                defect_mu_chunks.append(defect_values)
+            if background_values.size:
+                background_mu_chunks.append(background_values)
+            metadata = test_dataset.metadata[sample_idx]
             row = {
                 'sample_index': sample_idx,
                 'defect_type': defect_type,
+                'area_bin': str(metadata['area_bin']) if 'area_bin' in test_dataset.metadata.dtype.names else '',
+                'num_defects': float(metadata['num_defects']) if 'num_defects' in test_dataset.metadata.dtype.names else float('nan'),
+                'complexity_level': float(metadata['complexity_level']) if 'complexity_level' in test_dataset.metadata.dtype.names else float('nan'),
                 **metrics,
+                'pred_area_gt_true': bool(metrics['pred_area'] > metrics['true_area']),
             }
             rows.append(row)
 
@@ -266,6 +382,23 @@ def evaluate_test_set(args):
     ensure_parent_dir(metrics_csv)
     save_metrics_txt(avg, rows, metrics_txt, args.checkpoint, args.mask_threshold)
     save_metrics_csv(rows, metrics_csv)
+    if args.summary_csv:
+        defect_mu_values = np.concatenate(defect_mu_chunks) if defect_mu_chunks else np.array([], dtype=np.float64)
+        background_mu_values = (
+            np.concatenate(background_mu_chunks)
+            if background_mu_chunks
+            else np.array([], dtype=np.float64)
+        )
+        summary_csv = project_path(args.summary_csv)
+        summary_row = build_summary_row(
+            args=args,
+            checkpoint_info=checkpoint_info,
+            avg=avg,
+            rows=rows,
+            defect_mu_values=defect_mu_values,
+            background_mu_values=background_mu_values,
+        )
+        save_summary_csv(summary_row, summary_csv, append=args.summary_append)
 
     figure_paths = []
     figures_dir = project_path(args.figures_dir) if args.figures_dir else project_path('results')
@@ -291,6 +424,8 @@ def evaluate_test_set(args):
         print(f'{key}: {avg[key]:.8e}')
     print(f'Saved metrics txt to {metrics_txt}')
     print(f'Saved metrics csv to {metrics_csv}')
+    if args.summary_csv:
+        print(f'Saved summary csv to {summary_csv}')
     for path in figure_paths:
         print(f'Saved comparison figure to {path}')
     print(f'checkpoint_loaded: {checkpoint_loaded}')
@@ -311,6 +446,9 @@ def parse_args():
     parser.add_argument('--point-chunk', type=int, default=4096)
     parser.add_argument('--mask-threshold', type=float, default=MASK_THRESHOLD)
     parser.add_argument('--num-figures', type=int, default=3)
+    parser.add_argument('--summary-csv', default=None)
+    parser.add_argument('--summary-name', default='')
+    parser.add_argument('--summary-append', action='store_true')
     return parser.parse_args()
 
 

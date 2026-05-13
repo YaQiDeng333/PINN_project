@@ -1,5 +1,42 @@
 NEXT_STEP
 
+## 当前最新状态（以此为准）
+
+第 7.20A 步：`calibrated_mu` 输出 μ 参数化校准实验已完成。
+
+本轮已经在 `seed=42` 下完成 baseline 与 `calibrated_mu` A/B 对比。`calibrated_mu` 保持 BzEncoder 和 decoder 主体不变，只改变输出 μ 参数化，将 defect probability 映射到 `mu_norm ∈ [0.001, 1.0]`。
+
+关键结论：
+
+* `calibrated_mu` 相比 baseline seed=42 改善了 MSE、IoU、Dice、center_error、polygon area_error、small polygon IoU / Dice 和 multi_defect center_error；
+* 缺陷区预测 μ_r 均值从约 399 降到约 361，中位数从约 295 降到约 262，说明输出校准方向有效；
+* area_error 只从 0.6404435 降到 0.6401099，改善很小；
+* `pred_area > true_area` 数量从 174 / 200 增加到 182 / 200；
+* small polygon `pred_area=0` 保持 0 / 25；
+* 当前不切换 `CURRENT_BASELINE`。
+
+## 当前下一步建议
+
+进入第 7.20B：decoder 轻量增强 A/B 实验。
+
+建议保持：
+
+* dataset = `v4_balanced_complex`
+* seed = 42
+* loss_type = `weighted_mse_dice_area`
+* defect_weight = 5
+* lambda_dice = 0.03
+* lambda_area = 0.04
+* lambda_tv = 0
+* area_loss_type = `symmetric`
+* 不启用 physics_loss
+* 不启用 L-BFGS
+* 不切换 CURRENT_BASELINE
+
+第 7.20B 只应在第 7.20A 的基础上测试轻量 decoder 增强，不要同时加入新的 loss、后处理或数据增强，避免混淆变量。
+
+---
+
 ## 当前最新下一步（以此为准）
 
 第 7.20A 步：输出 μ 参数化校准实验。

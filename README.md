@@ -714,3 +714,47 @@ v4 test 整体指标：MSE=3.56734905e+04，MAE=6.02042826e+01，IoU=3.25826098e
 文档索引补充：
 
 * `MODEL_STRUCTURE_PLAN.md`：第 7.19 模型结构优化方案和第 7.20A / 7.20B 实施计划。
+
+---
+
+## 最新实验状态：第 7.20A 步
+
+第 7.20A 步已完成 `calibrated_mu` 输出 μ 参数化校准实验。
+
+本轮只修改输出 μ 参数化，不增强 BzEncoder，不增强 decoder，不启用 physics_loss / L-BFGS，也不修改标准评价指标定义。`train_pinn.py` 新增：
+
+* `--model-variant baseline / calibrated_mu`
+* 默认 `baseline`
+* `baseline` 保持旧输出行为：`Linear(64, 1) + Softplus`
+* `calibrated_mu` 将 decoder logit 映射为 defect probability，再映射到 `mu_norm ∈ [0.001, 1.0]`
+
+固定训练配置：
+
+* dataset = `v4_balanced_complex`
+* seed = 42
+* loss_type = `weighted_mse_dice_area`
+* defect_weight = 5
+* lambda_dice = 0.03
+* lambda_area = 0.04
+* area_loss_type = `symmetric`
+* lambda_tv = 0
+* epochs = 100
+
+主要输出：
+
+* `checkpoints/best_model_v4_baseline_seed42_w5_dice003_area004.pt`
+* `checkpoints/best_model_v4_calibrated_mu_seed42_w5_dice003_area004.pt`
+* `results/metrics/v4_calibrated_mu_ablation.csv`
+* `results/summaries/v4_calibrated_mu_ablation_summary.txt`
+* `results/loss_curves/loss_curve_v4_calibrated_mu.png`
+* `results/previews/reconstruction_preview_v4_calibrated_mu.png`
+
+关键结论：
+
+* `calibrated_mu` 相比 baseline seed=42 改善了 MSE、IoU、Dice、center_error、polygon area_error、small polygon IoU / Dice 和 multi_defect center_error；
+* 缺陷区预测 μ_r 均值从约 399 降到约 361，中位数从约 295 降到约 262，说明输出校准方向有效但幅度有限；
+* area_error 几乎不变，`pred_area > true_area` 数量反而增加；
+* small polygon `pred_area=0` 仍为 0 / 25；
+* 当前不切换全项目 baseline，推荐 baseline 仍以 `CURRENT_BASELINE.md` 为准。
+
+下一步建议进入第 7.20B：在固定 seed 和同一 loss 配置下测试轻量 decoder 增强，判断 decoder 表达能力是否能进一步改善 μ 校准和面积误差。

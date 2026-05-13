@@ -436,7 +436,6 @@ test 指标：
 当前全项目推荐模型仍为：
 
 `checkpoints/best_model_v3_complex_tv_sweep_2e-6.pt`
----
 
 ## 第 7.14 步补充：area_error 诊断已完成
 
@@ -586,3 +585,42 @@ test 指标：
 * 第 7.20 拆成 7.20A / 7.20B：7.20A 只做输出 μ 参数化校准，保持当前 decoder 不变；7.20B 只有在 7.20A 有效或部分有效后，再考虑轻量增强 decoder。
 
 第 7.20A 状态：准备开始。要求固定 `seed=42`，使用 v4_balanced_complex 数据集，不启用 physics_loss，不启用 L-BFGS，不切换 CURRENT_BASELINE。
+
+---
+
+## 第 7.20A 步：calibrated_mu 输出 μ 参数化校准实验
+
+状态：已完成。
+
+目标：验证只改变输出 μ 参数化、保持当前 BzEncoder 和 decoder 主体不变时，是否能改善 μ 值偏软和 `pred_area` 偏大的问题。
+
+本轮新增：
+
+* `train_pinn.py` 支持 `--model-variant baseline / calibrated_mu`；
+* 默认 `baseline`，保持 `Linear(64, 1) + Softplus` 输出行为；
+* `calibrated_mu` 将 decoder logit 转成 defect probability，再映射到 `mu_norm ∈ [0.001, 1.0]`；
+* `evaluate_pinn.py` 兼容加载 `model_variant`，并输出本轮所需的 μ 校准诊断字段；标准指标定义不变。
+
+固定配置：
+
+* dataset = `v4_balanced_complex`
+* seed = 42
+* loss_type = `weighted_mse_dice_area`
+* defect_weight = 5
+* lambda_dice = 0.03
+* lambda_area = 0.04
+* area_loss_type = `symmetric`
+* lambda_tv = 0
+* epochs = 100
+
+结果摘要：
+
+* baseline seed=42：IoU = 3.39044536e-01，Dice = 4.80770498e-01，area_error = 6.40443541e-01；
+* calibrated_mu seed=42：IoU = 3.54232016e-01，Dice = 4.96098795e-01，area_error = 6.40109928e-01；
+* 缺陷区预测 μ_r 均值从约 399 降到约 361，中位数从约 295 降到约 262；
+* small polygon `pred_area=0` 仍为 0 / 25；
+* `pred_area > true_area` 数量从 174 / 200 增加到 182 / 200。
+
+结论：`calibrated_mu` 证明输出参数化校准方向有效，但单独改变输出映射不足以解决面积系统性偏大。当前不切换全项目 baseline。
+
+当前下一步：第 7.20B，轻量 decoder 增强 A/B 实验。第 7.20B 应继续固定 seed=42，保持同一 loss 配置，不加入新 loss、physics_loss、L-BFGS 或数据增强。

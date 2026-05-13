@@ -1,0 +1,63 @@
+# 第 7.20A calibrated_mu 输出参数化校准实验总结
+
+## 实验目标
+
+验证只改变输出 μ 参数化、保持 BzEncoder 和 decoder 主体不变时，是否能缓解 v4_balanced_complex 模型的 μ 值偏软和预测面积偏大问题。
+
+## 固定配置
+
+- dataset = v4_balanced_complex
+- seed = 42
+- loss_type = weighted_mse_dice_area
+- defect_weight = 5
+- lambda_dice = 0.03
+- lambda_area = 0.04
+- area_loss_type = symmetric
+- lambda_tv = 0
+- physics_loss = off
+- L-BFGS = off
+- epochs = 100
+
+## A/B 模型
+
+### baseline
+
+- checkpoint = checkpoints/best_model_v4_baseline_seed42_w5_dice003_area004.pt
+- output = Linear(64, 1) + Softplus
+
+### calibrated_mu
+
+- checkpoint = checkpoints/best_model_v4_calibrated_mu_seed42_w5_dice003_area004.pt
+- output = sigmoid(logit) 得到 defect_prob，再映射到 mu_norm ∈ [0.001, 1.0]
+- 映射方式：mu_pred = 0.001 + (1.0 - 0.001) * (1 - defect_prob)
+
+## 整体指标对比
+
+| model | MSE | MAE | IoU | Dice | area_error | center_error |
+|---|---:|---:|---:|---:|---:|---:|
+| baseline_seed42 | 3.18715908e+04 | 5.64035633e+01 | 3.39044536e-01 | 4.80770498e-01 | 6.40443541e-01 | 1.19076125e+00 |
+| calibrated_mu_seed42 | 3.06620221e+04 | 5.87495580e+01 | 3.54232016e-01 | 4.96098795e-01 | 6.40109928e-01 | 1.13673565e+00 |
+
+## 细分指标对比
+
+| model | polygon_area_error | small_polygon_pred_area_zero | small_polygon_IoU | small_polygon_Dice | medium_polygon_area_error | multi_defect_center_error | pred_area>true_area |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| baseline_seed42 | 9.29138121e-01 | 0 / 25 | 1.23585509e-01 | 1.99845698e-01 | 1.15665433e+00 | 1.11142334e+00 | 174 / 200 |
+| calibrated_mu_seed42 | 7.93836931e-01 | 0 / 25 | 1.42170036e-01 | 2.17796901e-01 | 1.04839205e+00 | 1.00847890e+00 | 182 / 200 |
+
+## μ 校准诊断
+
+| model | defect_mu_mean | defect_mu_median | defect_mu_p10 | defect_mu_p90 | defect_mu_min | defect_mu_max | background_mu_mean | background_mu_median |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| baseline_seed42 | 3.99100673e+02 | 2.95004196e+02 | 3.92511761e+01 | 9.60037683e+02 | 2.53774719e+01 | 1.38894727e+03 | 9.66205995e+02 | 1.00152924e+03 |
+| calibrated_mu_seed42 | 3.60555509e+02 | 2.61573990e+02 | 4.52932854e+01 | 8.79176477e+02 | 1.16256933e+01 | 9.96082458e+02 | 9.54104381e+02 | 9.94808411e+02 |
+
+## 结论
+
+calibrated_mu 相比 baseline seed=42 小幅改善 MSE、IoU、Dice、center_error、polygon area_error、small polygon IoU / Dice、medium polygon area_error 和 multi_defect center_error；small polygon 仍保持 0 / 25 漏检。需要注意：small polygon pred_area=0 为 0 / 25 只说明没有完全空预测，仍需要关注 small polygon IoU=0 的样本；后续评估应同时记录 small polygon IoU=0 数量。
+
+calibrated_mu 的缺陷区预测 μ_r 分布有所降低，defect_mu_mean 从约 399 降到约 361，defect_mu_median 从约 295 降到约 262，说明输出参数化校准方向有效但幅度有限，缺陷区仍远未接近真实 μ_r≈1。
+
+area_error 只从 0.6404435 降到 0.6401099，改善很小；pred_area > true_area 数量反而从 174 / 200 增加到 182 / 200。因此 calibrated_mu 不能单独解决预测面积系统性偏大的问题。
+
+本轮不切换 CURRENT_BASELINE。第 7.20A 结果支持继续做第 7.20B decoder 轻量增强实验，但需要保持 seed=42 和同一 loss 配置，以便确认 decoder 表达能力是否能进一步改善 μ 校准和面积误差。
