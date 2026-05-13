@@ -2,47 +2,37 @@ NEXT_STEP
 
 ## 当前最新状态（以此为准）
 
-第 7.21 步：`calibrated_mu` standard vs enhanced decoder 多 seed 配对重复实验已完成。
+第 7.22 步：`calibrated_mu` decoder threshold calibration 已完成。
 
-本轮不重新设计路线、不切换 baseline，只验证第 7.20B 中 “enhanced decoder 改善部分 μ 校准 / Dice，但 area_error 恶化” 的 trade-off 是否稳定。
+本轮是 evaluation-level threshold calibration，不重新训练、不修改模型结构、不修改 `CURRENT_BASELINE`，只对第 7.21 的 6 个 calibrated_mu standard / enhanced decoder checkpoint 做 validation threshold sweep，并在 test set 上验证推荐 threshold。
 
-固定配置：
+实验对象：
 
-* dataset = `v4_balanced_complex`
-* model_variant = `calibrated_mu`
-* decoder_variant = `standard` vs `enhanced`
-* loss_type = `weighted_mse_dice_area`
-* defect_weight = 5
-* lambda_dice = 0.03
-* lambda_area = 0.04
-* lambda_tv = 0
-* area_loss_type = `symmetric`
-* seeds = 42 / 123 / 2026
+* standard decoder：seed = 42 / 123 / 2026
+* enhanced decoder：seed = 42 / 123 / 2026
+* validation set 用于选择 threshold
+* test set 只用于最终验证
+* threshold 使用 raw μ_r：300 / 350 / 400 / 450 / 500 / 550 / 600 / 650 / 700
 
-复用与新训练：
+推荐 threshold：
 
-* standard seed=42 复用第 7.20A checkpoint：`checkpoints/best_model_v4_calibrated_mu_seed42_w5_dice003_area004.pt`
-* enhanced seed=42 复用第 7.20B checkpoint：`checkpoints/best_model_v4_calibrated_mu_enhanced_decoder_seed42_w5_dice003_area004.pt`
-* seed=123 和 seed=2026 的 standard / enhanced 四组为本轮补跑。
+* standard decoder：400
+* enhanced decoder：350
 
 关键结论：
 
-* enhanced decoder 在 3 个 seed 上均降低 MAE，并提高 Dice；
-* enhanced decoder 在多 seed 均值和 paired mean 上小幅稳定改善 IoU / Dice；
-* enhanced decoder 在 3 个 seed 上均降低 defect_mu_mean / defect_mu_median；
-* enhanced decoder 让 small polygon IoU=0 数量下降，并改善 small `pred_area=0` 问题；
-* enhanced decoder 在 3 个 seed 上均增加 area_error；
-* enhanced decoder 的 `pred_area>true_area` 数量增加或保持更高水平，说明 enhanced decoder 存在更明显的面积高估问题；
-* enhanced decoder 的 mean area_error = 0.953397，standard 的 mean area_error = 0.829989；
-* enhanced - standard 的 mean ΔDice = +0.009287，mean Δarea_error = +0.123408；
-* 说明第 7.20B 中的 decoder trade-off 稳定存在；
+* standard threshold 500 -> 400：test mean area_error 从 0.829989 降到 0.513358，IoU 从 0.348739 升到 0.350794，Dice 从 0.491443 小幅降到 0.488918；
+* enhanced threshold 500 -> 350：test mean area_error 从 0.953397 降到 0.416337，IoU 从 0.354685 升到 0.355723，Dice 从 0.500730 小幅降到 0.496510；
+* enhanced `pred_area>true_area` 从 190.0 降到 146.67，面积高估明显缓解；
+* threshold calibration 没有明显牺牲 overall IoU / Dice；
+* small polygon IoU=0 和 small `pred_area=0` 有轻微恶化，需要后续继续监控；
 * 当前不切换 `CURRENT_BASELINE`。
 
 ## 当前下一步
 
-第 7.21 不用于更新 baseline，只用于验证 decoder variant trade-off 是否稳定。
+第 7.22 不用于更新 baseline，只用于评估层面的阈值校准诊断。
 
-如果 enhanced 继续表现为 area_error 恶化，后续不应继续单纯加宽 decoder，应转向 area calibration / threshold calibration / post-processing 方向。后续具体方向由主线对话决定。
+如果后续接受 evaluation-level calibration，可以继续围绕 area calibration / threshold calibration / post-processing 做验证；如果不接受后处理阈值校准，enhanced decoder 仍只作为结构消融记录。后续方向由主线对话决定。
 
 ---
 

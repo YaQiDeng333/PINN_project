@@ -1605,3 +1605,53 @@ enhanced decoder 的 trade-off 在多 seed 下稳定存在：MAE 稳定改善，
 ### 下一步
 
 后续是否进入 post-processing / area calibration / threshold calibration，由主线对话决定。
+
+---
+
+## 第 7.22 步：calibrated_mu decoder threshold calibration
+
+### 目标
+
+对第 7.21 的 6 个 calibrated_mu standard / enhanced decoder checkpoint 做 evaluation-level mask threshold sweep，判断 enhanced decoder 的面积高估问题是否能通过后处理阈值校准缓解。本实验不重新训练、不修改模型结构、不修改 `CURRENT_BASELINE`。
+
+### 修改内容
+
+* 检查 `evaluate_pinn.py`，确认已支持 `--mask-threshold`，默认仍为 500.0；
+* 使用 validation set 扫描 raw μ_r threshold：300 / 350 / 400 / 450 / 500 / 550 / 600 / 650 / 700；
+* 只根据 validation set 选择 recommended threshold；
+* 使用推荐 threshold 在 test set 上验证；
+* 未修改 `train_pinn.py`、`evaluate_pinn.py` 或 `CURRENT_BASELINE.md`。
+
+### 输出文件
+
+* `results/metrics/v4_calibrated_mu_threshold_validation_sweep.csv`
+* `results/metrics/v4_calibrated_mu_threshold_test_comparison.csv`
+* `results/summaries/v4_calibrated_mu_threshold_calibration_summary.txt`
+
+### 关键指标 / 结果
+
+validation set 推荐 threshold：
+
+* standard decoder：400
+* enhanced decoder：350
+
+test set mean 对比：
+
+| decoder | threshold | MSE | MAE | IoU | Dice | area_error | center_error | small IoU=0 | small pred_area=0 | pred_area>true_area |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| standard | 500 | 3.177953e+04 | 64.071944 | 0.348739 | 0.491443 | 0.829989 | 1.129777 | 11.000000 | 1.333333 | 182.333333 |
+| standard | 400 | 3.177953e+04 | 64.071944 | 0.350794 | 0.488918 | 0.513358 | 1.139972 | 14.000000 | 5.333333 | 151.000000 |
+| enhanced | 500 | 3.242061e+04 | 57.576270 | 0.354685 | 0.500730 | 0.953397 | 1.125450 | 7.000000 | 0.000000 | 190.000000 |
+| enhanced | 350 | 3.242061e+04 | 57.576270 | 0.355723 | 0.496510 | 0.416337 | 1.146558 | 9.666667 | 0.333333 | 146.666667 |
+
+### 结论
+
+threshold calibration 明显缓解面积高估。standard decoder 的 area_error 从 0.829989 降到 0.513358；enhanced decoder 的 area_error 从 0.953397 降到 0.416337，且 `pred_area>true_area` 从 190.0 降到 146.67。
+
+overall IoU / Dice 没有明显牺牲：standard IoU 略升、Dice 小幅下降；enhanced IoU 略升、Dice 小幅下降。但 small polygon IoU=0 和 small `pred_area=0` 有轻微恶化，需要后续继续监控。
+
+本轮不切换 `CURRENT_BASELINE`。如果后续接受 evaluation-level calibration，enhanced decoder 可以作为继续做 area calibration / threshold calibration / post-processing 的候选；否则 enhanced decoder 仍只保留为结构消融记录。
+
+### 下一步
+
+后续是否进入 fixed evaluation threshold、area calibration 或 post-processing，由主线对话决定。

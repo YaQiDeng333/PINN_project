@@ -705,3 +705,35 @@ test 指标：
 结论：enhanced decoder 对 μ 校准、MAE 和 IoU / Dice 的改善具有一定稳定性，但面积高估恶化也稳定存在。因此 enhanced decoder 不更新 `CURRENT_BASELINE`。后续不应继续单纯加宽 decoder，应转向 area calibration / threshold calibration / post-processing 方向。
 
 当前下一步：后续是否进入 post-processing / area calibration / threshold calibration，由主线对话决定。
+
+---
+
+## 第 7.22 步：calibrated_mu decoder threshold calibration
+
+状态：已完成。
+
+目标：在不重新训练的前提下，对第 7.21 的 calibrated_mu standard / enhanced decoder checkpoint 做 evaluation-level threshold calibration，判断面积高估是否能通过 mask threshold 调整缓解。
+
+本轮设置：
+
+* 不重新训练；
+* 不修改 `train_pinn.py`；
+* `evaluate_pinn.py` 已支持 `--mask-threshold`，默认保持 500.0，本轮未改代码；
+* 不修改 `CURRENT_BASELINE`；
+* validation set 用于选择 threshold；
+* test set 只用于最终验证；
+* threshold 使用 raw μ_r：300 / 350 / 400 / 450 / 500 / 550 / 600 / 650 / 700。
+
+validation 推荐 threshold：
+
+* standard decoder：400；
+* enhanced decoder：350。
+
+test set 结果摘要：
+
+* standard threshold 500 -> 400：area_error 从 0.829989 降到 0.513358，IoU 从 0.348739 升到 0.350794，Dice 从 0.491443 小幅降到 0.488918；
+* enhanced threshold 500 -> 350：area_error 从 0.953397 降到 0.416337，IoU 从 0.354685 升到 0.355723，Dice 从 0.500730 小幅降到 0.496510；
+* enhanced `pred_area>true_area` 从 190.0 降到 146.67；
+* small polygon IoU=0 和 small `pred_area=0` 略有恶化。
+
+结论：threshold calibration 能明显缓解 area_error，且没有明显牺牲 overall IoU / Dice。enhanced decoder 在 calibrated threshold 下的面积高估大幅缓解，但本轮仍不切换 `CURRENT_BASELINE`。如果后续接受 evaluation-level calibration，可继续做 area calibration / threshold calibration / post-processing；如果不接受后处理阈值校准，enhanced decoder 仍只作为结构消融记录。
