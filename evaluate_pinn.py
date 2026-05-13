@@ -32,6 +32,7 @@ def load_model(checkpoint_path, signal_length, device):
         checkpoint_args = checkpoint.get('args', {})
         latent_dim = int(checkpoint_args.get('latent_dim', 64))
         model_variant = checkpoint_args.get('model_variant', 'baseline')
+        decoder_variant = checkpoint_args.get('decoder_variant', 'standard')
         signal_mean = float(checkpoint.get('signal_mean', 0.0))
         signal_std = float(checkpoint.get('signal_std', 1.0))
         checkpoint_info = checkpoint
@@ -39,6 +40,7 @@ def load_model(checkpoint_path, signal_length, device):
         state_dict = checkpoint
         latent_dim = 64
         model_variant = 'baseline'
+        decoder_variant = 'standard'
         signal_mean = None
         signal_std = None
         checkpoint_info = {'model_state_dict': checkpoint}
@@ -47,6 +49,7 @@ def load_model(checkpoint_path, signal_length, device):
         signal_length=signal_length,
         latent_dim=latent_dim,
         model_variant=model_variant,
+        decoder_variant=decoder_variant,
     ).to(device)
     try:
         model.load_state_dict(state_dict)
@@ -211,6 +214,7 @@ def summarize_mu_values(values):
 def build_summary_row(args, checkpoint_info, avg, rows, defect_mu_values, background_mu_values):
     checkpoint_args = checkpoint_info.get('args', {}) if isinstance(checkpoint_info, dict) else {}
     model_variant = checkpoint_args.get('model_variant', 'baseline')
+    decoder_variant = checkpoint_args.get('decoder_variant', 'standard')
     polygon_rows = [row for row in rows if row['defect_type'] == 'polygon']
     small_polygon_rows = [
         row for row in polygon_rows
@@ -229,6 +233,7 @@ def build_summary_row(args, checkpoint_info, avg, rows, defect_mu_values, backgr
     return {
         'model_name': summary_name,
         'model_variant': model_variant,
+        'decoder_variant': decoder_variant,
         'checkpoint': args.checkpoint,
         'test_samples': len(rows),
         'mse': avg['mse'],
@@ -240,6 +245,7 @@ def build_summary_row(args, checkpoint_info, avg, rows, defect_mu_values, backgr
         'polygon_area_error': safe_nanmean(polygon_rows, 'area_error'),
         'small_polygon_count': len(small_polygon_rows),
         'small_polygon_pred_area_zero_count': sum(row['pred_area'] == 0.0 for row in small_polygon_rows),
+        'small_polygon_iou_zero_count': sum(row['iou'] == 0.0 for row in small_polygon_rows),
         'small_polygon_iou': safe_nanmean(small_polygon_rows, 'iou'),
         'small_polygon_dice': safe_nanmean(small_polygon_rows, 'dice'),
         'medium_polygon_area_error': safe_nanmean(medium_polygon_rows, 'area_error'),

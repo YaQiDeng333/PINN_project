@@ -160,23 +160,46 @@ class BzEncoder(nn.Module):
 
 
 class PINN(nn.Module):
-    def __init__(self, signal_length, coord_feature_dim=84, latent_dim=64, model_variant='baseline'):
+    def __init__(
+            self,
+            signal_length,
+            coord_feature_dim=84,
+            latent_dim=64,
+            model_variant='baseline',
+            decoder_variant='standard'):
         super().__init__()
         if model_variant not in ('baseline', 'calibrated_mu'):
             raise ValueError(f'Unsupported model_variant: {model_variant}')
+        if decoder_variant not in ('standard', 'enhanced'):
+            raise ValueError(f'Unsupported decoder_variant: {decoder_variant}')
         self.model_variant = model_variant
+        self.decoder_variant = decoder_variant
         self.mu_min = MU_NORM_MIN
         self.mu_max = MU_NORM_MAX
         self.bz_encoder = BzEncoder(signal_length=signal_length, latent_dim=latent_dim)
-        self.decoder = nn.Sequential(
-            nn.Linear(coord_feature_dim + latent_dim, 128),
-            nn.Tanh(),
-            nn.Linear(128, 128),
-            nn.Tanh(),
-            nn.Linear(128, 64),
-            nn.Tanh(),
-            nn.Linear(64, 1),
-        )
+        input_dim = coord_feature_dim + latent_dim
+        if decoder_variant == 'standard':
+            self.decoder = nn.Sequential(
+                nn.Linear(input_dim, 128),
+                nn.Tanh(),
+                nn.Linear(128, 128),
+                nn.Tanh(),
+                nn.Linear(128, 64),
+                nn.Tanh(),
+                nn.Linear(64, 1),
+            )
+        else:
+            self.decoder = nn.Sequential(
+                nn.Linear(input_dim, 256),
+                nn.SiLU(),
+                nn.Linear(256, 256),
+                nn.SiLU(),
+                nn.Linear(256, 128),
+                nn.SiLU(),
+                nn.Linear(128, 64),
+                nn.SiLU(),
+                nn.Linear(64, 1),
+            )
 
     def forward(self, bz_signal, coords):
         if coords.dim() == 2:
@@ -513,6 +536,7 @@ def load_checkpoint_model(checkpoint_path, signal_length, fallback_latent_dim, d
         checkpoint_args = checkpoint.get('args', {})
         latent_dim = int(checkpoint_args.get('latent_dim', fallback_latent_dim))
         model_variant = checkpoint_args.get('model_variant', 'baseline')
+        decoder_variant = checkpoint_args.get('decoder_variant', 'standard')
         signal_mean = checkpoint.get('signal_mean')
         signal_std = checkpoint.get('signal_std')
     else:
@@ -520,6 +544,7 @@ def load_checkpoint_model(checkpoint_path, signal_length, fallback_latent_dim, d
         checkpoint_args = {}
         latent_dim = fallback_latent_dim
         model_variant = 'baseline'
+        decoder_variant = 'standard'
         signal_mean = None
         signal_std = None
 
@@ -527,6 +552,7 @@ def load_checkpoint_model(checkpoint_path, signal_length, fallback_latent_dim, d
         signal_length=signal_length,
         latent_dim=latent_dim,
         model_variant=model_variant,
+        decoder_variant=decoder_variant,
     ).to(device)
     try:
         model.load_state_dict(state_dict)
@@ -608,6 +634,11 @@ def train_adam_tv(args=None):
                 f'Warning: --model-variant={args.model_variant} but checkpoint is '
                 f'{model.model_variant}, using checkpoint variant'
             )
+        if args.decoder_variant != model.decoder_variant:
+            print(
+                f'Warning: --decoder-variant={args.decoder_variant} but checkpoint is '
+                f'{model.decoder_variant}, using checkpoint variant'
+            )
         if signal_mean is None or signal_std is None:
             train_dataset_for_stats = MFLDataset(args.train_data)
             signal_mean = train_dataset_for_stats.signal_mean
@@ -619,6 +650,7 @@ def train_adam_tv(args=None):
             signal_length=train_dataset.signals.shape[1],
             latent_dim=args.latent_dim,
             model_variant=args.model_variant,
+            decoder_variant=args.decoder_variant,
         ).to(device)
 
     val_dataset = MFLDataset(
@@ -661,6 +693,7 @@ def train_adam_tv(args=None):
 
     print('Model: BzEncoder(signal -> latent) + Fourier(x,y) + MLP -> mu(x,y)')
     print(f'model_variant: {model.model_variant}')
+    print(f'decoder_variant: {model.decoder_variant}')
     if model.model_variant == 'calibrated_mu':
         print(f'calibrated_mu range: [{MU_NORM_MIN:.6f}, {MU_NORM_MAX:.6f}] normalized mu')
     print(f'Dataset: {args.dataset}')
@@ -979,6 +1012,7 @@ def parse_args():
     parser.add_argument('--lr', type=float, default=1e-3)
     parser.add_argument('--seed', type=int, default=42)
     parser.add_argument('--model-variant', choices=['baseline', 'calibrated_mu'], default='baseline')
+    parser.add_argument('--decoder-variant', choices=['standard', 'enhanced'], default='standard')
     parser.add_argument(
         '--loss-type',
         choices=['mse', 'weighted_mse', 'weighted_mse_dice', 'weighted_mse_dice_area'],

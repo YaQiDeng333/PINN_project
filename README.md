@@ -758,3 +758,35 @@ v4 test 整体指标：MSE=3.56734905e+04，MAE=6.02042826e+01，IoU=3.25826098e
 * 当前不切换全项目 baseline，推荐 baseline 仍以 `CURRENT_BASELINE.md` 为准。
 
 下一步建议进入第 7.20B：在固定 seed 和同一 loss 配置下测试轻量 decoder 增强，判断 decoder 表达能力是否能进一步改善 μ 校准和面积误差。
+
+---
+
+## 最新实验状态：第 7.20B 步
+
+第 7.20B 步已完成 `calibrated_mu` 轻量 decoder 增强实验。
+
+本轮新增：
+
+* `train_pinn.py` 支持 `--decoder-variant standard / enhanced`
+* 默认 `standard`
+* `standard` 保持旧 decoder：`128 / 128 / 64 + Tanh`
+* `enhanced` 使用轻量增强 decoder：`256 / 256 / 128 / 64 + SiLU`
+
+本轮没有修改 BzEncoder，没有修改 Fourier feature，没有加入新 loss，没有启用 physics_loss / L-BFGS，也没有修改标准评价指标定义。
+
+主要输出：
+
+* `checkpoints/best_model_v4_calibrated_mu_enhanced_decoder_seed42_w5_dice003_area004.pt`
+* `results/metrics/v4_calibrated_mu_decoder_ablation.csv`
+* `results/summaries/v4_calibrated_mu_decoder_ablation_summary.txt`
+* `results/loss_curves/loss_curve_v4_calibrated_mu_enhanced_decoder.png`
+* `results/previews/reconstruction_preview_v4_calibrated_mu_enhanced_decoder.png`
+
+关键结论：
+
+* enhanced decoder 让 defect_mu_mean 从约 361 降到约 333，defect_mu_median 从约 262 降到约 238，说明 decoder 容量会影响 μ 校准；
+* enhanced decoder 小幅改善 Dice、small polygon IoU / Dice、small polygon IoU=0 数量和 multi_defect center_error；
+* 但 area_error 从 0.6401 升到 0.9582，polygon area_error 从 0.7938 升到 1.4199，pred_area > true_area 从 182 / 200 增加到 189 / 200；
+* 当前不切换全项目 baseline，推荐 baseline 仍以 `CURRENT_BASELINE.md` 为准。
+
+下一步建议先做 seed repeat / 稳定性验证，确认 enhanced decoder 的校准收益和面积误差恶化是否稳定存在。

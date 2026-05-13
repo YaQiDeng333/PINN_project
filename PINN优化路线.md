@@ -624,3 +624,44 @@ test 指标：
 结论：`calibrated_mu` 证明输出参数化校准方向有效，但单独改变输出映射不足以解决面积系统性偏大。当前不切换全项目 baseline。
 
 当前下一步：第 7.20B，轻量 decoder 增强 A/B 实验。第 7.20B 应继续固定 seed=42，保持同一 loss 配置，不加入新 loss、physics_loss、L-BFGS 或数据增强。
+
+---
+
+## 第 7.20B 步：calibrated_mu 轻量 decoder 增强实验
+
+状态：已完成。
+
+目标：在第 7.20A `calibrated_mu` 输出参数化基础上，只增强 decoder 容量，验证 decoder 表达能力是否限制 μ 校准和 area_error 改善。
+
+本轮新增：
+
+* `train_pinn.py` 支持 `--decoder-variant standard / enhanced`；
+* 默认 `standard`，保持旧 decoder：`128 / 128 / 64 + Tanh`；
+* `enhanced` 使用 `256 / 256 / 128 / 64 + SiLU`；
+* BzEncoder、Fourier feature、`calibrated_mu` 输出映射和 loss 配置均保持不变；
+* `evaluate_pinn.py` 仅增加 `decoder_variant` 加载兼容和 summary 字段，标准指标定义不变。
+
+固定配置：
+
+* dataset = `v4_balanced_complex`
+* seed = 42
+* model_variant = `calibrated_mu`
+* loss_type = `weighted_mse_dice_area`
+* defect_weight = 5
+* lambda_dice = 0.03
+* lambda_area = 0.04
+* area_loss_type = `symmetric`
+* lambda_tv = 0
+* epochs = 100
+
+结果摘要：
+
+* standard decoder：IoU = 3.54232016e-01，Dice = 4.96098795e-01，area_error = 6.40109928e-01；
+* enhanced decoder：IoU = 3.53319625e-01，Dice = 4.99793934e-01，area_error = 9.58160563e-01；
+* 缺陷区预测 μ_r 均值从约 361 降到约 333，中位数从约 262 降到约 238；
+* small polygon `pred_area=0` 仍为 0 / 25，small polygon IoU=0 从 10 / 25 降到 7 / 25；
+* `pred_area > true_area` 数量从 182 / 200 增加到 189 / 200。
+
+结论：enhanced decoder 能进一步改善 μ 校准和部分 mask 指标，但显著恶化 area_error，特别是 polygon / medium polygon 面积误差。当前不切换全项目 baseline。
+
+当前下一步：建议做 seed repeat / 稳定性验证，确认该 trade-off 是否稳定，再决定是否继续结构优化。

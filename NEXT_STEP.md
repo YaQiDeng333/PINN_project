@@ -2,6 +2,43 @@ NEXT_STEP
 
 ## 当前最新状态（以此为准）
 
+第 7.20B 步：`calibrated_mu` 轻量 decoder 增强实验已完成。
+
+本轮在第 7.20A 的基础上只增强 decoder，不改 BzEncoder、不改 Fourier feature、不加入新 loss、不启用 physics_loss 或 L-BFGS。`train_pinn.py` 新增 `--decoder-variant standard / enhanced`，默认仍为 `standard`。
+
+关键结论：
+
+* enhanced decoder 结构为 `256 / 256 / 128 / 64 + SiLU`；
+* standard decoder 复用第 7.20A checkpoint：`checkpoints/best_model_v4_calibrated_mu_seed42_w5_dice003_area004.pt`；
+* enhanced decoder 新模型：`checkpoints/best_model_v4_calibrated_mu_enhanced_decoder_seed42_w5_dice003_area004.pt`；
+* enhanced decoder 让 defect_mu_mean 从约 361 降到约 333，defect_mu_median 从约 262 降到约 238；
+* enhanced decoder 小幅改善 Dice、small polygon IoU / Dice、small polygon IoU=0 数量和 multi_defect center_error；
+* 但 area_error 从 0.6401 升到 0.9582，polygon area_error 从 0.7938 升到 1.4199，pred_area > true_area 从 182 / 200 增加到 189 / 200；
+* 当前不切换 `CURRENT_BASELINE`。
+
+## 当前下一步建议
+
+进入第 7.20C 或第 7.21：seed repeat / 稳定性验证。
+
+建议优先固定同一配置做 repeat：
+
+* dataset = `v4_balanced_complex`
+* model_variant = `calibrated_mu`
+* decoder_variant = `standard` vs `enhanced`
+* loss_type = `weighted_mse_dice_area`
+* defect_weight = 5
+* lambda_dice = 0.03
+* lambda_area = 0.04
+* lambda_tv = 0
+* area_loss_type = `symmetric`
+* seeds 可选：42 / 123 / 2024
+
+目标是判断第 7.20B 中“μ 校准改善但 area_error 恶化”的 trade-off 是否稳定存在。暂不建议直接继续增大 decoder。
+
+---
+
+## 当前最新状态（以此为准）
+
 第 7.20A 步：`calibrated_mu` 输出 μ 参数化校准实验已完成。
 
 本轮已经在 `seed=42` 下完成 baseline 与 `calibrated_mu` A/B 对比。`calibrated_mu` 保持 BzEncoder 和 decoder 主体不变，只改变输出 μ 参数化，将 defect probability 映射到 `mu_norm ∈ [0.001, 1.0]`。
