@@ -87,7 +87,7 @@ def weak_form_loss(mu, phi_fixed, coords, test_grads=None, quad_weights=None):
         phi_fixed,
         coords,
         create_graph=False,
-        retain_graph=True,
+        retain_graph=False,
     ).detach()
 
     mu_values = mu.reshape(1, coords.shape[0], -1)
