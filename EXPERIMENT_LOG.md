@@ -1684,8 +1684,8 @@ validation set 选出的 adaptive rule：
 
 | decoder | A | B | T_small | T_medium | T_large |
 |---|---:|---:|---:|---:|---:|
-| standard | 9.654345 | 20.423356 | 450 | 350 | 350 |
-| enhanced | 15.232851 | 21.589796 | 350 | 300 | 300 |
+| standard | 9.654345 | 12.387713 | 450 | 350 | 350 |
+| enhanced | 9.897988 | 15.232851 | 350 | 350 | 300 |
 
 test set mean 对比：
 

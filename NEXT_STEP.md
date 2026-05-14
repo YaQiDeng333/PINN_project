@@ -14,8 +14,8 @@ NEXT_STEP
 
 validation set 选出的 adaptive rule：
 
-* standard：A=9.654345，B=20.423356，T_small=450，T_medium=350，T_large=350；
-* enhanced：A=15.232851，B=21.589796，T_small=350，T_medium=300，T_large=300。
+* standard：A=9.654345，B=12.387713，T_small=450，T_medium=350，T_large=350；
+* enhanced：A=9.897988，B=15.232851，T_small=350，T_medium=350，T_large=300。
 
 关键结论：
 
