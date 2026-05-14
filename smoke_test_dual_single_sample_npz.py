@@ -48,6 +48,8 @@ def _run_loop(npz_path):
         "0.0",
         "--lambda-mask-prior",
         "0.0",
+        "--lambda-mask-bce-prior",
+        "0.0",
     ]
     return subprocess.run(command, text=True, capture_output=True)
 
@@ -79,6 +81,8 @@ def _assert_success(result):
         "target_defect_fraction=",
         "dice_loss=",
         "lambda_mask_prior=",
+        "mask_bce_loss=",
+        "lambda_mask_bce_prior=",
     ]
     missing = [snippet for snippet in required_snippets if snippet not in result.stdout]
     if missing:

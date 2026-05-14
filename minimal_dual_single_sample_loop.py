@@ -11,6 +11,7 @@ from pathlib import Path
 
 import numpy as np
 import torch
+import torch.nn.functional as F
 
 from dual_network_data_utils import (
     build_dual_inputs,
@@ -157,6 +158,12 @@ def compute_mask_prior_loss(mu, mu_label, temperature, eps=1e-8):
     return dice_loss
 
 
+def compute_mask_bce_prior_loss(mu, mu_label, temperature):
+    soft_defect = torch.sigmoid((500.0 - mu) / temperature)
+    label_mask = (mu_label < 500.0).float()
+    return F.binary_cross_entropy(soft_defect, label_mask)
+
+
 def compute_centroid(coords, mask):
     flat_mask = mask.reshape(-1)
     if not torch.any(flat_mask):
@@ -279,6 +286,7 @@ def parse_args():
     parser.add_argument("--area-prior-temperature", type=float, default=50.0)
     parser.add_argument("--lambda-mask-prior", type=float, default=0.0)
     parser.add_argument("--mask-prior-temperature", type=float, default=50.0)
+    parser.add_argument("--lambda-mask-bce-prior", type=float, default=0.0)
     parser.add_argument("--diagnostics-dir", default=None)
     return parser.parse_args()
 
@@ -358,6 +366,7 @@ def main():
     final_diagnostics = None
     final_area_prior = None
     final_mask_prior = None
+    final_mask_bce_prior = None
     final_mu_pred = None
 
     for outer_idx in range(args.outer_steps):
@@ -425,8 +434,17 @@ def main():
                 mu_label,
                 args.mask_prior_temperature,
             )
+            # BCE mask prior is a supervised branch diagnostic for checking
+            # false-positive suppression. It is not part of the final
+            # unsupervised inversion design.
+            mask_bce_loss = compute_mask_bce_prior_loss(
+                mu,
+                mu_label,
+                args.mask_prior_temperature,
+            )
             loss_mu = loss_mu + args.lambda_area_prior * area_prior_loss
             loss_mu = loss_mu + args.lambda_mask_prior * dice_loss
+            loss_mu = loss_mu + args.lambda_mask_bce_prior * mask_bce_loss
             loss_mu.backward()
             mu_optimizer.step()
             final_loss_mu = loss_mu.detach()
@@ -454,6 +472,15 @@ def main():
                 "dice_loss": dice_loss.item(),
                 "lambda_mask_prior": args.lambda_mask_prior,
             }
+            mask_bce_loss = compute_mask_bce_prior_loss(
+                mu_pred,
+                mu_label,
+                args.mask_prior_temperature,
+            )
+            final_mask_bce_prior = {
+                "mask_bce_loss": mask_bce_loss.item(),
+                "lambda_mask_bce_prior": args.lambda_mask_bce_prior,
+            }
             print(
                 f"sample={args.sample_index} | "
                 f"outer={outer_idx + 1}/{args.outer_steps} | "
@@ -475,13 +502,18 @@ def main():
                 f"{final_area_prior['target_defect_fraction']:.6e} | "
                 f"dice_loss={final_mask_prior['dice_loss']:.6e} | "
                 f"lambda_mask_prior="
-                f"{final_mask_prior['lambda_mask_prior']:.6e}"
+                f"{final_mask_prior['lambda_mask_prior']:.6e} | "
+                f"mask_bce_loss="
+                f"{final_mask_bce_prior['mask_bce_loss']:.6e} | "
+                f"lambda_mask_bce_prior="
+                f"{final_mask_bce_prior['lambda_mask_bce_prior']:.6e}"
             )
 
     if (
         final_diagnostics is not None
         and final_area_prior is not None
         and final_mask_prior is not None
+        and final_mask_bce_prior is not None
     ):
         print(
             "final diagnostics summary | "
@@ -497,7 +529,11 @@ def main():
             f"{final_area_prior['target_defect_fraction']:.6e} | "
             f"dice_loss={final_mask_prior['dice_loss']:.6e} | "
             f"lambda_mask_prior="
-            f"{final_mask_prior['lambda_mask_prior']:.6e}"
+            f"{final_mask_prior['lambda_mask_prior']:.6e} | "
+            f"mask_bce_loss="
+            f"{final_mask_bce_prior['mask_bce_loss']:.6e} | "
+            f"lambda_mask_bce_prior="
+            f"{final_mask_bce_prior['lambda_mask_bce_prior']:.6e}"
         )
 
     if args.diagnostics_dir is not None and final_mu_pred is not None:
