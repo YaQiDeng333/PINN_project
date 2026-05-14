@@ -1,5 +1,36 @@
 # DUAL_NETWORK_STAGE_SUMMARY
 
+## S21 40x20 Adaptation Note
+
+S21 reused the S20 `40x20` dataset and tested three BCE adaptation settings:
+
+| run | avg defect_iou | avg defect_area_pred | avg mu_mse | avg mu_mae |
+| --- | ---: | ---: | ---: | ---: |
+| S20 BCE reference | 1.739786e-01 | 2.125500e+02 | 2.053370e+05 | 3.794331e+02 |
+| S21 bce_30steps_temp50 | 5.440697e-01 | 6.380000e+01 | 5.094976e+04 | 1.127006e+02 |
+| S21 bce_30steps_temp25 | 9.262554e-01 | 3.290000e+01 | 3.503892e+04 | 1.461498e+02 |
+| S21 bce_30steps_lambda3 | 9.053153e-01 | 3.280000e+01 | 1.327051e+04 | 6.555141e+01 |
+
+S21 shows that the weaker S20 `40x20` result was strongly affected by resolution adaptation. Increasing training steps improves the result, lowering `mask_prior_temperature` to `25.0` gives the best average IoU, and increasing `lambda_mask_bce_prior` to `3.0` gives the best `mu_mse/mu_mae`.
+
+This strengthens the semi-supervised dual-network route at higher resolution, but it does not change the core boundary: BCE mask prior uses `mu_label < 500`, so these are semi-supervised / diagnostic upper-bound results, not proof of unsupervised weak-form inversion success.
+
+## S22 40x20 Combo Adaptation Note
+
+S22 tested whether combining sharper mask temperature with stronger BCE weight can improve both IoU and `mu_mse/mu_mae`:
+
+| run | avg defect_iou | avg defect_area_pred | avg mu_mse | avg mu_mae |
+| --- | ---: | ---: | ---: | ---: |
+| S21 temp25 reference | 9.262554e-01 | 3.290000e+01 | 3.503892e+04 | 1.461498e+02 |
+| S21 lambda3 reference | 9.053153e-01 | 3.280000e+01 | 1.327051e+04 | 6.555141e+01 |
+| S22 combo_temp25_lambda3 | 9.177421e-01 | 3.260000e+01 | 3.814877e+04 | 1.629943e+02 |
+| S22 combo_temp20_lambda3 | 9.172025e-01 | 3.265000e+01 | 5.109617e+04 | 1.986578e+02 |
+| S22 combo_temp25_lambda5 | 9.139707e-01 | 3.230000e+01 | 4.181617e+04 | 1.753928e+02 |
+
+Among S22 combinations, `combo_temp25_lambda3` is the most balanced candidate. However, it does not dominate S21: `bce_30steps_temp25` still has the best average IoU, and `bce_30steps_lambda3` still has the best `mu_mse/mu_mae`.
+
+For 40x20 follow-up experiments, keep `bce_30steps_temp25` as the IoU-oriented default, keep `bce_30steps_lambda3` as the error-oriented default, and use `combo_temp25_lambda3` only when a single combined setting is required. This remains a semi-supervised / diagnostic upper-bound direction because BCE uses `mu_label < 500`; it is not evidence of pure unsupervised weak-form success.
+
 ## 1. 当前支线目标
 
 本支线探索 `phi-Net / mu-Net` 双网络反演方法：

@@ -466,6 +466,64 @@ Current judgment:
 - If this path continues, tune training steps, loss scale, temperature, or resolution adaptation before claiming success.
 - S20 is still semi-supervised / diagnostic upper bound, not unsupervised weak-form success.
 
+## Step S21: 40x20 BCE Adaptation Probe
+
+Purpose:
+
+- Adapt the S20 `40x20` setup by testing whether more training steps, sharper mask temperature, or stronger BCE weight improves the semi-supervised BCE runner.
+
+Configuration:
+
+- Reused S20 `40x20` train data.
+- Ran 20 samples with `center_mode=three`, `test_radius=5.0`, `lambda_area_prior=1.0`, and `lambda_mask_prior=1.0`.
+- Compared `bce_30steps_temp50`, `bce_30steps_temp25`, and `bce_30steps_lambda3`.
+
+Key results:
+
+| run | avg defect_iou | avg defect_area_pred | avg mu_mse | avg mu_mae |
+| --- | ---: | ---: | ---: | ---: |
+| S20 bce reference | 1.739786e-01 | 2.125500e+02 | 2.053370e+05 | 3.794331e+02 |
+| bce_30steps_temp50 | 5.440697e-01 | 6.380000e+01 | 5.094976e+04 | 1.127006e+02 |
+| bce_30steps_temp25 | 9.262554e-01 | 3.290000e+01 | 3.503892e+04 | 1.461498e+02 |
+| bce_30steps_lambda3 | 9.053153e-01 | 3.280000e+01 | 1.327051e+04 | 6.555141e+01 |
+
+Current judgment:
+
+- Increasing training from `20/20/20` to `30/30/30` already gives a large improvement at `40x20`.
+- A sharper mask prior (`mask_prior_temperature=25.0`) gives the best average IoU.
+- A stronger BCE weight (`lambda_mask_bce_prior=3.0`) gives the best `mu_mse` and `mu_mae`.
+- S21 suggests 40x20 semi-supervised behavior is sensitive to resolution adaptation rather than simply failing.
+- The result is still semi-supervised / diagnostic upper bound because BCE and mask priors use `mu_label < 500`.
+
+## Step S22: 40x20 BCE Combo Adaptation Probe
+
+Purpose:
+
+- Combine the useful S21 directions, sharper mask temperature and stronger BCE weight, to test whether one setting can improve both IoU and `mu_mse/mu_mae`.
+
+Configuration:
+
+- Reused S20 `40x20` train data.
+- Ran 20 samples with `outer_steps=30`, `phi_steps=30`, `mu_steps=30`, `center_mode=three`, and `test_radius=5.0`.
+- Compared `combo_temp25_lambda3`, `combo_temp20_lambda3`, and `combo_temp25_lambda5`.
+
+Key results:
+
+| run | avg defect_iou | avg defect_area_pred | avg mu_mse | avg mu_mae |
+| --- | ---: | ---: | ---: | ---: |
+| S21 temp25 reference | 9.262554e-01 | 3.290000e+01 | 3.503892e+04 | 1.461498e+02 |
+| S21 lambda3 reference | 9.053153e-01 | 3.280000e+01 | 1.327051e+04 | 6.555141e+01 |
+| combo_temp25_lambda3 | 9.177421e-01 | 3.260000e+01 | 3.814877e+04 | 1.629943e+02 |
+| combo_temp20_lambda3 | 9.172025e-01 | 3.265000e+01 | 5.109617e+04 | 1.986578e+02 |
+| combo_temp25_lambda5 | 9.139707e-01 | 3.230000e+01 | 4.181617e+04 | 1.753928e+02 |
+
+Current judgment:
+
+- Among S22 combo runs, `combo_temp25_lambda3` is the best candidate.
+- The combo settings do not dominate the best S21 single-axis settings: `temp25` remains better for IoU, while `lambda3` remains better for `mu_mse/mu_mae`.
+- For the next 40x20 experiments, use `combo_temp25_lambda3` only if one combined setting is needed; otherwise keep S21 `temp25` and `lambda3` as separate candidates.
+- The result remains semi-supervised / diagnostic upper bound, not unsupervised weak-form success.
+
 ## Current Boundary
 
 - Do not claim the branch has outperformed `main`.
