@@ -85,6 +85,20 @@ S26 shows that the weaker S25 result was strongly affected by insufficient adapt
 
 This does not change the core boundary: BCE mask prior uses `mu_label < 500`, so S26 remains a semi-supervised / diagnostic upper-bound result, not proof of unsupervised weak-form inversion success.
 
+## S27 Fresh 80x40 Candidate Validation Note
+
+S27 generated a fresh `80x40` / 20-sample dataset and compared `baseline`, `temp25_lambda3`, and `temp20_lambda3`:
+
+| run | avg defect_iou | avg defect_area_pred | avg mu_mse | avg mu_mae |
+| --- | ---: | ---: | ---: | ---: |
+| baseline | 1.115430e-01 | 1.115400e+03 | 3.065218e+05 | 3.569112e+02 |
+| temp25_lambda3 | 8.656310e-01 | 1.327500e+02 | 4.774737e+04 | 1.879750e+02 |
+| temp20_lambda3 | 8.693352e-01 | 1.322500e+02 | 6.314803e+04 | 2.269721e+02 |
+
+S27 validates that the S26 candidate configurations are not limited to the original S25 data. `temp20_lambda3` has the best average IoU and is the IoU-priority candidate. `temp25_lambda3` has much lower `mu_mse/mu_mae` with only slightly lower IoU, so it is the more balanced current `80x40` default candidate.
+
+The boundary remains unchanged: BCE mask prior uses `mu_label < 500`, so S27 is semi-supervised / diagnostic upper-bound evidence, not proof of unsupervised weak-form inversion success.
+
 ## 1. 当前支线目标
 
 本支线探索 `phi-Net / mu-Net` 双网络反演方法：

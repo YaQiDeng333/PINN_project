@@ -633,6 +633,34 @@ Current judgment:
 - `temp25_lambda3_30steps` is the most balanced 80x40 follow-up candidate because it is near the best IoU, has the lowest predicted area, and avoids the larger continuous-`mu` errors of `temp20_lambda3_30steps`.
 - The result remains semi-supervised / diagnostic upper bound because BCE and mask priors use `mu_label < 500`; it is not unsupervised weak-form success.
 
+## Step S27: Fresh 80x40 Candidate Validation
+
+Purpose:
+
+- Validate the S26 `80x40` candidate configurations on a fresh 20-sample dataset.
+
+Configuration:
+
+- Generated a new `80x40` dataset with 20 train samples.
+- Compared `baseline`, `temp25_lambda3`, and `temp20_lambda3`.
+- All runs used `outer_steps=30`, `phi_steps=30`, `mu_steps=30`, `center_mode=three`, and `test_radius=5.0`.
+
+Key results:
+
+| run | avg defect_iou | avg defect_area_pred | avg mu_mse | avg mu_mae |
+| --- | ---: | ---: | ---: | ---: |
+| baseline | 1.115430e-01 | 1.115400e+03 | 3.065218e+05 | 3.569112e+02 |
+| temp25_lambda3 | 8.656310e-01 | 1.327500e+02 | 4.774737e+04 | 1.879750e+02 |
+| temp20_lambda3 | 8.693352e-01 | 1.322500e+02 | 6.314803e+04 | 2.269721e+02 |
+
+Current judgment:
+
+- Both BCE candidates improve over baseline on all 20 samples.
+- `temp20_lambda3` is the IoU-priority candidate.
+- `temp25_lambda3` has clearly lower `mu_mse/mu_mae`, with only slightly lower IoU, and is the more balanced default candidate.
+- Weak samples remain in similar cases for both candidates, especially samples 2, 5, 14, 15, and 17.
+- The result remains semi-supervised / diagnostic upper bound because BCE and mask priors use `mu_label < 500`; it is not unsupervised weak-form success.
+
 ## Current Boundary
 
 - Do not claim the branch has outperformed `main`.
