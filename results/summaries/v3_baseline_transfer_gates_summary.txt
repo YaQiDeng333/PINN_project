@@ -4,7 +4,7 @@
 
 本轮只做 fast gate，用于判断 v4 阶段中看起来有价值的 loss / auxiliary 技巧是否能迁移到当前 v3_complex baseline。
 
-当前 baseline 不变，不扩展 3 seed，不继续调 `lambda_mask`、`lambda_dice`、`lambda_area`。
+当前 baseline 不变，不扩展 3 seed，不继续调 `lambda_mask`、`lambda_dice`、`lambda_area`，不继续把 v4 的 loss / aux / threshold 技巧迁移到 v3_complex baseline。
 
 ## CURRENT_BASELINE
 
@@ -111,4 +111,6 @@ IoU、Dice、center_error 改善，但 MSE、MAE、area_error 明显变差，尤
 
 `checkpoints/best_model_v3_complex_tv_sweep_2e-6.pt`
 
-baseline transfer gates 停止。不继续调 `lambda_mask`、`lambda_dice`、`lambda_area`，也不继续把 v4 的 loss / aux 技巧硬迁移到 v3_complex baseline。
+baseline transfer gates 停止。不继续调 `lambda_mask`、`lambda_dice`、`lambda_area`，也不继续把 v4 的 loss / aux / threshold 技巧硬迁移到 v3_complex baseline。
+
+v4 / aux / threshold / shape-aware transfer 线到此停止。后续主线转向 CURRENT_BASELINE failure-driven analysis。
