@@ -551,6 +551,33 @@ Current judgment:
 - No obvious failure sample was observed; the weakest case is still above IoU `0.67`.
 - The result remains semi-supervised / diagnostic upper bound because BCE and mask priors use `mu_label < 500`.
 
+## Step S24: 40x20 50-Sample Default Candidate Validation
+
+Purpose:
+
+- Validate whether the S23 IoU-priority default candidate `temp25_lambda1` remains stable on 50 fresh `40x20` samples.
+
+Configuration:
+
+- Generated a new `40x20` dataset with 50 train samples.
+- Compared baseline against `temp25_lambda1`.
+- Both runs used `outer_steps=30`, `phi_steps=30`, `mu_steps=30`, `center_mode=three`, and `test_radius=5.0`.
+
+Key results:
+
+| run | avg defect_iou | avg defect_area_pred | avg mu_mse | avg mu_mae |
+| --- | ---: | ---: | ---: | ---: |
+| baseline | 1.426606e-01 | 2.353600e+02 | 2.503184e+05 | 2.932973e+02 |
+| temp25_lambda1 | 9.203000e-01 | 3.340000e+01 | 3.598542e+04 | 1.498937e+02 |
+
+Current judgment:
+
+- `temp25_lambda1` improves IoU on all 50 samples and strongly reduces predicted defect area.
+- Three weak samples remain below IoU `0.7`: sample 11, sample 30, and sample 44.
+- `temp25_lambda1` is suitable as the current `40x20` IoU-priority default candidate.
+- S23's `temp50_lambda3` remains useful as the continuous-`mu` error-oriented comparison.
+- The result remains semi-supervised / diagnostic upper bound, not unsupervised weak-form success.
+
 ## Current Boundary
 
 - Do not claim the branch has outperformed `main`.

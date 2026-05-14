@@ -44,6 +44,19 @@ S23 reproduces the S21 pattern on new data: `temp25_lambda1` is the IoU-oriented
 
 This strengthens the 40x20 semi-supervised runner direction, but it still does not change the core boundary: BCE mask prior uses `mu_label < 500`, so these are semi-supervised / diagnostic upper-bound results, not evidence of pure unsupervised weak-form inversion success.
 
+## S24 40x20 50-Sample Default Validation Note
+
+S24 validated the S23 IoU-priority default candidate `temp25_lambda1` on a fresh `40x20` / 50-sample dataset:
+
+| run | avg defect_iou | avg defect_area_pred | avg mu_mse | avg mu_mae |
+| --- | ---: | ---: | ---: | ---: |
+| baseline | 1.426606e-01 | 2.353600e+02 | 2.503184e+05 | 2.932973e+02 |
+| temp25_lambda1 | 9.203000e-01 | 3.340000e+01 | 3.598542e+04 | 1.498937e+02 |
+
+`temp25_lambda1` improves IoU on all 50 samples and is suitable as the current `40x20` IoU-priority default candidate. Three weak samples remain below IoU `0.7`, so failure-case review is still useful. S23's `temp50_lambda3` remains the continuous-`mu` error-oriented comparison.
+
+This does not change the boundary: BCE mask prior uses `mu_label < 500`, so S24 is a semi-supervised / diagnostic upper-bound result, not proof of unsupervised weak-form inversion success.
+
 ## 1. 当前支线目标
 
 本支线探索 `phi-Net / mu-Net` 双网络反演方法：
