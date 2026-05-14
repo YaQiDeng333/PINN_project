@@ -19,7 +19,7 @@
 - single-sample loop 已跑通，能输出 `phi/mu` 闭环训练诊断；
 - `minimal_dual_single_sample_loop.py` 已支持 area prior、Dice mask prior、BCE mask prior 和 diagnostics 输出；
 - `train_dual_variational.py` 已从 skeleton 升级为小规模 runner，可对多个 sample 独立运行并输出 `metrics.csv`；
-- S17 已完成 10-sample runner 验证。
+- S17/S18 已完成 10/20-sample runner 验证。
 
 ## 3. 关键实验结论
 
@@ -37,7 +37,8 @@
 - S6 默认配置最终 `defect_area_pred=200`，`defect_area_label=11`，`defect_iou=0.055`；
 - S7/S8 area prior 能压低预测面积，但 IoU 改善有限，较强 area prior 甚至出现面积更准但定位失败；
 - S16 runner baseline 三样本平均 `defect_iou=9.287478e-02`，`defect_area_pred=64.0`；
-- S17 runner baseline 十样本平均 `defect_iou=1.145468e-01`，`defect_area_pred=62.8`。
+- S17 runner baseline 十样本平均 `defect_iou=1.145468e-01`，`defect_area_pred=62.8`；
+- S18 runner baseline 二十样本平均 `defect_iou=1.226982e-01`，`defect_area_pred=64.6`，`mu_mse=2.826850e+05`，`mu_mae=3.129512e+02`。
 
 ### label-informed centers
 
@@ -55,12 +56,13 @@ S11 使用 `mu_label` 的真实缺陷 centroid 构造 oracle centers：
 
 ### BCE mask prior
 
-S14-S17 表明 BCE mask prior 是当前最有效的局部监督信号：
+S14-S18 表明 BCE mask prior 是当前最有效的局部监督信号：
 
 - S14 单样本中，`lambda_mask_bce_prior=1.0` 将 `defect_area_pred` 从 66 降到 11，`defect_iou` 从 0.166667 提升到 1.0；
 - S15 三样本中，BCE 相比 baseline 稳定降低面积、提高 IoU、降低 `mu_mse/mu_mae`；
 - S16 runner 复现 S15 结论；
-- S17 十样本中，BCE 仍稳定优于 baseline。
+- S17 十样本中，BCE 仍稳定优于 baseline；
+- S18 二十样本中，BCE 继续稳定优于 baseline。
 
 S17 十样本平均：
 
@@ -68,6 +70,13 @@ S17 十样本平均：
 | --- | ---: | ---: | ---: | ---: |
 | baseline | 1.145468e-01 | 6.280000e+01 | 2.766025e+05 | 3.173523e+02 |
 | BCE | 8.425641e-01 | 7.800000e+00 | 1.319349e+04 | 6.156954e+01 |
+
+S18 二十样本平均：
+
+| run | avg defect_iou | avg defect_area_pred | avg mu_mse | avg mu_mae |
+| --- | ---: | ---: | ---: | ---: |
+| baseline | 1.226982e-01 | 6.460000e+01 | 2.826850e+05 | 3.129512e+02 |
+| BCE | 8.934921e-01 | 9.100000e+00 | 1.558897e+04 | 6.164804e+01 |
 
 但 BCE 使用 `mu_label < 500` 的真实 mask，因此它是半监督/诊断上界，不是无监督 weak-form 成功证明。
 
@@ -78,7 +87,8 @@ S17 十样本平均：
 1. 双网络 weak-form 框架可以工程上跑通；
 2. 仅靠当前 weak-form + area/TV 约束，缺陷定位能力不足；
 3. 加入 label mask 类局部监督后，结果显著改善；
-4. 因此下一阶段若继续，应转向半监督/弱监督方案，或重新设计无监督物理约束，而不是继续简单扫 radius、centers、area prior。
+4. S18 的 20-sample 结果进一步说明 BCE mask prior 稳定优于 baseline；
+5. 因此下一阶段若继续，应转向半监督/弱监督方案，或重新设计无监督物理约束，而不是继续简单扫 radius、centers、area prior。
 
 ## 5. 推荐下一阶段路线
 
@@ -87,6 +97,7 @@ S17 十样本平均：
 理由：
 
 - 当前实验已经证明 label mask prior 是最有效信号；
+- S18 已在 20 个样本上验证 BCE mask prior 稳定优于 baseline；
 - 继续纯无监督 weak-form 调参收益低；
 - 半监督路线更容易形成可展示结果；
 - 可以作为主线之外的结构探索，而不干扰 `main`。
@@ -95,7 +106,7 @@ S17 十样本平均：
 
 1. 固定 `train_dual_variational.py` runner；
 2. 使用 BCE / Dice mask prior 作为可选半监督项；
-3. 在 20-50 个小样本上测试；
+3. 在 20-50 个小样本上继续测试，优先检查 S18 中的弱样本而不是继续扫 radius/centers；
 4. 输出 `metrics.csv`；
 5. 后续再考虑可视化和论文方法表述。
 
@@ -109,26 +120,14 @@ S17 十样本平均：
 
 ## 7. 下一步最小执行建议
 
-S18：20-sample semi-supervised runner probe。
+S19：semi-supervised runner consolidation / failure-sample review。
 
 目标：
 
-用 `train_dual_variational.py` 在 20 个样本上比较：
+在 S18 已完成 20-sample 验证的基础上，不再继续单纯扫描 `test_radius`、`center_mode` 或 `area prior`，而是沿半监督双网络支线整理和验证：
 
-- baseline: `weak-form + area + Dice`
-- semi-supervised: `baseline + BCE mask prior`
-
-评价：
-
-- avg IoU；
-- avg `defect_area_pred`；
-- avg `mu_mse / mu_mae`；
-- failure samples。
-
-预期产物：
-
-- `experiments/dual_network/S18_20sample_semisupervised_probe/`
-- `metrics.csv`
-- `summary.md`
-- 更新 `DUAL_NETWORK_EXPERIMENT_LOG.md`
-
+- 复查 S18 中 IoU 相对较弱的样本；
+- 继续比较 baseline: `weak-form + area + Dice` 与 semi-supervised: `baseline + BCE mask prior`；
+- 必要时扩展到 20-50 个小样本；
+- 记录 avg IoU、avg `defect_area_pred`、avg `mu_mse / mu_mae` 和 failure samples；
+- 明确所有 BCE mask prior 结果都是半监督/诊断上界，不是无监督 weak-form 反演成功。
