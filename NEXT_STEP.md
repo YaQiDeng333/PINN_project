@@ -2,35 +2,23 @@ NEXT_STEP
 
 ## 当前最新状态（以此为准）
 
-第 7.23 步：`calibrated_mu` adaptive threshold calibration 已完成。
+第 7.24 步：`calibrated_mu` decoder + threshold calibration 阶段性 consolidation 已完成。
 
-本轮是 evaluation-level adaptive threshold calibration，不重新训练、不修改模型结构、不修改 `CURRENT_BASELINE`。规则只使用 default threshold=500 下的 predicted area 分段选择 threshold，不使用 true area。
+本轮只做阶段性文档收尾，不训练、不评估、不修改模型结构、不修改 `CURRENT_BASELINE`。
 
-对比方法：
+阶段事实：
 
-* default threshold=500；
-* global calibrated threshold：standard=400，enhanced=350；
-* adaptive threshold：根据 default `pred_area` 分段选择 threshold。
-
-validation set 选出的 adaptive rule：
-
-* standard：A=9.654345，B=12.387713，T_small=450，T_medium=350，T_large=350；
-* enhanced：A=9.897988，B=15.232851，T_small=350，T_medium=350，T_large=300。
-
-关键结论：
-
-* standard adaptive：test area_error 从 default 0.829989 降到 0.474476，低于 global 0.513358；IoU/Dice 为 0.347960 / 0.485609；
-* enhanced adaptive：test area_error 从 default 0.953397 降到 0.360101，低于 global 0.416337；IoU/Dice 为 0.350185 / 0.490040；
-* adaptive 仍能明显降低 area_error，但 IoU / Dice 比 global threshold 更低；
-* standard adaptive 比 standard global 更少伤害 small polygon：small pred_area=0 从 5.333 降到 3.000，small IoU=0 从 14.000 降到 12.667；
-* enhanced adaptive 对 small polygon 的保护与 enhanced global 基本相同：small IoU=0 = 9.667，small pred_area=0 = 0.333；
+* enhanced decoder 稳定改善 MAE、IoU/Dice、小 polygon 漏检和缺陷区 μ 校准；
+* enhanced decoder 也稳定带来更高 MSE、default threshold 下更严重 area_error 和面积高估；
+* global threshold calibration 能显著降低 area_error 和 `pred_area>true_area`，但会降低 Dice，并加重 small polygon IoU=0 / small pred_area=0 风险；
+* adaptive threshold 能进一步降低 area_error 和 `pred_area>true_area`，但不全面优于 global threshold，代价是 IoU/Dice 进一步下降；
+* 当前没有结果足以更新 `CURRENT_BASELINE`；
+* 停止继续做更多 threshold trick。
 * 当前不切换 `CURRENT_BASELINE`。
 
 ## 当前下一步
 
-第 7.23 不用于更新 baseline，只用于评估层面的 adaptive threshold calibration 诊断。
-
-adaptive threshold 作为 evaluation-level calibration 记录；是否作为后续候选由主线对话决定。
+进入下一阶段前，先由主线对话重新定义实验包、接受条件和停止条件，不再从当前副作用继续追加 threshold trick。
 
 ---
 

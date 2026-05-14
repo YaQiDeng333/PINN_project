@@ -770,3 +770,45 @@ test set 结果摘要：
 * enhanced adaptive：area_error = 0.360101，IoU / Dice = 0.350185 / 0.490040。
 
 结论：adaptive threshold 能继续降低 area_error，但相比 global threshold 会进一步牺牲 IoU / Dice。standard adaptive 比 standard global 更少伤害 small polygon；enhanced adaptive 与 enhanced global 的 small polygon 指标基本相同。当前仍不切换 `CURRENT_BASELINE`。adaptive threshold 作为 evaluation-level calibration 记录。
+
+---
+
+## 第 7.24 步：calibrated_mu decoder + threshold calibration 阶段性 consolidation
+
+状态：已完成。
+
+目标：对第 7.20B 到第 7.23 的 calibrated_mu decoder 与 threshold calibration 结果做阶段性归纳。本阶段只做文档收尾，不训练、不评估、不修改 `CURRENT_BASELINE`。
+
+阶段归类：
+
+* `calibrated_mu + enhanced decoder`：有价值但不进入 baseline 的结构消融；
+* global / adaptive threshold calibration：有价值但不进入 baseline 的 evaluation-level calibration；
+* 当前没有结果足以更新 `CURRENT_BASELINE`。
+
+enhanced decoder 的收益：
+
+* 稳定改善 MAE；
+* 在多 seed mean 上小幅改善 IoU / Dice；
+* 减少 small polygon IoU=0 和 small `pred_area=0`；
+* 降低 defect_mu_mean / defect_mu_median，说明缺陷区 μ 校准方向更低。
+
+enhanced decoder 的副作用：
+
+* MSE 更高；
+* default threshold 下 area_error 更高；
+* default threshold 下 `pred_area>true_area` 更多；
+* 面积高估问题比 standard decoder 更明显。
+
+threshold calibration 的收益：
+
+* global threshold calibration 显著降低 area_error 和 `pred_area>true_area`；
+* adaptive threshold calibration 进一步降低 area_error 和 `pred_area>true_area`；
+* enhanced decoder 在 threshold calibration 后的面积高估大幅缓解。
+
+threshold calibration 的代价：
+
+* Dice 下降；
+* small polygon IoU=0 和 small `pred_area=0` 风险上升；
+* adaptive threshold 的 area_error 低于 global threshold，但 IoU / Dice 进一步下降，因此不全面优于 global threshold。
+
+结论：calibrated_mu enhanced decoder 与 threshold calibration 这条线已经说明了主要 trade-off。后续不再沿着 threshold trick 继续修补；进入下一阶段前，应由主线对话重新定义实验包、接受条件和停止条件。
