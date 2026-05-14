@@ -578,6 +578,33 @@ Current judgment:
 - S23's `temp50_lambda3` remains useful as the continuous-`mu` error-oriented comparison.
 - The result remains semi-supervised / diagnostic upper bound, not unsupervised weak-form success.
 
+## Step S25: 80x40 High-Resolution Feasibility Probe
+
+Purpose:
+
+- Test whether the `40x20` IoU-priority default candidate `temp25_lambda1` still improves over baseline at `80x40`.
+
+Configuration:
+
+- Generated a new `80x40` dataset with 10 train samples.
+- Compared baseline against `temp25_lambda1`.
+- Both runs used `outer_steps=20`, `phi_steps=20`, `mu_steps=20`, `center_mode=three`, and `test_radius=5.0`.
+
+Key results:
+
+| run | avg defect_iou | avg defect_area_pred | avg mu_mse | avg mu_mae |
+| --- | ---: | ---: | ---: | ---: |
+| baseline | 6.824286e-02 | 1.418300e+03 | 3.996649e+05 | 4.761472e+02 |
+| temp25_lambda1 | 5.102481e-01 | 2.611000e+02 | 1.519206e+05 | 3.708853e+02 |
+
+Current judgment:
+
+- `temp25_lambda1` improves IoU on all 10 samples and substantially reduces over-expanded predicted area.
+- Absolute IoU is much weaker than S24 `40x20`; samples 6 and 9 remain weak.
+- S25 shows a high-resolution semi-supervised improvement trend, but not stable `80x40` performance.
+- If continuing at `80x40`, tune training steps, `test_radius`, center layout, mask temperature, BCE weight, or network capacity.
+- The result remains semi-supervised / diagnostic upper bound, not unsupervised weak-form success.
+
 ## Current Boundary
 
 - Do not claim the branch has outperformed `main`.

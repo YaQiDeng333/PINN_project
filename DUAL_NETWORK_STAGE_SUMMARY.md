@@ -57,6 +57,19 @@ S24 validated the S23 IoU-priority default candidate `temp25_lambda1` on a fresh
 
 This does not change the boundary: BCE mask prior uses `mu_label < 500`, so S24 is a semi-supervised / diagnostic upper-bound result, not proof of unsupervised weak-form inversion success.
 
+## S25 80x40 High-Resolution Feasibility Note
+
+S25 tested `temp25_lambda1` on a new `80x40` / 10-sample dataset with `20/20/20` training steps:
+
+| run | avg defect_iou | avg defect_area_pred | avg mu_mse | avg mu_mae |
+| --- | ---: | ---: | ---: | ---: |
+| baseline | 6.824286e-02 | 1.418300e+03 | 3.996649e+05 | 4.761472e+02 |
+| temp25_lambda1 | 5.102481e-01 | 2.611000e+02 | 1.519206e+05 | 3.708853e+02 |
+
+`temp25_lambda1` improves IoU on all 10 samples and reduces predicted defect area, so the semi-supervised BCE upper-bound trend persists at `80x40`. However, absolute IoU is much weaker than S24 `40x20`, with weak samples at sample 6 and sample 9.
+
+This indicates high-resolution feasibility, not high-resolution stability. If the branch continues at `80x40`, it needs resolution-specific adaptation such as more training steps, adjusted `test_radius`, center layout, mask temperature, BCE weight, or network capacity. The boundary remains unchanged: this is semi-supervised / diagnostic upper-bound evidence, not unsupervised weak-form success.
+
 ## 1. 当前支线目标
 
 本支线探索 `phi-Net / mu-Net` 双网络反演方法：
