@@ -31,6 +31,19 @@ Among S22 combinations, `combo_temp25_lambda3` is the most balanced candidate. H
 
 For 40x20 follow-up experiments, keep `bce_30steps_temp25` as the IoU-oriented default, keep `bce_30steps_lambda3` as the error-oriented default, and use `combo_temp25_lambda3` only when a single combined setting is required. This remains a semi-supervised / diagnostic upper-bound direction because BCE uses `mu_label < 500`; it is not evidence of pure unsupervised weak-form success.
 
+## S23 Fresh 40x20 Candidate Validation Note
+
+S23 generated a fresh `40x20` / 20-sample dataset and compared the two S21 candidate settings:
+
+| run | avg defect_iou | avg defect_area_pred | avg mu_mse | avg mu_mae |
+| --- | ---: | ---: | ---: | ---: |
+| temp25_lambda1 | 9.560439e-01 | 3.555000e+01 | 3.528870e+04 | 1.481365e+02 |
+| temp50_lambda3 | 9.283914e-01 | 3.530000e+01 | 1.459990e+04 | 7.058641e+01 |
+
+S23 reproduces the S21 pattern on new data: `temp25_lambda1` is the IoU-oriented 40x20 default candidate, while `temp50_lambda3` remains the continuous-`mu` error-oriented candidate. No obvious failure sample was observed.
+
+This strengthens the 40x20 semi-supervised runner direction, but it still does not change the core boundary: BCE mask prior uses `mu_label < 500`, so these are semi-supervised / diagnostic upper-bound results, not evidence of pure unsupervised weak-form inversion success.
+
 ## 1. 当前支线目标
 
 本支线探索 `phi-Net / mu-Net` 双网络反演方法：

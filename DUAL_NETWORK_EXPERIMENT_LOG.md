@@ -524,6 +524,33 @@ Current judgment:
 - For the next 40x20 experiments, use `combo_temp25_lambda3` only if one combined setting is needed; otherwise keep S21 `temp25` and `lambda3` as separate candidates.
 - The result remains semi-supervised / diagnostic upper bound, not unsupervised weak-form success.
 
+## Step S23: Fresh 40x20 Candidate Validation
+
+Purpose:
+
+- Validate the two S21 candidate settings on a fresh `40x20` / 20-sample dataset.
+
+Configuration:
+
+- Generated a new `40x20` dataset with 20 train samples.
+- Compared `temp25_lambda1` and `temp50_lambda3`.
+- Both runs used `outer_steps=30`, `phi_steps=30`, `mu_steps=30`, `center_mode=three`, and `test_radius=5.0`.
+
+Key results:
+
+| run | avg defect_iou | avg defect_area_pred | avg mu_mse | avg mu_mae |
+| --- | ---: | ---: | ---: | ---: |
+| temp25_lambda1 | 9.560439e-01 | 3.555000e+01 | 3.528870e+04 | 1.481365e+02 |
+| temp50_lambda3 | 9.283914e-01 | 3.530000e+01 | 1.459990e+04 | 7.058641e+01 |
+
+Current judgment:
+
+- S23 reproduces the S21 pattern on fresh data.
+- `temp25_lambda1` is better for IoU and is the 40x20 IoU-oriented default candidate.
+- `temp50_lambda3` is better for `mu_mse/mu_mae` and remains the continuous-material-error candidate.
+- No obvious failure sample was observed; the weakest case is still above IoU `0.67`.
+- The result remains semi-supervised / diagnostic upper bound because BCE and mask priors use `mu_label < 500`.
+
 ## Current Boundary
 
 - Do not claim the branch has outperformed `main`.
