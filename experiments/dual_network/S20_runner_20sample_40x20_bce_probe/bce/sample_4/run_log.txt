@@ -1,0 +1,21 @@
+runner config | sample=4 | center_mode=three | test_centers=3 | test_radius=5.000000e+00 | lambda_area_prior=1.000000e+00 | lambda_mask_prior=1.000000e+00 | lambda_mask_bce_prior=1.000000e+00
+sample=4 | outer=1/20 | loss_phi=2.243217e+00 | loss_mu=2.335653e+00 | mu_mse=1.911160e+05 | mu_mae=4.360791e+02 | defect_area_pred=5 | defect_area_label=12 | defect_iou=0.000000e+00
+sample=4 | outer=2/20 | loss_phi=2.218402e+00 | loss_mu=1.220168e+00 | mu_mse=1.414561e+05 | mu_mae=3.724319e+02 | defect_area_pred=0 | defect_area_label=12 | defect_iou=0.000000e+00
+sample=4 | outer=3/20 | loss_phi=2.211685e+00 | loss_mu=1.104360e+00 | mu_mse=1.217431e+05 | mu_mae=3.438204e+02 | defect_area_pred=0 | defect_area_label=12 | defect_iou=0.000000e+00
+sample=4 | outer=4/20 | loss_phi=2.209382e+00 | loss_mu=1.053258e+00 | mu_mse=1.172211e+05 | mu_mae=3.356537e+02 | defect_area_pred=0 | defect_area_label=12 | defect_iou=0.000000e+00
+sample=4 | outer=5/20 | loss_phi=2.208070e+00 | loss_mu=1.042985e+00 | mu_mse=1.047784e+05 | mu_mae=3.141628e+02 | defect_area_pred=0 | defect_area_label=12 | defect_iou=0.000000e+00
+sample=4 | outer=6/20 | loss_phi=2.207232e+00 | loss_mu=1.049304e+00 | mu_mse=9.751172e+04 | mu_mae=3.011290e+02 | defect_area_pred=0 | defect_area_label=12 | defect_iou=0.000000e+00
+sample=4 | outer=7/20 | loss_phi=2.206422e+00 | loss_mu=1.057703e+00 | mu_mse=9.361428e+04 | mu_mae=2.941547e+02 | defect_area_pred=8 | defect_area_label=12 | defect_iou=1.111111e-01
+sample=4 | outer=8/20 | loss_phi=2.205577e+00 | loss_mu=1.073611e+00 | mu_mse=8.852795e+04 | mu_mae=2.845691e+02 | defect_area_pred=18 | defect_area_label=12 | defect_iou=2.500000e-01
+sample=4 | outer=9/20 | loss_phi=2.204746e+00 | loss_mu=1.109117e+00 | mu_mse=8.023958e+04 | mu_mae=2.676290e+02 | defect_area_pred=20 | defect_area_label=12 | defect_iou=2.800000e-01
+sample=4 | outer=10/20 | loss_phi=2.203992e+00 | loss_mu=1.176422e+00 | mu_mse=7.536755e+04 | mu_mae=2.556891e+02 | defect_area_pred=22 | defect_area_label=12 | defect_iou=3.076923e-01
+sample=4 | outer=11/20 | loss_phi=2.203028e+00 | loss_mu=1.288642e+00 | mu_mse=7.469459e+04 | mu_mae=2.508577e+02 | defect_area_pred=25 | defect_area_label=12 | defect_iou=3.703704e-01
+sample=4 | outer=12/20 | loss_phi=2.201704e+00 | loss_mu=1.461194e+00 | mu_mse=7.648954e+04 | mu_mae=2.514823e+02 | defect_area_pred=30 | defect_area_label=12 | defect_iou=3.548387e-01
+sample=4 | outer=13/20 | loss_phi=2.199918e+00 | loss_mu=1.693426e+00 | mu_mse=8.527676e+04 | mu_mae=2.658212e+02 | defect_area_pred=33 | defect_area_label=12 | defect_iou=3.235294e-01
+sample=4 | outer=14/20 | loss_phi=2.197077e+00 | loss_mu=1.977059e+00 | mu_mse=1.008370e+05 | mu_mae=2.918065e+02 | defect_area_pred=41 | defect_area_label=12 | defect_iou=2.619048e-01
+sample=4 | outer=15/20 | loss_phi=2.192597e+00 | loss_mu=2.219198e+00 | mu_mse=1.171370e+05 | mu_mae=3.179341e+02 | defect_area_pred=65 | defect_area_label=12 | defect_iou=1.846154e-01
+sample=4 | outer=16/20 | loss_phi=2.188331e+00 | loss_mu=2.431586e+00 | mu_mse=1.340244e+05 | mu_mae=3.405938e+02 | defect_area_pred=162 | defect_area_label=12 | defect_iou=7.407407e-02
+sample=4 | outer=17/20 | loss_phi=2.184345e+00 | loss_mu=2.667625e+00 | mu_mse=1.513298e+05 | mu_mae=3.610497e+02 | defect_area_pred=202 | defect_area_label=12 | defect_iou=5.940594e-02
+sample=4 | outer=18/20 | loss_phi=2.180081e+00 | loss_mu=2.861375e+00 | mu_mse=1.694451e+05 | mu_mae=3.769266e+02 | defect_area_pred=215 | defect_area_label=12 | defect_iou=5.581395e-02
+sample=4 | outer=19/20 | loss_phi=2.174748e+00 | loss_mu=3.065353e+00 | mu_mse=1.934922e+05 | mu_mae=3.932720e+02 | defect_area_pred=222 | defect_area_label=12 | defect_iou=5.405406e-02
+sample=4 | outer=20/20 | loss_phi=2.166618e+00 | loss_mu=3.277854e+00 | mu_mse=2.191948e+05 | mu_mae=4.069466e+02 | defect_area_pred=232 | defect_area_label=12 | defect_iou=5.172414e-02
