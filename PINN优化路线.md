@@ -737,3 +737,36 @@ test set 结果摘要：
 * small polygon IoU=0 和 small `pred_area=0` 略有恶化。
 
 结论：threshold calibration 能明显缓解 area_error，且没有明显牺牲 overall IoU / Dice。enhanced decoder 在 calibrated threshold 下的面积高估大幅缓解，但本轮仍不切换 `CURRENT_BASELINE`。如果后续接受 evaluation-level calibration，可继续做 area calibration / threshold calibration / post-processing；如果不接受后处理阈值校准，enhanced decoder 仍只作为结构消融记录。
+
+---
+
+## 第 7.23 步：calibrated_mu adaptive threshold calibration
+
+状态：已完成。
+
+目标：缓解第 7.22 中 global threshold 对 small polygon 的副作用，测试是否可以只根据 default threshold=500 下的 predicted area 做 sample-wise adaptive threshold calibration。
+
+本轮设置：
+
+* 不重新训练；
+* 不修改 `train_pinn.py`；
+* 不修改 `CURRENT_BASELINE`；
+* validation set 用于搜索 rule；
+* test set 只用于最终验证；
+* adaptive rule 只能使用 default `pred_area`，不能使用 true area。
+
+validation 选出的 adaptive rule：
+
+* standard：A=9.654345，B=20.423356，T_small=450，T_medium=350，T_large=350；
+* enhanced：A=15.232851，B=21.589796，T_small=350，T_medium=300，T_large=300。
+
+test set 结果摘要：
+
+* standard default：area_error = 0.829989，IoU / Dice = 0.348739 / 0.491443；
+* standard global：area_error = 0.513358，IoU / Dice = 0.350794 / 0.488918；
+* standard adaptive：area_error = 0.474476，IoU / Dice = 0.347960 / 0.485609；
+* enhanced default：area_error = 0.953397，IoU / Dice = 0.354685 / 0.500730；
+* enhanced global：area_error = 0.416337，IoU / Dice = 0.355723 / 0.496510；
+* enhanced adaptive：area_error = 0.360101，IoU / Dice = 0.350185 / 0.490040。
+
+结论：adaptive threshold 能继续降低 area_error，但相比 global threshold 会进一步牺牲 IoU / Dice。standard adaptive 比 standard global 更少伤害 small polygon；enhanced adaptive 与 enhanced global 的 small polygon 指标基本相同。当前仍不切换 `CURRENT_BASELINE`。adaptive threshold 作为 evaluation-level calibration 记录。

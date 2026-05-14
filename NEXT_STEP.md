@@ -2,37 +2,35 @@ NEXT_STEP
 
 ## 当前最新状态（以此为准）
 
-第 7.22 步：`calibrated_mu` decoder threshold calibration 已完成。
+第 7.23 步：`calibrated_mu` adaptive threshold calibration 已完成。
 
-本轮是 evaluation-level threshold calibration，不重新训练、不修改模型结构、不修改 `CURRENT_BASELINE`，只对第 7.21 的 6 个 calibrated_mu standard / enhanced decoder checkpoint 做 validation threshold sweep，并在 test set 上验证推荐 threshold。
+本轮是 evaluation-level adaptive threshold calibration，不重新训练、不修改模型结构、不修改 `CURRENT_BASELINE`。规则只使用 default threshold=500 下的 predicted area 分段选择 threshold，不使用 true area。
 
-实验对象：
+对比方法：
 
-* standard decoder：seed = 42 / 123 / 2026
-* enhanced decoder：seed = 42 / 123 / 2026
-* validation set 用于选择 threshold
-* test set 只用于最终验证
-* threshold 使用 raw μ_r：300 / 350 / 400 / 450 / 500 / 550 / 600 / 650 / 700
+* default threshold=500；
+* global calibrated threshold：standard=400，enhanced=350；
+* adaptive threshold：根据 default `pred_area` 分段选择 threshold。
 
-推荐 threshold：
+validation set 选出的 adaptive rule：
 
-* standard decoder：400
-* enhanced decoder：350
+* standard：A=9.654345，B=20.423356，T_small=450，T_medium=350，T_large=350；
+* enhanced：A=15.232851，B=21.589796，T_small=350，T_medium=300，T_large=300。
 
 关键结论：
 
-* standard threshold 500 -> 400：test mean area_error 从 0.829989 降到 0.513358，IoU 从 0.348739 升到 0.350794，Dice 从 0.491443 小幅降到 0.488918；
-* enhanced threshold 500 -> 350：test mean area_error 从 0.953397 降到 0.416337，IoU 从 0.354685 升到 0.355723，Dice 从 0.500730 小幅降到 0.496510；
-* enhanced `pred_area>true_area` 从 190.0 降到 146.67，面积高估明显缓解；
-* threshold calibration 没有明显牺牲 overall IoU / Dice；
-* small polygon IoU=0 和 small `pred_area=0` 有轻微恶化，需要后续继续监控；
+* standard adaptive：test area_error 从 default 0.829989 降到 0.474476，低于 global 0.513358；IoU/Dice 为 0.347960 / 0.485609；
+* enhanced adaptive：test area_error 从 default 0.953397 降到 0.360101，低于 global 0.416337；IoU/Dice 为 0.350185 / 0.490040；
+* adaptive 仍能明显降低 area_error，但 IoU / Dice 比 global threshold 更低；
+* standard adaptive 比 standard global 更少伤害 small polygon：small pred_area=0 从 5.333 降到 3.000，small IoU=0 从 14.000 降到 12.667；
+* enhanced adaptive 对 small polygon 的保护与 enhanced global 基本相同：small IoU=0 = 9.667，small pred_area=0 = 0.333；
 * 当前不切换 `CURRENT_BASELINE`。
 
 ## 当前下一步
 
-第 7.22 不用于更新 baseline，只用于评估层面的阈值校准诊断。
+第 7.23 不用于更新 baseline，只用于评估层面的 adaptive threshold calibration 诊断。
 
-如果后续接受 evaluation-level calibration，可以继续围绕 area calibration / threshold calibration / post-processing 做验证；如果不接受后处理阈值校准，enhanced decoder 仍只作为结构消融记录。后续方向由主线对话决定。
+adaptive threshold 作为 evaluation-level calibration 记录；是否作为后续候选由主线对话决定。
 
 ---
 

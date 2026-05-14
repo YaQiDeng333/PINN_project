@@ -1,0 +1,61 @@
+# ? 7.23 calibrated_mu adaptive threshold calibration ??
+
+## ????
+
+? 7.23 ? evaluation-level adaptive threshold calibration???????????? checkpoint???? `train_pinn.py`???? `CURRENT_BASELINE`?
+
+adaptive rule ???????? default threshold=500 ?? predicted area???? true area?validation set ???? rule?test set ????????
+
+???????
+
+1. default threshold=500?
+2. global calibrated threshold?standard=400?enhanced=350?
+3. adaptive threshold rule??? default `pred_area` ???? threshold?
+
+MSE / MAE ??? checkpoint ??? threshold ???????????????????? hard mask threshold?
+
+## ??? adaptive rule
+
+| decoder | A | B | T_small | T_medium | T_large | selection note |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| standard | 9.654345 | 12.387713 | 450 | 350 | 350 | selected on validation default_pred_area distribution; inference uses only default threshold=500 pred_area |
+| enhanced | 9.897988 | 15.232851 | 350 | 350 | 300 | selected on validation default_pred_area distribution; inference uses only default threshold=500 pred_area |
+
+## validation ???
+
+| split | decoder | method | MSE | MAE | IoU | Dice | area_error | center_error | small IoU=0 | small pred_area=0 | pred_area>true_area |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| val | standard | default | 3.129423e+04 | 63.289861 | 0.354903 | 0.499413 | 0.809691 | 1.075696 | 11.000000 | 2.333333 | 180.333333 |
+| val | standard | global | 3.129423e+04 | 63.289861 | 0.355240 | 0.495062 | 0.502733 | 1.094895 | 13.666667 | 4.666667 | 147.000000 |
+| val | standard | adaptive | 3.129423e+04 | 63.289861 | 0.354983 | 0.494688 | 0.458020 | 1.115539 | 12.000000 | 2.666667 | 138.000000 |
+| val | enhanced | default | 3.191375e+04 | 57.474284 | 0.363397 | 0.511301 | 0.953240 | 1.044484 | 6.000000 | 0.000000 | 189.333333 |
+| val | enhanced | global | 3.191375e+04 | 57.474284 | 0.366937 | 0.508529 | 0.419579 | 1.065445 | 8.333333 | 0.333333 | 142.666667 |
+| val | enhanced | adaptive | 3.191375e+04 | 57.474284 | 0.361501 | 0.502262 | 0.357907 | 1.075385 | 8.333333 | 0.333333 | 125.333333 |
+
+## test ???
+
+| split | decoder | method | MSE | MAE | IoU | Dice | area_error | center_error | small IoU=0 | small pred_area=0 | pred_area>true_area |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| test | standard | default | 3.177953e+04 | 64.071944 | 0.348739 | 0.491443 | 0.829989 | 1.129777 | 11.000000 | 1.333333 | 182.333333 |
+| test | standard | global | 3.177953e+04 | 64.071944 | 0.350794 | 0.488918 | 0.513358 | 1.139972 | 14.000000 | 5.333333 | 151.000000 |
+| test | standard | adaptive | 3.177953e+04 | 64.071944 | 0.347960 | 0.485609 | 0.474476 | 1.157978 | 12.666667 | 3.000000 | 143.000000 |
+| test | enhanced | default | 3.242061e+04 | 57.576270 | 0.354685 | 0.500730 | 0.953397 | 1.125450 | 7.000000 | 0.000000 | 190.000000 |
+| test | enhanced | global | 3.242061e+04 | 57.576270 | 0.355723 | 0.496510 | 0.416337 | 1.146558 | 9.666667 | 0.333333 | 146.666667 |
+| test | enhanced | adaptive | 3.242061e+04 | 57.576270 | 0.350185 | 0.490040 | 0.360101 | 1.155400 | 9.666667 | 0.333333 | 127.333333 |
+
+## enhanced - standard paired difference?test, enhanced - standard?
+
+| method | ?MSE | ?MAE | ?IoU | ?Dice | ?area_error | ?center_error | ?small IoU=0 | ?small pred_area=0 | ?pred_area>true_area |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| default | 641.074535 | -6.495674 | 0.005946 | 0.009287 | 0.123408 | -0.004326 | -4.000000 | -1.333333 | 7.666667 |
+| global | 641.074535 | -6.495674 | 0.004930 | 0.007592 | -0.097021 | 0.006587 | -4.333333 | -5.000000 | -4.333333 |
+| adaptive | 641.074535 | -6.495674 | 0.002225 | 0.004431 | -0.114375 | -0.002578 | -3.000000 | -2.666667 | -15.666667 |
+
+## ??
+
+- adaptive threshold ??? area_error???????????????? global threshold?
+- standard decoder?adaptive ? test area_error = 0.474476??? default ? 0.829989???? global ? 0.513358?
+- enhanced decoder?adaptive ? test area_error = 0.360101??? default ? 0.953397???? global ? 0.416337?
+- adaptive ?? global threshold ? small polygon ??????standard ? small `pred_area=0` ? global ? 5.333333 ?? adaptive ? 3.000000?? small IoU=0 ?? 12.666667?enhanced ? small IoU=0 ? global ???
+- adaptive ? enhanced decoder ? area_error ??? standard??? MAE / IoU / Dice ??? standard?? small polygon ?????? standard ?????
+- ????? `CURRENT_BASELINE`?adaptive threshold ?? evaluation-level calibration ???????????????????????
