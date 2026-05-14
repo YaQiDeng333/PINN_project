@@ -1,0 +1,15 @@
+PINN evaluation metrics
+checkpoint: checkpoints/best_model_v3_complex_threshold_margin_seed42.pt
+test_samples: 200
+mask_threshold: mu < 500.0
+pred_mask_source: mu_threshold
+pred_mask_rule: pred_mu < 500.0
+area_error: relative absolute area error
+center_error: Euclidean center distance in coordinate units (mm)
+
+mse: 2.07515658e+04
+mae: 4.56356235e+01
+iou: 2.61914661e-01
+dice: 3.75806756e-01
+area_error: 4.59785744e-01
+center_error: 1.23322830e+00
