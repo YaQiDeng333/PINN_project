@@ -1,0 +1,48 @@
+# Step 8.2 auxiliary mask head formal small experiment
+
+## Experiment notes
+- This is a controlled experiment for the auxiliary mask head.
+- Only standard decoder is tested.
+- Only lambda_mask=0.1 is tested.
+- No threshold sweep or adaptive threshold is used.
+- CURRENT_BASELINE is not updated.
+- Seeds: 42, 123, 2026.
+- seed=42 auxiliary checkpoint is reused from Step 8.1 POC because the configuration is identical; seed=123 and seed=2026 were newly trained.
+
+## Single seed table
+| seed | method | MSE | MAE | IoU | Dice | area_error | center_error | small IoU=0 | small pred_area=0 | pred_area>true_area |
+|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 42 | baseline_mu_threshold | 3.066202e+04 | 58.749558 | 0.354232 | 0.496099 | 0.640110 | 1.136736 | 10.000000 | 0.000000 | 182.000000 |
+| 42 | aux_mu_threshold | 3.162651e+04 | 57.786674 | 0.351512 | 0.494412 | 0.746639 | 1.166529 | 8.000000 | 0.000000 | 180.000000 |
+| 42 | aux_mask_head | 3.162651e+04 | 57.786674 | 0.341740 | 0.479707 | 0.454302 | 1.205403 | 10.000000 | 1.000000 | 136.000000 |
+| 123 | baseline_mu_threshold | 3.237506e+04 | 64.600430 | 0.347101 | 0.490599 | 0.926339 | 1.119149 | 12.000000 | 3.000000 | 182.000000 |
+| 123 | aux_mu_threshold | 3.068618e+04 | 60.539208 | 0.351211 | 0.490489 | 0.673990 | 1.126017 | 11.000000 | 5.000000 | 174.000000 |
+| 123 | aux_mask_head | 3.068618e+04 | 60.539208 | 0.345228 | 0.480534 | 0.399159 | 1.159874 | 12.000000 | 3.000000 | 123.000000 |
+| 2026 | baseline_mu_threshold | 3.230152e+04 | 68.865845 | 0.344884 | 0.487632 | 0.923517 | 1.133445 | 11.000000 | 1.000000 | 183.000000 |
+| 2026 | aux_mu_threshold | 3.037458e+04 | 62.018809 | 0.357409 | 0.498092 | 0.738750 | 1.102197 | 10.000000 | 1.000000 | 181.000000 |
+| 2026 | aux_mask_head | 3.037458e+04 | 62.018809 | 0.350904 | 0.492834 | 0.537179 | 1.134438 | 7.000000 | 2.000000 | 130.000000 |
+
+## Mean +/- std
+| method | MSE | MAE | IoU | Dice | area_error | center_error | small IoU=0 | small pred_area=0 | pred_area>true_area |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| baseline_mu_threshold | 3.177953e+04 +/- 968.492245 | 64.071944 +/- 5.078808 | 0.348739 +/- 0.004885 | 0.491443 +/- 0.004296 | 0.829989 +/- 0.164446 | 1.129777 +/- 0.009350 | 11.000000 +/- 1.000000 | 1.333333 +/- 1.527525 | 182.333333 +/- 0.577350 |
+| aux_mu_threshold | 3.089576e+04 +/- 651.745827 | 60.114897 +/- 2.147736 | 0.353377 +/- 0.003495 | 0.494331 +/- 0.003802 | 0.719793 +/- 0.039862 | 1.131581 +/- 0.032525 | 9.666667 +/- 1.527525 | 2.000000 +/- 2.645751 | 178.333333 +/- 3.785939 |
+| aux_mask_head | 3.089576e+04 +/- 651.745827 | 60.114897 +/- 2.147736 | 0.345957 +/- 0.004625 | 0.484358 +/- 0.007352 | 0.463547 +/- 0.069472 | 1.166572 +/- 0.035953 | 9.666667 +/- 2.516611 | 2.000000 +/- 1.000000 | 129.666667 +/- 6.506407 |
+
+## Judgment table
+| Question | Result |
+|---|---|
+| Does aux_mu_threshold preserve mu_pred MSE/MAE? | yes; MSE/MAE are not worse than baseline mean. |
+| Does aux_mask_head improve IoU/Dice? | no; mean IoU/Dice are lower than baseline. |
+| Does aux_mask_head improve small polygon? | yes for small IoU=0 count, but small pred_area=0 is worse. |
+| Does aux_mask_head lower area_error? | yes; mean area_error is lower. |
+| Acceptance condition 1 | fail |
+| Acceptance condition 2 | pass |
+| Acceptance condition 3 | pass |
+| Acceptance condition 4 | fail |
+
+## Conclusion
+The auxiliary mask training branch does not break the mu_pred path: aux_mu_threshold improves or preserves the main mu metrics relative to the existing standard seed-repeat baseline.
+However, the mask_head output at fixed probability threshold 0.5 has lower mean IoU and Dice than the baseline mu-threshold mask. It lowers area_error and pred_area>true_area, but does not satisfy the primary acceptance condition for mask quality.
+Stop condition is triggered because mask_pred IoU/Dice are worse than baseline, and small pred_area=0 is not improved.
+This POC direction should not be expanded without a revised acceptance package.

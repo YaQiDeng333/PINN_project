@@ -24,6 +24,18 @@ def ensure_parent_dir(path):
         os.makedirs(parent_dir, exist_ok=True)
 
 
+def strip_module_prefix(key):
+    return key[len('module.'):] if key.startswith('module.') else key
+
+
+def has_module_prefix(state_dict):
+    return any(key.startswith('module.') for key in state_dict)
+
+
+def has_aux_mask_head_state(state_dict):
+    return any(strip_module_prefix(key).startswith('mask_head.') for key in state_dict)
+
+
 def load_model(checkpoint_path, signal_length, device):
     checkpoint = torch.load(project_path(checkpoint_path), map_location=device)
 
@@ -33,6 +45,7 @@ def load_model(checkpoint_path, signal_length, device):
         latent_dim = int(checkpoint_args.get('latent_dim', 64))
         model_variant = checkpoint_args.get('model_variant', 'baseline')
         decoder_variant = checkpoint_args.get('decoder_variant', 'standard')
+        aux_mask_head = bool(checkpoint_args.get('aux_mask_head', False))
         signal_mean = float(checkpoint.get('signal_mean', 0.0))
         signal_std = float(checkpoint.get('signal_std', 1.0))
         checkpoint_info = checkpoint
@@ -41,21 +54,26 @@ def load_model(checkpoint_path, signal_length, device):
         latent_dim = 64
         model_variant = 'baseline'
         decoder_variant = 'standard'
+        aux_mask_head = has_aux_mask_head_state(state_dict)
         signal_mean = None
         signal_std = None
         checkpoint_info = {'model_state_dict': checkpoint}
+    aux_mask_head = aux_mask_head or has_aux_mask_head_state(state_dict)
 
     model = PINN(
         signal_length=signal_length,
         latent_dim=latent_dim,
         model_variant=model_variant,
         decoder_variant=decoder_variant,
+        aux_mask_head=aux_mask_head,
     ).to(device)
     try:
         model.load_state_dict(state_dict)
     except RuntimeError:
+        if not has_module_prefix(state_dict):
+            raise
         state_dict = {
-            key.replace('module.', '', 1): value
+            strip_module_prefix(key): value
             for key, value in state_dict.items()
         }
         model.load_state_dict(state_dict)
@@ -65,18 +83,27 @@ def load_model(checkpoint_path, signal_length, device):
 
 
 @torch.no_grad()
-def predict_batch_maps(model, signals, coords, grid_shape, device, point_chunk=4096):
+def predict_batch_maps(model, signals, coords, grid_shape, device, point_chunk=4096, return_aux_mask=False):
     model.eval()
     signals = signals.to(device)
     pred_chunks = []
+    mask_chunks = []
 
     for start in range(0, coords.shape[0], point_chunk):
         coord_chunk = coords[start:start + point_chunk]
-        pred_chunk = model(signals, coord_chunk)
+        if return_aux_mask:
+            pred_chunk, mask_chunk = model(signals, coord_chunk, return_aux_mask=True)
+            mask_chunks.append(mask_chunk.cpu())
+        else:
+            pred_chunk = model(signals, coord_chunk)
         pred_chunks.append(pred_chunk.cpu())
 
     pred = torch.cat(pred_chunks, dim=1).numpy()
-    return pred.reshape(signals.shape[0], *grid_shape) * MU_SCALE
+    pred_maps = pred.reshape(signals.shape[0], *grid_shape) * MU_SCALE
+    if return_aux_mask:
+        mask_pred = torch.cat(mask_chunks, dim=1).numpy()
+        return pred_maps, mask_pred.reshape(signals.shape[0], *grid_shape)
+    return pred_maps
 
 
 def mask_center(mask, x_grid, y_grid):
@@ -88,8 +115,8 @@ def mask_center(mask, x_grid, y_grid):
     ], dtype=np.float32)
 
 
-def compute_sample_metrics(pred_mu, true_mu, x_grid, y_grid, threshold=MASK_THRESHOLD):
-    pred_mask = pred_mu < threshold
+def compute_sample_metrics(pred_mu, true_mu, x_grid, y_grid, threshold=MASK_THRESHOLD, pred_mask_override=None):
+    pred_mask = pred_mu < threshold if pred_mask_override is None else pred_mask_override.astype(bool)
     true_mask = true_mu < threshold
 
     mse = float(np.mean((pred_mu - true_mu) ** 2))
@@ -145,12 +172,17 @@ def average_metrics(rows):
     }
 
 
-def save_metrics_txt(avg, rows, output_path, checkpoint_path, threshold):
+def save_metrics_txt(avg, rows, output_path, checkpoint_path, threshold, mask_source, mask_prob_threshold):
     with open(output_path, 'w', encoding='utf-8') as f:
         f.write('PINN evaluation metrics\n')
         f.write(f'checkpoint: {checkpoint_path}\n')
         f.write(f'test_samples: {len(rows)}\n')
         f.write(f'mask_threshold: mu < {threshold}\n')
+        f.write(f'pred_mask_source: {mask_source}\n')
+        if mask_source == 'mu_threshold':
+            f.write(f'pred_mask_rule: pred_mu < {threshold}\n')
+        else:
+            f.write(f'pred_mask_rule: mask_prob >= {mask_prob_threshold}\n')
         f.write('area_error: relative absolute area error\n')
         f.write('center_error: Euclidean center distance in coordinate units (mm)\n\n')
         for key in ['mse', 'mae', 'iou', 'dice', 'area_error', 'center_error']:
@@ -308,6 +340,8 @@ def evaluate_test_set(args):
     signal_length = raw_test['signals'].shape[1]
 
     model, signal_mean, signal_std, checkpoint_info = load_model(args.checkpoint, signal_length, device)
+    if args.mask_source == 'aux_mask_head' and not getattr(model, 'aux_mask_head', False):
+        raise ValueError('Checkpoint does not contain an auxiliary mask head.')
     checkpoint_loaded = isinstance(checkpoint_info, dict)
 
     test_dataset = MFLDataset(
@@ -330,27 +364,38 @@ def evaluate_test_set(args):
     print(f'Using device: {device}')
     print(f'Loaded checkpoint: {args.checkpoint}')
     print(f'Test samples: {len(test_dataset)}')
+    print(f'Mask source: {args.mask_source}')
 
     for signals, mu_targets, batch_indices in test_loader:
-        pred_maps = predict_batch_maps(
+        pred_output = predict_batch_maps(
             model=model,
             signals=signals,
             coords=coords,
             grid_shape=grid_shape,
             device=device,
             point_chunk=args.point_chunk,
+            return_aux_mask=args.mask_source == 'aux_mask_head',
         )
+        if args.mask_source == 'aux_mask_head':
+            pred_maps, mask_prob_maps = pred_output
+        else:
+            pred_maps = pred_output
+            mask_prob_maps = None
         true_maps = mu_targets.numpy().reshape(-1, *grid_shape) * MU_SCALE
 
         for batch_pos, sample_idx_tensor in enumerate(batch_indices):
             sample_idx = int(sample_idx_tensor.item())
             defect_type = str(test_dataset.defect_types[sample_idx])
+            pred_mask_override = None
+            if args.mask_source == 'aux_mask_head':
+                pred_mask_override = mask_prob_maps[batch_pos] >= args.mask_prob_threshold
             metrics, pred_mask, true_mask = compute_sample_metrics(
                 pred_maps[batch_pos],
                 true_maps[batch_pos],
                 X,
                 Y,
                 threshold=args.mask_threshold,
+                pred_mask_override=pred_mask_override,
             )
             defect_values, background_values = compute_mu_calibration(pred_maps[batch_pos], true_mask)
             if defect_values.size:
@@ -386,7 +431,15 @@ def evaluate_test_set(args):
     metrics_csv = project_path(args.metrics_csv) if args.metrics_csv else project_path('results', f'{output_prefix}evaluation_metrics.csv')
     ensure_parent_dir(metrics_txt)
     ensure_parent_dir(metrics_csv)
-    save_metrics_txt(avg, rows, metrics_txt, args.checkpoint, args.mask_threshold)
+    save_metrics_txt(
+        avg,
+        rows,
+        metrics_txt,
+        args.checkpoint,
+        args.mask_threshold,
+        args.mask_source,
+        args.mask_prob_threshold,
+    )
     save_metrics_csv(rows, metrics_csv)
     if args.summary_csv:
         defect_mu_values = np.concatenate(defect_mu_chunks) if defect_mu_chunks else np.array([], dtype=np.float64)
@@ -451,6 +504,8 @@ def parse_args():
     parser.add_argument('--batch-size', type=int, default=4)
     parser.add_argument('--point-chunk', type=int, default=4096)
     parser.add_argument('--mask-threshold', type=float, default=MASK_THRESHOLD)
+    parser.add_argument('--mask-source', choices=['mu_threshold', 'aux_mask_head'], default='mu_threshold')
+    parser.add_argument('--mask-prob-threshold', type=float, default=0.5)
     parser.add_argument('--num-figures', type=int, default=3)
     parser.add_argument('--summary-csv', default=None)
     parser.add_argument('--summary-name', default='')
