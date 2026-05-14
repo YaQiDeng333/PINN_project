@@ -53,13 +53,14 @@ def _assert_success(result):
         raise AssertionError(f"single-sample loop failed with code {result.returncode}")
 
     required_snippets = [
-        "Minimal dual-network single-sample .npz loop passed.",
+        "Minimal dual-network single-sample loop passed.",
         "loss_phi=",
         "loss_mu=",
         "mu_pred_min=",
         "mu_pred_max=",
         "mu_label_min=",
         "mu_label_max=",
+        "test_grads_shape=",
     ]
     missing = [snippet for snippet in required_snippets if snippet not in result.stdout]
     if missing:

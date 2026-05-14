@@ -98,6 +98,33 @@
 - 用临时 `.npz` 跑单样本真实 weak-form 闭环；
 - 记录 `loss_phi`、`loss_mu`、`mu_pred` 范围和是否稳定。
 
+### Step S2: Single-sample loop with compact-support weak-form gradients
+
+目的：
+
+将 `generate_compact_support_test_grads` 接入单样本 `.npz` 闭环，替代 dummy `test_grads`。
+
+方法：
+
+- 使用 3 个固定中心 `[-5, 5]`、`[0, 5]`、`[5, 5]`；
+- `radius = 5.0`；
+- `normalize=True`；
+- 在 `mu-step` 中生成 compact-support `test_grads` 并传入 `weak_form_loss`。
+
+验证：
+
+- `minimal_dual_single_sample_loop.py` 可在临时 `.npz` 上运行；
+- `smoke_test_dual_single_sample_npz.py` 通过；
+- `py_compile` 通过。
+
+当前限制：
+
+- centers 和 radius 仍是手动固定；
+- 尚未验证真实缺陷反演效果；
+- 尚未引入 quadrature weights；
+- 尚未进行多样本训练；
+- 当前仍不声称物理结果有效。
+
 ## 3. 当前不做的事情
 
 - 不替换 main；

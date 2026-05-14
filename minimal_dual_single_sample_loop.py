@@ -2,8 +2,8 @@
 
 This script is only a data-interface closure prototype. It does not perform
 formal training, does not save checkpoints or images, and does not claim the
-resulting fields are physically valid. Dummy weak-form test gradients must be
-replaced with compact-support test functions before real experiments.
+resulting fields are physically valid. The first fixed compact-support test
+centers are only for checking that real test gradients can enter the loop.
 """
 
 import argparse
@@ -17,7 +17,13 @@ from dual_network_data_utils import (
     infer_grid_shape,
     load_npz_dataset,
 )
-from dual_network_losses import data_loss, energy_loss, tv_loss, weak_form_loss
+from dual_network_losses import (
+    data_loss,
+    energy_loss,
+    generate_compact_support_test_grads,
+    tv_loss,
+    weak_form_loss,
+)
 from dual_network_models import MuNet, PhiNet
 
 
@@ -79,6 +85,18 @@ def main():
             "signal length must match the number of unique x coordinates."
         )
 
+    # First fixed test-function layout for single-sample closure testing only.
+    # Later versions should place centers based on Omega, grid density, and the
+    # defect region. normalize=True improves numerical stability, but changes
+    # residual weights across different support sizes.
+    centers = torch.tensor(
+        [[-5.0, 5.0], [0.0, 5.0], [5.0, 5.0]],
+        dtype=coords.dtype,
+        device=coords.device,
+    )
+    test_radius = 5.0
+    printed_test_info = False
+
     phi_net = PhiNet(hidden_dim=32, num_layers=2).to(device)
     mu_net = MuNet(hidden_dim=32, num_layers=2, mu_min=1.0, mu_max=1000.0).to(device)
     phi_optimizer = torch.optim.Adam(phi_net.parameters(), lr=1e-3)
@@ -117,16 +135,25 @@ def main():
             phi_fixed = phi_net(coords)
             mu = mu_net(coords)
 
-            # Dummy gradients for interface testing only. These are not the
-            # final compact-support weak-form test functions.
-            dummy_test_grads = torch.zeros(1, coords.shape[0], 2, device=device)
-            dummy_test_grads[0, :, 0] = 1.0
+            test_grads = generate_compact_support_test_grads(
+                coords=coords,
+                centers=centers,
+                radius=test_radius,
+                normalize=True,
+            )
+            if not printed_test_info:
+                print(
+                    f"test_centers={centers.shape[0]} | "
+                    f"test_radius={test_radius:.6e} | "
+                    f"test_grads_shape={tuple(test_grads.shape)}"
+                )
+                printed_test_info = True
 
             loss_mu = weak_form_loss(
                 mu,
                 phi_fixed,
                 coords,
-                test_grads=dummy_test_grads,
+                test_grads=test_grads,
             ) + 1e-6 * tv_loss(mu, coords)
             loss_mu.backward()
             mu_optimizer.step()
@@ -145,7 +172,7 @@ def main():
                 f"mu_label_max={mu_label.max().item():.6e}"
             )
 
-    print("Minimal dual-network single-sample .npz loop passed.")
+    print("Minimal dual-network single-sample loop passed.")
 
 
 if __name__ == "__main__":
