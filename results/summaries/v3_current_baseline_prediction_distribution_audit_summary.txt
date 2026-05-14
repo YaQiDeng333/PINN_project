@@ -1,0 +1,76 @@
+# ? 10.7 CURRENT_BASELINE prediction distribution audit
+
+## Setup
+
+checkpoint: checkpoints/best_model_v3_complex_tv_sweep_2e-6.pt
+test set: data/training_data_v3_complex_test.npz
+thresholds compared: 500 and 600
+
+## True defect pixels pred_mu distribution
+
+count: 137962
+mean: 5.75411907e+02
+median: 5.53469696e+02
+p10: 3.04742624e+02
+p25: 4.08736435e+02
+p75: 7.39048141e+02
+p90: 8.81127539e+02
+lt500_ratio: 4.08496543e-01
+band_500_600_ratio: 1.62022876e-01
+ge600_ratio: 4.29480582e-01
+
+## True background pixels pred_mu distribution
+
+count: 3862038
+mean: 9.75080328e+02
+median: 9.99099182e+02
+p10: 9.61662091e+02
+p25: 9.95135803e+02
+p75: 1.00028369e+03
+p90: 1.00109198e+03
+lt500_ratio: 9.77592660e-03
+lt600_ratio: 1.87315609e-02
+
+## Samples with pred_area=0 at threshold=500
+
+pred_area=0 sample count: 18
+defect_pixels_count: 5489
+defect_pixels_mean: 7.53480018e+02
+defect_pixels_median: 7.46557373e+02
+defect_pixels_p10: 6.02324182e+02
+defect_pixels_p25: 6.65472168e+02
+defect_pixels_p75: 8.35120544e+02
+defect_pixels_p90: 9.26664990e+02
+defect_pixels_lt500_ratio: 0.00000000e+00
+defect_pixels_band_500_600_ratio: 9.63745673e-02
+defect_pixels_ge600_ratio: 9.03625433e-01
+
+## true_area bucket summary
+
+| bucket | count | defect_lt500_ratio | defect_500_600_ratio | defect_ge600_ratio | background_lt500_ratio | background_lt600_ratio | pred_area_zero_500_count | pred_area_500 | pred_area_600 | true_area |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| small | 67 | 2.98362593e-01 | 1.92088193e-01 | 5.09549214e-01 | 8.51025683e-03 | 1.67586040e-02 | 15 | 4.33170504e+00 | 7.91657222e+00 | 5.43150674e+00 |
+| medium | 66 | 4.05778981e-01 | 1.67335074e-01 | 4.26885945e-01 | 9.61599842e-03 | 1.83590681e-02 | 3 | 6.72578671e+00 | 1.09161657e+01 | 9.56113345e+00 |
+| large | 67 | 4.45697423e-01 | 1.44152896e-01 | 4.10149681e-01 | 1.12646867e-02 | 2.11838757e-02 | 0 | 1.04325476e+01 | 1.56610944e+01 | 1.65058894e+01 |
+
+## defect_type summary
+
+| defect_type | count | defect_lt500_ratio | defect_500_600_ratio | defect_ge600_ratio | background_lt500_ratio | background_lt600_ratio | pred_area_zero_500_count | pred_area_500 | pred_area_600 | true_area |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| multi_defect | 62 | 3.62815039e-01 | 1.64214271e-01 | 4.72970690e-01 | 1.12699848e-02 | 2.24818995e-02 | 3 | 8.71170314e+00 | 1.43243290e+01 | 1.49071560e+01 |
+| polygon | 75 | 3.34815527e-01 | 1.74352953e-01 | 4.90831520e-01 | 8.63425468e-03 | 1.65973349e-02 | 13 | 5.46551673e+00 | 9.11061580e+00 | 7.31659277e+00 |
+| rotated_rect | 63 | 4.60757729e-01 | 1.63722406e-01 | 3.75519865e-01 | 9.73442789e-03 | 1.77010594e-02 | 2 | 7.66773810e+00 | 1.15677146e+01 | 9.96590832e+00 |
+
+## Threshold 500 to 600 boundary contribution
+
+true_defect_pixels_in_500_600_band: 22353
+true_background_pixels_in_500_600_band: 34587
+new_pred_area_defect_share: 3.92571128e-01
+new_pred_area_background_share: 6.07428872e-01
+
+## Judgment
+
+Threshold=600 ??????? true defect pixels ?? 500-600 ?????? true defect pixels ?? 16.20% ??????? threshold=500 ???? 40.85%?threshold=600 ???? 57.05%?
+?? background ? pred_mu < 600 ???? 1.87%????? pred_mu < 500 ? 0.98%??? threshold=600 ?????? false positive????? 10.3 ? pred_area>true_area ??? area_error ?????
+?????????????????/????????????????????true defect pixels ?????? 600???????????? 500?
+small defect ???small bucket ? defect_lt500_ratio ???defect_ge600_ratio ???pred_area=0 ???????????????? pred_mu ???????

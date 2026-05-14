@@ -1,0 +1,60 @@
+# ? 10.9 CURRENT_BASELINE signal difficulty audit
+
+## Setup
+
+checkpoint: checkpoints/best_model_v3_complex_tv_sweep_2e-6.pt
+test set: data/training_data_v3_complex_test.npz
+metrics source: results/metrics/evaluation_metrics_v3_complex_tv_sweep_2e-6_test.csv
+mask threshold: pred_mu < 500
+
+## Area bins
+
+small <= 7.60876108e+00, medium <= 1.17456125e+01, large > 1.17456125e+01
+
+## Signal strength by true_area bin
+
+| bin | count | max_abs_bz | peak_to_peak_bz | mean_abs_bz | std_bz | l2_energy_bz | IoU | Dice | pred_area=0 | pred_area<true | pred_area>true |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| small | 67 | 6.96453428e+00 | 1.09285676e+01 | 2.22568557e+00 | 2.23269820e+00 | 1.61569933e+03 | 2.02241320e-01 | 2.92975910e-01 | 15 | 42 | 25 |
+| medium | 66 | 9.38198325e+00 | 1.58065496e+01 | 2.85262161e+00 | 3.29545250e+00 | 2.98142530e+03 | 3.10631435e-01 | 4.47316566e-01 | 3 | 54 | 12 |
+| large | 67 | 1.46581905e+01 | 2.63849364e+01 | 4.53377704e+00 | 5.75029076e+00 | 8.00720018e+03 | 3.73172629e-01 | 5.25743315e-01 | 0 | 62 | 5 |
+
+## pred_area=0 vs nonzero signal strength
+
+| group | count | max_abs_bz | peak_to_peak_bz | mean_abs_bz | std_bz | l2_energy_bz | true_area | IoU | Dice |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| pred_area=0 | 18 | 4.06290225e+00 | 5.09365658e+00 | 1.63353653e+00 | 1.03560393e+00 | 6.97915029e+02 | 4.64359457e+00 | 0.00000000e+00 | 0.00000000e+00 |
+| pred_area>0 | 182 | 1.09604462e+01 | 1.89645672e+01 | 3.36128222e+00 | 4.03142448e+00 | 4.55464762e+03 | 1.10838223e+01 | 3.24474776e-01 | 4.63610337e-01 |
+
+## Correlations
+
+| feature | corr(IoU) | corr(Dice) | corr(pred_area=0) | corr(true_area) |
+|---|---:|---:|---:|---:|
+| max_abs_bz | 5.86577304e-01 | 5.90475401e-01 | -3.99065227e-01 | 6.72407541e-01 |
+| peak_to_peak_bz | 5.93494851e-01 | 5.98523634e-01 | -4.04760957e-01 | 6.81152606e-01 |
+| mean_abs_bz | 5.39558245e-01 | 5.45834384e-01 | -3.50740149e-01 | 7.45561023e-01 |
+| std_bz | 5.76680767e-01 | 5.85945859e-01 | -4.02461826e-01 | 7.27543849e-01 |
+| l2_energy_bz | 4.94346926e-01 | 4.84238208e-01 | -2.53575178e-01 | 6.74279580e-01 |
+
+## Worst 10 IoU samples
+
+| rank | sample_index | defect_type | area_bin | true_area | pred_area | IoU | Dice | max_abs_bz | peak_to_peak_bz | mean_abs_bz | std_bz | l2_energy_bz | pred_area=0 |
+|---:|---:|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1 | 6 | polygon | small | 5.78651610e+00 | 0.00000000e+00 | 0.00000000e+00 | 0.00000000e+00 | 4.92139959e+00 | 6.93746448e+00 | 1.70767445e+00 | 1.34456757e+00 | 7.93802666e+02 | 1 |
+| 2 | 28 | polygon | small | 3.83737383e+00 | 0.00000000e+00 | 0.00000000e+00 | 0.00000000e+00 | 4.16868210e+00 | 5.12482941e+00 | 1.63954026e+00 | 9.76747485e-01 | 6.80983327e+02 | 1 |
+| 3 | 32 | polygon | small | 2.83234735e+00 | 7.91839045e-01 | 0.00000000e+00 | 0.00000000e+00 | 4.58602571e+00 | 6.59634376e+00 | 1.71456835e+00 | 1.24455179e+00 | 7.76299702e+02 | 0 |
+| 4 | 37 | polygon | small | 2.11664668e+00 | 0.00000000e+00 | 0.00000000e+00 | 0.00000000e+00 | 4.12224436e+00 | 5.16439021e+00 | 1.60584488e+00 | 1.04586775e+00 | 6.68508837e+02 | 1 |
+| 5 | 54 | polygon | small | 5.80174377e+00 | 0.00000000e+00 | 0.00000000e+00 | 0.00000000e+00 | 4.15813923e+00 | 5.38132846e+00 | 1.72748778e+00 | 1.10370167e+00 | 7.47686919e+02 | 1 |
+| 6 | 60 | rotated_rect | small | 5.83219912e+00 | 0.00000000e+00 | 0.00000000e+00 | 0.00000000e+00 | 4.11141396e+00 | 5.19569194e+00 | 1.62281045e+00 | 1.05093311e+00 | 6.79190997e+02 | 1 |
+| 7 | 68 | polygon | small | 2.99985177e+00 | 0.00000000e+00 | 0.00000000e+00 | 0.00000000e+00 | 3.99532700e+00 | 4.80873477e+00 | 1.57467383e+00 | 9.18932804e-01 | 6.26818808e+02 | 1 |
+| 8 | 70 | rotated_rect | small | 4.08101662e+00 | 2.92371340e+00 | 0.00000000e+00 | 0.00000000e+00 | 6.08255816e+00 | 9.30448103e+00 | 1.98622451e+00 | 1.87647736e+00 | 1.16006640e+03 | 0 |
+| 9 | 73 | rotated_rect | small | 4.90331101e+00 | 0.00000000e+00 | 0.00000000e+00 | 0.00000000e+00 | 4.28726006e+00 | 5.38574791e+00 | 1.63283203e+00 | 1.10211707e+00 | 6.96913927e+02 | 1 |
+| 10 | 95 | polygon | small | 4.82717264e+00 | 0.00000000e+00 | 0.00000000e+00 | 0.00000000e+00 | 4.08835649e+00 | 5.29798281e+00 | 1.58629996e+00 | 1.04845540e+00 | 6.57392776e+02 | 1 |
+
+## Judgment
+
+Small samples have lower average signal strength than large samples: max_abs_bz 6.9645e+00 vs 1.4658e+01, peak_to_peak_bz 1.0929e+01 vs 2.6385e+01, l2_energy_bz 1.6157e+03 vs 8.0072e+03.
+pred_area=0 samples also have weaker Bz signatures than nonzero predictions: max_abs_bz 4.0629e+00 vs 1.0960e+01, l2_energy_bz 6.9792e+02 vs 4.5546e+03.
+Signal strength has a visible but not deterministic relationship with performance: maximum absolute correlation with IoU is 0.593, and with pred_area=0 is 0.405.
+Worst-IoU samples are mostly small defects with weak-to-moderate signal, but weak signal alone does not fully explain failure because correlations are moderate and some nonzero predictions have comparable signal levels.
+Conclusion: small defect failure is partly tied to weaker Bz signal / lower identifiability, but also reflects model usage/calibration limits rather than purely impossible input signal.

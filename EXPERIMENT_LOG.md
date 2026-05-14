@@ -1867,3 +1867,52 @@ v4 / aux / threshold / shape-aware transfer 线到此停止。下一阶段转向
 `threshold=600` 能稳定缓解 CURRENT_BASELINE 的面积低估和空预测问题，并改善 IoU、Dice、center_error；但它也引入更多面积高估，使 test set area_error 小幅变差。
 
 因此 `threshold=600` 只作为 validation-selected evaluation-level calibration 记录，不更新 `CURRENT_BASELINE`。本阶段不继续做更多 threshold trick。
+
+---
+
+## 第 10.7 / 10.8 / 10.9 步：CURRENT_BASELINE prediction / oversampling / signal difficulty audit
+
+### 目标
+
+继续围绕 `CURRENT_BASELINE` 的失败模式做轻量诊断，不训练新主线模型，不修改模型结构，不更新 `CURRENT_BASELINE`。本阶段重点确认面积低估是否来自预测 μ 分布、small defect 数据分布或 Bz 输入信号可辨识性。
+
+### 修改内容
+
+* 第 10.7：分析 CURRENT_BASELINE 在 test set 上的 `pred_mu` 分布；
+* 第 10.8：使用 v3_complex train set 构造 small-defect oversampling gate，只做 seed=42 快速验证；
+* 第 10.9：分析 Bz signal 强度与 IoU、Dice、`pred_area=0` 的关系；
+* 更新 `EXPERIMENT_LOG.md`；
+* 补充 `术语说明.md` 中与 gate / audit / threshold / area 相关的术语解释。
+
+### 输出文件
+
+* `results/metrics/v3_current_baseline_prediction_distribution_audit.csv`
+* `results/summaries/v3_current_baseline_prediction_distribution_audit_summary.txt`
+* `results/metrics/evaluation_metrics_v3_complex_small_os3_seed42.csv`
+* `results/metrics/evaluation_metrics_v3_complex_small_os3_seed42.txt`
+* `results/metrics/evaluation_metrics_v3_complex_small_os3_seed42_summary.csv`
+* `results/summaries/v3_complex_small_os3_gate_summary.txt`
+* `results/metrics/v3_current_baseline_signal_difficulty_audit.csv`
+* `results/summaries/v3_current_baseline_signal_difficulty_audit_summary.txt`
+
+### 关键指标 / 结果
+
+第 10.7 prediction distribution audit 显示，真实缺陷像素中只有 40.85% 的 `pred_mu < 500`，16.20% 落在 500-600，42.95% 大于等于 600。small defect 更差，`pred_mu < 500` 比例只有 29.84%，`pred_mu >= 600` 比例达到 50.95%。在 `pred_area=0` 样本中，真实缺陷像素的 median `pred_mu` 为 746.56，90.36% 大于等于 600。
+
+第 10.8 small-defect oversampling gate 失败。临时训练集将 train set 中 true_area 最低 1/3 的 small 样本复制到约 3x 出现次数，训练集从 1000 扩展到 1666。seed=42 结果显示 small pred_area=0 从 15 增加到 21，small IoU 从 0.2022 降到 0.1425，small Dice 从 0.2930 降到 0.2112；overall IoU 从 0.2953 降到 0.2496，Dice 从 0.4219 降到 0.3638，area_error 从 0.3945 升到 0.5114，`pred_area < true_area` 从 158 增加到 192。因此不扩展 3 seed，不继续调 oversampling ratio。
+
+第 10.9 signal difficulty audit 显示，small 样本的平均 Bz 信号强度明显低于 large 样本：small 的 mean `max_abs_bz` 为 6.96，large 为 14.66；small 的 mean `l2_energy_bz` 为 1615.70，large 为 8007.20。`pred_area=0` 样本的 Bz 信号也明显弱于非空预测样本：mean `max_abs_bz` 为 4.06 vs 10.96，mean `l2_energy_bz` 为 697.92 vs 4554.65。
+
+信号强度与性能存在可见但不决定性的相关性。`peak_to_peak_bz` 与 IoU 的相关系数约为 0.593，与 Dice 约为 0.599；`max_abs_bz` 与 `pred_area=0` 的相关系数约为 -0.399。最差 IoU 样本多数是 small defect，且通常具有弱到中等强度的 Bz 信号。
+
+### 结论
+
+CURRENT_BASELINE 的 small defect 失败既与 Bz 信号较弱、可辨识性较低有关，也反映出模型对弱信号的利用和输出校准不足；它不是单纯由阈值选择造成，也不是简单 small oversampling 可以解决。
+
+第 10.8 证明 small-defect oversampling gate 没有改善 small defect，反而加重面积低估。第 10.7 / 10.9 说明继续做 loss trick、threshold trick 或 small oversampling ratio trick 都缺乏直接证据支撑。
+
+`CURRENT_BASELINE` 保持不变。
+
+### 下一步
+
+不继续 loss trick、threshold trick、small oversampling ratio trick。后续实验应围绕 CURRENT_BASELINE 的真实失败样本和弱 Bz 信号可辨识性重新定义实验包、接受条件和停止条件。

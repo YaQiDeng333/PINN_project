@@ -1,0 +1,50 @@
+# ? 10.8 v3_complex small-defect oversampling gate
+
+## Setup
+
+checkpoint baseline: checkpoints/best_model_v3_complex_tv_sweep_2e-6.pt
+checkpoint oversampling: checkpoints/best_model_v3_complex_small_os3_seed42.pt
+train set: data/training_data_v3_complex_small_os3_train.npz
+val set: data/training_data_v3_complex_val.npz
+test set: data/training_data_v3_complex_test.npz
+lambda_tv: 2e-6
+loss_type: mse
+seed: 42
+epochs: 50
+mask threshold: pred_mu < 500
+
+## Oversampled train construction
+
+Original train samples: 1000
+Small definition: lowest one third of train true_area, count=333, max small true_area=7.65950967e+00
+Small samples were duplicated twice, so each selected small sample appears about 3x total.
+Oversampled train samples: 1666
+Small selected defect type counts: multi_defect=12, polygon=224, rotated_rect=97
+Oversampled train defect type counts: multi_defect=355, polygon=796, rotated_rect=515
+
+## Overall test comparison
+
+| model | MSE | MAE | IoU | Dice | area_error | center_error | pred_area=0 | pred_area<true | pred_area>true |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| current_baseline | 2.07377174e+04 | 4.44655262e+01 | 2.95272047e-01 | 4.21885407e-01 | 3.94517442e-01 | 1.32594189e+00 | 18 | 158 | 42 |
+| small_os3_seed42 | 2.06818300e+04 | 4.17368009e+01 | 2.49559871e-01 | 3.63803957e-01 | 5.11354550e-01 | 1.31838585e+00 | 28 | 192 | 8 |
+
+## true_area bucket comparison
+
+true_area bins from test set: small <= 7.60876108e+00, medium <= 1.17456125e+01, large > 1.17456125e+01
+
+| bin | model | count | IoU | Dice | area_error | center_error | pred_area | true_area | pred_area=0 | pred_area<true | pred_area>true |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| small | current_baseline | 67 | 2.02241320e-01 | 2.92975910e-01 | 4.54790178e-01 | 1.19331766e+00 | 4.33170504e+00 | 5.43150674e+00 | 15 | 42 | 25 |
+| small | small_os3_seed42 | 67 | 1.42512457e-01 | 2.11172562e-01 | 6.10917845e-01 | 1.27296895e+00 | 2.29369680e+00 | 5.43150674e+00 | 21 | 64 | 3 |
+| medium | current_baseline | 66 | 3.10631435e-01 | 4.47316566e-01 | 3.67439603e-01 | 1.31575362e+00 | 6.72578671e+00 | 9.56113345e+00 | 3 | 54 | 12 |
+| medium | small_os3_seed42 | 66 | 2.46490508e-01 | 3.68312009e-01 | 5.42388008e-01 | 1.38426809e+00 | 4.53000227e+00 | 9.56113345e+00 | 6 | 64 | 2 |
+| large | current_baseline | 67 | 3.73172629e-01 | 5.25743315e-01 | 3.60918400e-01 | 1.43845413e+00 | 1.04325476e+01 | 1.65058894e+01 | 0 | 62 | 5 |
+| large | small_os3_seed42 | 67 | 3.59630837e-01 | 5.11994586e-01 | 3.81220985e-01 | 1.29014711e+00 | 1.03591366e+01 | 1.65058894e+01 | 1 | 64 | 3 |
+
+## Judgment
+
+Small defect metrics did not improve overall: small pred_area=0 increased and small IoU/Dice decreased.
+Overall gate does not satisfy acceptance: IoU/Dice decreased and area_error increased.
+The oversampled model did not push the problem into area overestimation; pred_area>true decreased, but pred_area=0 and pred_area<true increased, so underestimation became worse.
+Conclusion: stop this oversampling gate at seed=42 and do not expand to 3 seeds.
