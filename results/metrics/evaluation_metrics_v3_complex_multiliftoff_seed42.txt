@@ -1,0 +1,14 @@
+v3_complex multi-liftoff gate metrics
+checkpoint: checkpoints/best_model_v3_complex_multiliftoff_seed42.pt
+test_data: data/training_data_v3_complex_multiliftoff_test.npz
+test_samples: 200
+mask rule: pred_mu < 500
+mse: 2.28778783e+04
+mae: 4.84355108e+01
+iou: 3.17907577e-01
+dice: 4.53038364e-01
+area_error: 3.53772262e-01
+center_error: 1.27720883e+00
+pred_area_zero: 10
+pred_area_lt_true: 153
+pred_area_gt_true: 46

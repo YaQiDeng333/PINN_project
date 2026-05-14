@@ -115,6 +115,14 @@ class MFLDataset(Dataset):
         )
 
 
+def signal_shape_info(signals):
+    if signals.ndim == 2:
+        return signals.shape[1], 1
+    if signals.ndim == 3:
+        return signals.shape[2], signals.shape[1]
+    raise ValueError(f'Unsupported signals shape: {signals.shape}')
+
+
 def build_coord_grid(x, y):
     x_norm = x / max(abs(float(x.min())), abs(float(x.max())))
     y_norm = 2.0 * (y - float(y.min())) / (float(y.max()) - float(y.min())) - 1.0
@@ -140,10 +148,10 @@ def feature_mapping(coords, num_frequencies=21):
 
 
 class BzEncoder(nn.Module):
-    def __init__(self, signal_length, latent_dim=64):
+    def __init__(self, signal_length, latent_dim=64, signal_channels=1):
         super().__init__()
         self.encoder = nn.Sequential(
-            nn.Conv1d(1, 16, kernel_size=5, padding=2),
+            nn.Conv1d(signal_channels, 16, kernel_size=5, padding=2),
             nn.GELU(),
             nn.Conv1d(16, 32, kernel_size=5, padding=2),
             nn.GELU(),
@@ -156,13 +164,16 @@ class BzEncoder(nn.Module):
         )
 
     def forward(self, bz_signal):
-        return self.encoder(bz_signal.unsqueeze(1))
+        if bz_signal.dim() == 2:
+            bz_signal = bz_signal.unsqueeze(1)
+        return self.encoder(bz_signal)
 
 
 class PINN(nn.Module):
     def __init__(
             self,
             signal_length,
+            signal_channels=1,
             coord_feature_dim=84,
             latent_dim=64,
             model_variant='baseline',
@@ -178,7 +189,12 @@ class PINN(nn.Module):
         self.aux_mask_head = aux_mask_head
         self.mu_min = MU_NORM_MIN
         self.mu_max = MU_NORM_MAX
-        self.bz_encoder = BzEncoder(signal_length=signal_length, latent_dim=latent_dim)
+        self.signal_channels = signal_channels
+        self.bz_encoder = BzEncoder(
+            signal_length=signal_length,
+            latent_dim=latent_dim,
+            signal_channels=signal_channels,
+        )
         input_dim = coord_feature_dim + latent_dim
         if decoder_variant == 'standard':
             self.decoder = nn.Sequential(
@@ -271,6 +287,11 @@ def simplified_forward_bz(mu_pred_map, sensor_x, depth, lift_off, signal_mean, s
 
 
 def physics_loss(mu_pred_map, target_signals, sensor_x, depth, lift_off, signal_mean, signal_std):
+    if target_signals.dim() != 2:
+        raise ValueError(
+            'physics_loss currently supports only single-liftoff/single-channel '
+            f'Bz targets with shape [batch, signal_length]; got {tuple(target_signals.shape)}.'
+        )
     bz_pred = simplified_forward_bz(
         mu_pred_map=mu_pred_map,
         sensor_x=sensor_x,
@@ -635,7 +656,14 @@ def has_aux_mask_head_state(state_dict):
     return any(strip_module_prefix(key).startswith('mask_head.') for key in state_dict)
 
 
-def load_checkpoint_model(checkpoint_path, signal_length, fallback_latent_dim, device):
+def infer_signal_channels_from_state_dict(state_dict, fallback=1):
+    for key, value in state_dict.items():
+        if strip_module_prefix(key) == 'bz_encoder.encoder.0.weight':
+            return int(value.shape[1])
+    return fallback
+
+
+def load_checkpoint_model(checkpoint_path, signal_length, fallback_latent_dim, device, signal_channels=1):
     checkpoint = torch.load(project_path(checkpoint_path), map_location=device)
 
     if isinstance(checkpoint, dict) and 'model_state_dict' in checkpoint:
@@ -645,6 +673,10 @@ def load_checkpoint_model(checkpoint_path, signal_length, fallback_latent_dim, d
         model_variant = checkpoint_args.get('model_variant', 'baseline')
         decoder_variant = checkpoint_args.get('decoder_variant', 'standard')
         aux_mask_head = bool(checkpoint_args.get('aux_mask_head', False))
+        signal_channels = int(checkpoint_args.get(
+            'signal_channels',
+            infer_signal_channels_from_state_dict(state_dict, fallback=signal_channels),
+        ))
         signal_mean = checkpoint.get('signal_mean')
         signal_std = checkpoint.get('signal_std')
     else:
@@ -654,12 +686,14 @@ def load_checkpoint_model(checkpoint_path, signal_length, fallback_latent_dim, d
         model_variant = 'baseline'
         decoder_variant = 'standard'
         aux_mask_head = has_aux_mask_head_state(state_dict)
+        signal_channels = infer_signal_channels_from_state_dict(state_dict, fallback=signal_channels)
         signal_mean = None
         signal_std = None
     aux_mask_head = aux_mask_head or has_aux_mask_head_state(state_dict)
 
     model = PINN(
         signal_length=signal_length,
+        signal_channels=signal_channels,
         latent_dim=latent_dim,
         model_variant=model_variant,
         decoder_variant=decoder_variant,
@@ -732,7 +766,8 @@ def train_adam_tv(args=None):
 
     use_physics = args.mode == 'adam_tv_phy'
     raw_train = np.load(project_path(args.train_data), allow_pickle=False)
-    signal_length = raw_train['signals'].shape[1]
+    signal_length, signal_channels = signal_shape_info(raw_train['signals'])
+    args.signal_channels = signal_channels
 
     if args.init_checkpoint:
         print(f'Loading Adam initial checkpoint: {args.init_checkpoint}')
@@ -741,6 +776,7 @@ def train_adam_tv(args=None):
             signal_length=signal_length,
             fallback_latent_dim=args.latent_dim,
             device=device,
+            signal_channels=signal_channels,
         )
         if args.model_variant != model.model_variant:
             print(
@@ -764,8 +800,11 @@ def train_adam_tv(args=None):
         train_dataset = MFLDataset(args.train_data, signal_mean=signal_mean, signal_std=signal_std)
     else:
         train_dataset = MFLDataset(args.train_data)
+        signal_length, signal_channels = signal_shape_info(train_dataset.signals)
+        args.signal_channels = signal_channels
         model = PINN(
-            signal_length=train_dataset.signals.shape[1],
+            signal_length=signal_length,
+            signal_channels=signal_channels,
             latent_dim=args.latent_dim,
             model_variant=args.model_variant,
             decoder_variant=args.decoder_variant,
@@ -814,6 +853,7 @@ def train_adam_tv(args=None):
     print('Model: BzEncoder(signal -> latent) + Fourier(x,y) + MLP -> mu(x,y)')
     print(f'model_variant: {model.model_variant}')
     print(f'decoder_variant: {model.decoder_variant}')
+    print(f'signal_channels: {getattr(model, "signal_channels", 1)}')
     print(f'aux_mask_head: {getattr(model, "aux_mask_head", False)}')
     if model.model_variant == 'calibrated_mu':
         print(f'calibrated_mu range: [{MU_NORM_MIN:.6f}, {MU_NORM_MAX:.6f}] normalized mu')
@@ -1006,12 +1046,14 @@ def refine_with_lbfgs(args=None):
     print(f'Loading L-BFGS initial checkpoint: {args.lbfgs_init_checkpoint}')
 
     raw_train = np.load(project_path(args.train_data), allow_pickle=False)
-    signal_length = raw_train['signals'].shape[1]
+    signal_length, signal_channels = signal_shape_info(raw_train['signals'])
+    args.signal_channels = signal_channels
     model, checkpoint, checkpoint_args, signal_mean, signal_std = load_checkpoint_model(
         checkpoint_path=args.lbfgs_init_checkpoint,
         signal_length=signal_length,
         fallback_latent_dim=args.latent_dim,
         device=device,
+        signal_channels=signal_channels,
     )
 
     if signal_mean is None or signal_std is None:

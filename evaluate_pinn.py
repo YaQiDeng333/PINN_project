@@ -36,6 +36,13 @@ def has_aux_mask_head_state(state_dict):
     return any(strip_module_prefix(key).startswith('mask_head.') for key in state_dict)
 
 
+def infer_signal_channels_from_state_dict(state_dict, fallback=1):
+    for key, value in state_dict.items():
+        if strip_module_prefix(key) == 'bz_encoder.encoder.0.weight':
+            return int(value.shape[1])
+    return fallback
+
+
 def load_model(checkpoint_path, signal_length, device):
     checkpoint = torch.load(project_path(checkpoint_path), map_location=device)
 
@@ -46,6 +53,10 @@ def load_model(checkpoint_path, signal_length, device):
         model_variant = checkpoint_args.get('model_variant', 'baseline')
         decoder_variant = checkpoint_args.get('decoder_variant', 'standard')
         aux_mask_head = bool(checkpoint_args.get('aux_mask_head', False))
+        signal_channels = int(checkpoint_args.get(
+            'signal_channels',
+            infer_signal_channels_from_state_dict(state_dict),
+        ))
         signal_mean = float(checkpoint.get('signal_mean', 0.0))
         signal_std = float(checkpoint.get('signal_std', 1.0))
         checkpoint_info = checkpoint
@@ -55,6 +66,7 @@ def load_model(checkpoint_path, signal_length, device):
         model_variant = 'baseline'
         decoder_variant = 'standard'
         aux_mask_head = has_aux_mask_head_state(state_dict)
+        signal_channels = infer_signal_channels_from_state_dict(state_dict)
         signal_mean = None
         signal_std = None
         checkpoint_info = {'model_state_dict': checkpoint}
@@ -62,6 +74,7 @@ def load_model(checkpoint_path, signal_length, device):
 
     model = PINN(
         signal_length=signal_length,
+        signal_channels=signal_channels,
         latent_dim=latent_dim,
         model_variant=model_variant,
         decoder_variant=decoder_variant,
@@ -337,7 +350,7 @@ def evaluate_test_set(args):
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     raw_test = np.load(project_path(args.test_data), allow_pickle=False)
-    signal_length = raw_test['signals'].shape[1]
+    signal_length = raw_test['signals'].shape[-1]
 
     model, signal_mean, signal_std, checkpoint_info = load_model(args.checkpoint, signal_length, device)
     if args.mask_source == 'aux_mask_head' and not getattr(model, 'aux_mask_head', False):

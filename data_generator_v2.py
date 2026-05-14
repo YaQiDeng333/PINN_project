@@ -12,6 +12,8 @@ MAX_COMPONENTS = 5
 MAX_POLYGON_VERTICES = 12
 DEFECT_MU = 1.0
 V4_DATASET_NAME = 'v4_balanced_complex'
+MULTILIFTOFF_DATASET_NAME = 'v3_complex_multiliftoff'
+MULTILIFTOFF_OFFSETS = (0.0, 1.0)
 V4_POLYGON_MIN_MASK_PIXELS = 30
 V4_POLYGON_MIN_SIGNAL_SNR = 5.0
 V4_POLYGON_MAX_ATTEMPTS = 80
@@ -628,7 +630,11 @@ def _generate_dataset(num_samples=1, grid_size=(100, 200), seed=None,
     mu_bg = 1000.0
     rng = np.random.default_rng(seed)
 
-    signals = np.empty((num_samples, grid_size[1]), dtype=np.float32)
+    use_multiliftoff = dataset == MULTILIFTOFF_DATASET_NAME
+    if use_multiliftoff:
+        signals = np.empty((num_samples, len(MULTILIFTOFF_OFFSETS), grid_size[1]), dtype=np.float32)
+    else:
+        signals = np.empty((num_samples, grid_size[1]), dtype=np.float32)
     mu_maps = np.empty((num_samples, grid_size[0], grid_size[1]), dtype=np.float32)
     defect_types = np.empty(num_samples, dtype='<U16')
     metadata = _init_metadata(num_samples)
@@ -761,10 +767,24 @@ def _generate_dataset(num_samples=1, grid_size=(100, 200), seed=None,
             )
 
         # 6. Add Gaussian noise
-        noise = rng.normal(0, sample_noise_level, bz_at_liftoff.shape)
-        bz_noisy = bz_at_liftoff + noise
-
-        signals[idx] = bz_noisy.astype(np.float32)
+        if use_multiliftoff:
+            channel_signals = []
+            for offset in MULTILIFTOFF_OFFSETS:
+                channel_lift_off = sample_lift_off + float(offset)
+                bz_channel = _generate_bz_signal(
+                    x=x,
+                    signal_components=signal_components,
+                    sample_depth=sample_depth,
+                    sample_lift_off=channel_lift_off,
+                    B0=B0,
+                )
+                noise = rng.normal(0, sample_noise_level, bz_channel.shape)
+                channel_signals.append((bz_channel + noise).astype(np.float32))
+            signals[idx] = np.stack(channel_signals, axis=0)
+        else:
+            noise = rng.normal(0, sample_noise_level, bz_at_liftoff.shape)
+            bz_noisy = bz_at_liftoff + noise
+            signals[idx] = bz_noisy.astype(np.float32)
         mu_maps[idx] = mu_map
         defect_types[idx] = shape_info['defect_type']
 
@@ -1129,7 +1149,7 @@ def _parse_args():
     parser = argparse.ArgumentParser(description='Generate PINN/MFL defect datasets.')
     parser.add_argument('--complex', action='store_true', dest='complex_shapes',
                         help='Generate v3 complex defect splits with rotated_rect, polygon, and multi_defect.')
-    parser.add_argument('--dataset', choices=['simple', 'v3_complex', V4_DATASET_NAME], default=None,
+    parser.add_argument('--dataset', choices=['simple', 'v3_complex', V4_DATASET_NAME, MULTILIFTOFF_DATASET_NAME], default=None,
                         help='Dataset version to generate. Use v4_balanced_complex for balanced complex defects.')
     parser.add_argument('--train-samples', type=int, default=1000)
     parser.add_argument('--val-samples', type=int, default=200)
@@ -1151,12 +1171,14 @@ if __name__ == '__main__':
     dataset_name = args.dataset
     if dataset_name is None:
         dataset_name = 'v3_complex' if args.complex_shapes else 'simple'
-    complex_shapes = args.complex_shapes or dataset_name in ('v3_complex', V4_DATASET_NAME)
+    complex_shapes = args.complex_shapes or dataset_name in ('v3_complex', V4_DATASET_NAME, MULTILIFTOFF_DATASET_NAME)
 
     dataset_prefix = args.dataset_prefix
     if dataset_prefix is None:
         if dataset_name == V4_DATASET_NAME:
             dataset_prefix = 'training_data_v4_balanced_complex'
+        elif dataset_name == MULTILIFTOFF_DATASET_NAME:
+            dataset_prefix = 'training_data_v3_complex_multiliftoff'
         elif dataset_name == 'v3_complex':
             dataset_prefix = 'training_data_v3_complex'
         else:
