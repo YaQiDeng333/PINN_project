@@ -1820,3 +1820,50 @@ v4 / aux / threshold / shape-aware transfer 线到此停止。下一阶段转向
 ### 输出文件
 
 * `results/summaries/v3_baseline_transfer_gates_summary.txt`
+
+---
+
+## 第 10.1 / 10.2 / 10.3 步：CURRENT_BASELINE failure audit 与 threshold calibration
+
+### 目标
+
+分析当前 `CURRENT_BASELINE` 在 v3_complex test set 上的主要失败模式，并用 validation set 选择 evaluation-level mask threshold，判断面积低估是否可以被稳定缓解。本阶段不训练、不修改模型、不更新 `CURRENT_BASELINE`。
+
+### 修改内容
+
+* 第 10.1 对 `checkpoints/best_model_v3_complex_tv_sweep_2e-6.pt` 做 per-sample failure audit；
+* 第 10.2 在 test set 上做 threshold sensitivity 诊断；
+* 第 10.3 在 validation set 上选择 threshold，并只在最后用 test set 验证；
+* 明确 threshold calibration 只作为 evaluation-level calibration 记录，不更新 baseline；
+* 明确不继续做更多 threshold trick。
+
+### 输出文件
+
+* `results/metrics/v3_current_baseline_failure_audit.csv`
+* `results/summaries/v3_current_baseline_failure_audit_summary.txt`
+* `results/metrics/v3_current_baseline_threshold_sensitivity.csv`
+* `results/summaries/v3_current_baseline_threshold_sensitivity_summary.txt`
+* `results/metrics/v3_current_baseline_val_selected_threshold.csv`
+* `results/summaries/v3_current_baseline_val_selected_threshold_summary.txt`
+
+### 关键指标 / 结果
+
+第 10.1 failure audit 显示 `CURRENT_BASELINE` 的主要失败模式是系统性面积低估：`pred_area < true_area` 为 158 / 200，`pred_area=0` 为 18。small / medium / large 三个面积分桶中，平均 `pred_area` 都小于 `true_area`。最差样本主要集中在 polygon、rotated_rect、multi_defect。
+
+第 10.2 threshold sensitivity 显示，提高 mask threshold 可以明显缓解面积低估。`threshold=550` 在 test set 上改善 IoU、Dice、area_error、center_error，并减少 `pred_area=0`。但第 10.2 是 test-set 诊断，不能作为正式选阈值依据。
+
+第 10.3 validation-selected threshold calibration 使用 validation set 选出 `threshold=600`。在 test set 上，`threshold=600` 相比默认 `threshold=500`：
+
+* IoU 从 0.2953 提升到 0.3528；
+* Dice 从 0.4219 提升到 0.4952；
+* center_error 从 1.3259 降到 1.2031；
+* `pred_area=0` 从 18 降到 9；
+* `pred_area < true_area` 从 158 降到 80；
+* area_error 从 0.3945 小幅升到 0.4158；
+* `pred_area > true_area` 从 42 增加到 120。
+
+### 结论
+
+`threshold=600` 能稳定缓解 CURRENT_BASELINE 的面积低估和空预测问题，并改善 IoU、Dice、center_error；但它也引入更多面积高估，使 test set area_error 小幅变差。
+
+因此 `threshold=600` 只作为 validation-selected evaluation-level calibration 记录，不更新 `CURRENT_BASELINE`。本阶段不继续做更多 threshold trick。

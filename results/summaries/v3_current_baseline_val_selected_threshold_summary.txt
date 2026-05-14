@@ -1,0 +1,44 @@
+# 第 10.3 CURRENT_BASELINE validation-selected threshold calibration
+
+## Setup
+
+checkpoint: checkpoints/best_model_v3_complex_tv_sweep_2e-6.pt
+dataset: v3_complex
+validation set: data/training_data_v3_complex_val.npz
+test set: data/training_data_v3_complex_test.npz
+threshold candidates: 500, 525, 550, 575, 600
+Selection uses validation set only. Test set is used only for final verification.
+
+## Validation sweep
+
+| threshold | selected | MSE | MAE | IoU | Dice | area_error | center_error | pred_area=0 | pred_area<true_area | pred_area>true_area | pred_area | true_area |
+|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 500 |  | 2.21932081e+04 | 4.70484419e+01 | 3.05094212e-01 | 4.30574208e-01 | 3.94489126e-01 | 1.23130435e+00 | 19 | 162 | 37 | 7.89448300e+00 | 1.15643524e+01 |
+| 525 |  | 2.21932081e+04 | 4.70484419e+01 | 3.26845828e-01 | 4.57472908e-01 | 3.52087463e-01 | 1.18921841e+00 | 18 | 142 | 58 | 8.99742342e+00 | 1.15643524e+01 |
+| 550 |  | 2.21932081e+04 | 4.70484419e+01 | 3.45548546e-01 | 4.80301731e-01 | 3.36481970e-01 | 1.14440040e+00 | 17 | 119 | 80 | 1.01494731e+01 | 1.15643524e+01 |
+| 575 |  | 2.21932081e+04 | 4.70484419e+01 | 3.59104942e-01 | 4.97356491e-01 | 3.54730420e-01 | 1.13928998e+00 | 14 | 95 | 104 | 1.13022842e+01 | 1.15643524e+01 |
+| 600 | yes | 2.21932081e+04 | 4.70484419e+01 | 3.70283837e-01 | 5.11831273e-01 | 3.91511061e-01 | 1.12023413e+00 | 12 | 75 | 125 | 1.24713127e+01 | 1.15643524e+01 |
+
+## Selected threshold
+
+validation selected threshold: 600
+selection rule: prioritize IoU/Dice improvement while requiring area_error <= 1.05 * default area_error and pred_area=0 not increased.
+
+## Test verification
+
+| threshold | selected | MSE | MAE | IoU | Dice | area_error | center_error | pred_area=0 | pred_area<true_area | pred_area>true_area | pred_area | true_area |
+|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 500 |  | 2.07377174e+04 | 4.44655262e+01 | 2.95272047e-01 | 4.21885407e-01 | 3.94517442e-01 | 1.32594189e+00 | 18 | 158 | 42 | 7.16553425e+00 | 1.05042018e+01 |
+| 600 | yes | 2.07377174e+04 | 4.44655262e+01 | 3.52787205e-01 | 4.95192002e-01 | 4.15808691e-01 | 1.20307838e+00 | 9 | 80 | 120 | 1.15008530e+01 | 1.05042018e+01 |
+
+## Deltas
+
+validation selected - default: delta_iou=6.51896255e-02, delta_dice=8.12570648e-02, delta_area_error=-2.97806434e-03, delta_center_error=-1.11070211e-01, delta_pred_area_zero=-7, delta_pred_area_lt_true=-87, delta_pred_area_gt_true=88
+test selected - default: delta_iou=5.75151583e-02, delta_dice=7.33065952e-02, delta_area_error=2.12912482e-02, delta_center_error=-1.22863505e-01, delta_pred_area_zero=-9, delta_pred_area_lt_true=-78, delta_pred_area_gt_true=78
+
+## Judgment
+
+Validation selected a threshold above 500, confirming that default threshold=500 is too strict for the current output calibration on validation data.
+On test set, the validation-selected threshold does not reduce area_error.
+pred_area=0 is reduced or not increased on test set.
+This is an evaluation-level calibration record only and does not update CURRENT_BASELINE.
