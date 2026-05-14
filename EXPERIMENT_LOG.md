@@ -1916,3 +1916,60 @@ CURRENT_BASELINE 的 small defect 失败既与 Bz 信号较弱、可辨识性较
 ### 下一步
 
 不继续 loss trick、threshold trick、small oversampling ratio trick。后续实验应围绕 CURRENT_BASELINE 的真实失败样本和弱 Bz 信号可辨识性重新定义实验包、接受条件和停止条件。
+
+---
+
+## 第 11.2 / 11.3 步：v3_complex data observability audit 与 Bz input feature augmentation gate
+
+### 目标
+
+第 11.2 只分析 v3_complex 数据本身的可观测性，判断 small / low-signal 样本是否天然更难；第 11.3 在不改 loss、decoder、threshold、oversampling 和 evaluate_pinn.py 的前提下，快速测试 `raw_plus_norm_stats` Bz 输入增强是否能改善 weak Bz signal 的利用。
+
+### 修改内容
+
+* 第 11.2：读取 v3_complex train / val / test，统计 true_area、Bz signal 强度、Bz peak x、defect centroid x 和 peak-centroid offset；
+* 第 11.2：复用 CURRENT_BASELINE failure audit，把 test 失败样本与信号强度关联；
+* 第 11.3：临时在 `train_pinn.py` 中加入 `--bz-feature-mode raw_plus_norm_stats`，训练 seed=42 gate；
+* 第 11.3 gate 失败后已恢复 `train_pinn.py`，不保留失败代码分支；
+* 更新 `EXPERIMENT_LOG.md` 和 `术语说明.md`。
+
+### 输出文件
+
+* `results/metrics/v3_complex_data_observability_audit.csv`
+* `results/summaries/v3_complex_data_observability_audit_summary.txt`
+* `results/summaries/v3_complex_bz_feature_aug_gate_summary.txt`
+* `results/metrics/evaluation_metrics_v3_complex_bz_feature_aug_seed42.csv`
+* `results/metrics/evaluation_metrics_v3_complex_bz_feature_aug_seed42.txt`
+* `results/metrics/evaluation_metrics_v3_complex_bz_feature_aug_seed42_summary.csv`
+
+### 关键指标 / 结果
+
+第 11.2 data observability audit 显示，v3_complex 的 train / val / test small 比例接近，分别为 33.40%、34.00%、33.50%，说明 small 失败不是由 split 分布异常造成。
+
+按 train-based true_area 分桶统计，small 样本的 Bz 信号明显弱于 large：small mean `max_abs_bz = 6.8745`、`l2_energy_bz = 1605.81`，large mean `max_abs_bz = 14.6291`、`l2_energy_bz = 8452.48`。low-signal 样本主要集中在 polygon 和 rotated_rect：polygon 占 low-signal 的 53.02%，rotated_rect 占 24.14%，multi_defect 占 22.84%。
+
+Bz peak x 与 defect centroid x 不是可靠一一对应。small 样本 mean `peak_centroid_dx_abs = 1.5186 mm`，其中 `>1 mm` 为 409 / 469，`>2 mm` 为 53 / 469。multi_defect 中最强 Bz peak 也可能与几何中心分离。
+
+CURRENT_BASELINE 的失败样本与低信号相关：`pred_area=0` 样本 mean `max_abs_bz = 4.0629`，非空预测样本为 10.9604；`IoU < 0.1` 样本 mean `max_abs_bz = 5.7437`，`IoU >= 0.1` 样本为 11.4886。test set 中 `max_abs_bz` 与 IoU 的相关系数约 0.5866，`peak_to_peak_bz` 与 IoU 约 0.5935；peak-centroid offset 与 IoU 只有弱负相关，约 -0.1364。
+
+第 11.3 `raw_plus_norm_stats` gate 失败。相比 CURRENT_BASELINE：
+
+* overall IoU 从 0.2953 降到 0.2787；
+* overall Dice 从 0.4219 降到 0.4009；
+* area_error 从 0.3945 升到 0.4269；
+* pred_area=0 从 18 增加到 21；
+* small IoU 从 0.2022 降到 0.1687，small Dice 从 0.2930 降到 0.2487；
+* low-signal IoU 从 0.1607 降到 0.1477，low-signal Dice 从 0.2461 降到 0.2277；
+* 仅 MSE 和 center_error 有轻微改善，不构成综合改善。
+
+### 结论
+
+v3_complex 的 small defect 失败具有明显数据可观测性因素：small / low-signal 样本确实 Bz 信号更弱，且 Bz peak x 不稳定等价于 defect centroid x。但该问题不是纯粹不可辨识，模型训练与表示仍有影响。
+
+第 11.3 表明，简单地把 per-sample normalized Bz 和少量 signal stats 拼入输入并不能改善 small / low-signal 样本，反而降低 IoU / Dice 并增加空预测。因此不扩展 3 seed，不继续调输入特征，不保留本次 `raw_plus_norm_stats` 代码分支。
+
+`CURRENT_BASELINE` 保持不变。
+
+### 下一步
+
+不继续 loss trick、threshold trick、small oversampling、CNN1D encoder 或简单 Bz input feature augmentation。后续需要重新定义新的实验包、接受条件和停止条件。

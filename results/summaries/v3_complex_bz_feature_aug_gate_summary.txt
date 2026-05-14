@@ -1,0 +1,50 @@
+# Step 11.3 v3_complex Bz input feature augmentation gate
+
+## Setup
+
+dataset: v3_complex
+checkpoint: checkpoints/best_model_v3_complex_bz_feature_aug_seed42.pt
+baseline checkpoint: checkpoints/best_model_v3_complex_tv_sweep_2e-6.pt
+seed: 42
+epochs: 50
+lambda_tv: 2e-6
+loss: MSE + TV
+mask threshold: pred_mu < 500
+bz_feature_mode: raw_plus_norm_stats
+feature mode detail: original globally normalized Bz plus per-sample max-abs normalized shape channel and log1p(max_abs, peak_to_peak, l2_energy) scalar stats.
+
+## Overall comparison
+
+| model | MSE | MAE | IoU | Dice | area_error | center_error | pred_area=0 | pred_area<true | pred_area>true |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| CURRENT_BASELINE | 2.07377174e+04 | 4.44655262e+01 | 2.95272047e-01 | 4.21885407e-01 | 3.94517442e-01 | 1.32594189e+00 | 18 | 158 | 42 |
+| raw_plus_norm_stats | 2.05554662e+04 | 4.64259757e+01 | 2.78685578e-01 | 4.00857779e-01 | 4.26929346e-01 | 1.32429144e+00 | 21 | 167 | 32 |
+
+## Area-bin comparison
+
+| bin | model | count | IoU | Dice | area_error | pred_area=0 | pred_area<true | pred_area>true |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| small | CURRENT_BASELINE | 67 | 2.02241320e-01 | 2.92975910e-01 | 4.54790178e-01 | 15 | 42 | 25 |
+| small | raw_plus_norm_stats | 67 | 1.68704881e-01 | 2.48708511e-01 | 5.36108430e-01 | 18 | 53 | 14 |
+| medium | CURRENT_BASELINE | 74 | 3.22844231e-01 | 4.61787760e-01 | 3.48999024e-01 | 3 | 60 | 14 |
+| medium | raw_plus_norm_stats | 74 | 2.97909871e-01 | 4.29796186e-01 | 4.10675026e-01 | 3 | 63 | 11 |
+| large | CURRENT_BASELINE | 59 | 3.66335047e-01 | 5.18227139e-01 | 3.83163031e-01 | 0 | 56 | 3 |
+| large | raw_plus_norm_stats | 59 | 3.79467087e-01 | 5.37341825e-01 | 3.23333094e-01 | 0 | 51 | 7 |
+
+## Low-signal comparison
+
+| model | count | IoU | Dice | area_error | pred_area=0 | pred_area<true | pred_area>true |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| CURRENT_BASELINE | 70 | 1.60742464e-01 | 2.46088621e-01 | 5.95307424e-01 | 18 | 59 | 11 |
+| raw_plus_norm_stats | 70 | 1.47713692e-01 | 2.27734533e-01 | 6.40773963e-01 | 20 | 62 | 8 |
+
+## Judgment
+
+small IoU/Dice improved: False
+low-signal IoU/Dice improved: False
+overall IoU/Dice not down: False
+pred_area=0 reduced: False
+MSE worsened >5%: False
+MAE worsened >5%: False
+area_error worsened >5%: True
+Conclusion: Gate failed; restore train_pinn.py and do not continue tuning this input feature mode.

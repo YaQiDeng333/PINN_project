@@ -1,0 +1,70 @@
+# Step 11.2 v3_complex data observability audit
+
+## Setup
+
+datasets: v3_complex train / val / test
+mask rule for true defect: mu_r < 500
+train-based area bins: small <= 7.65951999e+00, medium <= 1.23344159e+01, large > 1.23344159e+01
+low-signal definition: max_abs_bz <= train lower-third cutoff 7.60016489e+00
+CURRENT_BASELINE failure metrics joined for test samples only.
+
+## Split area-bin counts
+
+| split | small | medium | large | total | small_ratio |
+|---|---:|---:|---:|---:|---:|
+| train | 334 | 333 | 333 | 1000 | 0.3340 |
+| val | 68 | 53 | 79 | 200 | 0.3400 |
+| test | 67 | 74 | 59 | 200 | 0.3350 |
+
+## Signal strength by area bin, all splits
+
+| area_bin | count | true_area | max_abs_bz | peak_to_peak_bz | mean_abs_bz | std_bz | l2_energy_bz | peak_centroid_dx_abs |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| small | 469 | 5.39111607e+00 | 6.87454984e+00 | 1.07613535e+01 | 2.19801295e+00 | 2.18967548e+00 | 1.60580945e+03 | 1.51861961e+00 |
+| medium | 460 | 9.94400212e+00 | 1.03954874e+01 | 1.77858100e+01 | 3.08215962e+00 | 3.71165972e+00 | 3.63423174e+03 | 1.84051007e+00 |
+| large | 471 | 1.77854059e+01 | 1.46290675e+01 | 2.60135082e+01 | 4.60299282e+00 | 5.77984098e+00 | 8.45248470e+03 | 3.04528312e+00 |
+
+## Small-sample peak-centroid alignment
+
+small mean peak_centroid_dx_abs: 1.51861961e+00
+small dx > 1 mm: 409 / 469
+small dx > 2 mm: 53 / 469
+small dx > 5 mm: 5 / 469
+
+## Low-signal type concentration, all splits
+
+| defect_type | all_count | low_signal_count | low_signal_ratio_within_type | share_of_low_signal |
+|---|---:|---:|---:|---:|
+| multi_defect | 464 | 106 | 0.2284 | 0.2284 |
+| polygon | 495 | 246 | 0.4970 | 0.5302 |
+| rotated_rect | 441 | 112 | 0.2540 | 0.2414 |
+
+## CURRENT_BASELINE failure relation on test set
+
+| group | count | true_area | max_abs_bz | peak_to_peak_bz | l2_energy_bz | peak_centroid_dx_abs |
+|---|---:|---:|---:|---:|---:|---:|
+| pred_area_zero | 18 | 4.64359457e+00 | 4.06290225e+00 | 5.09365658e+00 | 6.97915029e+02 | 2.57666959e+00 |
+| pred_area_nonzero | 182 | 1.10838223e+01 | 1.09604462e+01 | 1.89645672e+01 | 4.55464762e+03 | 2.07686728e+00 |
+| iou_lt_0p1 | 40 | 5.80174377e+00 | 5.74373719e+00 | 8.45969273e+00 | 1.19447172e+03 | 2.08589113e+00 |
+| iou_ge_0p1 | 160 | 1.16798163e+01 | 1.14886498e+01 | 2.00303083e+01 | 4.96080918e+03 | 2.13083908e+00 |
+| worst10_iou | 10 | 4.30181789e+00 | 4.45214067e+00 | 5.91969948e+00 | 7.48766436e+02 | 1.31771940e+00 |
+
+## Test-set correlations with CURRENT_BASELINE metrics
+
+| relation | correlation |
+|---|---:|
+| max_abs_bz_vs_iou | 5.86577304e-01 |
+| peak_to_peak_bz_vs_iou | 5.93494851e-01 |
+| l2_energy_bz_vs_iou | 4.94346926e-01 |
+| peak_centroid_dx_abs_vs_iou | -1.36435076e-01 |
+| max_abs_bz_vs_dice | 5.90475401e-01 |
+| peak_centroid_dx_abs_vs_dice | -1.20795650e-01 |
+
+## Judgment
+
+Small samples have clearly weaker Bz signals than large samples across train/val/test. The mean max_abs_bz rises from small to large, and the same trend holds for peak_to_peak_bz and l2_energy_bz.
+The train / val / test small ratios are similar enough for the three splits to be considered broadly aligned; the test set is not unusually small-heavy.
+Bz peak x is not a perfectly reliable proxy for defect centroid x. Small samples often have millimeter-level peak-centroid offsets, and multi-defect samples can further decouple the strongest Bz peak from the geometric centroid.
+Low-signal samples are concentrated most strongly in polygon and rotated_rect, while multi_defect is less dominant in the low-signal bucket because multi-defect samples often have larger total area and stronger aggregate signal.
+CURRENT_BASELINE failure samples correspond to weaker Bz signal and smaller true_area on average. pred_area=0 samples have much lower signal strength than nonzero predictions. IoU is moderately correlated with signal strength, while peak-centroid offset has only weak negative correlation with IoU/Dice.
+Main conclusion: small-defect failure is partly a data observability / single-signal identifiability issue, especially for weak polygon and rotated_rect samples, but not purely a data impossibility. The moderate correlations and nonzero peak-centroid effects indicate that model training and representation still contribute to the failure.
