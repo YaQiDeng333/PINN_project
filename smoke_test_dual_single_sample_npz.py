@@ -40,6 +40,14 @@ def _run_loop(npz_path):
         "1",
         "--mu-steps",
         "1",
+        "--test-radius",
+        "5.0",
+        "--center-mode",
+        "three",
+        "--lambda-area-prior",
+        "0.0",
+        "--lambda-mask-prior",
+        "0.0",
     ]
     return subprocess.run(command, text=True, capture_output=True)
 
@@ -61,6 +69,16 @@ def _assert_success(result):
         "mu_label_min=",
         "mu_label_max=",
         "test_grads_shape=",
+        "center_mode=three",
+        "test_centers=3",
+        "mu_mse=",
+        "mu_mae=",
+        "defect_iou=",
+        "area_prior_loss=",
+        "pred_defect_fraction=",
+        "target_defect_fraction=",
+        "dice_loss=",
+        "lambda_mask_prior=",
     ]
     missing = [snippet for snippet in required_snippets if snippet not in result.stdout]
     if missing:
