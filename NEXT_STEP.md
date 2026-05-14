@@ -2,25 +2,26 @@ NEXT_STEP
 
 ## 当前最新状态（以此为准）
 
-第 8.4 步：auxiliary mask head 阶段收口已完成。
-
-本轮只做阶段性文档收口，不训练、不评估、不修改模型结构、不修改 `CURRENT_BASELINE`。
+第 11.5 步：multi-liftoff Bz observation 3 seed expansion 已完成。
 
 阶段事实：
 
-* 第 8.2 standard decoder + aux mask loss 显示，aux_mask_head 直接作为最终 mask 输出不够好；
-* aux mask loss 作为 regularizer 对 standard decoder 有正信号，`standard_aux_mu_threshold` 相比 baseline 在 MSE、MAE、IoU/Dice、area_error、small IoU=0 上整体更好；
-* 第 8.3 enhanced decoder + aux mask loss 显示，`enhanced_aux_mu_threshold` 的 MSE、IoU/Dice、small IoU=0 有改善；
-* 但 enhanced + aux mask loss 没有降低 area_error，仍然严重面积高估，因此不满足接受条件并触发停止条件；
-* aux mask head 直接输出 mask 不作为主线方向；
-* 不继续调 mask_pred threshold；
-* 不继续调 lambda_mask；
-* 不继续 enhanced aux 方向；
+* 第 11.4 seed=42 gate 中，multi-liftoff 相比 fair single-liftoff 有明显正信号；
+* 第 11.5 三 seed 配对实验显示该正信号不稳定；
+* multi-liftoff 的 3 seed mean 相比 fair single-liftoff，IoU / Dice 下降，area_error 和 center_error 变差；
+* `pred_area=0` 略少，但不足以抵消整体指标下降；
+* small / low-signal 样本没有稳定改善；
+* 提升主要来自 seed=42，seed=123 和 seed=2026 未复现；
+* multi-liftoff 不进入正式主线候选；
+* 不继续扩展 seed；
+* 不继续调 multi-liftoff 结构；
 * 当前不切换 `CURRENT_BASELINE`。
 
 ## 当前下一步
 
-进入下一阶段前，先由主线对话重新定义新的实验包、接受条件和停止条件，不从第 8.3 的副作用继续修补。
+不再继续小 gate 或 multi-liftoff 修补。
+
+下一阶段应转向阶段性总结、当前 baseline 结果整理和论文材料准备；除非重新定义更大的实验包、接受条件和停止条件，否则不继续追加局部技巧实验。
 
 ---
 

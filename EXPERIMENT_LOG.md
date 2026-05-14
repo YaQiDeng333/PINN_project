@@ -1973,3 +1973,68 @@ v3_complex 的 small defect 失败具有明显数据可观测性因素：small /
 ### 下一步
 
 不继续 loss trick、threshold trick、small oversampling、CNN1D encoder 或简单 Bz input feature augmentation。后续需要重新定义新的实验包、接受条件和停止条件。
+
+---
+
+## 第 11.4 / 11.5 步：multi-liftoff Bz observation gate 与 3 seed expansion
+
+### 目标
+
+验证在 v3_complex 数据上增加 multi-liftoff Bz 观测是否能稳定改善 weak Bz / small defect 样本的可辨识性。本阶段不更新 `CURRENT_BASELINE`。
+
+### 修改内容
+
+* 第 11.4：在 `data_generator_v2.py` 中新增 `v3_complex_multiliftoff` 数据生成路径，同一样本输出两个 lift-off Bz 通道；
+* 第 11.4：在 `train_pinn.py` 中加入多通道 Bz 输入兼容，默认单通道路径保持不变；
+* 第 11.4：在 `evaluate_pinn.py` 中加入 multi-channel checkpoint 的 `signal_channels` 推断；
+* 第 11.4：完成 seed=42 fair single-liftoff vs multi-liftoff gate；
+* 第 11.5：复用第 11.4 的 seed=42 checkpoint，补跑 seed=123 和 seed=2026，完成 3 seed 配对实验；
+* 第 11.5 不修改代码，不更新 `CURRENT_BASELINE`。
+
+### 输出文件
+
+* `results/summaries/v3_complex_multiliftoff_gate_summary.txt`
+* `results/metrics/evaluation_metrics_v3_complex_multiliftoff_seed42.csv`
+* `results/metrics/evaluation_metrics_v3_complex_multiliftoff_seed42.txt`
+* `results/metrics/evaluation_metrics_v3_complex_multiliftoff_seed42_summary.csv`
+* `results/summaries/v3_complex_multiliftoff_3seed_summary.txt`
+* `results/metrics/v3_complex_multiliftoff_3seed_metrics.csv`
+
+### 关键指标 / 结果
+
+第 11.4 seed=42 gate 中，multi-liftoff 相比 fair single-liftoff 有明显正信号：
+
+* overall IoU 从 0.2883 提升到 0.3179；
+* overall Dice 从 0.4183 提升到 0.4530；
+* area_error 从 0.4243 降到 0.3538；
+* center_error 从 1.3390 降到 1.2772；
+* `pred_area=0` 从 19 降到 10；
+* small IoU 从 0.1831 提升到 0.2430；
+* low-signal IoU 从 0.1426 提升到 0.2066。
+
+第 11.5 三 seed 配对实验显示该正信号不稳定。3 seed mean 对比中，multi-liftoff 相比 fair single-liftoff：
+
+* mean IoU 从 0.2932 降到 0.2825；
+* mean Dice 从 0.4233 降到 0.4099；
+* mean area_error 从 0.4139 升到 0.4398；
+* mean center_error 从 1.2823 升到 1.3336；
+* mean `pred_area=0` 从 18.67 小幅降到 17.33。
+
+small / low-signal 样本也没有稳定改善：
+
+* small mean IoU 基本持平，0.2000 vs 0.2000；
+* small mean Dice 仅轻微变化，0.2926 vs 0.2939；
+* low-signal mean IoU 从 0.1566 降到 0.1528；
+* low-signal mean Dice 从 0.2383 降到 0.2313。
+
+paired difference 显示，multi-liftoff 的提升主要来自 seed=42，seed=123 和 seed=2026 未复现。
+
+### 结论
+
+第 11.4 的 seed=42 正信号没有在三 seed 配对实验中稳定复现。multi-liftoff 相比 fair single-liftoff 的 3 seed mean 在 IoU、Dice、area_error、center_error 上均变差，`pred_area=0` 仅小幅减少，不足以抵消整体指标下降。
+
+因此 multi-liftoff 不进入正式主线候选，不继续扩展 seed，不继续调 multi-liftoff 结构。`CURRENT_BASELINE` 保持不变。
+
+### 下一步
+
+不继续小 gate 或 multi-liftoff 修补。下一阶段转向阶段性总结、当前 baseline 结果整理和论文材料准备，除非重新定义更大的实验包、接受条件和停止条件。
