@@ -166,7 +166,8 @@ class PINN(nn.Module):
             coord_feature_dim=84,
             latent_dim=64,
             model_variant='baseline',
-            decoder_variant='standard'):
+            decoder_variant='standard',
+            aux_mask_head=False):
         super().__init__()
         if model_variant not in ('baseline', 'calibrated_mu'):
             raise ValueError(f'Unsupported model_variant: {model_variant}')
@@ -174,6 +175,7 @@ class PINN(nn.Module):
             raise ValueError(f'Unsupported decoder_variant: {decoder_variant}')
         self.model_variant = model_variant
         self.decoder_variant = decoder_variant
+        self.aux_mask_head = aux_mask_head
         self.mu_min = MU_NORM_MIN
         self.mu_max = MU_NORM_MAX
         self.bz_encoder = BzEncoder(signal_length=signal_length, latent_dim=latent_dim)
@@ -200,8 +202,25 @@ class PINN(nn.Module):
                 nn.SiLU(),
                 nn.Linear(64, 1),
             )
+        if self.aux_mask_head:
+            self.decoder_feature_dim = self._infer_decoder_feature_dim()
+            self.mask_head = nn.Linear(self.decoder_feature_dim, 1)
 
-    def forward(self, bz_signal, coords):
+    def _infer_decoder_feature_dim(self):
+        linear_layers = [layer for layer in self.decoder if isinstance(layer, nn.Linear)]
+        if len(linear_layers) < 2:
+            raise ValueError('Decoder must contain at least two Linear layers for aux mask head.')
+        return linear_layers[-2].out_features
+
+    def _decode_logits(self, features):
+        hidden = features
+        decoder_layers = list(self.decoder.children())
+        for layer in decoder_layers[:-1]:
+            hidden = layer(hidden)
+        logits = decoder_layers[-1](hidden).squeeze(-1)
+        return hidden, logits
+
+    def forward(self, bz_signal, coords, return_aux_mask=False):
         if coords.dim() == 2:
             coords = coords.unsqueeze(0).expand(bz_signal.shape[0], -1, -1)
 
@@ -209,12 +228,19 @@ class PINN(nn.Module):
         coord_features = feature_mapping(coords)
         bz_features = bz_latent.unsqueeze(1).expand(-1, coord_features.shape[1], -1)
         features = torch.cat([bz_features, coord_features], dim=-1)
-        logits = self.decoder(features).squeeze(-1)
+        hidden, logits = self._decode_logits(features)
         if self.model_variant == 'baseline':
-            return F.softplus(logits)
+            mu_pred = F.softplus(logits)
+        else:
+            defect_prob = torch.sigmoid(logits)
+            mu_pred = self.mu_min + (self.mu_max - self.mu_min) * (1.0 - defect_prob)
 
-        defect_prob = torch.sigmoid(logits)
-        return self.mu_min + (self.mu_max - self.mu_min) * (1.0 - defect_prob)
+        if return_aux_mask:
+            if not self.aux_mask_head:
+                return mu_pred, None
+            mask_pred = torch.sigmoid(self.mask_head(hidden).squeeze(-1))
+            return mu_pred, mask_pred
+        return mu_pred
 
 
 def tv_loss(mu_pred_map):
@@ -299,6 +325,38 @@ def compute_area_loss(pred, target, area_loss_type='symmetric', eps=1e-6):
     return torch.mean(area_penalty / (true_area + eps))
 
 
+def compute_aux_mask_loss(mask_pred, target, eps=1e-6):
+    target_mask = (target < normalized_defect_threshold()).to(dtype=mask_pred.dtype)
+    bce = F.binary_cross_entropy(mask_pred, target_mask)
+
+    pred_flat = mask_pred.reshape(mask_pred.shape[0], -1)
+    target_flat = target_mask.reshape(target.shape[0], -1)
+    intersection = torch.sum(pred_flat * target_flat, dim=1)
+    pred_sum = torch.sum(pred_flat, dim=1)
+    target_sum = torch.sum(target_flat, dim=1)
+    dice = (2.0 * intersection + eps) / (pred_sum + target_sum + eps)
+    dice_loss = torch.mean(1.0 - dice)
+    return bce + dice_loss
+
+
+def compute_aux_mask_metrics(mask_pred, target, eps=1e-6):
+    target_mask = target < normalized_defect_threshold()
+    pred_mask = mask_pred >= 0.5
+
+    pred_flat = pred_mask.reshape(pred_mask.shape[0], -1)
+    target_flat = target_mask.reshape(target_mask.shape[0], -1)
+    intersection = torch.sum((pred_flat & target_flat).to(dtype=mask_pred.dtype), dim=1)
+    pred_sum = torch.sum(pred_flat.to(dtype=mask_pred.dtype), dim=1)
+    target_sum = torch.sum(target_flat.to(dtype=mask_pred.dtype), dim=1)
+    union = torch.sum((pred_flat | target_flat).to(dtype=mask_pred.dtype), dim=1)
+    iou = (intersection + eps) / (union + eps)
+    dice = (2.0 * intersection + eps) / (pred_sum + target_sum + eps)
+    return {
+        'mask_iou': torch.mean(iou),
+        'mask_dice': torch.mean(dice),
+    }
+
+
 def get_batch_physics_params(dataset, indices, device):
     indices_np = indices.detach().cpu().numpy()
     depth = torch.from_numpy(dataset.depths[indices_np]).to(device)
@@ -323,27 +381,36 @@ def run_epoch(
     lambda_dice=0.05,
     lambda_area=0.0,
     area_loss_type='symmetric',
+    aux_mask_head=False,
+    lambda_mask=0.0,
 ):
     model.train()
     total_unweighted_mse_loss = 0.0
     total_weighted_mse_loss = 0.0
     total_soft_dice_loss = 0.0
     total_area_loss = 0.0
+    total_mask_loss = 0.0
     total_tv_loss = 0.0
     total_physics_loss = 0.0
     total_total_loss = 0.0
     total_samples = 0
+    use_aux_mask = aux_mask_head and getattr(model, 'aux_mask_head', False)
 
     for signals, mu_targets, indices in loader:
         signals = signals.to(device)
         mu_targets = mu_targets.to(device)
 
         optimizer.zero_grad()
-        pred = model(signals, coords)
+        if use_aux_mask:
+            pred, mask_pred = model(signals, coords, return_aux_mask=True)
+        else:
+            pred = model(signals, coords)
+            mask_pred = None
         pred_map = pred.reshape(signals.shape[0], *grid_shape)
         unweighted_mse = criterion(pred, mu_targets)
         soft_dice = pred.new_tensor(0.0)
         area = pred.new_tensor(0.0)
+        mask = pred.new_tensor(0.0)
         if loss_type == 'weighted_mse':
             weighted_mse = compute_weighted_mse_loss(pred, mu_targets, defect_weight)
             data_loss = weighted_mse
@@ -361,6 +428,8 @@ def run_epoch(
             data_loss = unweighted_mse
         else:
             raise ValueError(f'Unsupported loss_type: {loss_type}')
+        if use_aux_mask:
+            mask = compute_aux_mask_loss(mask_pred, mu_targets)
         tv = tv_loss(pred_map * MU_SCALE)
         phy = pred.new_tensor(0.0)
         if lambda_phy > 0.0:
@@ -376,7 +445,7 @@ def run_epoch(
                 signal_mean=physics_dataset.signal_mean,
                 signal_std=physics_dataset.signal_std,
             )
-        total = data_loss + lambda_tv * tv + lambda_phy * phy
+        total = data_loss + lambda_mask * mask + lambda_tv * tv + lambda_phy * phy
         total.backward()
         optimizer.step()
 
@@ -385,6 +454,7 @@ def run_epoch(
         total_weighted_mse_loss += weighted_mse.item() * batch_size
         total_soft_dice_loss += soft_dice.item() * batch_size
         total_area_loss += area.item() * batch_size
+        total_mask_loss += mask.item() * batch_size
         total_tv_loss += tv.item() * batch_size
         total_physics_loss += phy.item() * batch_size
         total_total_loss += total.item() * batch_size
@@ -397,6 +467,7 @@ def run_epoch(
         'weighted_mse_loss': total_weighted_mse_loss / total_samples,
         'soft_dice_loss': total_soft_dice_loss / total_samples,
         'area_loss': total_area_loss / total_samples,
+        'mask_loss': total_mask_loss / total_samples,
         'tv_loss': total_tv_loss / total_samples,
         'physics_loss': total_physics_loss / total_samples,
         'total_loss': total_total_loss / total_samples,
@@ -404,22 +475,40 @@ def run_epoch(
 
 
 @torch.no_grad()
-def evaluate(model, loader, coords, criterion, device):
+def evaluate(model, loader, coords, criterion, device, include_aux_mask=False):
     model.eval()
     total_loss = 0.0
+    total_mask_iou = 0.0
+    total_mask_dice = 0.0
     total_samples = 0
+    use_aux_mask = include_aux_mask and getattr(model, 'aux_mask_head', False)
 
     for signals, mu_targets, _ in loader:
         signals = signals.to(device)
         mu_targets = mu_targets.to(device)
-        pred = model(signals, coords)
+        if use_aux_mask:
+            pred, mask_pred = model(signals, coords, return_aux_mask=True)
+            mask_metrics = compute_aux_mask_metrics(mask_pred, mu_targets)
+        else:
+            pred = model(signals, coords)
+            mask_metrics = None
         loss = criterion(pred, mu_targets)
 
         batch_size = signals.shape[0]
         total_loss += loss.item() * batch_size
+        if mask_metrics is not None:
+            total_mask_iou += mask_metrics['mask_iou'].item() * batch_size
+            total_mask_dice += mask_metrics['mask_dice'].item() * batch_size
         total_samples += batch_size
 
-    return total_loss / max(total_samples, 1)
+    total_samples = max(total_samples, 1)
+    if include_aux_mask:
+        return {
+            'mse_loss': total_loss / total_samples,
+            'mask_iou': total_mask_iou / total_samples,
+            'mask_dice': total_mask_dice / total_samples,
+        }
+    return total_loss / total_samples
 
 
 @torch.no_grad()
@@ -446,6 +535,7 @@ def save_loss_curve(
     train_weighted_mse_losses=None,
     train_soft_dice_losses=None,
     train_area_losses=None,
+    train_mask_losses=None,
 ):
     plt.figure(figsize=(8, 5))
     plt.plot(train_mse_losses, label='Train Unweighted MSE Loss')
@@ -455,6 +545,8 @@ def save_loss_curve(
         plt.plot(train_soft_dice_losses, label='Train Soft Dice Loss')
     if train_area_losses is not None:
         plt.plot(train_area_losses, label='Train Area Loss')
+    if train_mask_losses is not None:
+        plt.plot(train_mask_losses, label='Train Aux Mask Loss')
     plt.plot(train_tv_losses, label='Train TV Loss')
     if train_physics_losses is not None:
         plt.plot(train_physics_losses, label='Train Physics Loss')
@@ -479,11 +571,14 @@ def save_physics_loss_log(rows, output_path):
         'weighted_mse_loss',
         'soft_dice_loss',
         'area_loss',
+        'mask_loss',
         'tv_loss',
         'physics_loss',
         'total_loss',
         'val_mse_loss',
         'val_unweighted_mse_loss',
+        'val_mask_iou',
+        'val_mask_dice',
     ]
     with open(output_path, 'w', encoding='utf-8', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
@@ -528,6 +623,18 @@ def save_checkpoint(model, optimizer, epoch, best_val_loss, args, train_dataset,
     }, checkpoint_path)
 
 
+def strip_module_prefix(key):
+    return key[len('module.'):] if key.startswith('module.') else key
+
+
+def has_module_prefix(state_dict):
+    return any(key.startswith('module.') for key in state_dict)
+
+
+def has_aux_mask_head_state(state_dict):
+    return any(strip_module_prefix(key).startswith('mask_head.') for key in state_dict)
+
+
 def load_checkpoint_model(checkpoint_path, signal_length, fallback_latent_dim, device):
     checkpoint = torch.load(project_path(checkpoint_path), map_location=device)
 
@@ -537,6 +644,7 @@ def load_checkpoint_model(checkpoint_path, signal_length, fallback_latent_dim, d
         latent_dim = int(checkpoint_args.get('latent_dim', fallback_latent_dim))
         model_variant = checkpoint_args.get('model_variant', 'baseline')
         decoder_variant = checkpoint_args.get('decoder_variant', 'standard')
+        aux_mask_head = bool(checkpoint_args.get('aux_mask_head', False))
         signal_mean = checkpoint.get('signal_mean')
         signal_std = checkpoint.get('signal_std')
     else:
@@ -545,20 +653,25 @@ def load_checkpoint_model(checkpoint_path, signal_length, fallback_latent_dim, d
         latent_dim = fallback_latent_dim
         model_variant = 'baseline'
         decoder_variant = 'standard'
+        aux_mask_head = has_aux_mask_head_state(state_dict)
         signal_mean = None
         signal_std = None
+    aux_mask_head = aux_mask_head or has_aux_mask_head_state(state_dict)
 
     model = PINN(
         signal_length=signal_length,
         latent_dim=latent_dim,
         model_variant=model_variant,
         decoder_variant=decoder_variant,
+        aux_mask_head=aux_mask_head,
     ).to(device)
     try:
         model.load_state_dict(state_dict)
     except RuntimeError:
+        if not has_module_prefix(state_dict):
+            raise
         state_dict = {
-            key.replace('module.', '', 1): value
+            strip_module_prefix(key): value
             for key, value in state_dict.items()
         }
         model.load_state_dict(state_dict)
@@ -639,6 +752,11 @@ def train_adam_tv(args=None):
                 f'Warning: --decoder-variant={args.decoder_variant} but checkpoint is '
                 f'{model.decoder_variant}, using checkpoint variant'
             )
+        if args.aux_mask_head != getattr(model, 'aux_mask_head', False):
+            print(
+                f'Warning: --aux-mask-head={args.aux_mask_head} but checkpoint is '
+                f'{getattr(model, "aux_mask_head", False)}, using checkpoint setting'
+            )
         if signal_mean is None or signal_std is None:
             train_dataset_for_stats = MFLDataset(args.train_data)
             signal_mean = train_dataset_for_stats.signal_mean
@@ -651,6 +769,7 @@ def train_adam_tv(args=None):
             latent_dim=args.latent_dim,
             model_variant=args.model_variant,
             decoder_variant=args.decoder_variant,
+            aux_mask_head=args.aux_mask_head,
         ).to(device)
 
     val_dataset = MFLDataset(
@@ -681,6 +800,7 @@ def train_adam_tv(args=None):
     train_weighted_mse_losses = []
     train_soft_dice_losses = []
     train_area_losses = []
+    train_mask_losses = []
     train_tv_losses = []
     train_physics_losses = []
     train_total_losses = []
@@ -694,6 +814,7 @@ def train_adam_tv(args=None):
     print('Model: BzEncoder(signal -> latent) + Fourier(x,y) + MLP -> mu(x,y)')
     print(f'model_variant: {model.model_variant}')
     print(f'decoder_variant: {model.decoder_variant}')
+    print(f'aux_mask_head: {getattr(model, "aux_mask_head", False)}')
     if model.model_variant == 'calibrated_mu':
         print(f'calibrated_mu range: [{MU_NORM_MIN:.6f}, {MU_NORM_MAX:.6f}] normalized mu')
     print(f'Dataset: {args.dataset}')
@@ -708,6 +829,8 @@ def train_adam_tv(args=None):
     if args.loss_type == 'weighted_mse_dice_area':
         print(f'lambda_area: {args.lambda_area:.2e}')
         print(f'area_loss_type: {args.area_loss_type}')
+    if getattr(model, 'aux_mask_head', False):
+        print(f'lambda_mask: {args.lambda_mask:.2e}')
     print(f'lambda_tv: {args.lambda_tv:.2e}')
     print(f'lambda_phy: {effective_lambda_phy:.2e}')
 
@@ -729,19 +852,31 @@ def train_adam_tv(args=None):
             lambda_dice=args.lambda_dice,
             lambda_area=args.lambda_area,
             area_loss_type=args.area_loss_type,
+            aux_mask_head=args.aux_mask_head,
+            lambda_mask=args.lambda_mask,
         )
-        val_loss = evaluate(
+        val_metrics = evaluate(
             model=model,
             loader=val_loader,
             coords=coords,
             criterion=criterion,
             device=device,
+            include_aux_mask=args.aux_mask_head,
         )
+        if args.aux_mask_head:
+            val_loss = val_metrics['mse_loss']
+            val_mask_iou = val_metrics['mask_iou']
+            val_mask_dice = val_metrics['mask_dice']
+        else:
+            val_loss = val_metrics
+            val_mask_iou = 0.0
+            val_mask_dice = 0.0
 
         train_mse_losses.append(train_metrics['mse_loss'])
         train_weighted_mse_losses.append(train_metrics['weighted_mse_loss'])
         train_soft_dice_losses.append(train_metrics['soft_dice_loss'])
         train_area_losses.append(train_metrics['area_loss'])
+        train_mask_losses.append(train_metrics['mask_loss'])
         train_tv_losses.append(train_metrics['tv_loss'])
         train_physics_losses.append(train_metrics['physics_loss'])
         train_total_losses.append(train_metrics['total_loss'])
@@ -753,12 +888,22 @@ def train_adam_tv(args=None):
             'weighted_mse_loss': f'{train_metrics["weighted_mse_loss"]:.8e}',
             'soft_dice_loss': f'{train_metrics["soft_dice_loss"]:.8e}',
             'area_loss': f'{train_metrics["area_loss"]:.8e}',
+            'mask_loss': f'{train_metrics["mask_loss"]:.8e}',
             'tv_loss': f'{train_metrics["tv_loss"]:.8e}',
             'physics_loss': f'{train_metrics["physics_loss"]:.8e}',
             'total_loss': f'{train_metrics["total_loss"]:.8e}',
             'val_mse_loss': f'{val_loss:.8e}',
             'val_unweighted_mse_loss': f'{val_loss:.8e}',
+            'val_mask_iou': f'{val_mask_iou:.8e}',
+            'val_mask_dice': f'{val_mask_dice:.8e}',
         })
+        aux_log = ''
+        if args.aux_mask_head:
+            aux_log = (
+                f' | mask_loss: {train_metrics["mask_loss"]:.6e} | '
+                f'val_mask_iou: {val_mask_iou:.6e} | '
+                f'val_mask_dice: {val_mask_dice:.6e}'
+            )
         if args.loss_type == 'weighted_mse':
             print(
                 f'Epoch {epoch:03d}/{args.epochs:03d} | '
@@ -768,6 +913,7 @@ def train_adam_tv(args=None):
                 f'physics_loss: {train_metrics["physics_loss"]:.6e} | '
                 f'total_loss: {train_metrics["total_loss"]:.6e} | '
                 f'val_unweighted_mse_loss: {val_loss:.6e}'
+                f'{aux_log}'
             )
         elif args.loss_type in ('weighted_mse_dice', 'weighted_mse_dice_area'):
             print(
@@ -778,6 +924,7 @@ def train_adam_tv(args=None):
                 f'area_loss: {train_metrics["area_loss"]:.6e} | '
                 f'total_loss: {train_metrics["total_loss"]:.6e} | '
                 f'val_unweighted_mse_loss: {val_loss:.6e}'
+                f'{aux_log}'
             )
         else:
             print(
@@ -787,6 +934,7 @@ def train_adam_tv(args=None):
                 f'physics_loss: {train_metrics["physics_loss"]:.6e} | '
                 f'total_loss: {train_metrics["total_loss"]:.6e} | '
                 f'val_mse_loss: {val_loss:.6e}'
+                f'{aux_log}'
             )
 
         if val_loss < best_val_loss:
@@ -819,6 +967,7 @@ def train_adam_tv(args=None):
             else None
         ),
         train_area_losses=train_area_losses if args.loss_type == 'weighted_mse_dice_area' else None,
+        train_mask_losses=train_mask_losses if args.aux_mask_head else None,
     )
     save_validation_visualization(
         model=model,
@@ -1013,6 +1162,7 @@ def parse_args():
     parser.add_argument('--seed', type=int, default=42)
     parser.add_argument('--model-variant', choices=['baseline', 'calibrated_mu'], default='baseline')
     parser.add_argument('--decoder-variant', choices=['standard', 'enhanced'], default='standard')
+    parser.add_argument('--aux-mask-head', action='store_true')
     parser.add_argument(
         '--loss-type',
         choices=['mse', 'weighted_mse', 'weighted_mse_dice', 'weighted_mse_dice_area'],
@@ -1021,6 +1171,7 @@ def parse_args():
     parser.add_argument('--defect-weight', type=float, default=10.0)
     parser.add_argument('--lambda-dice', type=float, default=0.05)
     parser.add_argument('--lambda-area', type=float, default=0.0)
+    parser.add_argument('--lambda-mask', type=float, default=0.1)
     parser.add_argument('--area-loss-type', choices=['symmetric', 'over_only'], default='symmetric')
     parser.add_argument('--lambda-tv', type=float, default=5e-6)
     parser.add_argument('--lambda-phy', type=float, default=1e-4)
