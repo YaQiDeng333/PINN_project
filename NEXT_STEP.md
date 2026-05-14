@@ -2,23 +2,25 @@ NEXT_STEP
 
 ## 当前最新状态（以此为准）
 
-第 7.24 步：`calibrated_mu` decoder + threshold calibration 阶段性 consolidation 已完成。
+第 8.4 步：auxiliary mask head 阶段收口已完成。
 
-本轮只做阶段性文档收尾，不训练、不评估、不修改模型结构、不修改 `CURRENT_BASELINE`。
+本轮只做阶段性文档收口，不训练、不评估、不修改模型结构、不修改 `CURRENT_BASELINE`。
 
 阶段事实：
 
-* enhanced decoder 稳定改善 MAE、IoU/Dice、小 polygon 漏检和缺陷区 μ 校准；
-* enhanced decoder 也稳定带来更高 MSE、default threshold 下更严重 area_error 和面积高估；
-* global threshold calibration 能显著降低 area_error 和 `pred_area>true_area`，但会降低 Dice，并加重 small polygon IoU=0 / small pred_area=0 风险；
-* adaptive threshold 能进一步降低 area_error 和 `pred_area>true_area`，但不全面优于 global threshold，代价是 IoU/Dice 进一步下降；
-* 当前没有结果足以更新 `CURRENT_BASELINE`；
-* 停止继续做更多 threshold trick。
+* 第 8.2 standard decoder + aux mask loss 显示，aux_mask_head 直接作为最终 mask 输出不够好；
+* aux mask loss 作为 regularizer 对 standard decoder 有正信号，`standard_aux_mu_threshold` 相比 baseline 在 MSE、MAE、IoU/Dice、area_error、small IoU=0 上整体更好；
+* 第 8.3 enhanced decoder + aux mask loss 显示，`enhanced_aux_mu_threshold` 的 MSE、IoU/Dice、small IoU=0 有改善；
+* 但 enhanced + aux mask loss 没有降低 area_error，仍然严重面积高估，因此不满足接受条件并触发停止条件；
+* aux mask head 直接输出 mask 不作为主线方向；
+* 不继续调 mask_pred threshold；
+* 不继续调 lambda_mask；
+* 不继续 enhanced aux 方向；
 * 当前不切换 `CURRENT_BASELINE`。
 
 ## 当前下一步
 
-进入下一阶段前，先由主线对话重新定义实验包、接受条件和停止条件，不再从当前副作用继续追加 threshold trick。
+进入下一阶段前，先由主线对话重新定义新的实验包、接受条件和停止条件，不从第 8.3 的副作用继续修补。
 
 ---
 

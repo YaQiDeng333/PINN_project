@@ -812,3 +812,25 @@ threshold calibration 的代价：
 * adaptive threshold 的 area_error 低于 global threshold，但 IoU / Dice 进一步下降，因此不全面优于 global threshold。
 
 结论：calibrated_mu enhanced decoder 与 threshold calibration 这条线已经说明了主要 trade-off。后续不再沿着 threshold trick 继续修补；进入下一阶段前，应由主线对话重新定义实验包、接受条件和停止条件。
+
+---
+
+## 第 8.4 步：auxiliary mask head 阶段收口
+
+状态：已完成。
+
+目标：对第 8.2 standard decoder + aux mask loss 和第 8.3 enhanced decoder + aux mask loss 做阶段性收口。本阶段只做文档更新，不训练、不评估、不修改 `CURRENT_BASELINE`。
+
+阶段结论：
+
+* aux_mask_head 直接输出 mask 不作为主线方向。第 8.2 中 `aux_mask_head` 固定 threshold=0.5 的 mean IoU / Dice 低于 baseline，且 small pred_area=0 没有改善；
+* aux mask loss 作为 regularizer 对 standard decoder 有正信号。第 8.2 中 `standard_aux_mu_threshold` 相比 baseline 在 MSE、MAE、IoU/Dice、area_error、small IoU=0 上整体更好；
+* enhanced + aux mask loss 停止。第 8.3 中 `enhanced_aux_mu_threshold` 的 MSE、IoU/Dice、small IoU=0 有改善，但 area_error 从 0.953397 升到 0.982450，仍然严重面积高估；
+* 不继续调 mask_pred threshold；
+* 不继续调 lambda_mask；
+* 不继续 enhanced aux；
+* 当前不切换 `CURRENT_BASELINE`。
+
+当前下一步：
+
+进入下一阶段前，由主线对话重新定义新的实验包、接受条件和停止条件，不从第 8.3 的副作用继续修补。
