@@ -605,6 +605,34 @@ Current judgment:
 - If continuing at `80x40`, tune training steps, `test_radius`, center layout, mask temperature, BCE weight, or network capacity.
 - The result remains semi-supervised / diagnostic upper bound, not unsupervised weak-form success.
 
+## Step S26: 80x40 BCE Adaptation Probe
+
+Purpose:
+
+- Adapt the S25 `80x40` setting by testing more training steps, stronger BCE weight, and sharper mask temperature.
+
+Configuration:
+
+- Reused the S25 `80x40` / 10-sample dataset.
+- Compared `temp25_lambda1_30steps`, `temp25_lambda3_30steps`, and `temp20_lambda3_30steps`.
+- All runs used `outer_steps=30`, `phi_steps=30`, `mu_steps=30`, `center_mode=three`, and `test_radius=5.0`.
+
+Key results:
+
+| run | avg defect_iou | avg defect_area_pred | avg mu_mse | avg mu_mae |
+| --- | ---: | ---: | ---: | ---: |
+| S25 temp25_lambda1 reference | 5.102481e-01 | 2.611000e+02 | 1.519206e+05 | 3.708853e+02 |
+| temp25_lambda1_30steps | 8.081555e-01 | 1.308000e+02 | 4.524894e+04 | 1.601105e+02 |
+| temp25_lambda3_30steps | 8.706159e-01 | 1.068000e+02 | 4.723388e+04 | 1.832961e+02 |
+| temp20_lambda3_30steps | 8.866546e-01 | 1.077000e+02 | 5.950246e+04 | 2.175080e+02 |
+
+Current judgment:
+
+- All S26 runs substantially improve over the S25 reference, so the weaker S25 result was strongly affected by training-step and high-resolution adaptation.
+- `temp20_lambda3_30steps` gives the best average IoU.
+- `temp25_lambda3_30steps` is the most balanced 80x40 follow-up candidate because it is near the best IoU, has the lowest predicted area, and avoids the larger continuous-`mu` errors of `temp20_lambda3_30steps`.
+- The result remains semi-supervised / diagnostic upper bound because BCE and mask priors use `mu_label < 500`; it is not unsupervised weak-form success.
+
 ## Current Boundary
 
 - Do not claim the branch has outperformed `main`.

@@ -1,0 +1,9 @@
+final_loss_phi=2.266908e+00
+final_loss_mu=1.766120e-01
+final_mu_mse=2.919463e+04
+final_mu_mae=1.366344e+02
+final_defect_area_pred=46
+defect_area_label=48
+final_defect_iou=8.431373e-01
+pred_centroid=(1.1062190532684326, 5.451504707336426)
+label_centroid=(1.1392405033111572, 5.512819766998291)

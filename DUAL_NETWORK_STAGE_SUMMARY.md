@@ -70,6 +70,21 @@ S25 tested `temp25_lambda1` on a new `80x40` / 10-sample dataset with `20/20/20`
 
 This indicates high-resolution feasibility, not high-resolution stability. If the branch continues at `80x40`, it needs resolution-specific adaptation such as more training steps, adjusted `test_radius`, center layout, mask temperature, BCE weight, or network capacity. The boundary remains unchanged: this is semi-supervised / diagnostic upper-bound evidence, not unsupervised weak-form success.
 
+## S26 80x40 BCE Adaptation Note
+
+S26 reused the S25 `80x40` / 10-sample dataset and tested three adaptation settings with `30/30/30` training steps:
+
+| run | avg defect_iou | avg defect_area_pred | avg mu_mse | avg mu_mae |
+| --- | ---: | ---: | ---: | ---: |
+| S25 temp25_lambda1 reference | 5.102481e-01 | 2.611000e+02 | 1.519206e+05 | 3.708853e+02 |
+| temp25_lambda1_30steps | 8.081555e-01 | 1.308000e+02 | 4.524894e+04 | 1.601105e+02 |
+| temp25_lambda3_30steps | 8.706159e-01 | 1.068000e+02 | 4.723388e+04 | 1.832961e+02 |
+| temp20_lambda3_30steps | 8.866546e-01 | 1.077000e+02 | 5.950246e+04 | 2.175080e+02 |
+
+S26 shows that the weaker S25 result was strongly affected by insufficient adaptation at `80x40`. More training steps plus sharper / stronger BCE settings substantially improve IoU and reduce over-expanded defect area. `temp20_lambda3_30steps` gives the best average IoU, while `temp25_lambda3_30steps` is the most balanced 80x40 follow-up candidate because it keeps near-best IoU with the lowest predicted area and lower continuous-`mu` errors than `temp20_lambda3_30steps`.
+
+This does not change the core boundary: BCE mask prior uses `mu_label < 500`, so S26 remains a semi-supervised / diagnostic upper-bound result, not proof of unsupervised weak-form inversion success.
+
 ## 1. 当前支线目标
 
 本支线探索 `phi-Net / mu-Net` 双网络反演方法：
