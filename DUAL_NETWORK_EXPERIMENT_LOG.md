@@ -687,9 +687,36 @@ Current judgment:
 - `temp25_lambda3` is suitable as the current `80x40` comprehensive default candidate.
 - The result remains semi-supervised / diagnostic upper bound because BCE and mask priors use `mu_label < 500`; it is not unsupervised weak-form success.
 
-## Current Boundary
+## Step S29: 80x40 可视化失败诊断
 
-- Do not claim the branch has outperformed `main`.
-- Do not claim pure weak-form unsupervised inversion is solved.
-- The most stable results come from BCE mask prior, which uses `mu_label` mask information.
-- The recommended next route is semi-supervised dual-network validation or a redesign of label-free localization / false-positive suppression.
+目的：
+
+- 在不重新训练的前提下，基于 S28 `80x40` `temp25_lambda3` 结果整理成功样本和弱样本。
+
+配置：
+
+- 只读取 S28 的 `baseline/metrics.csv`、`temp25_lambda3/metrics.csv` 和已有 `temp25_lambda3/sample_*/mu_pred_vs_label.png`。
+- 复制 15 张代表性 PNG 到 `experiments/dual_network/S29_80x40_visual_failure_report/figures/`。
+
+关键发现：
+
+- IoU 最高的成功样本：2、29、47。
+- IoU 最低的弱样本：45、48、41、49、21。
+- 面积误差最大的样本：21、45、3、37、11。
+- centroid 偏移最大的样本：45、21、25、44、6。
+- 相比 baseline 改善最大的样本：47、18、2、26、20。
+- 相比 baseline 改善最小的样本：45、41、21、48、49。
+
+当前判断：
+
+- S28 的 `temp25_lambda3` 未表现出全域低 `mu` 塌陷，已经明显抑制 baseline 的面积扩张。
+- 剩余弱样本更可能来自形状细节、边界 / 窄缺陷、centroid 偏移或局部几何误差。
+- 下一步应转向报告式结果整理和定向失败样本复查，而不是继续大范围参数扫描。
+- 该结果仍是半监督 / 诊断上界，因为 BCE 和 mask prior 使用 `mu_label < 500`；不能表述为无监督 weak-form 成功。
+
+## 当前边界
+
+- 不要声称本支线已经优于 `main`。
+- 不要声称纯 weak-form 无监督反演已经解决。
+- 当前最稳定结果来自 `BCE mask prior`，该项使用 `mu_label` mask 信息。
+- 后续推荐方向是半监督双网络结果整理，或重新设计 label-free 的局部化 / false-positive 抑制机制。

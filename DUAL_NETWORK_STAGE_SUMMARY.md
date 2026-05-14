@@ -112,6 +112,19 @@ S28 generated a fresh `80x40` / 50-sample dataset and validated the S27 comprehe
 
 S28 supports `temp25_lambda3` as the current `80x40` comprehensive default candidate. The boundary remains unchanged: BCE mask prior uses `mu_label < 500`, so S28 is semi-supervised / diagnostic upper-bound evidence, not proof of unsupervised weak-form inversion success.
 
+## S29 80x40 可视化失败诊断
+
+S29 只读取已有 S28 输出，为 `temp25_lambda3` 整理代表性图像和失败样本表格。
+
+- IoU 最高的成功样本：2、29、47。
+- IoU 最低的弱样本：45、48、41、49、21。
+- 面积误差最大的样本：21、45、3、37、11。
+- centroid 偏移最大的样本：45、21、25、44、6。
+
+S29 的诊断结论是：`temp25_lambda3` 已经基本修正 baseline 中全域扩张的低 `mu` 模式。剩余问题更可能来自形状细节不匹配、边界 / 窄缺陷样本、centroid 偏移或局部几何误差。下一步应转向最终结果整理和定向失败样本复查，而不是继续大范围参数扫描。
+
+边界不变：`BCE mask prior` 使用 `mu_label < 500`，因此 S29 是半监督 / 诊断上界分析，不是无监督 weak-form 反演成功证明。
+
 ## 1. 当前支线目标
 
 本支线探索 `phi-Net / mu-Net` 双网络反演方法：
