@@ -661,6 +661,32 @@ Current judgment:
 - Weak samples remain in similar cases for both candidates, especially samples 2, 5, 14, 15, and 17.
 - The result remains semi-supervised / diagnostic upper bound because BCE and mask priors use `mu_label < 500`; it is not unsupervised weak-form success.
 
+## Step S28: 80x40 50-Sample Default Candidate Validation
+
+Purpose:
+
+- Validate whether the S27 comprehensive default candidate `temp25_lambda3` remains stable on 50 fresh `80x40` samples.
+
+Configuration:
+
+- Generated a new `80x40` dataset with 50 train samples.
+- Compared `baseline` against `temp25_lambda3`.
+- Both runs used `outer_steps=30`, `phi_steps=30`, `mu_steps=30`, `center_mode=three`, and `test_radius=5.0`.
+
+Key results:
+
+| run | avg defect_iou | avg defect_area_pred | avg mu_mse | avg mu_mae |
+| --- | ---: | ---: | ---: | ---: |
+| baseline | 1.051006e-01 | 1.242440e+03 | 3.443720e+05 | 3.814918e+02 |
+| temp25_lambda3 | 8.925113e-01 | 1.328200e+02 | 4.572207e+04 | 1.832775e+02 |
+
+Current judgment:
+
+- `temp25_lambda3` improves IoU on all 50 samples and strongly reduces over-expanded predicted area.
+- Two samples remain below IoU `0.7`: sample 45 and sample 48. Sample 41 is borderline at `0.706897`.
+- `temp25_lambda3` is suitable as the current `80x40` comprehensive default candidate.
+- The result remains semi-supervised / diagnostic upper bound because BCE and mask priors use `mu_label < 500`; it is not unsupervised weak-form success.
+
 ## Current Boundary
 
 - Do not claim the branch has outperformed `main`.

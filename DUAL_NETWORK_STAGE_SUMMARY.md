@@ -99,6 +99,19 @@ S27 validates that the S26 candidate configurations are not limited to the origi
 
 The boundary remains unchanged: BCE mask prior uses `mu_label < 500`, so S27 is semi-supervised / diagnostic upper-bound evidence, not proof of unsupervised weak-form inversion success.
 
+## S28 80x40 50-Sample Default Validation Note
+
+S28 generated a fresh `80x40` / 50-sample dataset and validated the S27 comprehensive default candidate `temp25_lambda3` against baseline:
+
+| run | avg defect_iou | avg defect_area_pred | avg mu_mse | avg mu_mae |
+| --- | ---: | ---: | ---: | ---: |
+| baseline | 1.051006e-01 | 1.242440e+03 | 3.443720e+05 | 3.814918e+02 |
+| temp25_lambda3 | 8.925113e-01 | 1.328200e+02 | 4.572207e+04 | 1.832775e+02 |
+
+`temp25_lambda3` improves IoU on all 50 samples, strongly reduces predicted defect area, and substantially lowers continuous `mu` errors. Two samples remain below IoU `0.7` and one is borderline, so failure-case review is still useful.
+
+S28 supports `temp25_lambda3` as the current `80x40` comprehensive default candidate. The boundary remains unchanged: BCE mask prior uses `mu_label < 500`, so S28 is semi-supervised / diagnostic upper-bound evidence, not proof of unsupervised weak-form inversion success.
+
 ## 1. 当前支线目标
 
 本支线探索 `phi-Net / mu-Net` 双网络反演方法：
