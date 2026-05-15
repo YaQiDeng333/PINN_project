@@ -2038,3 +2038,35 @@ paired difference 显示，multi-liftoff 的提升主要来自 seed=42，seed=12
 ### 下一步
 
 不继续小 gate 或 multi-liftoff 修补。下一阶段转向阶段性总结、当前 baseline 结果整理和论文材料准备，除非重新定义更大的实验包、接受条件和停止条件。
+## 第 12.6 / 12.7 步：overfit30 capacity diagnostic 与 longer-training gate
+
+### 目标
+
+判断 CURRENT_BASELINE 架构是否具备小样本拟合能力，并检查 v3_complex 全量训练是否主要受 epoch 不足限制。
+
+### 修改内容
+
+第 12.6 从 v3_complex train 中按 true_area 三分位选取 10 small、10 medium、10 large，共 30 个样本，构造 overfit30 临时数据集；第 12.7 在不改结构、不改 loss、不改数据的前提下，将 v3_complex 训练预算扩展到 200 epoch。
+
+### 输出文件
+
+* `results/summaries/v3_complex_overfit30_capacity_diagnostic_summary.txt`
+* `results/metrics/v3_complex_overfit30_capacity_diagnostic_metrics.csv`
+* `results/summaries/v3_complex_longer_training_gate_summary.txt`
+* `results/metrics/v3_complex_longer_training_gate_metrics.csv`
+
+### 关键指标 / 结果
+
+第 12.6 中，CURRENT_BASELINE 在 overfit30 同一批样本上 IoU=0.3250、Dice=0.4608、area_error=0.3606；overfit30 模型达到 IoU=0.8821、Dice=0.9364、area_error=0.0394，且 pred_area=0 从 2 降到 0。small / medium / large 三个分桶均显著改善，说明当前架构具备小样本过拟合能力。
+
+第 12.7 中，200 epoch 训练的 best checkpoint 实际来自 epoch 17，best_val_loss=2.22840904e-02。相比 CURRENT_BASELINE，200 epoch best checkpoint 在 train / val / test 上 IoU、Dice 均下降，MAE 与 area_error 变差，pred_area=0 和 pred_area<true_area 增加，面积低估加重。
+
+### 结论
+
+CURRENT_BASELINE 架构不是完全没有表达能力；问题更像全量训练、样本复杂度、优化目标或模型选择准则导致的系统性困难。单纯增加 epoch 没有改善，反而在 best-val checkpoint 下选到更保守的早期模型，因此不扩展 3 seed，也不继续盲目加 epoch。
+
+### 下一步
+
+不在本记录中提出新实验方案；CURRENT_BASELINE 不变。
+
+---
