@@ -2070,3 +2070,38 @@ CURRENT_BASELINE 架构不是完全没有表达能力；问题更像全量训练
 不在本记录中提出新实验方案；CURRENT_BASELINE 不变。
 
 ---
+ 
+## 第 12.8 / 12.9 步：overfit100 capacity diagnostic 与 warm-start gate
+
+### 目标
+
+判断 CURRENT_BASELINE 架构的过拟合能力是否能从 30 个样本扩展到 100 个样本，并测试 overfit100 学到的形状表达是否能通过 warm-start 迁移到 full v3_complex 训练。
+
+### 修改内容
+
+第 12.8 从 `data/training_data_v3_complex_train.npz` 中按 true_area 三分位选取 34 small、33 medium、33 large，共 100 个样本，构造临时 `v3_complex_overfit100` 数据集，train / val / test 均使用同一批样本。
+
+第 12.9 使用 `checkpoints/best_model_v3_complex_overfit100_seed42.pt` 作为初始化，在 full v3_complex 上继续训练 50 epoch。未修改 `train_pinn.py`、`evaluate_pinn.py`、`data_generator_v2.py`，未更新 `CURRENT_BASELINE`。
+
+### 输出文件
+
+* `results/summaries/v3_complex_overfit100_capacity_diagnostic_summary.txt`
+* `results/metrics/v3_complex_overfit100_capacity_diagnostic_metrics.csv`
+* `results/summaries/v3_complex_overfit100_warmstart_gate_summary.txt`
+* `results/metrics/v3_complex_overfit100_warmstart_gate_metrics.csv`
+
+### 关键指标 / 结果
+
+第 12.8 overfit100 diagnostic 显示当前模型具备 100 样本过拟合能力。CURRENT_BASELINE 在这 100 个样本上 IoU=0.3104、Dice=0.4347、area_error=0.4108、pred_area=0 为 9；overfit100 模型达到 IoU=0.8426、Dice=0.9080、area_error=0.0958、pred_area=0 为 0。small / medium / large 三个分桶均明显优于 baseline。
+
+第 12.9 中，overfit100 checkpoint 直接在 full val/test 上泛化较差。warm-start full training 改善了 train MSE/MAE，但 val/test IoU、Dice、area_error、center_error 均未超过 CURRENT_BASELINE；small / medium 分桶没有稳定改善。
+
+### 结论
+
+当前架构不是完全没有表达能力，至少可以在 100 个混合面积样本上强力过拟合。但 overfit100 学到的表示不能直接泛化到 full v3_complex，也不能通过 50 epoch warm-start 转化为优于 CURRENT_BASELINE 的 full-data 模型。
+
+因此 CURRENT_BASELINE 不变；不扩展 3 seed；不继续 curriculum / warm-start 方向。
+
+### 下一步
+
+不在本记录中提出新实验方案；CURRENT_BASELINE 不变。

@@ -1,0 +1,36 @@
+# v3_complex overfit100 capacity diagnostic
+
+This diagnostic trains the CURRENT_BASELINE architecture on 100 selected v3_complex train samples, with train/val/test all pointing to the same 100 samples. It tests whether the overfit capacity seen in overfit30 scales to a larger mixed-area subset.
+
+Subset construction: selected 34 small, 33 medium, and 33 large samples from v3_complex train using train true_area tertiles and seed=42. The saved subset includes source_indices, source_true_area_pixels, and source_area_bin. The original v3_complex data files were not overwritten.
+
+Training configuration: MSE loss, lambda_tv=2e-6, seed=42, epochs=300, threshold=500 for evaluation.
+
+## Overall metrics on the same 100 samples
+
+| model | count | MSE | MAE | IoU | Dice | area_error | center_error | pred_area=0 | pred_area<true | pred_area>true |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| CURRENT_BASELINE | 100 | 2.10543106e+04 | 4.54389301e+01 | 3.10413056e-01 | 4.34664800e-01 | 4.10796512e-01 | 1.19639275e+00 | 9 | 86 | 14 |
+| overfit100_model | 100 | 3.88200465e+03 | 1.08541723e+01 | 8.42588805e-01 | 9.08035897e-01 | 9.57990681e-02 | 1.23280977e-01 | 0 | 67 | 33 |
+
+## Area-bin metrics
+
+| area_bin | model | count | IoU | Dice | area_error | center_error | pred_area=0 | mean_pred_area | mean_true_area |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| small | CURRENT_BASELINE | 34 | 1.67607430e-01 | 2.47080086e-01 | 5.77458446e-01 | 1.14872728e+00 | 9 | 3.33933932e+00 | 5.74262457e+00 |
+| small | overfit100_model | 34 | 7.64549182e-01 | 8.58248582e-01 | 1.48529476e-01 | 1.51462195e-01 | 0 | 5.34984015e+00 | 5.74262457e+00 |
+| medium | CURRENT_BASELINE | 33 | 3.32796302e-01 | 4.72840113e-01 | 3.23760507e-01 | 1.26086131e+00 | 0 | 7.11040084e+00 | 1.01277875e+01 |
+| medium | overfit100_model | 33 | 8.56522492e-01 | 9.15769586e-01 | 8.72623839e-02 | 9.99144291e-02 | 0 | 9.44623373e+00 | 1.01277875e+01 |
+| large | CURRENT_BASELINE | 33 | 4.35162880e-01 | 5.89758588e-01 | 3.26120222e-01 | 1.16803440e+00 | 0 | 1.26795765e+01 | 1.87364992e+01 |
+| large | overfit100_model | 33 | 9.09059579e-01 | 9.51598230e-01 | 5.00074534e-02 | 1.17612331e-01 | 0 | 1.85117756e+01 | 1.87364992e+01 |
+
+## Reference: overfit30 diagnostic
+
+| model | count | MSE | MAE | IoU | Dice | area_error | center_error | pred_area=0 | pred_area<true | pred_area>true |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| current_baseline_on_overfit30 | 30 | 2.04267342e+04 | 4.54047790e+01 | 3.25002647e-01 | 4.60754950e-01 | 3.60550657e-01 | 1.20025400e+00 | 2 | 24 | 6 |
+| overfit30_model | 30 | 3.26917542e+03 | 1.11651049e+01 | 8.82080371e-01 | 9.36388711e-01 | 3.94027541e-02 | 5.23989004e-02 | 0 | 15 | 15 |
+
+## Diagnostic judgment
+
+The architecture still has meaningful 100-sample overfit capacity: the overfit100 model is far better than CURRENT_BASELINE on the same 100 samples, with substantially higher IoU/Dice, lower MSE/MAE/area_error, and no empty masks. However, it is weaker than overfit30, so fitting capacity scales down as subset complexity grows. This points more to full-data training/optimization/objective/sample-complexity limitations than a complete lack of representation capacity.
