@@ -378,6 +378,61 @@ def compute_aux_mask_metrics(mask_pred, target, eps=1e-6):
     }
 
 
+def compute_shape_selection_metrics(pred, target, eps=1e-6):
+    threshold = normalized_defect_threshold()
+    pred_mask = pred < threshold
+    target_mask = target < threshold
+
+    pred_flat = pred_mask.reshape(pred_mask.shape[0], -1)
+    target_flat = target_mask.reshape(target_mask.shape[0], -1)
+    intersection = torch.sum((pred_flat & target_flat).to(dtype=pred.dtype), dim=1)
+    union = torch.sum((pred_flat | target_flat).to(dtype=pred.dtype), dim=1)
+    pred_sum = torch.sum(pred_flat.to(dtype=pred.dtype), dim=1)
+    target_sum = torch.sum(target_flat.to(dtype=pred.dtype), dim=1)
+    dice_denominator = pred_sum + target_sum
+
+    iou = torch.where(union > 0, intersection / (union + eps), torch.ones_like(union))
+    dice = torch.where(
+        dice_denominator > 0,
+        2.0 * intersection / (dice_denominator + eps),
+        torch.ones_like(dice_denominator),
+    )
+    area_error = torch.where(
+        target_sum > 0,
+        torch.abs(pred_sum - target_sum) / (target_sum + eps),
+        torch.zeros_like(target_sum),
+    )
+    return {
+        'val_iou': torch.mean(iou),
+        'val_dice': torch.mean(dice),
+        'val_area_error': torch.mean(area_error),
+    }
+
+
+def selection_is_lower_better(selection_metric):
+    return selection_metric in ('mse', 'area_error')
+
+
+def compute_selection_score(selection_metric, val_loss, val_iou, val_dice, val_area_error):
+    if selection_metric == 'mse':
+        return val_loss
+    if selection_metric == 'iou':
+        return val_iou
+    if selection_metric == 'dice':
+        return val_dice
+    if selection_metric == 'area_error':
+        return val_area_error
+    if selection_metric == 'composite':
+        return val_iou + val_dice - val_area_error
+    raise ValueError(f'Unsupported selection_metric: {selection_metric}')
+
+
+def is_better_selection_score(selection_metric, score, best_score):
+    if selection_is_lower_better(selection_metric):
+        return score < best_score
+    return score > best_score
+
+
 def get_batch_physics_params(dataset, indices, device):
     indices_np = indices.detach().cpu().numpy()
     depth = torch.from_numpy(dataset.depths[indices_np]).to(device)
@@ -496,11 +551,14 @@ def run_epoch(
 
 
 @torch.no_grad()
-def evaluate(model, loader, coords, criterion, device, include_aux_mask=False):
+def evaluate(model, loader, coords, criterion, device, include_aux_mask=False, include_shape_metrics=False):
     model.eval()
     total_loss = 0.0
     total_mask_iou = 0.0
     total_mask_dice = 0.0
+    total_val_iou = 0.0
+    total_val_dice = 0.0
+    total_val_area_error = 0.0
     total_samples = 0
     use_aux_mask = include_aux_mask and getattr(model, 'aux_mask_head', False)
 
@@ -514,21 +572,34 @@ def evaluate(model, loader, coords, criterion, device, include_aux_mask=False):
             pred = model(signals, coords)
             mask_metrics = None
         loss = criterion(pred, mu_targets)
+        shape_metrics = compute_shape_selection_metrics(pred, mu_targets) if include_shape_metrics else None
 
         batch_size = signals.shape[0]
         total_loss += loss.item() * batch_size
         if mask_metrics is not None:
             total_mask_iou += mask_metrics['mask_iou'].item() * batch_size
             total_mask_dice += mask_metrics['mask_dice'].item() * batch_size
+        if shape_metrics is not None:
+            total_val_iou += shape_metrics['val_iou'].item() * batch_size
+            total_val_dice += shape_metrics['val_dice'].item() * batch_size
+            total_val_area_error += shape_metrics['val_area_error'].item() * batch_size
         total_samples += batch_size
 
     total_samples = max(total_samples, 1)
-    if include_aux_mask:
-        return {
-            'mse_loss': total_loss / total_samples,
-            'mask_iou': total_mask_iou / total_samples,
-            'mask_dice': total_mask_dice / total_samples,
-        }
+    if include_aux_mask or include_shape_metrics:
+        metrics = {'mse_loss': total_loss / total_samples}
+        if include_aux_mask:
+            metrics.update({
+                'mask_iou': total_mask_iou / total_samples,
+                'mask_dice': total_mask_dice / total_samples,
+            })
+        if include_shape_metrics:
+            metrics.update({
+                'val_iou': total_val_iou / total_samples,
+                'val_dice': total_val_dice / total_samples,
+                'val_area_error': total_val_area_error / total_samples,
+            })
+        return metrics
     return total_loss / total_samples
 
 
@@ -598,8 +669,15 @@ def save_physics_loss_log(rows, output_path):
         'total_loss',
         'val_mse_loss',
         'val_unweighted_mse_loss',
+        'val_iou',
+        'val_dice',
+        'val_area_error',
         'val_mask_iou',
         'val_mask_dice',
+        'selection_metric',
+        'selection_score',
+        'best_selection_score',
+        'best_epoch',
     ]
     with open(output_path, 'w', encoding='utf-8', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
@@ -632,10 +710,23 @@ def save_validation_visualization(model, val_dataset, coords, device, output_pat
     plt.close(fig)
 
 
-def save_checkpoint(model, optimizer, epoch, best_val_loss, args, train_dataset, checkpoint_path):
+def save_checkpoint(
+    model,
+    optimizer,
+    epoch,
+    best_val_loss,
+    args,
+    train_dataset,
+    checkpoint_path,
+    best_selection_score=None,
+    selection_score=None,
+):
     torch.save({
         'epoch': epoch,
         'best_val_loss': best_val_loss,
+        'selection_metric': getattr(args, 'selection_metric', 'mse'),
+        'best_selection_score': best_selection_score,
+        'selection_score': selection_score,
         'model_state_dict': model.state_dict(),
         'optimizer_state_dict': optimizer.state_dict(),
         'signal_mean': train_dataset.signal_mean,
@@ -846,6 +937,11 @@ def train_adam_tv(args=None):
     val_mse_losses = []
     loss_log_rows = []
     best_val_loss = float('inf')
+    if selection_is_lower_better(args.selection_metric):
+        best_selection_score = float('inf')
+    else:
+        best_selection_score = -float('inf')
+    best_epoch = 0
     checkpoint_path = project_path(args.checkpoint_path)
     ensure_parent_dir(checkpoint_path)
     effective_lambda_phy = args.lambda_phy if use_physics else 0.0
@@ -873,6 +969,7 @@ def train_adam_tv(args=None):
         print(f'lambda_mask: {args.lambda_mask:.2e}')
     print(f'lambda_tv: {args.lambda_tv:.2e}')
     print(f'lambda_phy: {effective_lambda_phy:.2e}')
+    print(f'selection_metric: {args.selection_metric}')
 
     for epoch in range(1, args.epochs + 1):
         train_metrics = run_epoch(
@@ -902,15 +999,44 @@ def train_adam_tv(args=None):
             criterion=criterion,
             device=device,
             include_aux_mask=args.aux_mask_head,
+            include_shape_metrics=args.selection_metric != 'mse',
         )
-        if args.aux_mask_head:
+        if isinstance(val_metrics, dict):
             val_loss = val_metrics['mse_loss']
-            val_mask_iou = val_metrics['mask_iou']
-            val_mask_dice = val_metrics['mask_dice']
+            val_mask_iou = val_metrics.get('mask_iou', 0.0)
+            val_mask_dice = val_metrics.get('mask_dice', 0.0)
+            val_iou = val_metrics.get('val_iou', 0.0)
+            val_dice = val_metrics.get('val_dice', 0.0)
+            val_area_error = val_metrics.get('val_area_error', 0.0)
         else:
             val_loss = val_metrics
             val_mask_iou = 0.0
             val_mask_dice = 0.0
+            val_iou = 0.0
+            val_dice = 0.0
+            val_area_error = 0.0
+        selection_score = compute_selection_score(
+            args.selection_metric,
+            val_loss,
+            val_iou,
+            val_dice,
+            val_area_error,
+        )
+        if is_better_selection_score(args.selection_metric, selection_score, best_selection_score):
+            best_val_loss = val_loss
+            best_selection_score = selection_score
+            best_epoch = epoch
+            save_checkpoint(
+                model,
+                optimizer,
+                epoch,
+                best_val_loss,
+                args,
+                train_dataset,
+                checkpoint_path,
+                best_selection_score=best_selection_score,
+                selection_score=selection_score,
+            )
 
         train_mse_losses.append(train_metrics['mse_loss'])
         train_weighted_mse_losses.append(train_metrics['weighted_mse_loss'])
@@ -934,9 +1060,22 @@ def train_adam_tv(args=None):
             'total_loss': f'{train_metrics["total_loss"]:.8e}',
             'val_mse_loss': f'{val_loss:.8e}',
             'val_unweighted_mse_loss': f'{val_loss:.8e}',
+            'val_iou': f'{val_iou:.8e}',
+            'val_dice': f'{val_dice:.8e}',
+            'val_area_error': f'{val_area_error:.8e}',
             'val_mask_iou': f'{val_mask_iou:.8e}',
             'val_mask_dice': f'{val_mask_dice:.8e}',
+            'selection_metric': args.selection_metric,
+            'selection_score': f'{selection_score:.8e}',
+            'best_selection_score': f'{best_selection_score:.8e}',
+            'best_epoch': best_epoch,
         })
+        selection_log = (
+            f' | selection_metric: {args.selection_metric} | '
+            f'selection_score: {selection_score:.6e} | '
+            f'best_selection_score: {best_selection_score:.6e} | '
+            f'best_epoch: {best_epoch}'
+        )
         aux_log = ''
         if args.aux_mask_head:
             aux_log = (
@@ -954,6 +1093,7 @@ def train_adam_tv(args=None):
                 f'total_loss: {train_metrics["total_loss"]:.6e} | '
                 f'val_unweighted_mse_loss: {val_loss:.6e}'
                 f'{aux_log}'
+                f'{selection_log}'
             )
         elif args.loss_type in ('weighted_mse_dice', 'weighted_mse_dice_area'):
             print(
@@ -965,6 +1105,7 @@ def train_adam_tv(args=None):
                 f'total_loss: {train_metrics["total_loss"]:.6e} | '
                 f'val_unweighted_mse_loss: {val_loss:.6e}'
                 f'{aux_log}'
+                f'{selection_log}'
             )
         else:
             print(
@@ -975,11 +1116,8 @@ def train_adam_tv(args=None):
                 f'total_loss: {train_metrics["total_loss"]:.6e} | '
                 f'val_mse_loss: {val_loss:.6e}'
                 f'{aux_log}'
+                f'{selection_log}'
             )
-
-        if val_loss < best_val_loss:
-            best_val_loss = val_loss
-            save_checkpoint(model, optimizer, epoch, best_val_loss, args, train_dataset, checkpoint_path)
 
     checkpoint = torch.load(checkpoint_path, map_location=device)
     model.load_state_dict(checkpoint['model_state_dict'])
@@ -1023,7 +1161,10 @@ def train_adam_tv(args=None):
         ensure_parent_dir(physics_loss_log_path)
         save_physics_loss_log(loss_log_rows, physics_loss_log_path)
 
-    print(f'Best val mse loss: {best_val_loss:.6e}')
+    print(f'Best val mse loss at selected checkpoint: {best_val_loss:.6e}')
+    print(f'Best selection metric: {args.selection_metric}')
+    print(f'Best selection score: {best_selection_score:.6e}')
+    print(f'Best epoch: {best_epoch}')
     print(f'Saved best model to {checkpoint_path}')
     print(f'Saved loss curve to {loss_curve_path}')
     print(f'Saved validation visualization to {val_vis_path}')
@@ -1205,6 +1346,11 @@ def parse_args():
     parser.add_argument('--model-variant', choices=['baseline', 'calibrated_mu'], default='baseline')
     parser.add_argument('--decoder-variant', choices=['standard', 'enhanced'], default='standard')
     parser.add_argument('--aux-mask-head', action='store_true')
+    parser.add_argument(
+        '--selection-metric',
+        choices=['mse', 'iou', 'dice', 'area_error', 'composite'],
+        default='mse',
+    )
     parser.add_argument(
         '--loss-type',
         choices=['mse', 'weighted_mse', 'weighted_mse_dice', 'weighted_mse_dice_area'],
