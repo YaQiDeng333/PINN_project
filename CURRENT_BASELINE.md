@@ -1,10 +1,79 @@
 # CURRENT_BASELINE
 
-## 当前最佳模型
+## 当前 shape-oriented CURRENT_BASELINE（第 13.4 / 13.5 后，以此为准）
+
+本项目当前目标是缺陷边界形状反演，因此 CURRENT_BASELINE 以 shape / mask / boundary inversion 指标为主要依据，而不是只选择 MSE / MAE 最低的模型。
+
+当前 shape-oriented baseline 是 v3_complex composite-selection candidate。该 candidate 使用正式 `train_pinn.py` 参数 `--selection-metric composite` 训练得到，模型结构和 loss 未改变。
+
+### 当前 baseline checkpoint
+
+本轮以 3 seed candidate set 作为当前 shape-oriented baseline 记录：
+
+* `checkpoints/best_model_v3_complex_composite_seed42.pt`
+* `checkpoints/best_model_v3_complex_composite_seed123.pt`
+* `checkpoints/best_model_v3_complex_composite_seed2026.pt`
+
+对应数据集：
+
+* train：`data/training_data_v3_complex_train.npz`
+* val：`data/training_data_v3_complex_val.npz`
+* test：`data/training_data_v3_complex_test.npz`
+
+训练配置：
+
+* `dataset = v3_complex`
+* `lambda_tv = 2e-6`
+* `selection_metric = composite`
+* `composite = val IoU + val Dice - val area_error`
+* 主评估 threshold = 500
+* physics_loss：否
+* L-BFGS：否
+
+### 当前 baseline test 指标（threshold=500，3 seed mean +/- sample std）
+
+| 指标 | 数值 |
+|---|---:|
+| MSE | 2.1444e+04 +/- 2.72e+02 |
+| MAE | 4.9181e+01 +/- 1.39e+00 |
+| IoU | 3.2170e-01 +/- 7.30e-03 |
+| Dice | 4.5460e-01 +/- 8.70e-03 |
+| area_error | 3.3740e-01 +/- 1.95e-02 |
+| center_error | 1.2257e+00 +/- 1.23e-02 |
+| pred_area=0 | 10.33 +/- 5.13 |
+
+选择依据：
+
+第 13.4 / 13.5 已确认，composite-selection 相比旧 v3_complex MSE-oriented baseline 在 3 seed mean 上提升 IoU / Dice，降低 area_error，并减少 `pred_area=0`。逐样本审计显示改善不是少数 outlier 驱动，而是多数样本层面的改善；small / medium / large 分桶均有改善信号。
+
+MSE / MAE 代价需要保留记录：composite-selection 牺牲部分背景区域数值精度，但缺陷区 MAE 下降，更符合本项目“缺陷边界形状反演”的主目标。
+
+### MSE-oriented reference baseline（保留对照）
+
+旧 v3_complex 推荐模型保留为 MSE-oriented reference baseline，而不是当前 shape-oriented CURRENT_BASELINE：
+
+`checkpoints/best_model_v3_complex_tv_sweep_2e-6.pt`
+
+其 test 指标为：
+
+| 指标 | 数值 |
+|---|---:|
+| MSE | 2.07377174e+04 |
+| MAE | 4.44655262e+01 |
+| IoU | 2.95272047e-01 |
+| Dice | 4.21885407e-01 |
+| area_error | 3.94517442e-01 |
+| center_error | 1.32594189e+00 |
+
+该模型仍适合作为 MSE / MAE 数值误差参考，但不再代表当前 shape-oriented 主线最佳模型。
+
+---
+
+## simple 缺陷历史最佳模型（保留参考）
 
 checkpoints/best_model_tv_5e-6.pt
 
-## 当前推荐配置
+## simple 缺陷推荐配置（历史参考）
 
 推荐 lambda_tv = 5e-6
 
@@ -12,7 +81,7 @@ checkpoints/best_model_tv_5e-6.pt
 
 L-BFGS 仅作为可选实验保留，不作为默认推荐方案。
 
-## 当前 test 指标
+## simple 缺陷 test 指标（历史参考）
 
 MSE = 2.16568206e+04
 
@@ -86,9 +155,9 @@ simple baseline 仍为 checkpoints/best_model_tv_5e-6.pt。
 
 两者对应的数据集难度不同，不应直接混用为同一个 baseline。
 
-## 第 7.7 步后当前 v3 complex 推荐 baseline
+## 第 7.7 步后 v3 complex MSE-oriented reference baseline
 
-以本节记录为准，当前 v3 complex 推荐模型已更新为：
+第 13.4 / 13.5 前，本节模型曾作为 v3_complex 推荐 baseline。第 13.4 / 13.5 后，它保留为 MSE-oriented reference baseline：
 
 checkpoints/best_model_v3_complex_tv_sweep_2e-6.pt
 
@@ -124,13 +193,13 @@ area_error = 3.94517442e-01
 
 center_error = 1.32594189e+00
 
-## 第 7.7 步更新说明
+## 第 7.7 步更新说明（历史记录）
 
 相比第 7.5 步 20 epoch v3 baseline，当前推荐模型改善了 MSE、IoU、Dice、area_error、center_error，但 MAE 变差。
 
 simple baseline 仍为 checkpoints/best_model_tv_5e-6.pt。
 
-v3 complex 推荐 baseline 更新为 checkpoints/best_model_v3_complex_tv_sweep_2e-6.pt。
+v3 complex 推荐 baseline 当时更新为 checkpoints/best_model_v3_complex_tv_sweep_2e-6.pt。第 13.4 / 13.5 后，该模型保留为 MSE-oriented reference baseline。
 
 ## 第 7.9 步 v4 balanced complex 正式数据集
 

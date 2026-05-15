@@ -2105,3 +2105,70 @@ CURRENT_BASELINE 架构不是完全没有表达能力；问题更像全量训练
 ### 下一步
 
 不在本记录中提出新实验方案；CURRENT_BASELINE 不变。
+
+---
+
+## 第 13.4 / 13.5 步：v3_complex composite-selection candidate 与逐样本审计
+
+### 目标
+
+验证 `train_pinn.py` 正式集成的 `--selection-metric composite` 是否能作为 shape-oriented baseline 的模型选择标准，并通过逐样本审计确认改善是否来自多数样本，而不是少数 outlier。
+
+### 修改内容
+
+第 13.4 使用正式训练流程训练 v3_complex composite-selection 3 seed candidate。模型结构和 loss 均不变，仍使用默认 MSE + `lambda_tv=2e-6`；仅将 checkpoint selection 从默认 `mse` 改为 `composite`。
+
+第 13.5 对旧 v3_complex MSE-oriented baseline 和 composite-selection candidate 做 test set 逐样本对比，统计 IoU / Dice / area_error 改善样本数量、`pred_area=0` 修复情况、area bin 和 defect_type 分组改善情况。
+
+### 输出文件
+
+* `results/summaries/v3_complex_composite_selection_candidate_summary.txt`
+* `results/metrics/v3_complex_composite_selection_candidate_metrics.csv`
+* `results/summaries/v3_complex_composite_candidate_per_sample_audit_summary.txt`
+* `results/metrics/v3_complex_composite_candidate_per_sample_audit.csv`
+
+### 关键指标 / 结果
+
+composite-selection 的定义为：
+
+`composite = val IoU + val Dice - val area_error`
+
+threshold=500 下，composite-selection candidate 的 3 seed mean test 指标为：
+
+* MSE = 2.1444e+04 +/- 2.72e+02
+* MAE = 4.9181e+01 +/- 1.39e+00
+* IoU = 3.2170e-01 +/- 7.30e-03
+* Dice = 4.5460e-01 +/- 8.70e-03
+* area_error = 3.3740e-01 +/- 1.95e-02
+* center_error = 1.2257e+00 +/- 1.23e-02
+* `pred_area=0` = 10.33 +/- 5.13
+
+旧 v3_complex MSE-oriented reference baseline `checkpoints/best_model_v3_complex_tv_sweep_2e-6.pt` 的 test 指标为：
+
+* MSE = 2.07377174e+04
+* MAE = 4.44655262e+01
+* IoU = 2.95272047e-01
+* Dice = 4.21885407e-01
+* area_error = 3.94517442e-01
+* center_error = 1.32594189e+00
+* `pred_area=0` = 18
+
+第 13.5 逐样本审计显示：
+
+* IoU 改善样本数 = 125 / 200
+* Dice 改善样本数 = 121 / 200
+* area_error 改善样本数 = 121 / 200
+* `pred_area=0` 被修复 = 14 / 18
+* small / medium / large 分桶均有改善信号
+* multi_defect、polygon、rotated_rect 三类中均存在多数样本改善
+* MSE / MAE 代价主要来自背景区误差上升；缺陷区 MAE 反而下降
+
+### 结论
+
+第 13.4 / 13.5 证明，composite-selection 更符合本项目“缺陷边界形状反演”的主目标。它牺牲部分背景区域数值精度，但改善了 defect shape / mask 指标，并且逐样本改善不是少数 outlier 驱动。
+
+因此，CURRENT_BASELINE 已更新为 v3_complex composite-selection shape-oriented baseline；旧模型 `checkpoints/best_model_v3_complex_tv_sweep_2e-6.pt` 降级为 MSE-oriented reference baseline。
+
+### 下一步
+
+后续主线应以新的 shape-oriented CURRENT_BASELINE 为锚点。旧 MSE-oriented baseline 仍保留为数值误差参考，但不再作为唯一主线最佳模型。

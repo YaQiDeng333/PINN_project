@@ -2,26 +2,24 @@ NEXT_STEP
 
 ## 当前最新状态（以此为准）
 
-第 11.5 步：multi-liftoff Bz observation 3 seed expansion 已完成。
+第 13.4 / 13.5 步：v3_complex composite-selection candidate 已提升为新的 shape-oriented CURRENT_BASELINE。
 
 阶段事实：
 
-* 第 11.4 seed=42 gate 中，multi-liftoff 相比 fair single-liftoff 有明显正信号；
-* 第 11.5 三 seed 配对实验显示该正信号不稳定；
-* multi-liftoff 的 3 seed mean 相比 fair single-liftoff，IoU / Dice 下降，area_error 和 center_error 变差；
-* `pred_area=0` 略少，但不足以抵消整体指标下降；
-* small / low-signal 样本没有稳定改善；
-* 提升主要来自 seed=42，seed=123 和 seed=2026 未复现；
-* multi-liftoff 不进入正式主线候选；
-* 不继续扩展 seed；
-* 不继续调 multi-liftoff 结构；
-* 当前不切换 `CURRENT_BASELINE`。
+* `train_pinn.py` 已支持 `--selection-metric composite`；
+* `composite = val IoU + val Dice - val area_error`；
+* 第 13.4 的 3 seed 正式 candidate 显示，composite-selection 相比旧 v3_complex MSE-oriented baseline 提升 IoU / Dice，降低 area_error，并减少 `pred_area=0`；
+* 第 13.5 的逐样本审计显示，改善不是少数 outlier 驱动，IoU / Dice / area_error 改善覆盖多数样本；
+* small / medium / large 分桶均有改善信号；
+* MSE / MAE 代价主要来自背景区误差上升，缺陷区 MAE 反而下降；
+* `CURRENT_BASELINE.md` 已按项目目标更新为 shape-oriented baseline；
+* 原 `checkpoints/best_model_v3_complex_tv_sweep_2e-6.pt` 保留为 MSE-oriented reference baseline。
 
 ## 当前下一步
 
-不再继续小 gate 或 multi-liftoff 修补。
+后续主线应基于新的 shape-oriented CURRENT_BASELINE 继续推进。
 
-下一阶段应转向阶段性总结、当前 baseline 结果整理和论文材料准备；除非重新定义更大的实验包、接受条件和停止条件，否则不继续追加局部技巧实验。
+旧 MSE-oriented baseline 仍可作为数值误差参考，但不再作为唯一主线锚点。本文件暂不提出新的具体实验方案，只记录 baseline 更新后的状态。
 
 ---
 
