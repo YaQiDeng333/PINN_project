@@ -1,0 +1,40 @@
+# v3_complex composite-selection candidate per-sample audit
+
+Threshold: 500. Composite metrics are per-sample means across seeds 42, 123, and 2026.
+Clearly worse is defined as delta_iou <= -0.05, delta_dice <= -0.05, or delta_area_error >= 0.10.
+
+## Overall counts
+
+| count | IoU improved | Dice improved | area_error improved | pred_area=0 repaired | clearly worse |
+| --- | --- | --- | --- | --- | --- |
+| 200 | 125 | 121 | 121 | 14 | 52 |
+
+## Mean deltas
+
+| delta_iou | delta_dice | delta_area_error | delta_pred_area | delta_center_error | delta_defect_mae | delta_background_mae |
+| --- | --- | --- | --- | --- | --- | --- |
+| 0.026386 | 0.032666 | -0.057079 | 1.810215 | -0.136779 | -33.248675 | 6.357424 |
+
+## Area-bin breakdown
+
+| area_bin | count | IoU improved | Dice improved | area_error improved | pred_area=0 repaired | clearly worse | mean_delta_iou | mean_delta_area_error |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| small | 67 | 39 | 36 | 31 | 11 | 22 | 0.019665 | 0.001235 |
+| medium | 66 | 41 | 41 | 46 | 3 | 20 | 0.019480 | -0.070254 |
+| large | 67 | 45 | 44 | 44 | 0 | 10 | 0.039911 | -0.102414 |
+
+## Defect-type breakdown
+
+| defect_type | count | IoU improved | Dice improved | area_error improved | pred_area=0 repaired | clearly worse | mean_delta_iou | mean_delta_area_error |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| multi_defect | 62 | 45 | 44 | 47 | 3 | 10 | 0.054203 | -0.134238 |
+| polygon | 75 | 44 | 43 | 37 | 9 | 26 | 0.013691 | -0.005438 |
+| rotated_rect | 63 | 36 | 34 | 37 | 2 | 16 | 0.014125 | -0.042621 |
+
+## Judgment
+
+Composite-selection improvement is sample-broad for IoU/Dice rather than only a few outliers.
+Small defects improve for a majority of samples by IoU, and pred_area=0 repairs are concentrated in the small bin.
+Composite-selection increases predicted area on average, which partially mitigates the baseline area underestimation.
+MSE / MAE cost mainly comes from increased background-region error; defect-region MAE decreases instead. This means composite-selection is biased toward improving defect shape and defect-region prediction while sacrificing part of the background numeric accuracy.
+This audit supports keeping composite-selection as a formal candidate record. It does not by itself update CURRENT_BASELINE.
