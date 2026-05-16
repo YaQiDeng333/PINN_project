@@ -2216,3 +2216,56 @@ small / medium / large 仅按 validation set true_area 三分位定义；test se
 ### 下一步
 
 不继续 selection metric 细调；`CURRENT_BASELINE` 不变。
+
+---
+
+## 第 15.1 / 15.2 步：mask-only boundary model 与 probability threshold calibration
+
+### 目标
+
+直接测试以缺陷边界形状反演为主任务的 mask-only boundary model：从 Bz 输入直接预测 defect probability / mask，不再通过 `pred_mu < 500` 间接得到 mask。第 15.2 进一步只做一次 validation-selected probability threshold calibration，判断第 15.1 的面积高估是否可以被合理概率阈值缓解。
+
+### 修改内容
+
+新增独立训练脚本 `scripts/train_mask_boundary_candidate.py`，未修改 `train_pinn.py`、`evaluate_pinn.py` 或 `data_generator_v2.py`。模型输出 mask logit / probability，target mask 定义为 `target_mu_norm < 0.5`，loss 使用 `BCEWithLogits + soft Dice`，checkpoint selection 仅使用 validation set。
+
+新增独立校准脚本 `scripts/mask_boundary_threshold_calibration.py`。第 15.2 在 validation set 上从 `0.50 / 0.60 / 0.70 / 0.80 / 0.85 / 0.90 / 0.95` 中选择统一 probability threshold，最终选中 `0.90`；test set 只用于最终验证。
+
+### 输出文件
+
+* `scripts/train_mask_boundary_candidate.py`
+* `scripts/mask_boundary_threshold_calibration.py`
+* `results/summaries/v3_complex_mask_boundary_candidate_summary.txt`
+* `results/metrics/v3_complex_mask_boundary_candidate_metrics.csv`
+* `results/summaries/v3_complex_mask_boundary_threshold_calibration_summary.txt`
+* `results/metrics/v3_complex_mask_boundary_threshold_calibration_metrics.csv`
+
+### 关键指标 / 结果
+
+第 15.1 fixed threshold=0.5 下，mask-only 明显提升 IoU / Dice，但面积高估严重，因此不作为 as-is baseline：
+
+* IoU = 3.761e-01 +/- 3.10e-03
+* Dice = 5.294e-01 +/- 3.20e-03
+* area_error = 7.700e-01 +/- 3.44e-02
+* `pred_area=0` = 1.67 +/- 1.15
+
+第 15.2 validation-selected threshold=0.90 后，mask-only 在 test set 上相对 composite-selection CURRENT_BASELINE 的 3 seed mean 指标为：
+
+| metric | composite-selection reference | mask-only threshold=0.90 |
+|---|---:|---:|
+| IoU | 3.217e-01 +/- 7.30e-03 | 3.319e-01 +/- 1.69e-02 |
+| Dice | 4.546e-01 +/- 8.70e-03 | 4.729e-01 +/- 1.89e-02 |
+| area_error | 3.374e-01 +/- 1.95e-02 | 3.220e-01 +/- 8.71e-03 |
+| `pred_area=0` | 10.33 +/- 5.13 | 3.67 +/- 0.58 |
+
+small 分桶从 IoU / Dice = 0.2219 / 0.3224 提升到 0.2743 / 0.3981，area_error 从 0.4560 降到 0.3706，`pred_area=0` 从 8.67 降到 2.33。low-signal 样本从 IoU / Dice = 0.1976 / 0.2973 提升到 0.2454 / 0.3673，area_error 从 0.5202 降到 0.4222，`pred_area=0` 从 10.33 降到 3.67。
+
+### 结论
+
+第 15.1 证明 mask-only boundary model 对边界 mask 任务有强正信号，但 fixed threshold=0.5 存在严重面积高估。第 15.2 使用 validation set 选择 probability threshold=0.90 后，IoU / Dice / area_error / `pred_area=0` / small / low-signal 均优于 composite-selection reference，满足接受条件。
+
+因此，mask-only boundary model + validation-selected threshold=0.90 已提升为新的 boundary-oriented `CURRENT_BASELINE`。原 composite-selection baseline 保留为 μ-threshold shape-oriented reference；原 `v3_complex_tv_sweep_2e-6` 保留为 MSE-oriented reference。
+
+### 下一步
+
+后续实验应以新的 mask-only boundary baseline 为对照，不再围绕 composite-selection、selection metric、ensemble、threshold trick 做小修补。

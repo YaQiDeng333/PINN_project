@@ -2,24 +2,22 @@ NEXT_STEP
 
 ## 当前最新状态（以此为准）
 
-第 13.4 / 13.5 步：v3_complex composite-selection candidate 已提升为新的 shape-oriented CURRENT_BASELINE。
+第 15.1 / 15.2 步：CURRENT_BASELINE 已更新为 mask-only boundary model + validation-selected threshold=0.90。
 
 阶段事实：
 
-* `train_pinn.py` 已支持 `--selection-metric composite`；
-* `composite = val IoU + val Dice - val area_error`；
-* 第 13.4 的 3 seed 正式 candidate 显示，composite-selection 相比旧 v3_complex MSE-oriented baseline 提升 IoU / Dice，降低 area_error，并减少 `pred_area=0`；
-* 第 13.5 的逐样本审计显示，改善不是少数 outlier 驱动，IoU / Dice / area_error 改善覆盖多数样本；
-* small / medium / large 分桶均有改善信号；
-* MSE / MAE 代价主要来自背景区误差上升，缺陷区 MAE 反而下降；
-* `CURRENT_BASELINE.md` 已按项目目标更新为 shape-oriented baseline；
+* 第 15.1 的 mask-only boundary model 在 fixed threshold=0.5 下明显提升 IoU / Dice，但面积高估严重，因此不作为 as-is baseline；
+* 第 15.2 只使用 validation set 选择 probability threshold，最终选择 `0.90`；
+* test set 仅用于最终验证，mask-only + threshold=0.90 在 IoU / Dice / area_error / `pred_area=0` / small / low-signal 上均优于 composite-selection reference；
+* `CURRENT_BASELINE.md` 已按项目目标更新为 boundary-oriented baseline；
+* 原 composite-selection baseline 保留为 μ-threshold shape-oriented reference；
 * 原 `checkpoints/best_model_v3_complex_tv_sweep_2e-6.pt` 保留为 MSE-oriented reference baseline。
 
 ## 当前下一步
 
-后续主线应基于新的 shape-oriented CURRENT_BASELINE 继续推进。
+后续实验应以新的 mask-only boundary baseline 为对照，不再围绕 composite-selection、selection metric、ensemble、threshold trick 做小修补。
 
-旧 MSE-oriented baseline 仍可作为数值误差参考，但不再作为唯一主线锚点。本文件暂不提出新的具体实验方案，只记录 baseline 更新后的状态。
+本文件暂不提出新的具体实验方案，只记录 baseline 更新后的状态。
 
 ---
 
