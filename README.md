@@ -207,6 +207,8 @@ v4 metadata 在 v3 字段基础上新增：
 * `train_pinn.py`：训练 BzEncoder + Fourier 坐标特征 + MLP 模型；支持 TV Loss、物理一致性 Loss 初版、L-BFGS refine；支持 `--dataset v3_complex` 和 `--dataset v4_balanced_complex` 自动读取对应 train / val 数据集并使用新的输出路径。
 * `evaluate_pinn.py`：加载测试集和 checkpoint，输出 MSE、MAE、IoU、Dice、area_error、center_error，并保存对比图；支持 `--dataset v3_complex`、`--dataset v4_balanced_complex` 和可选 metrics / figures 输出路径。
 * `parameter_sweep.py`：执行 TV Loss 和 L-BFGS 参数扫描，生成参数对比表。
+* `scripts/inspect_comsol_mfl_dataset.py`：检查 `data/comsol_mfl/rectangular_sweep_small/` 中的 COMSOL MFL 轻量结果文件，确认 5 个 sample CSV 都是固定 201 个 sensor points，并校验 metadata 中的 `max_abs_delta_Bz` 与 CSV 重算值一致。该脚本只做数据接入检查，不接入训练流程。
+* `scripts/prepare_comsol_mfl_npz.py`：把 COMSOL rectangular notch 小规模 CSV 结果整理为统一中间 NPZ，并输出 `processed_summary.json`。该中间格式用于后续格式桥接分析，不是 `train_pinn.py` 的正式训练输入。
 
 第六步没有新增独立脚本；物理一致性 Loss 加在 `train_pinn.py` 中。
 
