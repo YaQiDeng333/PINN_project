@@ -2172,3 +2172,47 @@ threshold=500 下，composite-selection candidate 的 3 seed mean test 指标为
 ### 下一步
 
 后续主线应以新的 shape-oriented CURRENT_BASELINE 为锚点。旧 MSE-oriented baseline 仍保留为数值误差参考，但不再作为唯一主线最佳模型。
+
+---
+
+## 第 14.2 步：area-bin-balanced composite selection audit
+
+### 目标
+
+诊断 `macro_area_composite` 是否能在不修改模型、loss、数据和训练主流程的前提下，比当前 `composite` selection 更好地照顾 small / low-signal 样本。
+
+### 修改内容
+
+新增独立诊断脚本 `scripts/macro_area_selection_audit.py`，使用 v3_complex baseline 配置训练 3 个 seed，并在 validation set 上同时审计：
+
+* `composite = IoU + Dice - area_error`
+* `macro_area_composite = mean over small / medium / large bins of (IoU_bin + Dice_bin - area_error_bin)`
+
+small / medium / large 仅按 validation set true_area 三分位定义；test set 只用于最终报告。未修改 `train_pinn.py`、`evaluate_pinn.py`、`data_generator_v2.py` 或 `CURRENT_BASELINE.md`。
+
+### 输出文件
+
+* `scripts/macro_area_selection_audit.py`
+* `results/summaries/v3_complex_macro_area_selection_audit_summary.txt`
+* `results/metrics/v3_complex_macro_area_selection_audit_metrics.csv`
+* `results/metrics/v3_complex_macro_area_selection_epoch_log.csv`
+
+### 关键指标 / 结果
+
+`best_macro_area_composite` 与当前 `best_composite` 在 3 个 seed 上选中了完全相同的 epoch：
+
+| seed | best_composite epoch | best_macro_area_composite epoch |
+|---:|---:|---:|
+| 42 | 13 | 13 |
+| 123 | 25 | 25 |
+| 2026 | 11 | 11 |
+
+因此 overall 指标、small / medium / large 分桶指标、low-signal 指标都与当前 composite-selection CURRENT_BASELINE 完全一致。macro-area selection 没有额外减少 small `pred_area=0`，也没有改善 low-signal 样本。
+
+### 结论
+
+`macro_area_composite` 未带来新增收益，不满足接受条件。不建议将 `macro_area_composite` 集成进 `train_pinn.py`，也不继续设计更多 small-weighted / low-signal-weighted / polygon-weighted selection metric。当前 composite-selection shape-oriented `CURRENT_BASELINE` 保持不变。
+
+### 下一步
+
+不继续 selection metric 细调；`CURRENT_BASELINE` 不变。

@@ -1,0 +1,81 @@
+# v3_complex area-bin-balanced composite selection audit
+
+This controlled diagnostic trains v3_complex baseline runs for seeds 42, 123, and 2026 with MSE loss, lambda_tv=2e-6, epochs=50, and threshold=500 evaluation. It does not modify train_pinn.py, evaluate_pinn.py, or data_generator_v2.py.
+
+Validation area bins are defined only from validation-set true_area tertiles. Test-set bins are used only for reporting.
+
+Definitions:
+
+* overall composite = IoU + Dice - area_error
+* macro_area_composite = mean over validation small / medium / large bins of (IoU_bin + Dice_bin - area_error_bin)
+
+## Selection epochs
+
+| seed | best_composite epoch | best_composite score | best_macro_area_composite epoch | best_macro_area_composite score |
+|---:|---:|---:|---:|---:|
+| 42 | 13 | 3.950182e-01 | 13 | 3.958060e-01 |
+| 123 | 25 | 3.955513e-01 | 25 | 3.963555e-01 |
+| 2026 | 11 | 4.526303e-01 | 11 | 4.534300e-01 |
+
+## Overall test mean +/- sample std
+
+| candidate | group | MSE | MAE | IoU | Dice | area_error | center_error | pred_area=0 |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| current_baseline_composite | all | 2.1444e+04 +/- 2.72e+02 | 4.9181e+01 +/- 1.39e+00 | 0.3217 +/- 0.0073 | 0.4546 +/- 0.0087 | 0.3374 +/- 0.0195 | 1.2257 +/- 0.0123 | 10.33 +/- 5.13 |
+| best_composite | all | 2.1444e+04 +/- 2.72e+02 | 4.9181e+01 +/- 1.39e+00 | 0.3217 +/- 0.0073 | 0.4546 +/- 0.0087 | 0.3374 +/- 0.0195 | 1.2257 +/- 0.0123 | 10.33 +/- 5.13 |
+| best_macro_area_composite | all | 2.1444e+04 +/- 2.72e+02 | 4.9181e+01 +/- 1.39e+00 | 0.3217 +/- 0.0073 | 0.4546 +/- 0.0087 | 0.3374 +/- 0.0195 | 1.2257 +/- 0.0123 | 10.33 +/- 5.13 |
+
+## Area-bin test mean +/- sample std
+
+| candidate | group | MSE | MAE | IoU | Dice | area_error | center_error | pred_area=0 |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| current_baseline_composite | small | 1.4459e+04 +/- 3.74e+02 | 3.6788e+01 +/- 9.49e-01 | 0.2219 +/- 0.0106 | 0.3224 +/- 0.0147 | 0.4560 +/- 0.0238 | 1.2146 +/- 0.0376 | 8.67 +/- 5.03 |
+| best_composite | small | 1.4459e+04 +/- 3.74e+02 | 3.6788e+01 +/- 9.49e-01 | 0.2219 +/- 0.0106 | 0.3224 +/- 0.0147 | 0.4560 +/- 0.0238 | 1.2146 +/- 0.0376 | 8.67 +/- 5.03 |
+| best_macro_area_composite | small | 1.4459e+04 +/- 3.74e+02 | 3.6788e+01 +/- 9.49e-01 | 0.2219 +/- 0.0106 | 0.3224 +/- 0.0147 | 0.4560 +/- 0.0238 | 1.2146 +/- 0.0376 | 8.67 +/- 5.03 |
+| current_baseline_composite | medium | 1.9951e+04 +/- 4.06e+02 | 4.6596e+01 +/- 1.61e+00 | 0.3301 +/- 0.0051 | 0.4716 +/- 0.0061 | 0.2972 +/- 0.0169 | 1.3471 +/- 0.0225 | 1.67 +/- 0.58 |
+| best_composite | medium | 1.9950e+04 +/- 4.06e+02 | 4.6596e+01 +/- 1.61e+00 | 0.3301 +/- 0.0051 | 0.4716 +/- 0.0061 | 0.2972 +/- 0.0169 | 1.3471 +/- 0.0225 | 1.67 +/- 0.58 |
+| best_macro_area_composite | medium | 1.9950e+04 +/- 4.06e+02 | 4.6596e+01 +/- 1.61e+00 | 0.3301 +/- 0.0051 | 0.4716 +/- 0.0061 | 0.2972 +/- 0.0169 | 1.3471 +/- 0.0225 | 1.67 +/- 0.58 |
+| current_baseline_composite | large | 2.9900e+04 +/- 8.14e+02 | 6.4120e+01 +/- 1.78e+00 | 0.4131 +/- 0.0095 | 0.5699 +/- 0.0102 | 0.2585 +/- 0.0450 | 1.1180 +/- 0.0283 | 0.00 +/- 0.00 |
+| best_composite | large | 2.9900e+04 +/- 8.14e+02 | 6.4120e+01 +/- 1.78e+00 | 0.4131 +/- 0.0095 | 0.5699 +/- 0.0102 | 0.2585 +/- 0.0450 | 1.1180 +/- 0.0283 | 0.00 +/- 0.00 |
+| best_macro_area_composite | large | 2.9900e+04 +/- 8.14e+02 | 6.4120e+01 +/- 1.78e+00 | 0.4131 +/- 0.0095 | 0.5699 +/- 0.0102 | 0.2585 +/- 0.0450 | 1.1180 +/- 0.0283 | 0.00 +/- 0.00 |
+
+## Low-signal test mean +/- sample std
+
+| candidate | group | MSE | MAE | IoU | Dice | area_error | center_error | pred_area=0 |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| current_baseline_composite | low_signal | 1.7488e+04 +/- 3.73e+02 | 4.2310e+01 +/- 1.34e+00 | 0.1976 +/- 0.0148 | 0.2973 +/- 0.0199 | 0.5202 +/- 0.0297 | 1.4767 +/- 0.0362 | 10.33 +/- 5.13 |
+| best_composite | low_signal | 1.7487e+04 +/- 3.73e+02 | 4.2310e+01 +/- 1.34e+00 | 0.1976 +/- 0.0148 | 0.2973 +/- 0.0199 | 0.5202 +/- 0.0297 | 1.4767 +/- 0.0362 | 10.33 +/- 5.13 |
+| best_macro_area_composite | low_signal | 1.7487e+04 +/- 3.73e+02 | 4.2310e+01 +/- 1.34e+00 | 0.1976 +/- 0.0148 | 0.2973 +/- 0.0199 | 0.5202 +/- 0.0297 | 1.4767 +/- 0.0362 | 10.33 +/- 5.13 |
+| current_baseline_composite | non_low_signal | 2.3437e+04 +/- 2.63e+02 | 5.2642e+01 +/- 1.42e+00 | 0.3842 +/- 0.0112 | 0.5338 +/- 0.0130 | 0.2454 +/- 0.0167 | 1.1194 +/- 0.0133 | 0.00 +/- 0.00 |
+| best_composite | non_low_signal | 2.3437e+04 +/- 2.63e+02 | 5.2642e+01 +/- 1.42e+00 | 0.3842 +/- 0.0112 | 0.5338 +/- 0.0130 | 0.2454 +/- 0.0167 | 1.1194 +/- 0.0133 | 0.00 +/- 0.00 |
+| best_macro_area_composite | non_low_signal | 2.3437e+04 +/- 2.63e+02 | 5.2642e+01 +/- 1.42e+00 | 0.3842 +/- 0.0112 | 0.5338 +/- 0.0130 | 0.2454 +/- 0.0167 | 1.1194 +/- 0.0133 | 0.00 +/- 0.00 |
+
+## Paired differences
+
+best_macro_area_composite - current_baseline_composite:
+
+* ΔMSE = -1.455627e-02
+* ΔMAE = -8.425236e-05
+* ΔIoU = 0.000000e+00
+* ΔDice = 0.000000e+00
+* Δarea_error = 0.000000e+00
+* Δpred_area=0 = 0.000000e+00
+
+best_macro_area_composite - best_composite:
+
+* ΔMSE = 0.000000e+00
+* ΔMAE = 0.000000e+00
+* ΔIoU = 0.000000e+00
+* ΔDice = 0.000000e+00
+* Δarea_error = 0.000000e+00
+* Δpred_area=0 = 0.000000e+00
+
+## Judgment
+
+Small-bin improved versus current baseline without more empty predictions: False.
+
+Overall shape metrics not meaningfully worse than current baseline: True.
+
+MSE / MAE cost within 5% of current composite-selection baseline: True.
+
+Accepted as macro-area selection signal: False.
