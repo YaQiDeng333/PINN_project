@@ -2279,3 +2279,44 @@ small 分桶从 IoU / Dice = 0.2219 / 0.3224 提升到 0.2743 / 0.3981，area_er
 ### 下一步
 
 后续实验应以新的 mask-only boundary baseline 为对照，不再围绕 composite-selection、selection metric、ensemble、threshold trick 做小修补。
+# Mainline Sync: Steps 13.x-18.x
+
+This section summarizes the recent route-level conclusions. Detailed per-step outputs remain in `results/summaries/` and `results/metrics/`.
+
+## 13.x Composite Selection
+
+Steps 13.4 / 13.5 showed that checkpoint selection was a major bottleneck for the v3_complex mu-threshold route. Switching selection from MSE to `composite = IoU + Dice - area_error` improved shape-oriented mask metrics and temporarily replaced the old MSE-oriented baseline.
+
+After later mask-only work, composite-selection is no longer the active `CURRENT_BASELINE`. It is retained as a mu-threshold shape-oriented reference. The old `v3_complex_tv_sweep_2e-6` model is retained as an MSE-oriented reference.
+
+## 15.x Mask-Only Boundary Models
+
+Step 15.1 showed that a direct Bz -> defect mask model was the first direction that clearly aligned better with the project goal than mu-threshold reconstruction. At fixed threshold `0.50`, it improved IoU / Dice but overestimated area. Step 15.2 used validation-only probability threshold calibration and selected threshold `0.90`, which improved IoU / Dice / area_error / `pred_area=0` / small / low-signal versus composite-selection.
+
+Step 15.4 then upgraded the active baseline to the mask-only grid decoder boundary model + validation-selected threshold `0.90`. This remains the current `CURRENT_BASELINE`.
+
+SDF supervision, boundary head, and coordinate refinement produced some local positive metrics, but they did not solve the polygon / rotated_rect rounding problem or introduced area_error trade-offs. These directions are stopped rather than expanded into v2 variants.
+
+## 16.x Shape Prior, Signal Features, and Retrieval
+
+The shape-prior latent model proved that mask autoencoding itself was feasible, but Bz -> latent did not satisfy the acceptance gate because area_error and small-sample behavior did not improve enough.
+
+Hand-crafted Bz signal feature augmentation did not pass the seed=42 screening gate. Exemplar retrieval selected `stats_plus_shape + cosine + top1` on validation, but test performance was below the current baseline and polygon / rotated_rect metrics declined. These results indicate that simple shape prior, retrieval, or hand-crafted signal features do not solve the current rounding failure.
+
+## 17.x Geometric and Conditional Decoder Attempts
+
+The star-convex radial model had oracle shape capacity, especially at K=32, but trained Bz -> radial models had area_error far worse than `CURRENT_BASELINE`, so the direction did not enter 3 seed validation.
+
+The U-Net-like decoder and shape-type conditional decoder both failed their validation threshold rescue gates. The main blockers were area_error, small / low-signal trade-offs, or lack of real improvement in polygon / rotated_rect rounding. These directions are stopped; ordinary decoder capacity increases and type conditioning are not current mainline candidates.
+
+## 18.x Geometry and Forward Consistency
+
+Step 18.1 single-defect geometry decoder used a differentiable rotated-box rasterizer. It reduced visual blob-like rounding by construction and improved some IoU / Dice metrics, but area_error became much worse and polygon detail still did not fit well. It did not become a candidate.
+
+Step 18.2 trained a mask-to-Bz forward surrogate and found it reliable enough for a feasibility gate: test R2 `0.8520` and correlation `0.9231`. Forward consistency with `lambda_forward=0.05` gave clear positive signal in IoU / Dice / center_error / Bz residual, but did not fully satisfy the baseline replacement gate because area_error and small / low-signal trade-offs remained.
+
+Step 18.3 bounded lambda bracket tested only `0.02`, `0.05`, and `0.10`. `lambda_forward=0.10` was the best fixed value and justified a controlled 3 seed validation.
+
+Step 18.4 forward consistency with `lambda_forward=0.10` is now the strongest pending candidate. Against the current mask-only grid decoder baseline, it improves overall IoU, Dice, area_error, center_error, and Bz MSE, while keeping `pred_area=0` unchanged. It also improves small / low-signal IoU and Dice, but small / low-signal area_error and polygon area_error still require review. Therefore `CURRENT_BASELINE` remains the mask-only grid decoder until review / baseline decision explicitly promotes the forward-consistency candidate.
+
+---
