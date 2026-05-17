@@ -1,0 +1,26 @@
+# v3_complex mask-only conditional U-Net-like spatial decoder candidate
+
+This RESULT_DRIVEN_EXPERIMENT tests fixed U-Net-like spatial decoder variants without modifying train_pinn.py, evaluate_pinn.py, data_generator_v2.py, CURRENT_BASELINE.md, README.md, EXPERIMENT_LOG.md, the route document, or NEXT_STEP.md.
+
+## Stage A: seed=42 decoder screening
+
+The model keeps the direct Bz -> mask setup and changes only the spatial decoder capacity. Training loss remains BCEWithLogits + soft Dice. No SDF, boundary head/loss, handcrafted Bz feature augmentation, adaptive threshold, post-processing, retrieval, or star-convex parameterization is used.
+
+Decoder variants tested: unet_light, unet_residual.
+
+Threshold calibration rescue check is included in Stage A. Each seed=42 checkpoint is evaluated on validation thresholds 0.50, 0.60, 0.70, 0.80, 0.85, 0.90, 0.95, and the best threshold is selected by IoU + Dice - area_error before applying the positive-signal gate.
+
+| decoder_variant | best_epoch | best_threshold | val_score | val_IoU | val_Dice | val_area_error | val_pred_area=0 | small_IoU | low_signal_IoU | polygon_IoU | rotated_rect_IoU | positive_signal | checkpoint |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|---|
+| unet_light | 33 | 0.85 | 5.519925e-01 | 0.3549 | 0.4970 | 0.2999 | 3.00 | 0.2796 | 0.2781 | 0.2788 | 0.4315 | False | checkpoints\mask_boundary_unet_decoder_candidate\best_mask_boundary_unet_unet_light_seed42.pt |
+| unet_residual | 42 | 0.95 | 5.286652e-01 | 0.3336 | 0.4706 | 0.2756 | 0.00 | 0.2560 | 0.2520 | 0.2580 | 0.4049 | False | checkpoints\mask_boundary_unet_decoder_candidate\best_mask_boundary_unet_unet_residual_seed42.pt |
+
+Best decoder variant by validation gate/score: unet_light
+
+No decoder variant passed the validation positive-signal gate after threshold calibration. Stage B was not run, and U-Net v2/channel/block/threshold-variant tuning is not continued.
+
+Stage B entered: False
+Selected probability threshold: N/A
+Accepted by metric gate: False
+
+Output metrics for Stage B are not available because Stage B was not run. Screening CSV is written to `results\metrics\v3_complex_mask_boundary_unet_decoder_screening.csv`.
