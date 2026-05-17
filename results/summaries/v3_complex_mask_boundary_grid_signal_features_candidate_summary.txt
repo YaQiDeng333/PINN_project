@@ -1,0 +1,26 @@
+# v3_complex mask-only grid decoder + Bz signal feature augmentation pack
+
+This RESULT_DRIVEN_EXPERIMENT_PACK tests fixed Bz signal feature modes without modifying train_pinn.py, evaluate_pinn.py, data_generator_v2.py, CURRENT_BASELINE.md, README.md, EXPERIMENT_LOG.md, the route document, or NEXT_STEP.md.
+
+## Stage A: seed=42 feature-mode screening
+
+The model keeps the current mask-only grid decoder body and only changes the BzEncoder input channels. Training loss remains BCEWithLogits + soft Dice. No SDF, boundary head/loss, decoder change, adaptive threshold, post-processing, or ensemble is used.
+
+Feature modes tested: raw_norm, raw_deriv, raw_norm_deriv, raw_norm_deriv_stats.
+
+| feature_mode | best_epoch | val_score | val_IoU | val_Dice | val_area_error | val_center_error | val_pred_area=0 | small_IoU | small_Dice | small_area_error | low_signal_IoU | low_signal_Dice | low_signal_area_error | positive_signal | checkpoint |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|---|
+| raw_norm | 41 | 2.325738e-01 | 0.3577 | 0.5041 | 0.6292 | 1.1652 | 0.00 | 0.2659 | 0.3942 | 1.0373 | 0.2839 | 0.4145 | 0.7820 | False | checkpoints\mask_boundary_grid_signal_features_candidate\best_mask_boundary_grid_signal_features_raw_norm_seed42.pt |
+| raw_deriv | 42 | 4.296254e-01 | 0.3036 | 0.4307 | 0.3046 | 1.4069 | 3.00 | 0.2150 | 0.3108 | 0.4312 | 0.1941 | 0.2916 | 0.4028 | False | checkpoints\mask_boundary_grid_signal_features_candidate\best_mask_boundary_grid_signal_features_raw_deriv_seed42.pt |
+| raw_norm_deriv | 47 | 3.944595e-01 | 0.2988 | 0.4301 | 0.3345 | 1.4380 | 1.00 | 0.2038 | 0.3028 | 0.4336 | 0.2032 | 0.3085 | 0.4122 | False | checkpoints\mask_boundary_grid_signal_features_candidate\best_mask_boundary_grid_signal_features_raw_norm_deriv_seed42.pt |
+| raw_norm_deriv_stats | 47 | 3.560087e-01 | 0.3368 | 0.4740 | 0.4549 | 1.2924 | 0.00 | 0.2362 | 0.3519 | 0.6693 | 0.2416 | 0.3597 | 0.5286 | False | checkpoints\mask_boundary_grid_signal_features_candidate\best_mask_boundary_grid_signal_features_raw_norm_deriv_stats_seed42.pt |
+
+Best feature mode by validation score: raw_deriv
+
+The best feature mode did not pass the validation positive-signal gate. It is therefore not expanded to Stage B. No derivative v2 or additional handcrafted Bz features are continued.
+
+Stage B entered: False
+Selected probability threshold: N/A
+Accepted by metric gate: False
+
+Output metrics for Stage B are not available because Stage B was not run. Screening CSV is written to `results\metrics\v3_complex_mask_boundary_grid_signal_features_candidate_screening.csv`.
