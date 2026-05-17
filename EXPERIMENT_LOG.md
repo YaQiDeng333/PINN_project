@@ -1,14 +1,12 @@
 # 实验工作日志
 
-## Step 15.4 - Mask-Only Grid Decoder Candidate and Baseline Update
+## 当前主线摘要（第 18.4 后）
 
-Step 15.4 trained an independent v3_complex mask-only grid decoder boundary model for seeds 42, 123, and 2026. The model keeps the Bz -> mask setup, uses `BzEncoder`, projects the latent vector into a low-resolution 2D feature map, and upsamples with ConvTranspose2d / Conv2d blocks to predict full-grid mask logits. Training loss is BCEWithLogits + soft Dice. Checkpoint selection used validation IoU + validation Dice - validation area_error only.
+当前 `CURRENT_BASELINE` 已更新为 v3_complex mask-only grid decoder + forward consistency，`lambda_forward=0.10`，validation-selected probability threshold=`0.80`。第 18.4 review 确认 mask-to-Bz surrogate 独立训练并冻结使用，checkpoint selection 和 threshold selection 均只使用 validation set，test set 只用于最终评估。
 
-Validation-selected probability threshold remained `0.90`; the test set was used only for final evaluation. Compared with the previous mask-only MLP boundary baseline, the grid decoder improved the main boundary metrics: IoU `0.3319 +/- 0.0169` -> `0.33909 +/- 0.00483`, Dice `0.4729 +/- 0.0189` -> `0.48120 +/- 0.00413`, area_error `0.3220 +/- 0.0087` -> `0.28853 +/- 0.01164`, and pred_area=0 `3.67 +/- 0.58` -> `1.33 +/- 1.15`.
+相比上一版 mask-only grid decoder + threshold `0.90`，新的 forward consistency baseline 改善 overall IoU、Dice、area_error、center_error 和 Bz MSE，且 `pred_area=0` 保持不变。原 mask-only grid decoder baseline 保留为 boundary reference，composite-selection 保留为 μ-threshold shape-oriented reference，`v3_complex_tv_sweep_2e-6` 保留为 MSE-oriented reference。
 
-Small and low-signal groups also improved on IoU / Dice, and low-signal area_error decreased. Small area_error is still weaker than the previous baseline, and visual preview still shows polygon / rotated_rect fine-boundary rounding or blob-like predictions. Therefore the grid decoder is better as the new boundary CURRENT_BASELINE, but it does not mean the fine boundary problem is solved.
-
-CURRENT_BASELINE is updated to the mask-only grid decoder boundary model + validation-selected threshold=0.90. The previous mask-only MLP boundary baseline is retained as a boundary reference, composite-selection remains a mu-threshold shape-oriented reference, and `v3_complex_tv_sweep_2e-6` remains the MSE-oriented reference.
+需要明确的是：polygon area_error 轻微恶化，polygon / rotated_rect 精细边界圆斑化问题仍未根本解决。后续实验应以新的 forward consistency baseline 为对照，不再继续 loss、threshold、decoder head 或 feature 的小修补。
 
 本文件按实验推进顺序记录项目过程、参数、结果和结论。当前推荐模型和 baseline 以 `CURRENT_BASELINE.md` 为准。
 
@@ -2080,7 +2078,6 @@ CURRENT_BASELINE 架构不是完全没有表达能力；问题更像全量训练
 不在本记录中提出新实验方案；CURRENT_BASELINE 不变。
 
 ---
- 
 ## 第 12.8 / 12.9 步：overfit100 capacity diagnostic 与 warm-start gate
 
 ### 目标
@@ -2317,6 +2314,12 @@ U-Net-like decoder 和 shape-type conditional decoder 都没有通过 validation
 
 第 18.3 bounded lambda bracket 只测试 `0.02`、`0.05`、`0.10`。其中 `lambda_forward=0.10` 是最佳固定值，因此进入 controlled 3 seed validation。
 
-第 18.4 的 `lambda_forward=0.10` forward consistency 是当前最强 pending candidate。相对当前 mask-only grid decoder baseline，它改善 overall IoU、Dice、area_error、center_error 和 Bz MSE，同时 `pred_area=0` 不变；small / low-signal 的 IoU 和 Dice 也改善。但 small / low-signal area_error 与 polygon area_error 仍需要 review。因此在 review / baseline decision 明确通过前，`CURRENT_BASELINE` 仍保持 mask-only grid decoder。
+第 18.4 的 `lambda_forward=0.10` forward consistency 通过 review 和 3 seed validation，已提升为新的 `CURRENT_BASELINE`。Claude Code review 确认 mask-to-Bz surrogate 独立训练并冻结使用，checkpoint selection 只使用 validation score，probability threshold `0.80` 只由 validation set 选择，test set 只用于最终评估。
+
+相比上一版 mask-only grid decoder baseline，第 18.4 的 overall IoU 从 `0.3391` 提升到 `0.3563`，Dice 从 `0.4812` 提升到 `0.5017`，area_error 从 `0.2885` 降到 `0.2734`，center_error 从 `1.2489` 降到 `1.1464`，Bz MSE 从 `0.3323` 降到 `0.1649`，`pred_area=0` 保持 `1.33`。这说明 forward consistency 同时改善 shape metrics 和 Bz consistency。
+
+新的 `CURRENT_BASELINE` 为 mask-only grid decoder + forward consistency `lambda_forward=0.10` + validation-selected threshold `0.80`。原 mask-only grid decoder + threshold `0.90` 保留为 boundary reference，composite-selection 保留为 μ-threshold shape-oriented reference，`v3_complex_tv_sweep_2e-6` 保留为 MSE-oriented reference。
+
+需要保留的限制是：polygon area_error 从 `0.3563` 轻微恶化到 `0.3743`，polygon / rotated_rect 精细边界圆斑化问题仍未根本解决。第 18.4 的主要收益是整体 shape metrics 与 Bz consistency 同时改善，而不是彻底解决 polygon 细边界问题。
 
 ---

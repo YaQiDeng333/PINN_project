@@ -1,50 +1,59 @@
 # CURRENT_BASELINE
 
-## Authoritative Current Boundary Baseline (Step 15.4)
+## 当前权威 boundary baseline（第 18.4 后）
 
-This section is the current source of truth after Step 15.4.
+本节是当前 `CURRENT_BASELINE` 的权威记录。若下方历史记录与本节冲突，以本节为准。
 
-The current boundary-oriented CURRENT_BASELINE is the v3_complex mask-only grid decoder boundary model with validation-selected probability threshold `0.90`. This replaces the previous mask-only MLP boundary baseline as the active boundary baseline because it improves IoU, Dice, area_error, `pred_area=0`, and the small / low-signal groups. The project goal is defect boundary shape inversion, so the primary selection basis is IoU, Dice, area_error, `pred_area=0`, and small / low-signal behavior rather than full-field MSE / MAE.
+当前 boundary-oriented `CURRENT_BASELINE` 已更新为 v3_complex mask-only grid decoder + forward consistency：
 
-### Current Baseline Configuration
+* model family：mask-only grid decoder + forward consistency
+* dataset：`v3_complex`
+* forward surrogate：`checkpoints/mask_to_bz_forward_surrogate/best_mask_to_bz_forward_surrogate.pt`
+* `lambda_forward = 0.10`
+* selected probability threshold：`0.80`
+* threshold selection source：仅 validation set
+* checkpoint selection：validation IoU + validation Dice - validation area_error
+* main evaluation：test set，`mask_prob >= 0.80`
+* loss：BCEWithLogits + soft Dice + `0.10 * MSE(frozen_surrogate(mask_prob), Bz_obs)`
 
-* model family: mask-only grid decoder boundary model
-* dataset: `v3_complex`
-* checkpoint family:
-  * `checkpoints/mask_boundary_grid_candidate/best_mask_boundary_grid_seed42.pt`
-  * `checkpoints/mask_boundary_grid_candidate/best_mask_boundary_grid_seed123.pt`
-  * `checkpoints/mask_boundary_grid_candidate/best_mask_boundary_grid_seed2026.pt`
-* selected probability threshold: `0.90`
-* threshold selection source: validation set only
-* main evaluation: test set, `mask_prob >= 0.90`
-* checkpoint selection: validation IoU + validation Dice - validation area_error
-* loss: BCEWithLogits + soft Dice
-* MSE / MAE: not applicable as primary metrics because the mask-only grid decoder does not predict the full mu field.
+本项目目标是缺陷边界形状反演。该 baseline 的主要优势是 shape metrics 与 Bz consistency 同时改善：IoU、Dice、area_error、center_error 和 Bz MSE 均优于上一版 mask-only grid decoder baseline，且 `pred_area=0` 没有恶化。
 
-### Current Baseline Test Metrics
+### 当前 baseline test 指标
 
-All values are 3 seed mean +/- sample std on `data/training_data_v3_complex_test.npz`.
+以下数值为 3 seed mean +/- sample std，测试集为 `data/training_data_v3_complex_test.npz`。
 
 | metric | value |
 |---|---:|
-| IoU | 0.33909 +/- 0.00483 |
-| Dice | 0.48120 +/- 0.00413 |
-| area_error | 0.28853 +/- 0.01164 |
-| center_error | 1.24894 +/- 0.01191 |
+| IoU | 0.3563 +/- 0.0064 |
+| Dice | 0.5017 +/- 0.0089 |
+| area_error | 0.2734 +/- 0.0226 |
+| center_error | 1.1464 +/- 0.0302 |
+| Bz MSE | 0.1649 +/- 0.0135 |
 | pred_area=0 | 1.33 +/- 1.15 |
-| MSE | N/A |
-| MAE | N/A |
+| MSE / MAE | N/A for full mu field |
 
-### Current Baseline Small / Low-Signal Metrics
+### 分组指标与已知 trade-off
 
-| group | IoU | Dice | area_error |
-|---|---:|---:|---:|
-| small | 0.2857 +/- 0.0026 | 0.4151 +/- 0.0007 | 0.4077 +/- 0.0892 |
-| low_signal | 0.2579 +/- 0.0136 | 0.3861 +/- 0.0158 | 0.3762 +/- 0.0325 |
+| group | IoU | Dice | area_error | Bz MSE |
+|---|---:|---:|---:|---:|
+| small | 0.2909 +/- 0.0036 | 0.4210 +/- 0.0037 | 0.4193 +/- 0.0552 | 0.1702 +/- 0.0241 |
+| low_signal | 0.2706 +/- 0.0039 | 0.4025 +/- 0.0049 | 0.3788 +/- 0.0287 | 0.1861 +/- 0.0185 |
+| polygon | 0.3151 +/- 0.0008 | 0.4490 +/- 0.0005 | 0.3743 +/- 0.0407 | 0.1480 +/- 0.0230 |
+| rotated_rect | 0.3968 +/- 0.0092 | 0.5482 +/- 0.0126 | 0.1985 +/- 0.0089 | 0.1339 +/- 0.0184 |
 
-### Retained References
+需要明确保留的 trade-off：polygon area_error 相比上一版 grid baseline 轻微恶化（`0.3563 +/- 0.0565` -> `0.3743 +/- 0.0407`），polygon / rotated_rect 精细边界圆斑化问题仍未完全解决。第 18.4 的主要收益是整体 shape 指标和 Bz consistency 同时改善，不是彻底解决 polygon 细边界。
 
-The previous mask-only MLP boundary baseline is retained as a boundary reference:
+### 保留参考线
+
+上一版 mask-only grid decoder + threshold=0.90 保留为 boundary reference：
+
+* `checkpoints/mask_boundary_grid_candidate/best_mask_boundary_grid_seed42.pt`
+* `checkpoints/mask_boundary_grid_candidate/best_mask_boundary_grid_seed123.pt`
+* `checkpoints/mask_boundary_grid_candidate/best_mask_boundary_grid_seed2026.pt`
+* threshold：`0.90`
+* test metrics：IoU `0.33909 +/- 0.00483`，Dice `0.48120 +/- 0.00413`，area_error `0.28853 +/- 0.01164`，center_error `1.24894 +/- 0.01191`，pred_area=0 `1.33 +/- 1.15`，Bz MSE `0.3323 +/- 0.0149`
+
+更早的 mask-only MLP boundary baseline 保留为 earlier boundary reference：
 
 * `checkpoints/mask_boundary_candidate/best_mask_boundary_seed42.pt`
 * `checkpoints/mask_boundary_candidate/best_mask_boundary_seed123.pt`
@@ -64,11 +73,11 @@ The old `v3_complex_tv_sweep_2e-6` model is retained as an MSE-oriented referenc
 
 * `checkpoints/best_model_v3_complex_tv_sweep_2e-6.pt`
 
-### Known Remaining Failure Mode
+### 已知剩余问题
 
-The grid decoder improves the current boundary metrics, but it does not fully solve fine boundary shape. Polygon and rotated_rect samples can still be visually rounded or blob-like, so this baseline should not be interpreted as the boundary problem being solved.
+forward consistency 改善了当前 overall boundary metrics 和 Bz consistency，但没有完全解决精细边界形状。polygon 和 rotated_rect 样本仍可能出现圆斑化 / 平滑斑块化，因此不能把该 baseline 理解为边界问题已经完成解决。
 
-Historical baseline notes below are retained for provenance. If they conflict with this Step 15.4 section, this Step 15.4 section is authoritative.
+下方历史 baseline 记录仅保留用于溯源。若下方内容与第 18.4 当前权威 baseline 冲突，以第 18.4 记录为准。
 
 ## 当前 boundary-oriented CURRENT_BASELINE（第 15.1 / 15.2 后，以此为准）
 

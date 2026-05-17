@@ -1,0 +1,64 @@
+# v3_complex mask boundary grid forward consistency candidate
+
+This Step 18.2B script is independent and does not modify train_pinn.py, evaluate_pinn.py, data_generator_v2.py, CURRENT_BASELINE.md, README.md, EXPERIMENT_LOG.md, or NEXT_STEP.md.
+
+Frozen forward surrogate: `checkpoints\mask_to_bz_forward_surrogate\best_mask_to_bz_forward_surrogate.pt`
+
+Loss: BCEWithLogits + soft Dice + 0.1 * MSE(frozen_surrogate(mask_prob), observed_normalized_Bz). The forward surrogate is frozen. No lambda search, post-processing, adaptive threshold, COMSOL, or forward consistency v2 is used.
+
+## Seed=42 screening
+
+Validation-selected seed=42 threshold: 0.80
+
+Positive signal: False
+
+Reason: iou_not_down=True, dice_not_down=True, area_error_close=True, pred_area_zero_not_up=False, bz_mse_down=True; controlled extension forced 3-seed validation
+
+| candidate | threshold | IoU | Dice | area_error | pred_area=0 | Bz MSE | score |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| forward_consistency_screening | 0.50 | 0.3859 | 0.5355 | 0.4654 | 3.00 | 1.725596e-01 | 0.4560 |
+| forward_consistency_screening | 0.60 | 0.3818 | 0.5299 | 0.3827 | 4.00 | 1.725596e-01 | 0.5291 |
+| forward_consistency_screening | 0.70 | 0.3742 | 0.5206 | 0.3132 | 4.00 | 1.725596e-01 | 0.5816 |
+| forward_consistency_screening | 0.80 | 0.3597 | 0.5034 | 0.2655 | 5.00 | 1.725596e-01 | 0.5976 |
+| forward_consistency_screening | 0.85 | 0.3455 | 0.4870 | 0.2636 | 5.00 | 1.725596e-01 | 0.5689 |
+| forward_consistency_screening | 0.90 | 0.3192 | 0.4566 | 0.3140 | 6.00 | 1.725596e-01 | 0.4618 |
+| forward_consistency_screening | 0.95 | 0.2391 | 0.3601 | 0.5348 | 13.00 | 1.725596e-01 | 0.0644 |
+
+## Stage B
+
+Entered 3-seed validation: True
+
+Validation selected final threshold: 0.8
+
+| seed | best_epoch | best_val_score | val_IoU | val_Dice | val_area_error | checkpoint |
+|---:|---:|---:|---:|---:|---:|---|
+| 42 | 11 | 4.560453e-01 | 0.3859 | 0.5355 | 0.4654 | checkpoints\mask_boundary_forward_consistency_lambda_bracket\best_forward_consistency_lambda_0p10_seed42.pt |
+| 123 | 17 | 4.479629e-01 | 0.3841 | 0.5349 | 0.4710 | checkpoints\mask_boundary_forward_consistency_lambda010\best_mask_boundary_forward_consistency_seed123.pt |
+| 2026 | 37 | 4.485792e-01 | 0.3755 | 0.5230 | 0.4500 | checkpoints\mask_boundary_forward_consistency_lambda010\best_mask_boundary_forward_consistency_seed2026.pt |
+
+## Test comparison
+
+| group | candidate | threshold | IoU | Dice | area_error | center_error | pred_area=0 | Bz MSE |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| all | current grid baseline | 0.90 | 0.3391 +/- 0.0048 | 0.4812 +/- 0.0041 | 0.2885 +/- 0.0116 | 1.2489 +/- 0.0119 | 1.33 +/- 1.15 | 0.3323 +/- 0.0149 |
+| all | forward consistency | 0.80 | 0.3563 +/- 0.0064 | 0.5017 +/- 0.0089 | 0.2734 +/- 0.0226 | 1.1464 +/- 0.0302 | 1.33 +/- 1.15 | 0.1649 +/- 0.0135 |
+| small | current grid baseline | 0.90 | 0.2857 +/- 0.0026 | 0.4151 +/- 0.0007 | 0.4077 +/- 0.0892 | 1.2637 +/- 0.0897 | 1.33 +/- 1.15 | 0.3973 +/- 0.0242 |
+| small | forward consistency | 0.80 | 0.2909 +/- 0.0036 | 0.4210 +/- 0.0037 | 0.4193 +/- 0.0552 | 1.2153 +/- 0.0388 | 1.33 +/- 1.15 | 0.1702 +/- 0.0241 |
+| low_signal | current grid baseline | 0.90 | 0.2604 +/- 0.0146 | 0.3888 +/- 0.0173 | 0.3719 +/- 0.0321 | 1.3654 +/- 0.0170 | 1.33 +/- 1.15 | 0.3457 +/- 0.0259 |
+| low_signal | forward consistency | 0.80 | 0.2706 +/- 0.0039 | 0.4025 +/- 0.0049 | 0.3788 +/- 0.0287 | 1.2664 +/- 0.0171 | 1.33 +/- 1.15 | 0.1861 +/- 0.0185 |
+| polygon | current grid baseline | 0.90 | 0.3116 +/- 0.0025 | 0.4447 +/- 0.0016 | 0.3563 +/- 0.0565 | 1.1646 +/- 0.0618 | 1.33 +/- 1.15 | 0.3463 +/- 0.0219 |
+| polygon | forward consistency | 0.80 | 0.3151 +/- 0.0008 | 0.4490 +/- 0.0005 | 0.3743 +/- 0.0407 | 1.1360 +/- 0.0447 | 1.33 +/- 1.15 | 0.1480 +/- 0.0230 |
+| rotated_rect | current grid baseline | 0.90 | 0.3827 +/- 0.0092 | 0.5320 +/- 0.0071 | 0.2164 +/- 0.0180 | 1.2002 +/- 0.0161 | 0.00 +/- 0.00 | 0.3252 +/- 0.0148 |
+| rotated_rect | forward consistency | 0.80 | 0.3968 +/- 0.0092 | 0.5482 +/- 0.0126 | 0.1985 +/- 0.0089 | 1.1767 +/- 0.0456 | 0.00 +/- 0.00 | 0.1339 +/- 0.0184 |
+| multi_defect | current grid baseline | 0.90 | 0.3280 +/- 0.0051 | 0.4737 +/- 0.0053 | 0.2799 +/- 0.0149 | 1.3979 +/- 0.0632 | 0.00 +/- 0.00 | 0.3228 +/- 0.0095 |
+| multi_defect | forward consistency | 0.80 | 0.3650 +/- 0.0105 | 0.5182 +/- 0.0158 | 0.2274 +/- 0.0267 | 1.1278 +/- 0.0331 | 0.00 +/- 0.00 | 0.2168 +/- 0.0203 |
+
+Bz residual decreased: True
+
+Accepted by metric gate: True
+
+## Review 和 baseline 决策说明
+
+`lambda_forward=0.10` 满足整体 metric gate。相比当前 mask-only grid decoder baseline，它改善了 overall IoU、Dice、area_error、center_error 和 Bz MSE，同时 `pred_area=0` 保持不变。
+
+这不表示精细边界问题已经被彻底解决。polygon area_error 相比当前 grid baseline 轻微恶化（`0.3563 +/- 0.0565` -> `0.3743 +/- 0.0407`），polygon 精细边界 / 圆斑化问题仍然是已知限制。forward consistency 的主要收益是整体 shape 指标和 Bz consistency 同时改善，而不是彻底解决 polygon 细边界贴合问题。

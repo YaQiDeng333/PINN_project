@@ -59,15 +59,29 @@ EPOCHS = 50
 LR = 1e-3
 TRAIN_SELECTION_THRESHOLD = 0.5
 THRESHOLDS = [0.50, 0.60, 0.70, 0.80, 0.85, 0.90, 0.95]
-LAMBDA_FORWARD = 0.05
+LAMBDA_FORWARD = float(os.environ.get('PINN_LAMBDA_FORWARD', '0.05'))
 POSITIVE_SIGNAL_AREA_TOLERANCE = 0.02
 REUSE_EXISTING = os.environ.get('PINN_REUSE_EXISTING', '').lower() in {'1', 'true', 'yes'}
 FORCE_THREE_SEED = os.environ.get('PINN_FORCE_THREE_SEED', '').lower() in {'1', 'true', 'yes'}
+OUTPUT_TAG = os.environ.get('PINN_FORWARD_OUTPUT_TAG', '').strip()
 
-CHECKPOINT_DIR = ROOT / 'checkpoints' / 'mask_boundary_forward_consistency_candidate'
-METRICS_PATH = ROOT / 'results' / 'metrics' / 'v3_complex_mask_boundary_forward_consistency_candidate_metrics.csv'
-SUMMARY_PATH = ROOT / 'results' / 'summaries' / 'v3_complex_mask_boundary_forward_consistency_candidate_summary.txt'
-PREVIEW_DIR = ROOT / 'results' / 'previews' / 'mask_boundary_forward_consistency_candidate'
+if OUTPUT_TAG == 'lambda010':
+    CHECKPOINT_DIR = ROOT / 'checkpoints' / 'mask_boundary_forward_consistency_lambda010'
+    METRICS_PATH = ROOT / 'results' / 'metrics' / 'v3_complex_mask_boundary_forward_consistency_lambda010_metrics.csv'
+    SUMMARY_PATH = ROOT / 'results' / 'summaries' / 'v3_complex_mask_boundary_forward_consistency_lambda010_summary.txt'
+    PREVIEW_DIR = ROOT / 'results' / 'previews' / 'mask_boundary_forward_consistency_lambda010'
+else:
+    CHECKPOINT_DIR = ROOT / 'checkpoints' / 'mask_boundary_forward_consistency_candidate'
+    METRICS_PATH = ROOT / 'results' / 'metrics' / 'v3_complex_mask_boundary_forward_consistency_candidate_metrics.csv'
+    SUMMARY_PATH = ROOT / 'results' / 'summaries' / 'v3_complex_mask_boundary_forward_consistency_candidate_summary.txt'
+    PREVIEW_DIR = ROOT / 'results' / 'previews' / 'mask_boundary_forward_consistency_candidate'
+
+LAMBDA010_SEED42_BRACKET_PATH = (
+    ROOT
+    / 'checkpoints'
+    / 'mask_boundary_forward_consistency_lambda_bracket'
+    / 'best_forward_consistency_lambda_0p10_seed42.pt'
+)
 
 METRIC_KEYS = [
     'iou',
@@ -352,6 +366,17 @@ def train_one_seed(seed, device, pos_weight_value, forward_model, surrogate_chec
     best_score = -float('inf')
     best_info = None
     best_path = CHECKPOINT_DIR / f'best_mask_boundary_forward_consistency_seed{seed}.pt'
+
+    if (
+        OUTPUT_TAG == 'lambda010'
+        and seed == SCREENING_SEED
+        and abs(LAMBDA_FORWARD - 0.10) < 1e-12
+        and LAMBDA010_SEED42_BRACKET_PATH.exists()
+    ):
+        checkpoint = torch.load(LAMBDA010_SEED42_BRACKET_PATH, map_location='cpu')
+        info = checkpoint.get('val_metrics', {})
+        print(f'Reusing lambda=0.10 bracket checkpoint for seed={seed}: {LAMBDA010_SEED42_BRACKET_PATH}')
+        return LAMBDA010_SEED42_BRACKET_PATH, info
 
     if REUSE_EXISTING and best_path.exists():
         checkpoint = torch.load(best_path, map_location='cpu')
@@ -810,6 +835,10 @@ def main():
         base_polygon = find_row(all_rows, 'current_grid_baseline_test_mean', 'defect_type', 'polygon', threshold=CURRENT_BASELINE_THRESHOLD)
         rotated = find_row(all_rows, 'forward_consistency_test_mean', 'defect_type', 'rotated_rect', threshold=selected_threshold)
         base_rotated = find_row(all_rows, 'current_grid_baseline_test_mean', 'defect_type', 'rotated_rect', threshold=CURRENT_BASELINE_THRESHOLD)
+        small = find_row(all_rows, 'forward_consistency_test_mean', 'area_bin', 'small', threshold=selected_threshold)
+        base_small = find_row(all_rows, 'current_grid_baseline_test_mean', 'area_bin', 'small', threshold=CURRENT_BASELINE_THRESHOLD)
+        low = find_row(all_rows, 'forward_consistency_test_mean', 'signal_bin', 'low_signal', threshold=selected_threshold)
+        base_low = find_row(all_rows, 'current_grid_baseline_test_mean', 'signal_bin', 'low_signal', threshold=CURRENT_BASELINE_THRESHOLD)
         accepted = bool(
             cand is not None
             and float(cand['iou']) >= float(base['iou']) - 1e-6
@@ -821,6 +850,14 @@ def main():
                 (polygon is not None and float(polygon['iou']) >= float(base_polygon['iou']) - 1e-6)
                 or (rotated is not None and float(rotated['iou']) >= float(base_rotated['iou']) - 1e-6)
             )
+            and small is not None
+            and low is not None
+            and float(small['iou']) >= float(base_small['iou']) - 0.01
+            and float(small['dice']) >= float(base_small['dice']) - 0.01
+            and float(small['area_error']) <= float(base_small['area_error']) + POSITIVE_SIGNAL_AREA_TOLERANCE
+            and float(low['iou']) >= float(base_low['iou']) - 0.01
+            and float(low['dice']) >= float(base_low['dice']) - 0.01
+            and float(low['area_error']) <= float(base_low['area_error']) + POSITIVE_SIGNAL_AREA_TOLERANCE
         )
         write_previews(SEEDS[0], selected_threshold, sample_rows, prob_cache)
         print(f'final selected threshold={selected_threshold:.2f}, accepted={accepted}')
