@@ -1,0 +1,40 @@
+# v3_complex shape-type conditional boundary candidate
+
+Shape/type label exists: True
+
+Shape/type classes: multi_defect=0, polygon=1, rotated_rect=2
+
+| split | multi_defect | polygon | rotated_rect |
+|---|---:|---:|---:|
+| train | 331 | 348 | 321 |
+| val | 71 | 72 | 57 |
+| test | 62 | 75 | 63 |
+
+This RESULT_DRIVEN_EXPERIMENT_PACK trains an independent shape-type conditional mask boundary model without modifying train_pinn.py, evaluate_pinn.py, data_generator_v2.py, CURRENT_BASELINE.md, README.md, EXPERIMENT_LOG.md, the route document, or NEXT_STEP.md.
+
+## Model
+
+The deployable path uses BzEncoder -> latent, predicts shape_type logits, converts the predicted softmax probabilities into a soft type embedding, concatenates the embedding with latent, and decodes a mask using the grid decoder. Inference does not use true shape_type.
+
+Loss: BCEWithLogits + soft Dice + 0.1 * shape_type cross entropy. No SDF, boundary head/loss, mixture-of-experts v2, adaptive threshold, or post-processing is used.
+
+Train mask positive fraction: 0.036335; pos_weight=5.149934.
+
+## Stage A: seed=42 screening
+
+Threshold calibration rescue check is included in Stage A. The existing seed=42 checkpoint is evaluated on validation thresholds 0.50, 0.60, 0.70, 0.80, 0.85, 0.90, 0.95 for both predicted-type deployable mode and oracle true-type diagnostic mode. The threshold shown below is selected by IoU + Dice - area_error.
+
+Current validation baseline at threshold=0.90: IoU=0.3369, Dice=0.4763, area_error=0.2954, pred_area=0=3.00.
+
+| candidate | threshold | type_acc | IoU | Dice | area_error | pred_area=0 | small IoU | low-signal IoU | polygon IoU | rotated_rect IoU | multi_defect IoU | positive_signal |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|
+| shape_type_conditional_screening_predicted_mean | 0.80 | 0.6450 | 0.3406 | 0.4804 | 0.3001 | 0.00 | 0.2627 | 0.2688 | 0.2703 | 0.4128 | 0.3540 | False |
+| shape_type_conditional_screening_oracle_mean | 0.80 | 0.6450 | 0.3430 | 0.4839 | 0.3127 | 0.00 | 0.2711 | 0.2773 | 0.2736 | 0.4172 | 0.3538 | diagnostic_only |
+
+Oracle true-type upper-bound uses the same checkpoint and true shape_type embedding. It is diagnostic only and is not deployable.
+
+Stage B entered: False
+Validation selected threshold: N/A
+Accepted by metric gate: False
+
+The predicted-type model did not pass the validation positive-signal gate after threshold calibration, so no 3-seed expansion is run and no type-conditioned v2 or threshold variant is continued.
