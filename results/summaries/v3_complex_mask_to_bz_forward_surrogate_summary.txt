@@ -1,0 +1,49 @@
+# v3_complex mask-to-Bz forward surrogate
+
+This script trains a lightweight mask-to-Bz forward surrogate for Step 18.2A. It does not modify train_pinn.py, evaluate_pinn.py, data_generator_v2.py, CURRENT_BASELINE.md, README.md, EXPERIMENT_LOG.md, or NEXT_STEP.md.
+
+## Data and target
+
+Input mask: `target_mu_norm < 0.5`, equivalent to raw `target_mu < 500`.
+
+The model receives a binary mask plus fixed x/y coordinate channels and predicts the normalized Bz signal. The signal normalization uses train split mean/std and is stored in the checkpoint for reuse by any frozen forward-consistency candidate.
+
+| split | samples | signal_length | mask_shape |
+|---|---:|---:|---|
+| train | 1000 | 200 | (100, 200) |
+| val | 200 | 200 | (100, 200) |
+| test | 200 | 200 | (100, 200) |
+
+## Model
+
+Simple Conv2d encoder over mask + coordinate channels, adaptive pooling, and an MLP head to output the full Bz signal. Loss is MSE(pred_bz_norm, true_bz_norm). No COMSOL, neural operator, large framework, post-processing, or mask-model training is used in this stage.
+
+Best validation epoch: 12
+
+## Overall metrics
+
+All Bz metrics are computed on normalized Bz signals.
+
+* val: MSE=1.929229e-01, MAE=2.562221e-01, R2=0.8383, corr=0.9170, peak_pos_error=11.63
+* test: MSE=1.365280e-01, MAE=2.244235e-01, R2=0.8520, corr=0.9231, peak_pos_error=13.59
+
+## Small / low-signal reliability
+
+* test small: MSE=5.460376e-02, MAE=1.477170e-01, R2=0.8089, corr=0.9031, peak_pos_error=13.48
+* test low_signal: MSE=8.736447e-02, MAE=1.931974e-01, R2=0.5022, corr=0.9044, peak_pos_error=16.96
+
+## Defect-type test metrics
+
+| type | n | MSE | MAE | R2 | corr | peak_pos_error |
+|---|---:|---:|---:|---:|---:|---:|
+| multi_defect | 62 | 1.794458e-01 | 2.730687e-01 | 0.8600 | 0.9277 | 17.23 |
+| polygon | 75 | 1.183980e-01 | 2.007274e-01 | 0.7993 | 0.8952 | 13.33 |
+| rotated_rect | 63 | 1.158748e-01 | 2.047602e-01 | 0.8799 | 0.9387 | 10.30 |
+
+## Gate judgment
+
+Surrogate accepted for Step 18.2B: True
+
+Acceptance rule: test R2 must be clearly above 0.8, shape correlation must be high, and low-signal samples must not collapse. If this is false, forward consistency is stopped at 18.2A.
+
+Conclusion: The mask-to-Bz surrogate is reliable enough to freeze as a forward consistency module.
