@@ -1,5 +1,75 @@
 # CURRENT_BASELINE
 
+## Authoritative Current Boundary Baseline (Step 15.4)
+
+This section is the current source of truth after Step 15.4.
+
+The current boundary-oriented CURRENT_BASELINE is the v3_complex mask-only grid decoder boundary model with validation-selected probability threshold `0.90`. This replaces the previous mask-only MLP boundary baseline as the active boundary baseline because it improves IoU, Dice, area_error, `pred_area=0`, and the small / low-signal groups. The project goal is defect boundary shape inversion, so the primary selection basis is IoU, Dice, area_error, `pred_area=0`, and small / low-signal behavior rather than full-field MSE / MAE.
+
+### Current Baseline Configuration
+
+* model family: mask-only grid decoder boundary model
+* dataset: `v3_complex`
+* checkpoint family:
+  * `checkpoints/mask_boundary_grid_candidate/best_mask_boundary_grid_seed42.pt`
+  * `checkpoints/mask_boundary_grid_candidate/best_mask_boundary_grid_seed123.pt`
+  * `checkpoints/mask_boundary_grid_candidate/best_mask_boundary_grid_seed2026.pt`
+* selected probability threshold: `0.90`
+* threshold selection source: validation set only
+* main evaluation: test set, `mask_prob >= 0.90`
+* checkpoint selection: validation IoU + validation Dice - validation area_error
+* loss: BCEWithLogits + soft Dice
+* MSE / MAE: not applicable as primary metrics because the mask-only grid decoder does not predict the full mu field.
+
+### Current Baseline Test Metrics
+
+All values are 3 seed mean +/- sample std on `data/training_data_v3_complex_test.npz`.
+
+| metric | value |
+|---|---:|
+| IoU | 0.33909 +/- 0.00483 |
+| Dice | 0.48120 +/- 0.00413 |
+| area_error | 0.28853 +/- 0.01164 |
+| center_error | 1.24894 +/- 0.01191 |
+| pred_area=0 | 1.33 +/- 1.15 |
+| MSE | N/A |
+| MAE | N/A |
+
+### Current Baseline Small / Low-Signal Metrics
+
+| group | IoU | Dice | area_error |
+|---|---:|---:|---:|
+| small | 0.2857 +/- 0.0026 | 0.4151 +/- 0.0007 | 0.4077 +/- 0.0892 |
+| low_signal | 0.2579 +/- 0.0136 | 0.3861 +/- 0.0158 | 0.3762 +/- 0.0325 |
+
+### Retained References
+
+The previous mask-only MLP boundary baseline is retained as a boundary reference:
+
+* `checkpoints/mask_boundary_candidate/best_mask_boundary_seed42.pt`
+* `checkpoints/mask_boundary_candidate/best_mask_boundary_seed123.pt`
+* `checkpoints/mask_boundary_candidate/best_mask_boundary_seed2026.pt`
+* threshold: `0.90`
+* test metrics: IoU `0.3319 +/- 0.0169`, Dice `0.4729 +/- 0.0189`, area_error `0.3220 +/- 0.0087`, center_error `1.2271 +/- 0.0083`, pred_area=0 `3.67 +/- 0.58`
+
+The composite-selection baseline is retained as a mu-threshold shape-oriented reference:
+
+* `checkpoints/best_model_v3_complex_composite_seed42.pt`
+* `checkpoints/best_model_v3_complex_composite_seed123.pt`
+* `checkpoints/best_model_v3_complex_composite_seed2026.pt`
+* threshold: raw `mu < 500`
+* its MSE / MAE and mask metrics are 3 seed means, not single-checkpoint metrics.
+
+The old `v3_complex_tv_sweep_2e-6` model is retained as an MSE-oriented reference:
+
+* `checkpoints/best_model_v3_complex_tv_sweep_2e-6.pt`
+
+### Known Remaining Failure Mode
+
+The grid decoder improves the current boundary metrics, but it does not fully solve fine boundary shape. Polygon and rotated_rect samples can still be visually rounded or blob-like, so this baseline should not be interpreted as the boundary problem being solved.
+
+Historical baseline notes below are retained for provenance. If they conflict with this Step 15.4 section, this Step 15.4 section is authoritative.
+
 ## 当前 boundary-oriented CURRENT_BASELINE（第 15.1 / 15.2 后，以此为准）
 
 本项目当前目标是缺陷边界形状反演，因此 CURRENT_BASELINE 以 IoU、Dice、area_error、`pred_area=0`、small / low-signal 表现为主要依据，而不是只选择 MSE / MAE 最低的 μ field 模型。

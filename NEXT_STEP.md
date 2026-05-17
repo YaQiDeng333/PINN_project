@@ -1,5 +1,15 @@
 NEXT_STEP
 
+## Authoritative Current Status (Step 15.4)
+
+CURRENT_BASELINE has been updated to the mask-only grid decoder boundary model + validation-selected threshold=0.90.
+
+Future experiments should use this new grid decoder boundary baseline as the comparison point. Do not continue small patching around the previous mask-only MLP baseline, composite-selection, SDF loss, selection metrics, ensembles, or threshold tricks.
+
+If the project continues, the next phase should target the remaining polygon / rotated_rect fine-boundary rounding problem directly rather than small parameter tweaks.
+
+---
+
 ## 当前最新状态（以此为准）
 
 第 15.1 / 15.2 步：CURRENT_BASELINE 已更新为 mask-only boundary model + validation-selected threshold=0.90。

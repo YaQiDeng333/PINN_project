@@ -32,6 +32,7 @@ data/
 # Model checkpoints and training outputs
 checkpoints/
 results/
+results/previews/
 runs/
 *.pt
 *.pth

@@ -1,5 +1,15 @@
 # 实验工作日志
 
+## Step 15.4 - Mask-Only Grid Decoder Candidate and Baseline Update
+
+Step 15.4 trained an independent v3_complex mask-only grid decoder boundary model for seeds 42, 123, and 2026. The model keeps the Bz -> mask setup, uses `BzEncoder`, projects the latent vector into a low-resolution 2D feature map, and upsamples with ConvTranspose2d / Conv2d blocks to predict full-grid mask logits. Training loss is BCEWithLogits + soft Dice. Checkpoint selection used validation IoU + validation Dice - validation area_error only.
+
+Validation-selected probability threshold remained `0.90`; the test set was used only for final evaluation. Compared with the previous mask-only MLP boundary baseline, the grid decoder improved the main boundary metrics: IoU `0.3319 +/- 0.0169` -> `0.33909 +/- 0.00483`, Dice `0.4729 +/- 0.0189` -> `0.48120 +/- 0.00413`, area_error `0.3220 +/- 0.0087` -> `0.28853 +/- 0.01164`, and pred_area=0 `3.67 +/- 0.58` -> `1.33 +/- 1.15`.
+
+Small and low-signal groups also improved on IoU / Dice, and low-signal area_error decreased. Small area_error is still weaker than the previous baseline, and visual preview still shows polygon / rotated_rect fine-boundary rounding or blob-like predictions. Therefore the grid decoder is better as the new boundary CURRENT_BASELINE, but it does not mean the fine boundary problem is solved.
+
+CURRENT_BASELINE is updated to the mask-only grid decoder boundary model + validation-selected threshold=0.90. The previous mask-only MLP boundary baseline is retained as a boundary reference, composite-selection remains a mu-threshold shape-oriented reference, and `v3_complex_tv_sweep_2e-6` remains the MSE-oriented reference.
+
 本文件按实验推进顺序记录项目过程、参数、结果和结论。当前推荐模型和 baseline 以 `CURRENT_BASELINE.md` 为准。
 
 ## 目录
