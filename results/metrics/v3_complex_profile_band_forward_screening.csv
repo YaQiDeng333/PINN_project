@@ -1,0 +1,1 @@
+candidate,seed,split,group_type,group,threshold,n,iou,dice,area_error,center_error,pred_area_zero,pred_area_lt_true,pred_area_gt_true,bz_mse,composite,macro_area_composite,avg_support_length,empty_support_count,full_width_support_count
