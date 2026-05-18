@@ -1,0 +1,88 @@
+# v3_complex geometry + forward consistency candidate
+
+## Single-defect subset
+
+Subset is built in-script from v3_complex by keeping single-defect `polygon` and `rotated_rect` samples and excluding `multi_defect`. Original data files are not modified.
+
+| split | polygon | rotated_rect | total |
+|---|---:|---:|---:|
+| train | 348 | 321 | 669 |
+| val | 72 | 57 | 129 |
+| test | 75 | 63 | 138 |
+
+## Method
+
+* Geometry head: BzEncoder -> rotated box `(cx, cy, w, h, angle)`.
+* Rasterizer: PyTorch soft rotated rectangle SDF, fixed temperature `0.08`.
+* Loss: BCEWithLogits + soft Dice + `0.1` * frozen mask-to-Bz surrogate MSE.
+* Forward surrogate: `checkpoints/mask_to_bz_forward_surrogate/best_mask_to_bz_forward_surrogate.pt`.
+* No polygon vertices, multi-component matching, post-processing, SDF loss, boundary head, lambda search, or temperature search.
+
+## Seed=42 gate
+
+* completed: True
+* validation-selected threshold: `0.95`
+
+| candidate | threshold | n | IoU | Dice | area_error | center_error | pred_area=0 | Bz MSE |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| CURRENT_BASELINE on same subset, 3-seed mean | 0.8000 | 138.0000 | 0.3524 | 0.4943 | 0.2941 | 1.1547 | 1.33 | 1.415369e-01 |
+| geometry-only reference, 3-seed mean | 0.9500 | 138.0000 | 0.3598 | 0.5105 | 0.6118 | 1.1850 | 0.00 | 4.541645e-01 |
+| geometry-only reference, seed=42 | 0.9500 | 138.0000 | 0.3562 | 0.5068 | 0.5917 | 1.1915 | 0.00 | 4.475138e-01 |
+| geometry+forward, seed=42 | 0.9500 | 138.0000 | 0.3572 | 0.5055 | 0.4720 | 1.1846 | 0.00 | 2.828022e-01 |
+
+## Validation threshold screening
+
+| threshold | IoU | Dice | area_error | center_error | pred_area=0 | Bz MSE | score |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 0.50 | 0.3650 | 0.5160 | 0.8628 | 1.1188 | 0.00 | 2.677078e-01 | 0.0181 |
+| 0.60 | 0.3658 | 0.5164 | 0.7879 | 1.1172 | 0.00 | 2.677078e-01 | 0.0943 |
+| 0.70 | 0.3667 | 0.5167 | 0.7125 | 1.1154 | 0.00 | 2.677078e-01 | 0.1709 |
+| 0.80 | 0.3657 | 0.5147 | 0.6261 | 1.1184 | 0.00 | 2.677078e-01 | 0.2543 |
+| 0.85 | 0.3654 | 0.5138 | 0.5708 | 1.1197 | 0.00 | 2.677078e-01 | 0.3085 |
+| 0.90 | 0.3644 | 0.5123 | 0.4999 | 1.1150 | 0.00 | 2.677078e-01 | 0.3768 |
+| 0.95 | 0.3601 | 0.5066 | 0.4015 | 1.1192 | 0.00 | 2.677078e-01 | 0.4652 |
+
+## Gate checks
+
+* area_error_below_geometry_only: True
+* iou_not_obviously_below_current: True
+* dice_not_obviously_below_current: True
+* pred_area_zero_not_up: True
+* bz_mse_below_geometry_only: True
+* polygon_or_rotated_metric_signal: True
+* final_area_error_below_geometry_only: True
+* final_iou_not_obviously_below_current: True
+* final_dice_not_obviously_below_current: True
+* final_pred_area_zero_not_up: True
+* final_bz_mse_below_geometry_only: True
+* final_polygon_or_rotated_metric_signal: True
+* formal_iou_not_below_current: True
+* formal_dice_not_below_current: True
+* formal_area_error_not_worse_than_current: False
+* formal_bz_mse_not_worse_than_current: False
+* formal_pred_area_zero_not_worse_than_current: True
+
+Entered 3 seed: True
+Accepted as formal candidate: False
+
+The bounded gate above is used only to decide whether seed=42 is worth extending to 3 seeds. Formal acceptance is stricter and compares the 3-seed result against the current forward-consistency CURRENT_BASELINE on the same single-defect subset.
+
+| seed | best_epoch | best_val_score | val_IoU | val_Dice | val_area_error | checkpoint |
+|---:|---:|---:|---:|---:|---:|---|
+| 42 | 30 | 1.813503e-02 | 0.3650 | 0.5160 | 0.8628 | `checkpoints\geometry_forward_consistency_candidate\best_geometry_forward_consistency_seed42.pt` |
+| 123 | 40 | 2.784197e-02 | 0.3607 | 0.5117 | 0.8446 | `checkpoints\geometry_forward_consistency_candidate\best_geometry_forward_consistency_seed123.pt` |
+| 2026 | 35 | -2.664120e-02 | 0.3683 | 0.5216 | 0.9165 | `checkpoints\geometry_forward_consistency_candidate\best_geometry_forward_consistency_seed2026.pt` |
+
+## 3-seed result
+
+| geometry+forward, 3-seed mean | 0.9500 | 138.0000 | 0.3588 | 0.5076 | 0.4848 | 1.1701 | 0.00 | 3.088895e-01 |
+3-seed std row is recorded in `results\metrics\v3_complex_geometry_forward_consistency_candidate_metrics.csv`.
+Preview files: 12 written to `results\previews\geometry_forward_consistency_candidate`.
+
+## Final conclusion
+
+Geometry + forward consistency reduces the geometry-only branch area_error and Bz MSE, so the forward-consistency signal is real inside the rotated-box geometry branch.
+
+However, compared with the current CURRENT_BASELINE on the same single-defect subset, the gains are not sufficient: IoU / Dice are only slightly higher, while area_error and Bz MSE remain clearly worse. Visual previews show less round-blob behavior because the output is constrained to a rotated rectangle, but polygon samples are still approximated by rectangles, corner/detail fitting is not solved, and there are offset failure cases.
+
+Final decision: not accepted as a formal candidate, do not update CURRENT_BASELINE, and do not continue lambda_forward / temperature / rotated-box geometry v2 / polygon vertices / multi-component variants from this branch.
