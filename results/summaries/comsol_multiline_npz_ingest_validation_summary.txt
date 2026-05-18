@@ -1,0 +1,56 @@
+﻿# 第 20.7 COMSOL multiline NPZ ingest validation
+
+## 1. NPZ 读取与 schema
+
+- NPZ 路径：C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\prepared\comsol_single_defect_multiline_forward_pack_v1_smoke.npz
+- NPZ 是否可读：True
+- 字段列表：['delta_bz', 'bz_defect', 'bz_no_defect', 'masks', 'sensor_x', 'scan_line_y', 'mask_x', 'mask_y', 'defect_types', 'sample_ids', 'geometry_params', 'metadata']
+- 缺失字段：[]
+- schema-ready：True
+- train-ready：False
+- train-ready 判断：schema 已可读，但样本数只有 1，且没有正式 train/val/test split
+
+## 2. shape 检查
+
+- delta_bz shape：(1, 3, 201)
+- bz_defect shape：(1, 3, 201)
+- bz_no_defect shape：(1, 3, 201)
+- masks shape：(1, 64, 128)
+- sensor_x shape：(201,)
+- scan_line_y shape：(3,)
+- mask_x shape：(128,)
+- mask_y shape：(64,)
+- shape 是否一致：True
+
+## 3. 数值质量
+
+- numeric arrays finite：{'delta_bz': True, 'bz_defect': True, 'bz_no_defect': True, 'masks': True, 'sensor_x': True, 'scan_line_y': True, 'mask_x': True, 'mask_y': True}
+- delta_bz stats：{'min': -0.001967874321524749, 'max': 0.0016928060418475448, 'mean': -2.312120691257009e-05, 'std': 0.0007701146573088234}
+- bz_defect stats：{'min': -0.001636522316382203, 'max': 0.001721319524046962, 'mean': -1.977714786883853e-05, 'std': 0.0008121145707625569}
+- bz_no_defect stats：{'min': -0.0014937431495851234, 'max': 0.001715947695994256, 'mean': 3.3440590437315862e-06, 'std': 0.0005152365290461697}
+- mask_area：[312]
+- mask 是否非空：[True]
+- delta_bz 是否非零：True
+- 三条 scan line 是否不同：True
+- delta_bz 是否等于 bz_defect - bz_no_defect：True
+- 最大 delta 重构误差：0.0
+
+## 4. 坐标与几何一致性
+
+- sensor_x 单调：True
+- scan_line_y：[-0.001, 0.0, 0.001]
+- scan_line_y 是否为预期三线：True
+- mask_x 单调：True
+- mask_y 单调：True
+- mask 坐标范围：{'mask_x_min': -0.04, 'mask_x_max': 0.04, 'mask_y_min': -0.01, 'mask_y_max': 0.01}
+- geometry_params：[{'angle_rad': 0.0, 'center_x_m': 0.0, 'center_y_m': 0.0, 'center_z_m': -0.0005, 'defect_type': 'rectangular_notch', 'depth_m': 0.001, 'length_m': 0.008, 'sample_id': 'sample_001', 'width_m': 0.008}]
+- geometry 是否落在 mask 坐标范围内：[True]
+- geometry raster 与存储 mask 的 IoU：[1.0]
+
+## 5. ingest 结论
+
+- 该 1-sample smoke NPZ 字段完整、shape 一致、数值有限，且 delta_bz 与 raw Bz 差值一致。
+- 该 NPZ 可以作为 PINN_project 的 schema smoke 输入，但样本数只有 1，且没有 train / val / test split，因此不是正式 train-ready 数据集。
+- 外部 COMSOL 工程可以扩展到 6-12 个样本，但扩展前建议先 review 坐标映射、rectangular_notch 到目标 defect_type 的语义映射，以及 mask rasterization 是否符合后续 2D/quasi-2D 反演定义。
+- PINN_project 后续需要新增 prepare / dataset loader 支持 `(N, n_lines, L)` 的 `delta_bz` 输入、`(N, H, W)` masks、坐标数组、geometry metadata，以及小样本 split/manifest 读取。
+- 下一步更适合让 COMSOL 工程扩展真实样本，同时在 PINN_project 增加只读 ingest/prepare loader；不应直接基于 1 个样本训练模型。

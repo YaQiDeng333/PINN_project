@@ -1,0 +1,2 @@
+sample_id,defect_type,n_lines,signal_length,mask_shape,mask_area,delta_bz_min,delta_bz_max,delta_bz_mean,delta_bz_std,scan_line_y,has_valid_coords,delta_matches_defect_minus_reference,notes
+sample_001,rectangular_notch,3,201,"(64, 128)",312,-0.001967874321524749,0.0016928060418475448,-2.312120691257009e-05,0.0007701146573088234,"[-0.001, 0.0, 0.001]",True,True,ok
