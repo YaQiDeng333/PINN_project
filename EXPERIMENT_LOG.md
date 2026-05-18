@@ -2323,3 +2323,10 @@ U-Net-like decoder 和 shape-type conditional decoder 都没有通过 validation
 需要保留的限制是：polygon area_error 从 `0.3563` 轻微恶化到 `0.3743`，polygon / rotated_rect 精细边界圆斑化问题仍未根本解决。第 18.4 的主要收益是整体 shape metrics 与 Bz consistency 同时改善，而不是彻底解决 polygon 细边界问题。
 
 ---
+## 第 19.3 步：CURRENT_BASELINE proposal + anisotropic basis refinement gate
+
+第 19.3 测试了“CURRENT_BASELINE coarse probability / mask + K=4 anisotropic basis test-time refinement + forward consistency”的最后一条 basis refinement 路线。实验只使用当前 forward-consistency CURRENT_BASELINE 的 3 seed mean probability 生成 coarse proposal，不训练新网络，不更新 baseline checkpoint。
+
+validation 在 `proposal_only` 和 `proposal_forward` 中选择了 `proposal_forward`。该目标显著降低 Bz MSE，并使 area_error 略低于 CURRENT_BASELINE，但 test set 上 IoU / Dice 低于 CURRENT_BASELINE；polygon / rotated_rect 预览中也没有稳定呈现更贴合直边、角点或旋转边界的效果，主要收益更像是 Bz residual 与面积控制，而不是边界细节真正改善。
+
+因此第 19.3 不满足完整接受条件，不作为正式 candidate，也不更新 CURRENT_BASELINE。后续不继续 K / temperature / combine function / optimization steps / lambda / basis refinement v2 等小修补；当前 CURRENT_BASELINE 仍保持 mask-only grid decoder + forward consistency `lambda_forward=0.10` + validation-selected threshold `0.80`。
