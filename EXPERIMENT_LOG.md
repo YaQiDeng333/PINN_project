@@ -2330,3 +2330,8 @@ U-Net-like decoder 和 shape-type conditional decoder 都没有通过 validation
 validation 在 `proposal_only` 和 `proposal_forward` 中选择了 `proposal_forward`。该目标显著降低 Bz MSE，并使 area_error 略低于 CURRENT_BASELINE，但 test set 上 IoU / Dice 低于 CURRENT_BASELINE；polygon / rotated_rect 预览中也没有稳定呈现更贴合直边、角点或旋转边界的效果，主要收益更像是 Bz residual 与面积控制，而不是边界细节真正改善。
 
 因此第 19.3 不满足完整接受条件，不作为正式 candidate，也不更新 CURRENT_BASELINE。后续不继续 K / temperature / combine function / optimization steps / lambda / basis refinement v2 等小修补；当前 CURRENT_BASELINE 仍保持 mask-only grid decoder + forward consistency `lambda_forward=0.10` + validation-selected threshold `0.80`。
+---
+
+## 第 20.1 步：forward model / COMSOL feasibility planning
+
+19.x 后内部 geometry / basis / proposal / mask-logit refinement 路线已基本到达边界，继续围绕现有单条 Bz 和当前 decoder 做小修补不再是主线。下一阶段转向 forward model / COMSOL / 多观测数据可行性，目标是提高缺陷边界反演问题本身的可辨识性。

@@ -2,6 +2,30 @@
 
 本文件记录当前主线判断，不再按早期实验流水账追加。历史细节以 `EXPERIMENT_LOG.md`、`CURRENT_BASELINE.md` 和 `results/summaries/` 为准；本文件只保留路线层面的结论、停止条件和下一阶段原则。
 
+## 下一阶段：forward model / 多观测数据 / COMSOL feasibility
+
+第 18.x / 19.x 后，内部结构和 test-time refinement 路线已经基本到达边界。当前 `CURRENT_BASELINE` 仍保留为 mask-only grid decoder + forward consistency `lambda_forward=0.10` + validation-selected threshold `0.80`，它是现有 v3_complex 单通道 Bz 数据上的最强 boundary-oriented baseline。
+
+下一阶段目标不再是继续调 decoder、loss、threshold、basis、geometry、proposal refinement 或 post-processing，而是提高反演问题本身的可辨识性。核心判断是：现有单条 / 单通道 Bz 对 polygon / rotated_rect 的直边、角点、rotation 和 multi-defect 组件约束不足，因此继续在当前输入上做小修补很难根本解决圆斑化。
+
+推荐优先路线是 `comsol_single_defect_multiline_forward_pack_v1`：
+
+* 先做小规模、可审计的 COMSOL / physics-forward single-defect 数据包；
+* 优先覆盖 polygon / rotated_rect 或可实现的等价形状族；
+* 输入优先使用 multi-line `delta_Bz`，仍输出 2D / quasi-2D defect mask；
+* 先验证 Mask/Geometry -> Bz forward surrogate 是否可靠，再进入 inverse boundary model；
+* 不直接上完整 3D，不直接替换当前 v3_complex `CURRENT_BASELINE`。
+
+候选方向优先级：
+
+1. COMSOL-generated single-defect focused dataset，最好包含 multi-line `delta_Bz`；
+2. 基于该数据包训练更可靠的 forward surrogate，作为 inverse model 前置 gate；
+3. three-axis MFL 作为后续扩展；
+4. 单独 multi-liftoff 只作为低优先级补充，因为它更偏深度 / 尺度约束，不一定解决边界角点；
+5. 不再围绕当前 grid decoder 做小 head / 小 loss / 小 threshold / 小 refinement。
+
+该阶段的接受条件不是某个局部指标波动，而是更可靠 forward model 或更丰富观测能否稳定改善边界可辨识性：预测 mask 是否更能解释 Bz，同时 IoU / Dice / area_error / small-low-signal / polygon-rotated_rect 视觉质量是否优于当前 baseline。
+
 ## 当前主线状态
 
 当前 `CURRENT_BASELINE` 已从早期的 μ-field threshold / composite-selection 路线，以及上一版 mask-only grid decoder boundary baseline，更新为：
