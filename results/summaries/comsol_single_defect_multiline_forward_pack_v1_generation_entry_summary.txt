@@ -1,0 +1,240 @@
+# 第 20.4 COMSOL/MCP minimal generation entry and one-sample smoke
+
+## 结论
+
+本轮完成了 generation entry smoke，但没有生成真实 COMSOL 样本，也没有生成 NPZ。
+
+已新增一个 dry-run-first 的生成入口 scaffold：
+
+- `scripts/generate_comsol_single_defect_multiline_smoke_v1.py`
+
+以及一个只读 inspect scaffold：
+
+- `scripts/inspect_comsol_single_defect_multiline_smoke_v1.py`
+
+两个脚本都不会伪造 COMSOL 信号、不会把 raw Bz 冒充成 `delta_Bz`，也不会凭空生成 mask。当前状态是：`entry scaffold created, real generation blocked`。
+
+## 1. 当前 COMSOL/MCP 是否稳定可调用
+
+COMSOL/MCP 可以被当前 Codex 环境探测到，但还不能认为是稳定的 generation entry。
+
+本轮只做了轻量状态检查：
+
+- `comsol_status` 显示 `connected=true`；
+- COMSOL version 为 `6.3`；
+- cores 为 `1`；
+- standalone 为 `true`；
+- 当前没有 loaded model；
+- 本轮没有再次执行 `comsol_start`，避免重复触发长等待；
+- 本轮最后执行了 `comsol_disconnect` 清理探测状态，没有加载模型或运行求解。
+
+结合第 20.3 的记录，`comsol_start(cores=1)` 曾等待 600 秒超时，因此当前 MCP/COMSOL 只能算“可探测”，不能算“可稳定调用生成数据”。
+
+## 2. 当前仓库是否已有可复现 model generation entry
+
+PINN_project 内没有可直接生成目标 pack 的 COMSOL model generation entry。
+
+当前 PINN_project 内与 COMSOL / forward 相关的入口主要是：
+
+- `scripts/inspect_comsol_mfl_dataset.py`
+- `scripts/prepare_comsol_mfl_npz.py`
+- `data/comsol_mfl/rectangular_sweep_small/`
+
+这些入口能做：
+
+- 读取已有 `rectangular_notch` 单线 CSV；
+- 检查 5 个 smoke 样本；
+- 整理已有单线 CSV 到 intermediate NPZ；
+- 验证 `delta_Bz` 与 metadata 一致。
+
+这些入口不能做：
+
+- 创建新的 COMSOL model；
+- 设置新的 multi-line scan；
+- 生成 multi-line `delta_Bz`；
+- 生成 2D / quasi-2D mask；
+- 写出 `mask_x` / `mask_y`；
+- 写出目标 pack schema。
+
+## 3. 外部 COMSOL_Multiphysics_MCP 生成入口检查
+
+项目外存在：
+
+- `C:\Users\19166\Desktop\COMSOL_Multiphysics_MCP\scripts\generate_mfl_rectangular_sweep.py`
+- `C:\Users\19166\Desktop\COMSOL_Multiphysics_MCP\configs\mfl_rectangular_sweep_small.json`
+
+该外部脚本能力：
+
+- 能创建 rectangular notch COMSOL smoke sweep；
+- 能设置 rectangular notch geometry；
+- 能设置固定 sensor line；
+- 能导出 `Bz_no_defect`、`Bz_defect`、`delta_Bz`；
+- 能保存 no-defect baseline 和 defect sample CSV；
+- 能保存 `.mph` model。
+
+当前不足：
+
+- 只支持单条 `sensor_line.y_m`；
+- 不支持 `scan_line_y` 多线；
+- 不生成 2D / quasi-2D mask；
+- 不输出 `mask_x` / `mask_y`；
+- 不输出 mask 与 COMSOL geometry 坐标映射；
+- 不支持 polygon / rotated_rect；
+- 当前 `pinn_mfl` Python 环境 `import mph` 失败，因此不能直接在 PINN_project 环境内复用该脚本。
+
+## 4. 本轮新增 generation entry scaffold
+
+新增脚本：
+
+`scripts/generate_comsol_single_defect_multiline_smoke_v1.py`
+
+该脚本当前实现：
+
+- 默认 `dry_run=True`；
+- 默认 `max_samples=1`；
+- 限制 `max_samples <= 3`；
+- 目标输出目录固定为：
+  `data/comsol_mfl/generated/comsol_single_defect_multiline_forward_pack_v1/`
+- 目标 NPZ 路径固定为：
+  `data/comsol_mfl/prepared/comsol_single_defect_multiline_forward_pack_v1_smoke.npz`
+- 定义了 smoke sample 配置结构：
+  - `sample_id`
+  - `defect_type`
+  - `geometry_params`
+- 定义了 multi-line sensor 配置：
+  - `sensor_x_start_m = -0.04`
+  - `sensor_x_stop_m = 0.04`
+  - `sensor_points = 201`
+  - `scan_line_y_m = [-0.004, 0.0, 0.004]`
+  - `sensor_z_m = 0.002`
+- 定义了 2D / quasi-2D mask grid 配置：
+  - `mask_x_start_m = -0.04`
+  - `mask_x_stop_m = 0.04`
+  - `mask_y_start_m = -0.01`
+  - `mask_y_stop_m = 0.01`
+  - `height = 64`
+  - `width = 128`
+- 明确记录应生成的目标字段：
+  - `sample_id`
+  - `defect_type`
+  - `geometry_params`
+  - `mask_x`
+  - `mask_y`
+  - `masks`
+  - `sensor_x`
+  - `scan_line_y`
+  - `bz_defect`
+  - `bz_reference`
+  - `delta_bz`
+  - `metadata`
+
+当前执行 dry-run 结果：
+
+- 没有创建 `data/comsol_mfl/generated/...`；
+- 没有创建 NPZ；
+- 没有创建 CSV；
+- 没有创建 mask；
+- 没有调用 COMSOL 求解。
+
+如果使用 `--execute`，脚本会拒绝真实生成并返回 blocker，而不是伪造数据。
+
+## 5. 本轮新增 inspect scaffold
+
+新增脚本：
+
+`scripts/inspect_comsol_single_defect_multiline_smoke_v1.py`
+
+该脚本当前实现：
+
+- 读取目标 generated 目录；
+- 检查 `sample_*.json` manifest；
+- 如果目标 NPZ 存在，则检查 NPZ 字段；
+- 可按需输出 inventory CSV；
+- 如果没有真实生成文件，则报告 `manifest_count=0`、`npz.exists=false`。
+
+本轮 inspect 结果：
+
+- generated dir 不存在；
+- manifest count = 0；
+- inventory rows = 0；
+- 目标 NPZ 不存在。
+
+因此本轮没有生成 inventory CSV。
+
+## 6. 是否生成真实 COMSOL 样本
+
+没有。
+
+原因：
+
+1. 当前 PINN_project 内没有可调用的 COMSOL model generation function。
+2. 外部 `generate_mfl_rectangular_sweep.py` 只支持单线 rectangular notch，不满足 target schema。
+3. 当前 `pinn_mfl` 环境无法 import `mph`。
+4. 第 20.3 曾记录 `comsol_start` 长时间超时，本轮不重复启动长会话。
+5. 没有 mask generation / coordinate mapping 的可复现实现。
+
+## 7. 合格样本字段状态
+
+本轮没有生成合格样本。目标字段状态如下：
+
+- `sample_id`：scaffold 中定义，未生成真实样本；
+- `defect_type`：scaffold 中定义，未生成真实样本；
+- `geometry_params`：scaffold 中定义，未生成真实样本；
+- `mask_x` / `mask_y`：schema 中定义，未生成；
+- `mask`：未生成；
+- `sensor_x`：schema 中定义，未生成；
+- `scan_line_y`：schema 中定义，未生成；
+- `Bz_defect`：未生成；
+- `Bz_reference`：未生成；
+- `delta_Bz`：未生成；
+- 坐标单位和 COMSOL geometry 坐标约定：scaffold 中记录目标约定，未生成真实 manifest；
+- mask 与 sensor 坐标映射说明：仍缺正式实现。
+
+## 8. NPZ 状态
+
+未生成：
+
+`data/comsol_mfl/prepared/comsol_single_defect_multiline_forward_pack_v1_smoke.npz`
+
+train-ready：否。
+
+## 9. 最大 blocker
+
+当前最大 blocker 是生成逻辑缺失和执行入口不稳定，而不是已有 CSV 解析问题。
+
+具体为：
+
+1. 缺少 PINN_project 内可复现 COMSOL model generation function；
+2. 缺少 multi-line scan line 生成逻辑；
+3. 缺少 2D / quasi-2D mask rasterization 与 coordinate mapping；
+4. 当前 `pinn_mfl` 环境缺少 `mph`；
+5. COMSOL/MCP 虽可探测，但此前 `comsol_start` 超时，不能作为稳定批量生成入口；
+6. 外部现有 generator 只支持单线 rectangular notch，不满足 v1 pack 要求。
+
+## 10. 下一步建议
+
+下一步应先补 generation entry，而不是训练。
+
+推荐顺序：
+
+1. 先修 COMSOL/MCP 启动稳定性：
+   - 明确使用 MCP tool 还是 `mph` Python 脚本；
+   - 如果使用 `mph`，先给 `pinn_mfl` 或单独 COMSOL env 安装并验证 `mph`；
+   - 如果使用 MCP tool，先确认能在 120 秒内 load / create 一个小 model。
+
+2. 补 model generation 函数：
+   - 从外部 rectangular sweep 脚本迁移或封装最小 rectangular notch 生成；
+   - 增加 `scan_line_y` 多线评价；
+   - 保留 reference 和 defect 两套 Bz。
+
+3. 补 mask / coordinate mapping：
+   - 用同一 `geometry_params` rasterize 2D / quasi-2D mask；
+   - 写出 `mask_x` / `mask_y`；
+   - 在 manifest 中记录单位和坐标约定。
+
+4. 再做 1-sample real smoke：
+   - 只要 1 个样本；
+   - 字段完整后再扩展到最多 3 个；
+   - 仍不进入训练，先 inspect。
+
+当前不建议直接进入小训练 gate。
