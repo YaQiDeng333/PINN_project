@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import importlib.util
 import json
+import os
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -28,6 +29,15 @@ DEFAULT_COMSOL_MCP_ROOT = Path(
     r"C:\Users\19166\Desktop\COMSOL_Multiphysics_MCP"
 )
 MAX_ALLOWED_SAMPLES = 3
+ENV_KEYS = (
+    "COMSOL_HOME",
+    "COMSOLPATH",
+    "JAVA_HOME",
+    "JRE_HOME",
+    "MPH_SERVER",
+    "CONDA_PREFIX",
+    "CONDA_DEFAULT_ENV",
+)
 
 
 def parse_args() -> argparse.Namespace:
@@ -126,6 +136,12 @@ def smoke_samples(max_samples: int) -> list[dict[str, Any]]:
 def check_environment(comsol_mcp_root: Path) -> dict[str, Any]:
     external_generator = comsol_mcp_root / "scripts" / "generate_mfl_rectangular_sweep.py"
     external_config = comsol_mcp_root / "configs" / "mfl_rectangular_sweep_small.json"
+    opencode_config = comsol_mcp_root / "opencode.json"
+    path_matches = [
+        entry
+        for entry in os.environ.get("PATH", "").split(os.pathsep)
+        if any(token in entry.lower() for token in ("comsol", "java", "jdk", "jre", "mph"))
+    ]
     return {
         "comsol_mcp_root": str(comsol_mcp_root),
         "comsol_mcp_root_exists": comsol_mcp_root.exists(),
@@ -133,8 +149,15 @@ def check_environment(comsol_mcp_root: Path) -> dict[str, Any]:
         "external_rectangular_generator_exists": external_generator.exists(),
         "external_rectangular_config": str(external_config),
         "external_rectangular_config_exists": external_config.exists(),
+        "opencode_mcp_config": str(opencode_config),
+        "opencode_mcp_config_exists": opencode_config.exists(),
         "python_executable": sys.executable,
         "mph_import_available": importlib.util.find_spec("mph") is not None,
+        "environment_variables": {key: os.environ.get(key) for key in ENV_KEYS},
+        "path_entries_matching_comsol_or_java": path_matches,
+        "mcp_server_command_from_opencode": ["python", "-m", "src.server"]
+        if opencode_config.exists()
+        else None,
         "known_generator_limitations": [
             "external generator is rectangular_notch only",
             "external generator uses one sensor_line.y_m, not multi-line scan_line_y",
@@ -204,6 +227,51 @@ def build_generation_plan(args: argparse.Namespace) -> dict[str, Any]:
             "delta_bz",
             "metadata",
         ],
+        "minimum_external_csv_schema": {
+            "manifest": [
+                "sample_id",
+                "defect_type",
+                "geometry_params_json",
+                "signal_kind",
+                "n_lines",
+                "signal_length",
+                "mask_shape",
+                "sensor_x_path",
+                "scan_line_y_path",
+                "bz_defect_path",
+                "bz_reference_path",
+                "delta_bz_path",
+                "mask_path",
+                "mask_x_path",
+                "mask_y_path",
+                "units",
+                "comsol_model_path",
+            ],
+            "per_sample_signal_arrays": {
+                "sensor_x": "(L,)",
+                "scan_line_y": "(n_lines,)",
+                "bz_defect": "(n_lines, L)",
+                "bz_reference": "(n_lines, L)",
+                "delta_bz": "(n_lines, L)",
+                "mask": "(H, W)",
+                "mask_x": "(W,)",
+                "mask_y": "(H,)",
+            },
+        },
+        "minimum_npz_schema": {
+            "delta_bz_or_signals": "(N, n_lines, L)",
+            "bz_defect": "(N, n_lines, L)",
+            "bz_reference": "(N, n_lines, L)",
+            "masks": "(N, H, W)",
+            "sensor_x": "(L,)",
+            "scan_line_y": "(n_lines,)",
+            "mask_x": "(W,)",
+            "mask_y": "(H,)",
+            "defect_types": "(N,)",
+            "sample_ids": "(N,)",
+            "geometry_params": "json strings or structured table",
+            "metadata": "units, COMSOL settings, generation date, signal_kind",
+        },
         "reference_defect_flow": [
             "Build or load a no-defect COMSOL model on the fixed geometry.",
             "Evaluate Bz at all sensor_x and scan_line_y points.",
@@ -213,6 +281,21 @@ def build_generation_plan(args: argparse.Namespace) -> dict[str, Any]:
             "Rasterize mask from the same geometry_params on mask_x/mask_y.",
             "Write per-sample manifest and optional NPZ only when all fields are real.",
         ],
+        "scenario_a_if_pinn_project_calls_comsol": {
+            "required_first_fix": "Provide a stable COMSOL backend callable in this Python environment or via MCP under 120 seconds.",
+            "required_generation_change": "Implement multi-line point evaluation for scan_line_y and mask rasterization from geometry_params.",
+            "safe_sample_limit": MAX_ALLOWED_SAMPLES,
+        },
+        "scenario_b_if_external_comsol_project_generates_data": {
+            "recommended": True,
+            "external_project": str(comsol_mcp_root),
+            "pinn_project_role": "ingest/prepare/inspect only",
+            "required_deliverable": "real CSV/array bundle matching minimum_external_csv_schema",
+        },
+        "recommended_path": (
+            "Generate real COMSOL multi-line samples in the external "
+            "COMSOL_Multiphysics_MCP project, then ingest them in PINN_project."
+        ),
         "can_execute_real_generation": False,
         "blockers": blockers,
     }
