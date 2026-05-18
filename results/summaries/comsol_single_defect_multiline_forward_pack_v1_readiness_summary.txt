@@ -1,0 +1,291 @@
+# 第 20.2 COMSOL single-defect multi-line forward pack v1 readiness summary
+
+## 1. 本轮结论
+
+第 20.2 pipeline smoke 已完成。当前仓库内确实存在 COMSOL / MFL smoke-test 数据和轻量接入脚本，但现有数据不足以构建 `comsol_single_defect_multiline_forward_pack_v1` 正式训练包。
+
+本轮没有训练模型，没有运行 COMSOL，没有调用外部软件，没有下载数据，没有生成或伪造新样本，也没有修改 `train_pinn.py`、`evaluate_pinn.py`、`data_generator_v2.py`、`CURRENT_BASELINE.md`、`README.md`、`PINN优化路线.md`、`NEXT_STEP.md` 或 `EXPERIMENT_LOG.md`。
+
+未生成目标 NPZ：
+
+`data/comsol_mfl/prepared/comsol_single_defect_multiline_forward_pack_v1.npz`
+
+原因是当前 COMSOL 数据缺少训练包所需的最小字段：multi-line `delta_Bz`、2D / quasi-2D mask、polygon / rotated_rect 或等价 single-defect 标签、train / val / test split。
+
+## 2. 当前发现的 COMSOL / forward 数据资源
+
+当前存在目录：
+
+`data/comsol_mfl/rectangular_sweep_small/`
+
+当前文件：
+
+* `metadata.csv`
+* `no_defect_baseline_fixed_201.csv`
+* `sample_001.csv` 到 `sample_005.csv`
+* `sweep_summary.json`
+* `sweep_summary.txt`
+* `processed/comsol_rectangular_sweep_small.npz`
+* `processed/processed_summary.json`
+
+当前接入说明：
+
+* `data/comsol_mfl/README.md`
+* `data/comsol_mfl/FORMAT_BRIDGE.md`
+
+当前脚本：
+
+* `scripts/inspect_comsol_mfl_dataset.py`
+* `scripts/prepare_comsol_mfl_npz.py`
+
+`prepare_comsol_mfl_npz.py` 可以把现有 rectangular sweep CSV 转为中间 NPZ；`inspect_comsol_mfl_dataset.py` 是只读检查脚本，可验证 raw CSV 与 processed NPZ 的字段、shape、数值一致性。
+
+## 3. 只读 inspect 结果
+
+已运行：
+
+`C:\Users\19166\anaconda3\envs\pinn_mfl\python.exe scripts\inspect_comsol_mfl_dataset.py`
+
+输出结论：
+
+* dataset = `data/comsol_mfl/rectangular_sweep_small`
+* metadata rows = 5
+* `sample_001` 到 `sample_005` 均为 201 个固定 sensor points
+* solve_status 均为 `success`
+* `metadata max_abs_delta_Bz` 与 CSV 重新计算值一致
+* processed NPZ 存在且匹配 raw CSV
+* inspect 总结：OK, passed_samples=5/5
+
+因此，当前 smoke 数据本身是可读取且一致的。
+
+## 4. 当前数据格式盘点
+
+`metadata.csv` 字段：
+
+* `sample_id`
+* `defect_type`
+* `width_mm`
+* `depth_mm`
+* `length_mm`
+* `center_x_mm`
+* `center_y_mm`
+* `center_z_mm`
+* `sensor_z_mm`
+* `max_abs_delta_Bz`
+* `x_at_max_abs_delta_Bz`
+* `solve_status`
+* `output_csv`
+* `points`
+* `same_sensor_grid_as_baseline`
+* `center_mean_abs_delta_Bz`
+* `error`
+
+当前 defect_type：
+
+* `rectangular_notch`
+
+当前 sample CSV 字段：
+
+* `index`
+* `x`
+* `y`
+* `z`
+* `Bz_no_defect`
+* `Bz_defect`
+* `delta_Bz`
+* `normB_no_defect`
+* `normB_defect`
+* `delta_normB`
+
+当前 processed NPZ 字段：
+
+* `sample_ids`: `(5,)`
+* `sensor_x`: `(201,)`
+* `sensor_y`: `(201,)`
+* `sensor_z`: `(201,)`
+* `Bz_no_defect`: `(5, 201)`
+* `Bz_defect`: `(5, 201)`
+* `delta_Bz`: `(5, 201)`
+* `normB_no_defect`: `(5, 201)`
+* `normB_defect`: `(5, 201)`
+* `delta_normB`: `(5, 201)`
+* `label_params_mm`: `(5, 6)`
+* `label_param_names`: `(6,)`
+* `max_abs_delta_Bz`: `(5,)`
+* `x_at_max_abs_delta_Bz`: `(5,)`
+
+当前 sensor grid：
+
+* `sensor_x`: 201 points
+* `sensor_y`: only one unique value, `0.0`
+* `sensor_z`: only one unique value, `0.002`
+
+## 5. 是否满足 target pack 条件
+
+目标 pack：`comsol_single_defect_multiline_forward_pack_v1`
+
+逐项判断：
+
+| 条件 | 当前状态 | 是否满足 |
+|---|---|---:|
+| COMSOL 原始 / 中间数据 | 有 5 个 rectangular smoke samples 和 processed NPZ | 是，但只够 smoke |
+| Bz / delta_Bz | 有 `Bz_no_defect`, `Bz_defect`, `delta_Bz` | 是 |
+| multi-line | `sensor_y` 只有一个值，当前是 single-line | 否 |
+| multi-liftoff | `sensor_z` 只有一个值，当前无 multi-liftoff | 否 |
+| Bx / By / Bz 三轴 | 只有 Bz 与 normB，未提供 Bx / By | 否 |
+| 2D / quasi-2D defect mask | processed NPZ 没有 `mask`, `masks`, `mu_maps` 或等价字段 | 否 |
+| polygon / rotated_rect 标签 | 当前只有 `rectangular_notch` | 否 |
+| single-defect | 当前 5 个样本均可视为 single rectangular notch | 是 |
+| train / val / test split | 当前无 split，且 N=5 太少 | 否 |
+| inspect 脚本 | `scripts/inspect_comsol_mfl_dataset.py` 可读取并验证 | 是 |
+| prepare 脚本 | `scripts/prepare_comsol_mfl_npz.py` 可转换现有 CSV 到中间 NPZ | 是 |
+
+结论：当前数据只证明 COMSOL -> CSV -> intermediate NPZ 的接入链路可用，不能构建目标训练包。
+
+## 6. 为什么本轮不生成 NPZ
+
+目标 schema 要求至少包含：
+
+* `signals`: `(N, n_lines, L)` 或 `(N, C, L)`，优先 multi-line `delta_Bz`
+* `masks` 或 `mask`: `(N, H, W)`
+* `defect_types`: `(N,)`
+* `sample_ids`: `(N,)`
+* `metadata`
+* channel description
+
+当前 COMSOL NPZ 只有 `(N, 201)` 的 single-line `delta_Bz`，没有 `masks` / `mu_maps`。如果强行生成 target pack，只能伪造 mask 或把 rectangular parameters 临时 rasterize 成 quasi-mask；这会污染任务定义，因此本轮明确不生成目标 NPZ。
+
+## 7. 当前已有脚本能做到哪一步
+
+当前 `scripts/inspect_comsol_mfl_dataset.py` 能做到：
+
+* 检查 `metadata.csv`
+* 检查 `sample_XXX.csv`
+* 检查每个 sample 是否有 201 个 sensor points
+* 检查 `delta_Bz` 数值有效性
+* 检查 metadata 中的 `max_abs_delta_Bz` 是否匹配 CSV
+* 检查 processed NPZ 是否匹配 raw CSV
+
+当前 `scripts/prepare_comsol_mfl_npz.py` 能做到：
+
+* 读取 `metadata.csv` 与 `sample_XXX.csv`
+* 统一输出 `sample_ids`, sensor coordinates, Bz / delta_Bz / normB arrays
+* 保存 rectangular notch parameter labels
+* 保存 processed summary JSON
+
+当前脚本不能做到：
+
+* 从 COMSOL geometry 生成 2D / quasi-2D mask；
+* 组织 multi-line sensor array；
+* 组织 train / val / test split；
+* 生成 polygon / rotated_rect focused pack；
+* 映射到当前主线 `MFLDataset` 所需的 `signals + mu_maps + defect_types + metadata + x + y` 结构。
+
+## 8. 生成目标 pack 还需要的最小输入
+
+COMSOL / MCP 下一步应生成一个新的数据目录，例如：
+
+`data/comsol_mfl/single_defect_multiline_forward_pack_v1_raw/`
+
+最小 raw 文件建议：
+
+1. `metadata.csv`
+   * `sample_id`
+   * `split`
+   * `defect_type`
+   * `width_mm`
+   * `height_or_length_mm`
+   * `depth_mm`
+   * `angle_rad` 或 `angle_deg`
+   * `center_x_mm`
+   * `center_y_mm`
+   * `center_z_mm`
+   * `sensor_z_mm`
+   * `line_y_mm`
+   * `points_per_line`
+   * `n_lines`
+   * `solve_status`
+   * `mask_csv` 或 `mask_npz`
+   * `sample_csv`
+
+2. 每个 `sample_XXX.csv`
+   * `line_id`
+   * `point_index`
+   * `x`
+   * `y`
+   * `z`
+   * `Bz_no_defect`
+   * `Bz_defect`
+   * `delta_Bz`
+   * 可选：`Bx_no_defect`, `Bx_defect`, `delta_Bx`
+   * 可选：`By_no_defect`, `By_defect`, `delta_By`
+   * 可选：`normB_no_defect`, `normB_defect`, `delta_normB`
+
+3. 每个样本的 2D / quasi-2D mask
+   * `mask`: `(H, W)` binary or float
+   * `mask_x`: `(W,)`
+   * `mask_y`: `(H,)`
+   * mask 坐标系必须和 defect geometry / sensor 坐标系有明确映射
+
+推荐 target processed NPZ schema：
+
+* `signals`: `(N, n_lines, L)`，v1 固定为 multi-line `delta_Bz`
+* `masks`: `(N, H, W)`
+* `defect_types`: `(N,)`
+* `sample_ids`: `(N,)`
+* `metadata`: structured array or table-compatible arrays
+* `sensor_x`: `(n_lines, L)` 或 `(L,)`
+* `sensor_y`: `(n_lines, L)` 或 `(n_lines,)`
+* `sensor_z`: scalar or `(n_lines, L)`
+* `mask_x`: `(W,)`
+* `mask_y`: `(H,)`
+* `signal_channel_description`: e.g. `["delta_Bz_line_0", ...]`
+
+## 9. 推荐最小样本数量
+
+建议分两级：
+
+1. smoke pack：
+   * 30-60 samples
+   * 至少 2 个 defect_type 或 1 个 rotated_rect-like family
+   * 至少 3 条 y lines
+   * 用于验证 schema、坐标、mask、信号、split 与 inspect 脚本
+
+2. gate pack：
+   * 400 / 100 / 100 train / val / test，或最小 240 / 60 / 60
+   * single-defect
+   * 优先 polygon / rotated_rect 或 COMSOL 可稳定生成的等价 single-defect shape family
+   * 先不做 multi_defect
+
+## 10. 推荐下一步
+
+推荐下一步不是直接训练，也不是修当前 decoder。
+
+推荐先让 COMSOL / MCP 生成缺失数据：
+
+* multi-line `delta_Bz`
+* 2D / quasi-2D defect mask
+* single-defect polygon / rotated_rect 或等价可实现标签
+* train / val / test split
+* 明确的 mask 坐标、sensor 坐标和单位
+
+然后再新增一个安全 prepare / inspect 脚本，例如：
+
+* `scripts/prepare_comsol_single_defect_multiline_pack_v1.py`
+* `scripts/inspect_comsol_single_defect_multiline_pack_v1.py`
+
+只有当 inspect 通过，并且 processed NPZ 有统一 `signals` 和 `masks` 后，才进入 forward surrogate 或 inverse training gate。
+
+## 11. Git / artifact 说明
+
+本轮只生成 readiness summary。未生成 target NPZ，未生成 inventory CSV。
+
+未提交也不应提交：
+
+* `data/comsol_mfl/prepared/*.npz`
+* 原始 `data/`
+* checkpoint
+* preview PNG
+* `__pycache__`
+* `notes/`
+* `scripts/visualize_current_baseline.py`
