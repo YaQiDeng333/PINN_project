@@ -1,5 +1,11 @@
 # PINN 优化路线
 
+## 当前路线同步：第 20 阶段 forward data / COMSOL pilot
+
+当前 `CURRENT_BASELINE` 仍是 v3_complex mask-only grid decoder + forward consistency `lambda_forward=0.10` + validation-selected threshold `0.80`。第 18.x / 19.x 已经说明继续做 decoder、loss、threshold、geometry、basis 或 refinement 小修补收益不足。
+
+第 20 阶段的路线目标是提高反演问题本身的可辨识性：用 COMSOL / physics-forward 数据构建 multi-line `delta_Bz` -> 2D / quasi-2D mask 的可审计训练包。当前已经完成 rectangular_notch small / pilot / pilot_v2 数据链路，以及 rotated_rect / angle variation pilot_v3 数据链路。后续优先级是合并 `rectangular_notch` + `rotated_rect`，再扩展样本数和 defect_type 多样性；不要回到当前 grid decoder 的小 head / 小 loss / 小 threshold 调参。
+
 本文件记录当前主线判断，不再按早期实验流水账追加。历史细节以 `EXPERIMENT_LOG.md`、`CURRENT_BASELINE.md` 和 `results/summaries/` 为准；本文件只保留路线层面的结论、停止条件和下一阶段原则。
 
 ## 下一阶段：forward model / 多观测数据 / COMSOL feasibility

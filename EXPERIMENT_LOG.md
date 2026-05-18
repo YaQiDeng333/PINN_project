@@ -1,5 +1,18 @@
 # 实验工作日志
 
+## 主线同步补充：第 20.x forward data augmentation / COMSOL 数据阶段
+
+第 18.x / 19.x 的内部模型、几何参数化、basis、profile、proposal refinement 和 mask-logit refinement 已基本收口，均未替代当前 `CURRENT_BASELINE`。第 20 阶段的主线已经转向 forward 数据增强和 COMSOL multi-line forward data，目标是提高 MFL 反演问题本身的可辨识性，而不是继续调 decoder / loss / threshold。
+
+近期关键结果：
+
+* 第 20.8：外部 `COMSOL_Multiphysics_MCP` 工程生成 8 个真实 `rectangular_notch` multi-line smoke samples，schema 可读，tiny training smoke 跑通，但只能作为链路验证。
+* 第 20.10 / 20.11：生成并验证 36-sample `rectangular_notch` pilot pack，PINN_project 中 ingest、loader、normalization、training gate 和 preview 链路可用。
+* 第 20.12 / 20.13：生成并验证 120-sample `rectangular_notch` pilot_v2 pack，split 为 80 / 20 / 20；train-only normalization 和 pilot_v2 training gate 跑通，但 defect_type 仍单一。
+* 第 20.14 / 20.15：生成并验证 48-sample `rotated_rect` / angle variation pilot_v3 pack，split 为 32 / 8 / 8；angle 覆盖 `-30, -20, -10, 10, 20, 30`，mask 真实体现旋转，training gate 跑通，per-angle 没有明显 schema 或 loader 问题。
+
+这些结果只说明 COMSOL forward data 链路和 pilot training gate 可用，不更新 v3_complex `CURRENT_BASELINE`，也不作为正式泛化性能结论。下一阶段应优先合并 `rectangular_notch` + `rotated_rect`，再扩展样本数和 defect_type 多样性。
+
 ## 当前主线摘要（第 18.4 后）
 
 当前 `CURRENT_BASELINE` 已更新为 v3_complex mask-only grid decoder + forward consistency，`lambda_forward=0.10`，validation-selected probability threshold=`0.80`。第 18.4 review 确认 mask-to-Bz surrogate 独立训练并冻结使用，checkpoint selection 和 threshold selection 均只使用 validation set，test set 只用于最终评估。
