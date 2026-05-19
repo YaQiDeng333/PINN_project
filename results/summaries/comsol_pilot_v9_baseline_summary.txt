@@ -1,0 +1,72 @@
+# COMSOL pilot_v9 data-domain baseline
+
+## Scope
+
+- Baseline name: COMSOL_DATA_BASELINE / COMSOL single-defect pilot_v9 mask-only multi-line baseline.
+- Dataset domain: COMSOL multi-line delta_Bz controlled synthetic single-defect data.
+- This does not replace CURRENT_BASELINE.md and is not a v3_complex baseline.
+
+## Schema
+
+- pilot_v9 NPZ readable: True
+- schema complete: True
+- split is 402 / 99 / 99: True ({'train': 402, 'val': 99, 'test': 99})
+- defect_type distribution: {'rectangular_notch': 200, 'rotated_rect': 200, 'polygon': 200}
+- every split has three defect types: True ({'train': {'rectangular_notch': 134, 'rotated_rect': 134, 'polygon': 134}, 'val': {'rectangular_notch': 33, 'rotated_rect': 33, 'polygon': 33}, 'test': {'rectangular_notch': 33, 'rotated_rect': 33, 'polygon': 33}})
+- val/test source_pack not single-source: True
+- delta_bz input shape: (600, 3, 201)
+- mask output shape: (600, 64, 128)
+- rotated_rect angle distribution: {20.0: 34, -30.0: 34, -20.0: 33, 10.0: 33, 30.0: 33, -10.0: 33}
+- polygon vertex_count distribution: {4: 67, 5: 67, 6: 66}
+- geometry/mask IoU min/mean/max: {'min': 1.0, 'mean': 1.0, 'max': 1.0}
+
+## Normalization And Model
+
+- Normalization: per-channel delta_bz mean/std computed only from train split over train samples and signal length.
+- train mean shape: (1, 3, 1)
+- train std shape: (1, 3, 1)
+- Model: mask-only grid decoder; Conv1d encoder for `(3, 201)` delta_bz and ConvTranspose2d decoder to `(64, 128)` mask logits.
+- Loss: BCEWithLogits + soft Dice.
+- No bz_defect / bz_no_defect input, no geometry input, no defect_type conditional input, no forward consistency.
+
+## Three-Seed Training
+
+- seeds: [42, 123, 2026]
+- epochs: 200
+- batch_size: 8
+- Checkpoint selection: each epoch scans validation thresholds and uses best IoU + Dice - area_error.
+- all seeds completed: True
+- per-seed best epoch / threshold: {42: {'best_epoch': 19, 'checkpoint_threshold': 0.5, 'selected_threshold': 0.5, 'best_val_score': 1.2562607966169401}, 123: {'best_epoch': 23, 'checkpoint_threshold': 0.9, 'selected_threshold': 0.9, 'best_val_score': 1.287768572197726}, 2026: {'best_epoch': 32, 'checkpoint_threshold': 0.8, 'selected_threshold': 0.8, 'best_val_score': 1.261351666295834}}
+- train loss decreased by seed: {42: True, 123: True, 2026: True}
+- can fit 402 train samples by seed: {42: True, 123: True, 2026: True}
+
+## Metrics Mean Plus Std
+
+- train: iou_mean=0.7093+/-0.0183, dice_mean=0.8272+/-0.0127, area_error_mean=0.1503+/-0.0155, center_error_mean=2.2339+/-0.1090, pred_area_zero_sum=0.0000+/-0.0000
+- val: iou_mean=0.6700+/-0.0030, dice_mean=0.7994+/-0.0023, area_error_mean=0.2009+/-0.0110, center_error_mean=2.5645+/-0.0549, pred_area_zero_sum=0.0000+/-0.0000
+- test: iou_mean=0.6515+/-0.0064, dice_mean=0.7861+/-0.0046, area_error_mean=0.2208+/-0.0099, center_error_mean=2.5623+/-0.0538, pred_area_zero_sum=0.0000+/-0.0000
+
+## Group Diagnostics
+
+- defect_type summary path: C:\Users\19166\Desktop\PINN_project\results\metrics\comsol_pilot_v9_baseline_defect_type_summary.csv
+- angle summary path: C:\Users\19166\Desktop\PINN_project\results\metrics\comsol_pilot_v9_baseline_angle_summary.csv
+- vertex_count summary path: C:\Users\19166\Desktop\PINN_project\results\metrics\comsol_pilot_v9_baseline_vertex_count_summary.csv
+- source_pack summary path: C:\Users\19166\Desktop\PINN_project\results\metrics\comsol_pilot_v9_baseline_source_pack_summary.csv
+- source_pack issue: False
+- per-angle issue: False
+- vertex_count issue: False
+- empty predictions: False
+- full-image predictions: False
+- NaN detected: False
+
+## Preview
+
+- preview generated: True
+- preview dir: C:\Users\19166\Desktop\PINN_project\results\previews\comsol_pilot_v9_baseline
+- preview sample ids: ['rect_p2_0076', 'rect_v9_0055', 'rot_v7_0001', 'rot_v8_0033', 'poly_p5_0057', 'poly_v7_0004', 'rot_v7_0007', 'rot_p3_0046', 'rot_v7_0019', 'rot_v8_0027', 'rot_p3_0005', 'poly_p5_0010', 'poly_p5_0002', 'poly_v7_0015', 'rot_v8_0001', 'poly_v9_0003', 'rect_p2_0071', 'poly_p5_0006', 'poly_v8_0003', 'rot_v9_0014', 'rot_v9_0041', 'poly_p5_0007', 'rect_p2_0026']
+
+## Conclusion
+
+- Recommend recording as COMSOL_DATA_BASELINE: True
+- Limitations: pilot-level controlled synthetic data, single-defect only, no multi_defect, no real experimental data, not a v3_complex baseline.
+- Recommended next step: Expand toward multi_defect after reviewing COMSOL_DATA_BASELINE visual failures.
