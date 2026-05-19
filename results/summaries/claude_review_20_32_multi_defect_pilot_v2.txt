@@ -1,0 +1,136 @@
+I now have all the information needed. Here is the complete review.
+
+---
+
+# Review: COMSOL True Multi-Defect Pilot v2 Generation + 3-Seed Training Gate + Failure Audit
+
+## Part 1 — COMSOL_Multiphysics_MCP
+
+### Generation Script: `scripts/generate_mfl_multi_defect_pilot_v2.py`
+
+| Check | Result |
+|---|---|
+| True joint COMSOL model (2 notch in same model) | **PASS** — `geometry_for_model()` creates `notch_cut_1`, `notch_cut_2`, `notch_air_1`, `notch_air_2`; `steel_notched` subtracts all `cut_tags` jointly (parent `generate_mfl_multi_defect_pilot.py:304-351`) |
+| NOT summed single-defect Bz | **PASS** — `Bz_defect` solved from joint geometry; `delta_bz = bz_defect - bz_reference` (parent:794) |
+| NOT two single-defect masks pieced together | **PASS** — `rasterize_union_mask()` does `np.clip(np.sum(component_masks), 0, 1)` — true union (parent:391-397) |
+| Generates `Bz_no_defect` | **PASS** — reference model created and solved per-run (parent:775-780) |
+| `delta_Bz = Bz_defect - Bz_no_defect` | **PASS** (parent:794) |
+| `scan_line_y = [-0.001, 0.0, 0.001]` | **PASS** — inherits parent default `[-1.0, 0.0, 1.0]` mm = `[-0.001, 0.0, 0.001]` m |
+| Only `component_count = 2` | **PASS** |
+| No `component_count > 2` | **PASS** |
+| No full 3D volume | **PASS** — only evaluates Bz at sensor points via `rot.evaluate_bz()` |
+| No pseudo Bz/mask/components_json | **PASS** |
+| Records `sensor_z` / `liftoff` | **PASS** — `patch_save_sample_bundle()` adds `sensor_height_m` and `liftoff_m` to manifest/inventory |
+
+### Results Files
+
+| Check | Result |
+|---|---|
+| `results/comsol_multi_defect_multiline_generation_pilot_v2_summary.txt` | **NOT FOUND** — generation summary not present in repo |
+| `results/inventory_comsol_multi_defect_multiline_forward_pack_v2_pilot.csv` | **NOT FOUND** — inventory not present in repo |
+
+However, the NPZ at `PINN_project/data/comsol_mfl/prepared/comsol_multi_defect_multiline_forward_pack_v2_pilot.npz` exists and passes all 120-sample schema validation (verified by training gate). The summary/inventory files were likely written elsewhere or not generated — the data itself is intact.
+
+### COMSOL Repo Issues
+
+**MUST FIX:**
+- **No `.gitignore` file** — `.mph` files could be accidentally committed. Existing `comsol_models/micromixer_fixed/*.mph` are already tracked (3 files). Recommend adding `.gitignore` with at least `*.mph`, `results/`, `__pycache__/`.
+
+**SUGGESTED:**
+- **`sensor_z` changed from 0.002m (v1) to 0.008m (v2)** via `DEFAULT_SENSOR_Z_M = 0.008`. This is a 4× liftoff increase. The summary note says `"note": "true joint COMSOL multi_defect pilot_v2; not a baseline"` but does not explain the liftoff change. Recommend documenting the reason for this change (e.g., COMSOL convergence at higher liftoff, or intentional harder problem).
+
+---
+
+## Part 2 — PINN_project
+
+### Training Script: `scripts/train_comsol_multi_defect_pilot_v2_gate.py`
+
+| Check | Result |
+|---|---|
+| Reads correct NPZ | **PASS** — `DEFAULT_NPZ = .../comsol_multi_defect_multiline_forward_pack_v2_pilot.npz` |
+| Only `delta_bz` as model input | **PASS** — `TinyComsolMaskDecoder` receives only normalized delta_bz |
+| No `bz_defect` / `bz_no_defect` as input | **PASS** |
+| No `components_json` / metadata as input | **PASS** — metadata used only in metrics/audit |
+| Normalization from train split only | **PASS** — `train_mean = delta_bz[splits["train"]].mean(...)` |
+| Val/test reuse train mean/std | **PASS** |
+| Checkpoint from validation score | **PASS** — `select_threshold_for_epoch(model, val_dataset, ...)` |
+| Threshold from validation only | **PASS** |
+| Test only for final eval | **PASS** — test indices never used in training/threshold |
+| Does NOT modify `CURRENT_BASELINE.md` | **PASS** — not referenced, not modified (confirmed via git status) |
+| Does NOT modify `COMSOL_DATA_BASELINE.md` | **PASS** — not referenced, not modified |
+
+### Results Verification
+
+**3 seeds — all completed:** 42, 123, 2026 ✓
+
+**Seed summary consistency:**
+
+| Split | IoU (mean ± std) | Dice (mean ± std) |
+|---|---|---|
+| Train | 0.6270 ± 0.0093 | 0.7690 ± 0.0071 |
+| Val | 0.5794 ± 0.0049 | 0.7329 ± 0.0039 |
+| Test | 0.5615 ± 0.0042 | 0.7180 ± 0.0032 |
+
+Cross-checked against individual seed rows — consistent. ✓
+
+**Connected component diagnostics:**
+
+| Metric | Train | Val | Test |
+|---|---|---|---|
+| pred_cc_is_2 rate | 95.0% | 95.0% | 91.7% |
+| Missed component | 0% | 0% | 0% |
+| Merged (one blob) | 0% | 0% | 0% |
+| Split / extra fragment | 5.0% | 5.0% | 8.3% |
+
+Across all 3 seeds × 120 samples: **340/360 predicted cc=2, 20/360 predicted cc=3, 0/360 predicted cc=1**. No cc collapse. ✓
+
+**Component combination breakdown (test Dice):**
+
+| Combination | Test Dice |
+|---|---|
+| `rectangular_notch+rectangular_notch` | 0.7428 |
+| `rectangular_notch+rotated_rect` | **0.7027** ← hardest |
+| `rotated_rect+rotated_rect` | 0.7119 |
+
+**Hardest combination = `rect+rot`** — expected, as rotated geometry introduces more shape ambiguity. ✓
+
+**Failure audit:**
+- Dominant category: `boundary/shape smoothing`
+- Some `extra fragments` (split predictions) and `localization` errors
+- **No schema / mask / components_json issues found** ✓
+- Near-distance bin does not show significant degradation (near_issue=False) ✓
+
+### Expansion Plan (`pilot_v3`)
+
+| Recommendation | Verdict |
+|---|---|
+| Expand to 240-sample pilot_v3 | ✓ Correct |
+| Keep component_count=2 | ✓ Correct |
+| Do NOT establish baseline now | ✓ Correct |
+| Polygon: smoke → mini-pack first | ✓ Correct |
+| Do not merge with single-defect yet | ✓ Correct |
+
+### Git Safety
+
+| Check | Result |
+|---|---|
+| `scripts/visualize_current_baseline.py` | **Untracked** (not committed) ✓ |
+| `data/` files (NPZ, etc.) | In `.gitignore` — not tracked ✓ |
+| `.mph` files | None in repo ✓ |
+| Checkpoints | `results/` in `.gitignore` — not tracked ✓ |
+| Preview PNGs | `results/previews/` in `.gitignore` — not tracked ✓ |
+| `__pycache__/` | In `.gitignore` ✓ |
+| `notes/` | No such directory ✓ |
+| `.tmp_*` | Untracked ✓ |
+
+---
+
+## Final Verdict
+
+| Category | Status |
+|---|---|
+| **必须修复** | COMSOL_Multiphysics_MCP 缺少 `.gitignore`（`.mph` 可被误提交）；v2 的 `sensor_z` 从 0.002→0.008 缺少说明文档 |
+| **建议修复** | COMSOL 端的 summary/inventory 文件未生成至 `results/` 目录 |
+| **可以接受** | 训练 gate 全部通过，3 seeds 收敛正常，数据 schema 完整，component 诊断合理 |
+| **可以进入 polygon smoke** | ✅ 是 — 失败率低，无 component 丢失，建议按推荐路径先 smoke → mini-pack |
+| **可以进入 multi_defect pilot_v3** | ✅ 是 — 120-sample 验证通过，扩展到 240 合理，split=160/40/40 |
