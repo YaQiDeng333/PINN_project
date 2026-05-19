@@ -1,0 +1,33 @@
+# COMSOL mixed pilot_v9 balanced pack summary
+
+source packs readable: yes (C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\prepared\comsol_single_defect_multiline_forward_pack_v1_pilot_v2.npz, C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\prepared\comsol_single_defect_multiline_forward_pack_v1_pilot_v3_rotated_rect.npz, C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\prepared\comsol_single_defect_multiline_forward_pack_v1_pilot_v5_polygon.npz)
+pilot_v7 top-up readable: yes (C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\generated\comsol_single_defect_multiline_forward_pack_v1_pilot_v7_balanced_three_types\manifest_comsol_single_defect_multiline_forward_pack_v1_pilot_v7_topup.csv)
+pilot_v8 top-up readable: yes (C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\generated\comsol_single_defect_multiline_forward_pack_v1_pilot_v8_balanced_three_types\manifest_comsol_single_defect_multiline_forward_pack_v1_pilot_v8_topup.csv)
+pilot_v9 top-up readable: yes (C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\generated\comsol_single_defect_multiline_forward_pack_v1_pilot_v9_balanced_single_defect\manifest_comsol_single_defect_multiline_forward_pack_v1_pilot_v9_topup.csv)
+coordinate consistency: yes (sensor_x, scan_line_y, mask_x, mask_y all match)
+balanced pilot_v9 NPZ generated: yes
+balanced pilot_v9 NPZ path: C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\prepared\comsol_single_defect_multiline_forward_pack_v1_pilot_v9_balanced_single_defect.npz
+sample count: 600
+split distribution: {'val': 99, 'train': 402, 'test': 99}
+defect_type distribution: {'rectangular_notch': 200, 'rotated_rect': 200, 'polygon': 200}
+source_pack distribution: {'pilot_v2_rectangular_notch': 120, 'pilot_v9_topup_rectangular_notch': 80, 'pilot_v3_rotated_rect': 48, 'pilot_v7_topup_rotated_rect': 32, 'pilot_v8_topup_rotated_rect': 40, 'pilot_v9_topup_rotated_rect': 80, 'pilot_v5_polygon': 60, 'pilot_v7_topup_polygon': 20, 'pilot_v8_topup_polygon': 40, 'pilot_v9_topup_polygon': 80}
+split source_pack distribution: {'train': {'pilot_v2_rectangular_notch': 81, 'pilot_v9_topup_rectangular_notch': 53, 'pilot_v3_rotated_rect': 30, 'pilot_v7_topup_rotated_rect': 16, 'pilot_v8_topup_rotated_rect': 24, 'pilot_v9_topup_rotated_rect': 64, 'pilot_v5_polygon': 42, 'pilot_v7_topup_polygon': 4, 'pilot_v8_topup_polygon': 24, 'pilot_v9_topup_polygon': 64}, 'val': {'pilot_v2_rectangular_notch': 19, 'pilot_v9_topup_rectangular_notch': 14, 'pilot_v3_rotated_rect': 9, 'pilot_v7_topup_rotated_rect': 8, 'pilot_v8_topup_rotated_rect': 8, 'pilot_v9_topup_rotated_rect': 8, 'pilot_v5_polygon': 9, 'pilot_v7_topup_polygon': 8, 'pilot_v8_topup_polygon': 8, 'pilot_v9_topup_polygon': 8}, 'test': {'pilot_v2_rectangular_notch': 20, 'pilot_v9_topup_rectangular_notch': 13, 'pilot_v3_rotated_rect': 9, 'pilot_v7_topup_rotated_rect': 8, 'pilot_v8_topup_rotated_rect': 8, 'pilot_v9_topup_rotated_rect': 8, 'pilot_v5_polygon': 9, 'pilot_v7_topup_polygon': 8, 'pilot_v8_topup_polygon': 8, 'pilot_v9_topup_polygon': 8}}
+split defect_type source_pack distribution: {'train': {'rectangular_notch': {'pilot_v2_rectangular_notch': 81, 'pilot_v9_topup_rectangular_notch': 53}, 'rotated_rect': {'pilot_v3_rotated_rect': 30, 'pilot_v7_topup_rotated_rect': 16, 'pilot_v8_topup_rotated_rect': 24, 'pilot_v9_topup_rotated_rect': 64}, 'polygon': {'pilot_v5_polygon': 42, 'pilot_v7_topup_polygon': 4, 'pilot_v8_topup_polygon': 24, 'pilot_v9_topup_polygon': 64}}, 'val': {'rectangular_notch': {'pilot_v2_rectangular_notch': 19, 'pilot_v9_topup_rectangular_notch': 14}, 'rotated_rect': {'pilot_v3_rotated_rect': 9, 'pilot_v7_topup_rotated_rect': 8, 'pilot_v8_topup_rotated_rect': 8, 'pilot_v9_topup_rotated_rect': 8}, 'polygon': {'pilot_v5_polygon': 9, 'pilot_v7_topup_polygon': 8, 'pilot_v8_topup_polygon': 8, 'pilot_v9_topup_polygon': 8}}, 'test': {'rectangular_notch': {'pilot_v2_rectangular_notch': 20, 'pilot_v9_topup_rectangular_notch': 13}, 'rotated_rect': {'pilot_v3_rotated_rect': 9, 'pilot_v7_topup_rotated_rect': 8, 'pilot_v8_topup_rotated_rect': 8, 'pilot_v9_topup_rotated_rect': 8}, 'polygon': {'pilot_v5_polygon': 9, 'pilot_v7_topup_polygon': 8, 'pilot_v8_topup_polygon': 8, 'pilot_v9_topup_polygon': 8}}}
+val/test source_pack distribution no longer single-source for rectangular_notch / rotated_rect / polygon: yes
+rotated_rect angle distribution: {-30.0: 34, -20.0: 33, -10.0: 33, 10.0: 33, 20.0: 34, 30.0: 33}
+polygon vertex_count distribution: {4: 67, 5: 67, 6: 66}
+split defect_type distribution: {'train': {'rectangular_notch': 134, 'rotated_rect': 134, 'polygon': 134}, 'val': {'rectangular_notch': 33, 'rotated_rect': 33, 'polygon': 33}, 'test': {'rectangular_notch': 33, 'rotated_rect': 33, 'polygon': 33}}
+split rotated angle coverage: {'train': {20.0: 24, -30.0: 23, 10.0: 25, 30.0: 25, -20.0: 22, -10.0: 15}, 'val': {20.0: 4, -30.0: 6, -20.0: 5, 10.0: 4, 30.0: 4, -10.0: 10}, 'test': {-30.0: 5, -20.0: 6, -10.0: 8, 10.0: 4, 20.0: 6, 30.0: 4}}
+split polygon vertex_count coverage: {'train': {6: 48, 5: 46, 4: 40}, 'val': {4: 15, 5: 9, 6: 9}, 'test': {4: 12, 5: 12, 6: 9}}
+delta_bz shape: (600, 3, 201)
+masks shape: (600, 64, 128)
+delta_bz equals bz_defect - bz_no_defect max_abs_error: 0.0
+signal min/max/mean/std: [-0.00228594478783827, 0.0021632290697196797, -2.2786555240497092e-05, 0.0004493489966523951]
+mask area min/max/mean: [167, 832, 387.8466666666667]
+geometry_params schema unified: yes (defect_type, center_x, center_y, width, length, depth, angle, angle_deg, angle_rad, polygon_vertices, vertex_count, polygon_area, units, source_pack, source_sample_id)
+schema-ready: yes
+pilot_v9 train-ready: yes, for balanced pilot smoke/training gate only
+current limitations: still pilot-level, single-defect only, no multi_defect, limited COMSOL geometry families
+next step: enter balanced pilot_v9 training gate in PINN_project
+source quality: {'pilot_v2_rectangular_notch': {'delta_match_max_abs_error': 0.0, 'mask_area_min': 234, 'mask_area_max': 780}, 'pilot_v3_rotated_rect': {'delta_match_max_abs_error': 0.0, 'mask_area_min': 240, 'mask_area_max': 562}, 'pilot_v5_polygon': {'delta_match_max_abs_error': 0.0, 'mask_area_min': 171, 'mask_area_max': 519}}
+inventory path: C:\Users\19166\Desktop\PINN_project\results\metrics\comsol_mixed_pilot_v9_balanced_inventory.csv
