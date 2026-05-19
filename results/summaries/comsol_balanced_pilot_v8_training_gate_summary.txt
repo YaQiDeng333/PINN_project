@@ -1,0 +1,69 @@
+# Stage 20.26 COMSOL balanced pilot_v8 training gate
+
+## 1. NPZ / schema checks
+
+- balanced pilot_v8 NPZ readable: True
+- schema complete: True
+- split is 240 / 60 / 60: True ({'train': 240, 'val': 60, 'test': 60})
+- defect_type distribution correct: True ({'rectangular_notch': 120, 'rotated_rect': 120, 'polygon': 120})
+- each split has all three defect types: True ({'train': {'rectangular_notch': 80, 'rotated_rect': 80, 'polygon': 80}, 'val': {'rectangular_notch': 20, 'rotated_rect': 20, 'polygon': 20}, 'test': {'rectangular_notch': 20, 'rotated_rect': 20, 'polygon': 20}})
+- rotated_rect angle distribution: {20.0: 20, -30.0: 20, -20.0: 20, 10.0: 20, 30.0: 20, -10.0: 20}
+- polygon vertex_count distribution: {4: 40, 5: 40, 6: 40}
+- source_pack distribution: {'pilot_v2_rectangular_notch': 120, 'pilot_v3_rotated_rect': 48, 'pilot_v7_topup_rotated_rect': 32, 'pilot_v8_topup_rotated_rect': 40, 'pilot_v5_polygon': 60, 'pilot_v7_topup_polygon': 20, 'pilot_v8_topup_polygon': 40}
+- split source_pack distribution for each defect_type: {'train': {'rectangular_notch': {'pilot_v2_rectangular_notch': 80}, 'rotated_rect': {'pilot_v3_rotated_rect': 32, 'pilot_v7_topup_rotated_rect': 20, 'pilot_v8_topup_rotated_rect': 28}, 'polygon': {'pilot_v5_polygon': 44, 'pilot_v7_topup_polygon': 8, 'pilot_v8_topup_polygon': 28}}, 'val': {'rectangular_notch': {'pilot_v2_rectangular_notch': 20}, 'rotated_rect': {'pilot_v3_rotated_rect': 8, 'pilot_v7_topup_rotated_rect': 6, 'pilot_v8_topup_rotated_rect': 6}, 'polygon': {'pilot_v5_polygon': 8, 'pilot_v7_topup_polygon': 6, 'pilot_v8_topup_polygon': 6}}, 'test': {'rectangular_notch': {'pilot_v2_rectangular_notch': 20}, 'rotated_rect': {'pilot_v3_rotated_rect': 8, 'pilot_v7_topup_rotated_rect': 6, 'pilot_v8_topup_rotated_rect': 6}, 'polygon': {'pilot_v5_polygon': 8, 'pilot_v7_topup_polygon': 6, 'pilot_v8_topup_polygon': 6}}}
+- val/test source_pack not single-source for rotated_rect and polygon: True
+- geometry_params explain masks: {'min': 1.0, 'max': 1.0, 'mean': 1.0}
+- delta_bz input shape: (360, 3, 201)
+- mask output shape: (360, 64, 128)
+- delta_bz equals bz_defect - bz_no_defect: True
+- scan lines different: True
+
+## 2. Normalization / loader
+
+- Normalization uses only train split delta_bz statistics, per n_lines channel over train samples and signal length.
+- train mean shape: (1, 3, 1)
+- train std shape: (1, 3, 1)
+- normalization train-only: True
+
+## 3. Training gate
+
+- Model: lightweight Conv1d encoder for `(3, 201)` delta_bz, latent projection to `4x8`, ConvTranspose2d decoder to `(64, 128)` mask logits.
+- Loss: BCEWithLogits + soft Dice. No defect_type, angle, vertex_count, or geometry parameter supervision.
+- epochs: 200
+- batch_size: 8
+- Checkpoint selection: each epoch scans validation threshold candidates and uses the best validation IoU + Dice - area_error score.
+- selected threshold: 0.8
+- validation threshold scores: {0.3: {'iou': 0.6596210622338232, 'dice': 0.7922343863826296, 'area_error': 0.29680759355136904, 'score': 1.1550478550650838}, 0.4: {'iou': 0.6598084423917164, 'dice': 0.7924429317913152, 'area_error': 0.28056659528080546, 'score': 1.1716847789022262}, 0.5: {'iou': 0.6611193652591341, 'dice': 0.7933998198647533, 'area_error': 0.26954185043124057, 'score': 1.1849773346926467}, 0.6: {'iou': 0.6608915924735869, 'dice': 0.7931771228840921, 'area_error': 0.2601172987183799, 'score': 1.193951416639299}, 0.7: {'iou': 0.6580396839998035, 'dice': 0.7909993438419338, 'area_error': 0.2511258598202792, 'score': 1.197913168021458}, 0.8: {'iou': 0.6556117871676334, 'dice': 0.7887767381599944, 'area_error': 0.23988388521657533, 'score': 1.2045046401110522}, 0.9: {'iou': 0.6396333881982662, 'dice': 0.7756961808328903, 'area_error': 0.23618870558637375, 'score': 1.1791408634447826}}
+- best validation epoch: 15
+- train loop ok: True
+- train loss decreased: True (initial=0.830776, final=0.001007)
+- can fit 240 train samples: True
+
+## 4. Pilot metrics
+
+- train: {'group': 'all', 'split': 'train', 'sample_count': 240, 'iou_mean': 0.6818105623029403, 'dice_mean': 0.808362023756713, 'area_error_mean': 0.18020111654843002, 'center_error_mean': 2.315556226255602, 'pred_area_mean': 354.2416666666667, 'true_area_mean': 414.71666666666664, 'pred_area_zero_sum': 0, 'total_loss_mean': 0.24671108123535912}
+- val: {'group': 'all', 'split': 'val', 'sample_count': 60, 'iou_mean': 0.6556117871676334, 'dice_mean': 0.7887767381599944, 'area_error_mean': 0.23988388521657533, 'center_error_mean': 2.569202314441382, 'pred_area_mean': 318.51666666666665, 'true_area_mean': 352.21666666666664, 'pred_area_zero_sum': 0, 'total_loss_mean': 0.2788139894604683}
+- test: {'group': 'all', 'split': 'test', 'sample_count': 60, 'iou_mean': 0.6449243889561221, 'dice_mean': 0.7816954226370234, 'area_error_mean': 0.2146614726497713, 'center_error_mean': 2.460909747776499, 'pred_area_mean': 337.81666666666666, 'true_area_mean': 373.5, 'pred_area_zero_sum': 0, 'total_loss_mean': 0.2791235557446877}
+- defect_type summary: C:\Users\19166\Desktop\PINN_project\results\metrics\comsol_balanced_pilot_v8_defect_type_summary.csv
+- angle summary: C:\Users\19166\Desktop\PINN_project\results\metrics\comsol_balanced_pilot_v8_angle_summary.csv
+- vertex_count summary: C:\Users\19166\Desktop\PINN_project\results\metrics\comsol_balanced_pilot_v8_vertex_count_summary.csv
+- source_pack summary: C:\Users\19166\Desktop\PINN_project\results\metrics\comsol_balanced_pilot_v8_source_pack_summary.csv
+- type imbalance issue: False
+- per-angle issue: False
+- vertex_count issue: False
+- empty predictions: False
+- full-image predictions: False
+- NaN detected: False
+
+## 5. Preview
+
+- preview generated: True
+- preview dir: C:\Users\19166\Desktop\PINN_project\results\previews\comsol_balanced_pilot_v8_gate
+- preview sample ids: ['rect_0076', 'rect_0081', 'rot_v7_0001', 'rot_v8_0006', 'poly_p5_0057', 'poly_v7_0004', 'rot_v8_0007', 'rot_p3_0046', 'rot_v7_0022', 'rot_v8_0027', 'rot_p3_0005', 'poly_p5_0058', 'poly_p5_0002', 'poly_p5_0006', 'rect_0045', 'rect_0015', 'poly_v7_0006', 'poly_p5_0001', 'poly_v7_0020', 'poly_v8_0003', 'poly_v7_0003', 'poly_v8_0005', 'poly_v8_0002', 'poly_p5_0059']
+
+## 6. Conclusion
+
+- This result validates the balanced mixed single-defect-type pilot_v8 read -> dataset loader -> train-only normalization -> training -> validation checkpoint/threshold selection -> test evaluation -> preview chain.
+- It is not a v3_complex formal model result, not a candidate, and does not update CURRENT_BASELINE.
+- The 360-sample balanced pack is usable for next-stage data expansion, but remains pilot-level, controlled synthetic, and single-defect only.
+- Recommended next step: Expand sample count for the three single-defect types before adding true multi_defect.
