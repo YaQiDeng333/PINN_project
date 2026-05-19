@@ -1,0 +1,14 @@
+# COMSOL multi_defect pilot_v3 expansion plan
+
+- Recommended scale: 240 true multi_defect samples as the next bounded pilot_v3; use 160 train / 40 val / 40 test.
+- Keep component_count=2 for pilot_v3; do not jump to 3+ components until 2-component validation/test behavior is stable.
+- Balance rectangular_notch+rectangular_notch, rectangular_notch+rotated_rect, and rotated_rect+rotated_rect across train/val/test.
+- Add polygon components only after a separate 1-sample smoke and a 24-sample mini pilot; suggested first polygon combinations are rectangular_notch+polygon and rotated_rect+polygon.
+- Stratify min_component_distance into near / medium / far bins and ensure each split covers all bins.
+- Stratify relative component area and depth so one component is not always dominant.
+- Preserve train-only normalization and validation-only threshold/checkpoint selection.
+- Keep component-aware metrics: predicted connected component count, missed component flag, merge flag, extra fragment flag, and component recall heuristic.
+- Do not merge with single-defect data until a multi_defect-only 240-sample gate is reviewed.
+- Acceptance condition: schema complete, no data corruption, no systematic missed second component, and val/test contain all combinations and distance bins.
+- Stop condition: COMSOL geometry instability, components_json/mask mismatch, or frequent predicted connected count collapse to 1 on val/test.
+- Current pilot_v2 signal: Expand to a 240-sample multi_defect pilot_v3 before declaring a baseline; add a small polygon-component smoke/mini-pack if geometry remains stable.
