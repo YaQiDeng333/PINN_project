@@ -1,0 +1,18 @@
+# COMSOL true multi_defect pilot failure audit
+
+- model predicts non-empty union masks: True
+- missed second component count: 0
+- merged one-blob count: 0
+- extra fragments count: 0
+- hardest component combination: component_types=rotated_rect+rotated_rect
+- dominant failure category: boundary/shape smoothing
+- schema / mask / components_json issue found: False
+- preview dir: C:\Users\19166\Desktop\PINN_project\results\previews\comsol_multi_defect_pilot_gate
+
+## Interpretation
+
+The pilot chain works, but with 24 samples the dominant errors are boundary/shape smoothing; component diagnostics should be treated as pilot-only.
+
+## Recommendation
+
+Proceed with a bounded multi_defect pilot_v2 expansion; do not update any baseline from this 24-sample pilot.
