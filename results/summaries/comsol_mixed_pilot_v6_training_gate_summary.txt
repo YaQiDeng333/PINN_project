@@ -1,0 +1,64 @@
+# Stage 20.20 COMSOL mixed pilot_v6 training gate
+
+## 1. NPZ / schema checks
+
+- mixed pilot_v6 NPZ readable: True
+- schema complete: True
+- split is 152 / 38 / 38: True ({'train': 152, 'val': 38, 'test': 38})
+- defect_type distribution correct: True ({'rectangular_notch': 120, 'rotated_rect': 48, 'polygon': 60})
+- each split has all three defect types: True ({'train': {'rectangular_notch': 80, 'rotated_rect': 32, 'polygon': 40}, 'val': {'rectangular_notch': 20, 'rotated_rect': 8, 'polygon': 10}, 'test': {'rectangular_notch': 20, 'rotated_rect': 8, 'polygon': 10}})
+- rotated_rect angle distribution: {20.0: 8, -30.0: 8, -20.0: 8, 10.0: 8, 30.0: 8, -10.0: 8}
+- polygon vertex_count distribution: {4: 20, 5: 20, 6: 20}
+- geometry_params explain masks: {'min': 1.0, 'max': 1.0, 'mean': 1.0}
+- delta_bz input shape: (228, 3, 201)
+- mask output shape: (228, 64, 128)
+- delta_bz equals bz_defect - bz_no_defect: True
+- scan lines different: True
+
+## 2. Normalization / loader
+
+- Normalization uses only train split delta_bz statistics, per n_lines channel over train samples and signal length.
+- train mean shape: (1, 3, 1)
+- train std shape: (1, 3, 1)
+- normalization train-only: True
+
+## 3. Training gate
+
+- Model: lightweight Conv1d encoder for `(3, 201)` delta_bz, latent projection to `4x8`, ConvTranspose2d decoder to `(64, 128)` mask logits.
+- Loss: BCEWithLogits + soft Dice. No defect_type, angle, vertex_count, or geometry parameter supervision.
+- epochs: 200
+- batch_size: 8
+- selected threshold: 0.5
+- validation threshold scores: {0.3: {'iou': 0.6888123087328955, 'dice': 0.8120608753401735, 'area_error': 0.13808044621530818, 'score': 1.3627927378577607}, 0.4: {'iou': 0.6891865803260971, 'dice': 0.8123070649136301, 'area_error': 0.13366903086540824, 'score': 1.3678246143743191}, 0.5: {'iou': 0.6889320089649597, 'dice': 0.8121199613024989, 'area_error': 0.13269973078015151, 'score': 1.368352239487307}, 0.6: {'iou': 0.687914204740431, 'dice': 0.8113953791077545, 'area_error': 0.13232047093602073, 'score': 1.3669891129121647}, 0.7: {'iou': 0.6869649431767505, 'dice': 0.8107873900770797, 'area_error': 0.13366652865434733, 'score': 1.3640858045994828}, 0.8: {'iou': 0.6845142981811223, 'dice': 0.8090918491865057, 'area_error': 0.1365710309044084, 'score': 1.3570351164632197}, 0.9: {'iou': 0.6798354215487116, 'dice': 0.8059720979375671, 'area_error': 0.1485638162957184, 'score': 1.3372437031905604}}
+- best validation epoch: 73
+- train loop ok: True
+- train loss decreased: True (initial=0.957199, final=0.001694)
+- can fit 152 train samples: True
+
+## 4. Pilot metrics
+
+- train: {'group': 'all', 'split': 'train', 'sample_count': 152, 'iou_mean': 0.8975023419541133, 'dice_mean': 0.9453061053503875, 'area_error_mean': 0.043589426722674525, 'center_error_mean': 0.5879679551961383, 'pred_area_mean': 439.4407894736842, 'true_area_mean': 449.7105263157895, 'pred_area_zero_sum': 0, 'total_loss_mean': 0.07900659497337122}
+- val: {'group': 'all', 'split': 'val', 'sample_count': 38, 'iou_mean': 0.6889955736738332, 'dice_mean': 0.812157537005287, 'area_error_mean': 0.13263616607127787, 'center_error_mean': 2.5071608689123988, 'pred_area_mean': 420.2894736842105, 'true_area_mean': 429.2105263157895, 'pred_area_zero_sum': 0, 'total_loss_mean': 0.30303317661348145}
+- test: {'group': 'all', 'split': 'test', 'sample_count': 38, 'iou_mean': 0.6862360299620142, 'dice_mean': 0.8107937001448299, 'area_error_mean': 0.18695008932885396, 'center_error_mean': 2.515155619195943, 'pred_area_mean': 439.92105263157896, 'true_area_mean': 460.86842105263156, 'pred_area_zero_sum': 0, 'total_loss_mean': 0.3202645853161812}
+- defect_type summary: C:\Users\19166\Desktop\PINN_project\results\metrics\comsol_mixed_pilot_v6_defect_type_summary.csv
+- angle summary: C:\Users\19166\Desktop\PINN_project\results\metrics\comsol_mixed_pilot_v6_angle_summary.csv
+- vertex_count summary: C:\Users\19166\Desktop\PINN_project\results\metrics\comsol_mixed_pilot_v6_vertex_count_summary.csv
+- type imbalance issue: False
+- per-angle issue: False
+- vertex_count issue: False
+- empty predictions: False
+- full-image predictions: False
+- NaN detected: False
+
+## 5. Preview
+
+- preview generated: True
+- preview dir: C:\Users\19166\Desktop\PINN_project\results\previews\comsol_mixed_pilot_v6_gate
+- preview sample ids: ['rect_0082', 'rect_0111', 'rot_0038', 'rot_0039', 'poly_0044', 'poly_0048', 'rot_0040', 'rot_0046', 'rot_0047', 'rot_0044', 'rot_0034', 'poly_0052', 'poly_0057', 'rect_0096', 'rect_0114', 'rect_0086', 'rect_0118', 'rect_0112', 'poly_0047', 'rect_0101', 'rot_0037', 'rot_0045']
+
+## 6. Conclusion
+
+- This result validates the mixed single-defect-type pilot_v6 read -> dataset loader -> train-only normalization -> training -> validation threshold selection -> test smoke evaluation -> preview chain.
+- It is not a v3_complex formal model result, not a candidate, and does not update CURRENT_BASELINE.
+- The 228-sample mixed pack is usable for next-stage data expansion, but remains pilot-level and single-defect only.
+- Recommended next step: Expand sample count for the three single-defect types before adding true multi_defect.
