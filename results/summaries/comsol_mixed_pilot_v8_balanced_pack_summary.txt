@@ -1,0 +1,32 @@
+# COMSOL mixed pilot_v8 balanced pack summary
+
+source packs readable: yes (C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\prepared\comsol_single_defect_multiline_forward_pack_v1_pilot_v2.npz, C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\prepared\comsol_single_defect_multiline_forward_pack_v1_pilot_v3_rotated_rect.npz, C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\prepared\comsol_single_defect_multiline_forward_pack_v1_pilot_v5_polygon.npz)
+pilot_v7 top-up readable: yes (C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\generated\comsol_single_defect_multiline_forward_pack_v1_pilot_v7_balanced_three_types\manifest_comsol_single_defect_multiline_forward_pack_v1_pilot_v7_topup.csv)
+pilot_v8 top-up readable: yes (C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\generated\comsol_single_defect_multiline_forward_pack_v1_pilot_v8_balanced_three_types\manifest_comsol_single_defect_multiline_forward_pack_v1_pilot_v8_topup.csv)
+coordinate consistency: yes (sensor_x, scan_line_y, mask_x, mask_y all match)
+balanced pilot_v8 NPZ generated: yes
+balanced pilot_v8 NPZ path: C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\prepared\comsol_single_defect_multiline_forward_pack_v1_pilot_v8_balanced_three_types.npz
+sample count: 360
+split distribution: {'val': 60, 'train': 240, 'test': 60}
+defect_type distribution: {'rectangular_notch': 120, 'rotated_rect': 120, 'polygon': 120}
+source_pack distribution: {'pilot_v2_rectangular_notch': 120, 'pilot_v3_rotated_rect': 48, 'pilot_v7_topup_rotated_rect': 32, 'pilot_v8_topup_rotated_rect': 40, 'pilot_v5_polygon': 60, 'pilot_v7_topup_polygon': 20, 'pilot_v8_topup_polygon': 40}
+split source_pack distribution: {'train': {'pilot_v2_rectangular_notch': 80, 'pilot_v3_rotated_rect': 32, 'pilot_v7_topup_rotated_rect': 20, 'pilot_v8_topup_rotated_rect': 28, 'pilot_v5_polygon': 44, 'pilot_v7_topup_polygon': 8, 'pilot_v8_topup_polygon': 28}, 'val': {'pilot_v2_rectangular_notch': 20, 'pilot_v3_rotated_rect': 8, 'pilot_v7_topup_rotated_rect': 6, 'pilot_v8_topup_rotated_rect': 6, 'pilot_v5_polygon': 8, 'pilot_v7_topup_polygon': 6, 'pilot_v8_topup_polygon': 6}, 'test': {'pilot_v2_rectangular_notch': 20, 'pilot_v3_rotated_rect': 8, 'pilot_v7_topup_rotated_rect': 6, 'pilot_v8_topup_rotated_rect': 6, 'pilot_v5_polygon': 8, 'pilot_v7_topup_polygon': 6, 'pilot_v8_topup_polygon': 6}}
+split defect_type source_pack distribution: {'train': {'rectangular_notch': {'pilot_v2_rectangular_notch': 80}, 'rotated_rect': {'pilot_v3_rotated_rect': 32, 'pilot_v7_topup_rotated_rect': 20, 'pilot_v8_topup_rotated_rect': 28}, 'polygon': {'pilot_v5_polygon': 44, 'pilot_v7_topup_polygon': 8, 'pilot_v8_topup_polygon': 28}}, 'val': {'rectangular_notch': {'pilot_v2_rectangular_notch': 20}, 'rotated_rect': {'pilot_v3_rotated_rect': 8, 'pilot_v7_topup_rotated_rect': 6, 'pilot_v8_topup_rotated_rect': 6}, 'polygon': {'pilot_v5_polygon': 8, 'pilot_v7_topup_polygon': 6, 'pilot_v8_topup_polygon': 6}}, 'test': {'rectangular_notch': {'pilot_v2_rectangular_notch': 20}, 'rotated_rect': {'pilot_v3_rotated_rect': 8, 'pilot_v7_topup_rotated_rect': 6, 'pilot_v8_topup_rotated_rect': 6}, 'polygon': {'pilot_v5_polygon': 8, 'pilot_v7_topup_polygon': 6, 'pilot_v8_topup_polygon': 6}}}
+val/test source_pack distribution no longer single-source for rotated_rect and polygon: yes
+rotated_rect angle distribution: {-30.0: 20, -20.0: 20, -10.0: 20, 10.0: 20, 20.0: 20, 30.0: 20}
+polygon vertex_count distribution: {4: 40, 5: 40, 6: 40}
+split defect_type distribution: {'train': {'rectangular_notch': 80, 'rotated_rect': 80, 'polygon': 80}, 'val': {'rectangular_notch': 20, 'rotated_rect': 20, 'polygon': 20}, 'test': {'rectangular_notch': 20, 'rotated_rect': 20, 'polygon': 20}}
+split rotated angle coverage: {'train': {20.0: 14, -30.0: 14, 10.0: 14, 30.0: 14, -20.0: 12, -10.0: 12}, 'val': {20.0: 3, -30.0: 3, -20.0: 4, 10.0: 3, 30.0: 3, -10.0: 4}, 'test': {-20.0: 4, -10.0: 4, 10.0: 3, 20.0: 3, -30.0: 3, 30.0: 3}}
+split polygon vertex_count coverage: {'train': {6: 28, 4: 26, 5: 26}, 'val': {4: 7, 5: 7, 6: 6}, 'test': {4: 7, 5: 7, 6: 6}}
+delta_bz shape: (360, 3, 201)
+masks shape: (360, 64, 128)
+delta_bz equals bz_defect - bz_no_defect max_abs_error: 0.0
+signal min/max/mean/std: [-0.00228594478783827, 0.0021632290697196797, -2.6219708303710976e-05, 0.0005281080064184067]
+mask area min/max/mean: [167, 780, 397.43055555555554]
+geometry_params schema unified: yes (defect_type, center_x, center_y, width, length, depth, angle, angle_deg, angle_rad, polygon_vertices, vertex_count, polygon_area, units, source_pack, source_sample_id)
+schema-ready: yes
+pilot_v8 train-ready: yes, for balanced pilot smoke/training gate only
+current limitations: still pilot-level, single-defect only, no multi_defect, limited COMSOL geometry families
+next step: enter balanced pilot_v8 training gate in PINN_project
+source quality: {'pilot_v2_rectangular_notch': {'delta_match_max_abs_error': 0.0, 'mask_area_min': 234, 'mask_area_max': 780}, 'pilot_v3_rotated_rect': {'delta_match_max_abs_error': 0.0, 'mask_area_min': 240, 'mask_area_max': 562}, 'pilot_v5_polygon': {'delta_match_max_abs_error': 0.0, 'mask_area_min': 171, 'mask_area_max': 519}}
+inventory path: C:\Users\19166\Desktop\PINN_project\results\metrics\comsol_mixed_pilot_v8_balanced_inventory.csv
