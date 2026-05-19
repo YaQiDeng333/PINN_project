@@ -28,6 +28,7 @@
 - Loss: BCEWithLogits + soft Dice. No defect_type, angle, vertex_count, or geometry parameter supervision.
 - epochs: 200
 - batch_size: 8
+- Review fix note: future runs now select checkpoints using the best validation threshold over the same threshold candidates; the recorded Stage 20.20 metrics were not recomputed.
 - selected threshold: 0.5
 - validation threshold scores: {0.3: {'iou': 0.6888123087328955, 'dice': 0.8120608753401735, 'area_error': 0.13808044621530818, 'score': 1.3627927378577607}, 0.4: {'iou': 0.6891865803260971, 'dice': 0.8123070649136301, 'area_error': 0.13366903086540824, 'score': 1.3678246143743191}, 0.5: {'iou': 0.6889320089649597, 'dice': 0.8121199613024989, 'area_error': 0.13269973078015151, 'score': 1.368352239487307}, 0.6: {'iou': 0.687914204740431, 'dice': 0.8113953791077545, 'area_error': 0.13232047093602073, 'score': 1.3669891129121647}, 0.7: {'iou': 0.6869649431767505, 'dice': 0.8107873900770797, 'area_error': 0.13366652865434733, 'score': 1.3640858045994828}, 0.8: {'iou': 0.6845142981811223, 'dice': 0.8090918491865057, 'area_error': 0.1365710309044084, 'score': 1.3570351164632197}, 0.9: {'iou': 0.6798354215487116, 'dice': 0.8059720979375671, 'area_error': 0.1485638162957184, 'score': 1.3372437031905604}}
 - best validation epoch: 73

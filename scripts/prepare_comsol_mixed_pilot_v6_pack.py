@@ -137,7 +137,7 @@ def ensure_numeric_quality(name: str, pack: dict[str, np.ndarray]) -> dict[str, 
         raise PackValidationError(f"{name} contains all-zero delta_bz sample")
     if np.any(np.sum(masks > 0, axis=(1, 2)) <= 0):
         raise PackValidationError(f"{name} contains empty mask sample")
-    for key in ["sensor_x", "mask_x", "mask_y"]:
+    for key in ["sensor_x", "scan_line_y", "mask_x", "mask_y"]:
         if not np.all(np.diff(pack[key].astype(float)) > 0):
             raise PackValidationError(f"{name} {key} must be strictly increasing")
     return {

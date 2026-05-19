@@ -80,6 +80,14 @@ GROUP_FIELDS = [
     "total_loss_mean",
 ]
 
+EPOCH_FIELDS = tiny.EPOCH_FIELDS + [
+    "best_val_threshold",
+    "best_val_iou",
+    "best_val_dice",
+    "best_val_area_error",
+    "best_val_score",
+]
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run a mixed three-type COMSOL pilot_v6 training gate.")
@@ -523,6 +531,7 @@ def build_summary(context: dict[str, Any]) -> str:
         "- Loss: BCEWithLogits + soft Dice. No defect_type, angle, vertex_count, or geometry parameter supervision.",
         f"- epochs: {context['epochs']}",
         f"- batch_size: {context['batch_size']}",
+        "- Checkpoint selection: each epoch scans validation threshold candidates and uses the best validation IoU + Dice - area_error score.",
         f"- selected threshold: {context['threshold']}",
         f"- validation threshold scores: {context['threshold_scores']}",
         f"- best validation epoch: {context['best_epoch']}",
@@ -554,6 +563,7 @@ def build_summary(context: dict[str, Any]) -> str:
         "## 6. Conclusion",
         "",
         "- This result validates the mixed single-defect-type pilot_v6 read -> dataset loader -> train-only normalization -> training -> validation threshold selection -> test smoke evaluation -> preview chain.",
+        "- Review fix note: future runs now select checkpoints using the best validation threshold over the same threshold candidates; the recorded Stage 20.20 metrics were not recomputed.",
         "- It is not a v3_complex formal model result, not a candidate, and does not update CURRENT_BASELINE.",
         "- The 228-sample mixed pack is usable for next-stage data expansion, but remains pilot-level and single-defect only.",
         f"- Recommended next step: {context['next_step_recommendation']}",
@@ -633,11 +643,39 @@ def main() -> int:
         train_bce = float(np.mean(batch_bces))
         train_dice_loss = float(np.mean(batch_dices))
         val_loss, val_bce, val_dice_loss = tiny.evaluate_loss(model, val_dataset, device)
-        val_rows_at_half, _ = evaluate_model(model, val_dataset, device, 0.5, sample_ids, defect_types, angles, vertex_counts)
-        val_iou = float(np.mean([row["iou"] for row in val_rows_at_half]))
-        val_dice_metric = float(np.mean([row["dice"] for row in val_rows_at_half]))
-        val_area_error = float(np.mean([row["area_error"] for row in val_rows_at_half]))
-        val_score = val_iou + val_dice_metric - val_area_error
+        val_iou = val_dice_metric = val_area_error = val_score_at_half = float("nan")
+        best_val_threshold = THRESHOLD_CANDIDATES[0]
+        best_val_iou = 0.0
+        best_val_dice = 0.0
+        best_val_area_error = float("inf")
+        best_val_score = -float("inf")
+        for threshold in THRESHOLD_CANDIDATES:
+            val_rows, _ = evaluate_model(
+                model,
+                val_dataset,
+                device,
+                threshold,
+                sample_ids,
+                defect_types,
+                angles,
+                vertex_counts,
+            )
+            threshold_iou = float(np.mean([row["iou"] for row in val_rows]))
+            threshold_dice = float(np.mean([row["dice"] for row in val_rows]))
+            threshold_area_error = float(np.mean([row["area_error"] for row in val_rows]))
+            threshold_score = threshold_iou + threshold_dice - threshold_area_error
+            if abs(threshold - 0.5) < 1e-9:
+                val_iou = threshold_iou
+                val_dice_metric = threshold_dice
+                val_area_error = threshold_area_error
+                val_score_at_half = threshold_score
+            if threshold_score > best_val_score:
+                best_val_threshold = threshold
+                best_val_iou = threshold_iou
+                best_val_dice = threshold_dice
+                best_val_area_error = threshold_area_error
+                best_val_score = threshold_score
+        val_score = best_val_score
         if val_score > best_score:
             best_score = val_score
             best_state = deepcopy(model.state_dict())
@@ -657,7 +695,12 @@ def main() -> int:
                 "val_iou_at_0_5": val_iou,
                 "val_dice_at_0_5": val_dice_metric,
                 "val_area_error_at_0_5": val_area_error,
-                "val_score_at_0_5": val_score,
+                "val_score_at_0_5": val_score_at_half,
+                "best_val_threshold": best_val_threshold,
+                "best_val_iou": best_val_iou,
+                "best_val_dice": best_val_dice,
+                "best_val_area_error": best_val_area_error,
+                "best_val_score": best_val_score,
             }
         )
 
@@ -672,7 +715,7 @@ def main() -> int:
         metric_rows.extend(rows)
 
     write_csv(metrics_path, metric_rows, METRIC_FIELDS)
-    write_csv(epoch_log_path, epoch_rows, tiny.EPOCH_FIELDS)
+    write_csv(epoch_log_path, epoch_rows, EPOCH_FIELDS)
     defect_rows = group_summary(metric_rows, "defect_type", ["rectangular_notch", "rotated_rect", "polygon"])
     angle_rows = angle_summary(metric_rows)
     vertex_rows = group_summary([row for row in metric_rows if row["defect_type"] == "polygon"], "vertex_count", [4, 5, 6])
