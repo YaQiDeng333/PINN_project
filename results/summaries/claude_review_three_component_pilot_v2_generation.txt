@@ -1,0 +1,42 @@
+﻿I now have all the information needed to compile the review. Here's the full assessment:
+
+---
+
+## Review: 3-Component Multi-Defect COMSOL Pilot V2 Generation
+
+### 必须修复 (Must Fix)
+
+无。
+
+### 建议修复 (Suggested Fix)
+
+1. **Per-split distance_bin imbalance**: 虽然全局每个 combo 各 bin 10 个样本正确，但 split 内分布不均：
+   - train: far=24, medium=28, near=28
+   - val: far=8, medium=4, near=8
+   - test: far=8, medium=8, near=4
+   
+   这是由于 30-element pattern 被 20/5/5 切分的自然结果，不影响训练可用性。但 val 中 medium 仅 4 个样本可能导致验证指标波动。建议 v3 中改用分层采样确保每个 split 内各 bin 也平衡。
+
+### 可以接受 (Acceptable / Confirmed)
+
+逐项确认 12 个检查点：
+
+| # | 检查点 | 状态 | 证据 |
+|---|--------|------|------|
+| 1 | 同一 COMSOL model 联合创建 3 个 components | **通过** | Generator 继承 `generate_mfl_multi_defect_pilot.py`，在同一 mph 中创建 steel_notched 减去 3 个 notch_cut，notch_air 也包含在同一 solve 中。Summary 确认 `true_joint_comsol_geometry: True`。 |
+| 2 | 不是 single-defect Bz 相加 | **通过** | 单次 COMSOL solve 获取 Bz_defect。Summary: `not_single_defect_signal_summation: True`。 |
+| 3 | 不是 mask 拼接 | **通过** | Mask 从 components_json union rasterize。Summary: `not_mask_stitching: True`，manifest 中每行注释确认 `union mask rasterized from components_json`。 |
+| 4 | delta_bz = Bz_defect - Bz_no_defect | **通过** | Summary: `delta_matches_bz_defect_minus_reference: True`，inventory 中所有 120 行 `delta_matches_defect_minus_reference: True`。NPZ 含 bz_defect、bz_no_defect、delta_bz 三个数组。 |
+| 5 | component_count 全为 3 | **通过** | Summary: `component_count_distribution: {3: 120}`，`all_component_count_three: True`。Inventory 全部 120 行 `component_count=3`。 |
+| 6 | connected_component_count 全为 3 | **通过** | Summary: `connected_component_count_distribution: {3: 120}`，`all_connected_component_count_three: True`。Inventory 全部 120 行 `connected_component_count=3`。三个 notch 在空间上分离（bbox 不重叠），mask 连通分量正确为 3。 |
+| 7 | mask 来自 components_json union | **通过** | `validate_geometry_and_mask` 验证 mask 面积非零、每个 component 面积非零、连通分量数=3。Mask 由 generator 根据 component 几何参数 rasterize 并 union。 |
+| 8 | component_type combination 4 类各 30 | **通过** | `rrr=30, rra=30, raa=30, aaa=30`。每个 split 内：20/5/5。NPZ metadata 记录 `component_type_combination_target: {各30}`。 |
+| 9 | split 为 80/20/20 | **通过** | `split_distribution: {train: 80, val: 20, test: 20}`。 |
+| 10 | distance_bin 覆盖 near/medium/far | **通过** | 全局各 40，每 combo 每 bin 各 10。每 split 覆盖全部 3 个 bin。min pairwise distance: near≈12.9mm, medium≈16.8mm, far≈21.6mm，区分度合理。 |
+| 11 | sensor_z_m / liftoff = 0.008 m | **通过** | 与 single-defect pilot_v9 和 multi_defect pilot_v2/v3 对齐。 |
+| 12 | 未提交 .mph / NPZ / raw CSV / preview PNG | **通过** | PINN_project `.gitignore` 排除 `data/`、`*.npz`、`*.npy`；COMSOL `.gitignore` 排除 `*.mph`、`comsol_models/`、`results/`、`previews/`。最新 commit `d627c43` 仅含 training gate 脚本（10 文件，1903 行），无数据文件。NPZ 存在于 `data/comsol_mfl/prepared/` 但被 gitignore 保护。 |
+
+### 是否可以进入 PINN Training Gate
+
+**可以进入。** 所有 12 个质量检查点全部通过，0 个失败样本，0 个 duplicate geometry。NPZ schema 完整（delta_bz 形状 (120, 3, 201)，mask 形状 (120, 64, 128)），splits、distance_bins、component_types 等元数据完整。唯一建议是 v3 可改进 per-split distance_bin 平衡性，但不影响当前 pilot_v2 进入训练。
+
