@@ -1,0 +1,37 @@
+# COMSOL combined single + multi-defect baseline v2 candidate pack summary
+
+created_at: 2026-05-20T12:23:41
+single_defect_npz_loaded: True
+multi_defect_npz_loaded: True
+coordinates_matched: True
+combined_npz_generated: True
+combined_npz_path: C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\prepared\comsol_combined_single_multi_defect_baseline_v2_candidate.npz
+N: 840
+split_distribution: {'test': 139, 'train': 562, 'val': 139}
+defect_group_distribution: {'multi_defect': 240, 'single_defect': 600}
+defect_type_distribution: {'multi_defect': 240, 'polygon': 200, 'rectangular_notch': 200, 'rotated_rect': 200}
+split_defect_group_distribution: {'train': {'single_defect': 402, 'multi_defect': 160}, 'val': {'single_defect': 99, 'multi_defect': 40}, 'test': {'single_defect': 99, 'multi_defect': 40}}
+split_defect_type_distribution: {'train': {'rectangular_notch': 134, 'rotated_rect': 134, 'polygon': 134, 'multi_defect': 160}, 'val': {'rectangular_notch': 33, 'rotated_rect': 33, 'polygon': 33, 'multi_defect': 40}, 'test': {'rectangular_notch': 33, 'rotated_rect': 33, 'polygon': 33, 'multi_defect': 40}}
+delta_bz_shape: (840, 3, 201)
+masks_shape: (840, 64, 128)
+component_count_distribution: {1: 600, 2: 240}
+connected_component_count_distribution: {1: 600, 2: 240}
+delta_matches_bz_defect_minus_reference: True
+has_nan_or_inf: False
+masks_non_empty: True
+sample_ids_unique: True
+geometry_params_parseable: True
+components_json_parseable_where_present: True
+multi_defect_component_count_all_2: True
+multi_defect_connected_component_count_all_2: True
+coordinates_monotonic: True
+schema_ready: True
+baseline_v2_candidate_train_ready: True
+
+## Current limitations
+
+- Combined pack preserves reviewed source splits and does not reshuffle.
+- Single-defect samples remain controlled synthetic COMSOL pilot_v9 samples.
+- Multi_defect samples remain controlled synthetic component_count=2 pilot_v3 samples.
+- The pack is a candidate input for training; it is not itself a baseline result.
+- No data, NPZ, checkpoint, or preview PNG should be committed.
