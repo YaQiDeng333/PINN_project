@@ -1,0 +1,65 @@
+# COMSOL true multi_defect pilot_v3 3-seed training gate
+
+## Schema
+
+- pilot_v3 NPZ readable: True
+- schema complete: True
+- split is 160 / 40 / 40: True ({'train': 160, 'val': 40, 'test': 40})
+- component_count all 2: True
+- true connected count all 2: True
+- component_type combination distribution: {'rectangular_notch+rectangular_notch': 48, 'rectangular_notch+rotated_rect': 48, 'rotated_rect+rotated_rect': 48, 'rectangular_notch+polygon': 48, 'rotated_rect+polygon': 48}
+- min_component_distance bins: {'near': 80, 'medium': 80, 'far': 80}
+- union_mask_area bins: {'small': 80, 'large': 79, 'medium': 81}
+- delta_bz input shape: (240, 3, 201)
+- mask output shape: (240, 64, 128)
+- components_json/mask IoU min/mean/max: [1.0, 1.0, 1.0]
+
+## Normalization And Model
+
+- Normalization: per-channel delta_bz mean/std computed only from train split for each seed run.
+- train mean shape: (1, 3, 1)
+- train std shape: (1, 3, 1)
+- Model: lightweight mask-only Conv1d encoder for `(3, 201)` delta_bz and ConvTranspose2d decoder to `(64, 128)` union-mask logits.
+- Loss: BCEWithLogits + soft Dice. No component_count, component_type, geometry, bz_defect, or bz_no_defect input.
+
+## Training Gate
+
+- seeds: [42, 123, 2026]
+- epochs: 200
+- batch_size: 8
+- Checkpoint selection: each epoch scans validation thresholds and uses best validation IoU + Dice - area_error.
+- seed best epochs / thresholds: {42: {'best_epoch': 35, 'selected_threshold': 0.6, 'best_val_score': 1.2523653549801825}, 123: {'best_epoch': 37, 'selected_threshold': 0.6, 'best_val_score': 1.2644766167981063}, 2026: {'best_epoch': 36, 'selected_threshold': 0.6, 'best_val_score': 1.2643875844690864}}
+- all seeds completed: True
+- train loss decreased all seeds: True
+- can fit 160 train samples: True
+
+## 3-Seed Pilot Metrics
+
+- train mean+/-std: IoU=0.6932+/-0.0089, Dice=0.8169+/-0.0063, area_error=0.1178+/-0.0010, center_error=2.9689+/-0.2197, pred_cc_is_2=1.0000+/-0.0000, missed=0.0000+/-0.0000, merged=0.0000+/-0.0000, split=0.0000+/-0.0000
+- val mean+/-std: IoU=0.6246+/-0.0037, Dice=0.7660+/-0.0028, area_error=0.1301+/-0.0023, center_error=4.2248+/-0.0666, pred_cc_is_2=1.0000+/-0.0000, missed=0.0000+/-0.0000, merged=0.0000+/-0.0000, split=0.0000+/-0.0000
+- test mean+/-std: IoU=0.6118+/-0.0014, Dice=0.7573+/-0.0011, area_error=0.1630+/-0.0026, center_error=3.7359+/-0.1486, pred_cc_is_2=1.0000+/-0.0000, missed=0.0000+/-0.0000, merged=0.0000+/-0.0000, split=0.0000+/-0.0000
+- predicted connected component count summary: C:\Users\19166\Desktop\PINN_project\results\metrics\comsol_multi_defect_pilot_v3_connected_component_summary.csv
+- component combination summary: C:\Users\19166\Desktop\PINN_project\results\metrics\comsol_multi_defect_pilot_v3_component_combination_summary.csv
+- missed / merged / split rates on test: {'missed_rate': 0.0, 'merged_rate': 0.0, 'split_rate': 0.0, 'predicted_component_count_is_2_rate': 1.0}
+- hardest component_type combination: component_types=rectangular_notch+polygon
+- polygon vs non-polygon test Dice: {'polygon_test_dice': 0.7486989275878285, 'non_polygon_test_dice': 0.7630562410997963}
+- empty predictions: False
+- full-image predictions: False
+- NaN detected: False
+
+## Preview And Audit
+
+- preview generated: True
+- preview dir: C:\Users\19166\Desktop\PINN_project\results\previews\comsol_multi_defect_pilot_v3_gate
+- preview sample ids: ['sample_169', 'sample_173', 'sample_176', 'sample_184', 'sample_187', 'sample_190', 'sample_191', 'sample_193', 'sample_197', 'sample_200', 'sample_205', 'sample_207', 'sample_208', 'sample_211', 'sample_217', 'sample_223', 'sample_231']
+- failure audit summary: C:\Users\19166\Desktop\PINN_project\results\summaries\comsol_multi_defect_pilot_v3_failure_audit_summary.txt
+- failure cases CSV: C:\Users\19166\Desktop\PINN_project\results\metrics\comsol_multi_defect_pilot_v3_failure_audit_cases.csv
+- failure audit main conclusion: Pilot_v3 is trainable and component diagnostics are meaningful; dominant failures remain boundary/shape smoothing, with test missed/merged/split rates 0.000/0.000/0.000.
+
+## Conclusion
+
+- This is a multi_defect pilot_v3 gate only, not a baseline and not a v3_complex comparison.
+- recommend expanding multi_defect data: True
+- polygon component clearly harder: False
+- recommend multi_defect COMSOL baseline now: True
+- current limitations: pilot_v3 only, component_count=2 only, no polygon+polygon, no real experimental data, not a baseline
