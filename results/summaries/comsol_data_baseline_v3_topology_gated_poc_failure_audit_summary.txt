@@ -1,0 +1,21 @@
+# COMSOL_DATA_BASELINE_V3 topology-aware gated decoder POC failure audit
+
+- POC acceptance passed: True
+- cc2 improved vs 20.42: True
+- cc2 pred_cc tolerance pass: True
+- single_defect tolerance pass: True
+- cc3 tolerance pass: True
+- task gate accuracy: 0.9680365296803652
+- gate collapse: False
+- single_defect degradation vs COMSOL_DATA_BASELINE: False
+- cc2 degradation vs COMSOL_MULTI_DEFECT_DATA_BASELINE: False
+- cc3 degradation vs COMSOL_THREE_COMPONENT_DATA_BASELINE: False
+- model still predicts correct component counts for cc2/cc3: True
+- hardest group: component_type_combination=rotated_rect+polygon dice=0.6779
+- dominant failure mode: component_count_mismatch
+- source_dataset/source_pack issue: True
+- recommended next step: run 3-seed topology-gated candidate
+
+## Interpretation
+
+Topology-aware gated decoder POC is promising against the 20.42 lightweight reference and can advance to 3-seed validation.

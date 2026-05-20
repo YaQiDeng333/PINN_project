@@ -1,0 +1,64 @@
+# COMSOL_DATA_BASELINE_V3 topology-aware gated decoder POC summary
+
+- combined NPZ readable: True
+- schema complete: True
+- split distribution: {'val': 219, 'train': 882, 'test': 219}
+- input shape: (1320, 3, 201)
+- output shape: (1320, 64, 128)
+- normalization train-only: True
+- model: shared Conv1d BzEncoder + predicted task gate + 3 topology-specific decoders, delta_bz input only
+- auxiliary loss: task_group CE lambda=0.1, component_count CE lambda=0.05
+- seeds completed: True
+- best epoch / threshold per seed: {42: {'best_epoch': 39, 'selected_threshold': 0.6, 'best_val_score': 1.2902075572711258}}
+- train mean+/-std: IoU=0.7656+/-0.0000, Dice=0.8653+/-0.0000, area_error=0.0933+/-0.0000, center_error=1.9957+/-0.0000, pred_cc_correct=0.9989+/-0.0000, pred_cc_is_2=0.1825+/-0.0000, pred_cc_is_3=0.3628+/-0.0000, missed=0.0000+/-0.0000, merged=0.0000+/-0.0000, split=0.0011+/-0.0000, extra=0.0011+/-0.0000
+- val mean+/-std: IoU=0.6540+/-0.0000, Dice=0.7836+/-0.0000, area_error=0.1474+/-0.0000, center_error=3.1099+/-0.0000, pred_cc_correct=0.9954+/-0.0000, pred_cc_is_2=0.1872+/-0.0000, pred_cc_is_3=0.3607+/-0.0000, missed=0.0046+/-0.0000, merged=0.0000+/-0.0000, split=0.0000+/-0.0000, extra=0.0000+/-0.0000
+- test mean+/-std: IoU=0.6387+/-0.0000, Dice=0.7683+/-0.0000, area_error=0.1718+/-0.0000, center_error=2.9199+/-0.0000, pred_cc_correct=0.9589+/-0.0000, pred_cc_is_2=0.1872+/-0.0000, pred_cc_is_3=0.3562+/-0.0000, missed=0.0228+/-0.0000, merged=0.0000+/-0.0000, split=0.0320+/-0.0000, extra=0.0320+/-0.0000
+
+## Group Metrics
+
+- single_defect test: {'iou_mean': 0.6452005344297908, 'dice_mean': 0.7809455256217134, 'area_error_mean': 0.2484872559625456, 'sample_count': 99}
+- multi_defect_cc2 test: {'iou_mean': 0.5838968828268294, 'dice_mean': 0.7299970718516491, 'area_error_mean': 0.15932819382608548, 'sample_count': 40}
+- multi_defect_cc3 test: {'iou_mean': 0.6580504873580942, 'dice_mean': 0.7717639917782215, 'area_error_mean': 0.0830769817082513, 'sample_count': 80}
+- multi_defect combined test: {'iou_mean': 0.6333326191810059, 'dice_mean': 0.7578416851360307, 'area_error_mean': 0.10849405241419602, 'sample_count': 120}
+- task_group test summary: {'task_group=single_defect': {'iou': 0.6452005344297908, 'dice': 0.7809455256217134, 'n': 99}, 'task_group=multi_defect_cc2': {'iou': 0.5838968828268294, 'dice': 0.7299970718516491, 'n': 40}, 'task_group=multi_defect_cc3': {'iou': 0.6580504873580942, 'dice': 0.7717639917782215, 'n': 80}}
+- defect_type test summary: {'defect_type=rectangular_notch': {'iou': 0.6370753895447482, 'dice': 0.7752894737607778, 'n': 33}, 'defect_type=rotated_rect': {'iou': 0.63201685300743, 'dice': 0.7711639775870456, 'n': 33}, 'defect_type=polygon': {'iou': 0.6665093607371937, 'dice': 0.7963831255173166, 'n': 33}, 'defect_type=multi_defect': {'iou': 0.6333326191810059, 'dice': 0.7578416851360307, 'n': 120}}
+- connected-component behavior: {'cc2_pred_cc_is_2': 0.925, 'cc3_pred_cc_is_3': 0.95, 'multi_pred_cc_correct': 0.9416666666666667}
+- missed / merged / split / extra behavior: {'missed': 0.041666666666666664, 'merged': 0.0, 'split': 0.041666666666666664, 'extra': 0.041666666666666664}
+
+## Gate Diagnostics
+
+- task gate accuracy: 0.9680365296803652
+- component_count head accuracy: 0.9726027397260274
+- majority task baseline: 0.36363636363636365
+- gate above majority baseline: True
+- gate predicted distribution: {'single_defect': 99, 'multi_defect_cc2': 41, 'multi_defect_cc3': 79}
+- gate collapse: False
+
+## Comparison To 20.42 Lightweight Candidate
+
+- 20.42 reference: {'overall_iou': 0.6461, 'overall_dice': 0.7735, 'single_iou': 0.6602, 'single_dice': 0.7917, 'cc2_iou': 0.5598, 'cc2_dice': 0.6996, 'cc3_iou': 0.6717, 'cc3_dice': 0.7879, 'cc2_pred_cc_is_2': 0.8583, 'cc3_pred_cc_is_3': 0.9542}
+- cc2 improvement: {'iou_delta': 0.024096882826829424, 'dice_delta': 0.030397071851649082, 'pred_cc_is_2_delta': 0.06670000000000009}
+- cc2 pred_cc_is_2 tolerance pass: True
+- single_defect IoU delta: -0.014999465570209258
+- cc3 IoU delta: -0.013649512641905726
+- single_defect tolerance pass: True
+- cc3 tolerance pass: True
+- finite metrics / no NaN: True
+- POC acceptance passed: True
+
+## Standalone Baseline Comparison
+
+- single_defect substantial degradation vs COMSOL_DATA_BASELINE: False
+- cc2 substantial degradation vs COMSOL_MULTI_DEFECT_DATA_BASELINE: False
+- cc3 substantial degradation vs COMSOL_THREE_COMPONENT_DATA_BASELINE: False
+- preview generated: True
+- preview dir: C:\Users\19166\Desktop\PINN_project\results\previews\comsol_data_baseline_v3_topology_gated_poc
+- should run Stage B 3-seed: True
+
+## Limitations
+
+- COMSOL data-domain only; not v3_complex and not CURRENT_BASELINE.
+- Controlled synthetic pilot data only.
+- Component_count coverage is limited to 1, 2, and 3.
+- Component_count=3 samples do not include polygon components.
+- No real experimental data.
