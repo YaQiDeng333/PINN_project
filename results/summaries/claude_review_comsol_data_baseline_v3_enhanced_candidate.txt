@@ -1,0 +1,78 @@
+﻿I have all the data needed. Let me compile the complete review from the files already read.
+
+---
+
+## Stage 20.43 COMSOL_DATA_BASELINE_V3 Enhanced-Capacity Candidate — Review Report
+
+### 1. 脚本检查结论
+
+**通过。** 训练脚本 `scripts/train_comsol_data_baseline_v3_enhanced_candidate.py` 满足所有约束：
+
+| 检查项 | 状态 | 证据 |
+|--------|------|------|
+| 模型仅输入 delta_bz | ✓ | L575-582，`normalized = (delta_bz - train_mean) / train_std`，无其他输入拼接 |
+| 无 metadata leakage | ✓ | `EnhancedComsolMaskDecoder.forward()` 仅接收 Bz 信号张量，无 geometry/component 信息 |
+| train-only normalization | ✓ | L580-582，mean/std 仅从 `splits["train"]` 计算 |
+| validation-only checkpoint/threshold | ✓ | L593-637，每个 epoch 在 val set 上选阈值；L636-638 恢复 best val epoch |
+| test final only | ✓ | L639，evaluate_model 在训练结束后一次性运行，不参与阈值/checkpoint 选择 |
+| 未使用 v3_complex | ✓ | 脚本中无 v3_complex 引用 |
+| 未修改 CURRENT_BASELINE | ✓ | 无 CURRENT_BASELINE 相关代码 |
+| 未覆盖已有 COMSOL baseline 文档 | ✓ | 所有输出路径含 `enhanced_candidate` 前缀 |
+| 增强容量有界，无额外监督 | ✓ | Conv1d 从 32/64/128 → 64/128/256，decoder 对应加宽；无 auxiliary head |
+
+### 2. 结果一致性结论
+
+**通过。** 所有 CSV 文件内部自洽：
+
+| 交叉验证 | 结果 |
+|----------|------|
+| 3-seed test IoU 均值 vs training_summary 报告值 | 0.6100 = 0.6100 ✓ |
+| 3-seed test Dice 均值 vs training_summary 报告值 | 0.7377 = 0.7377 ✓ |
+| task_group weighted test IoU vs seed-level mean | (297×0.6485 + 120×0.5181 + 240×0.6083)/657 = 0.6100 ✓ |
+| task_group weighted test Dice vs seed-level mean | (297×0.7832 + 120×0.6563 + 240×0.7222)/657 = 0.7377 ✓ |
+| component_count test = task_group test | cc=1 ↔ single_defect, cc=2 ↔ cc2, cc=3 ↔ cc3，完全一致 ✓ |
+| connected_component test 行数 | 303+109+230+9+3+1+1+1 = 657 = 219×3 ✓ |
+| pred_area_zero | 全部为 0，无空预测 ✓ |
+| 所有 seed train_loss_decreased | True × 3 ✓ |
+
+**关键性能数据（test）：**
+
+| 任务组 | IoU | Dice | pred_cc_correct | vs 20.42 轻量基线 |
+|--------|-----|------|-----------------|-------------------|
+| single_defect | 0.6485 | 0.7832 | 1.000 | IoU -0.0117, Dice -0.0085 (可接受) |
+| cc2 | 0.5181 | 0.6563 | 0.800 | **IoU -0.0417, Dice -0.0433 (显著退化)** |
+| cc3 | 0.6083 | 0.7222 | 0.867 | **IoU -0.0634, Dice -0.0657 (显著退化)** |
+
+### 3. 文件安全结论
+
+**通过。** 无以下文件被提交/生成到仓库：
+- 无数据 NPZ 文件
+- 无模型 checkpoint（.pt/.pth）
+- 无 preview PNG
+- 无临时笔记文件
+
+git status 中的两个 untracked 文件（`.tmp_claude_review_*.txt` 和 `scripts/visualize_current_baseline.py`）与本次候选训练无关。
+
+### 4. 是否通过 COMSOL_DATA_BASELINE_V3 enhanced acceptance
+
+**不通过。** 六项验收条件中四项失败：
+
+| 验收条件 | 状态 | 详情 |
+|----------|------|------|
+| cc2_improved (IoU +0.02 或 Dice +0.015) | ❌ | IoU -0.0417, Dice -0.0433 |
+| cc2_pred_not_decrease | ❌ | pred_cc_is_2: 0.8583 → 0.8000 |
+| single_tradeoff_ok (≤0.015 退化) | ✅ | IoU -0.0117, Dice -0.0085 |
+| cc3_tradeoff_ok (≤0.015 退化) | ❌ | IoU -0.0634, Dice -0.0657 |
+| no source_pack collapse | ❌ | 存在 >0.08 Dice 跨 source_pack 差异 |
+| no seed collapse | ❌ | 至少一个 seed 在 cc3 上低于参考基线 -0.05 |
+
+### 5. 是否建议更新 COMSOL_DATA_BASELINE_V3 documentation
+
+**不建议。** 增强容量候选在 cc2 和 cc3 上全面退化于 20.42 轻量基线，说明单纯加宽通道数（不引入额外结构化先验或监督）导致了过拟合或优化困难。模型容量提升并未转化为分割精度提升。
+
+### 总结建议
+
+增强容量方向在当前设置下无效甚至有害。建议下一步尝试的方向：
+- 保持轻量 backbone 容量，转而改进 loss 函数或训练策略（如 curriculum learning、hard example mining）；
+- 若坚持扩大容量，需配套更强的正则化（当前仅 dropout=0.05）或更大的训练集；
+- 考虑在 decoder 端引入对 component count 的弱监督（如辅助分类头），而非纯 mask-only 预测。
