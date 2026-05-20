@@ -1,0 +1,26 @@
+# COMSOL_DATA_BASELINE_V3 topology-aware residual gated decoder v2 POC failure audit
+
+- POC acceptance passed: False
+- cc2 improved vs 20.42: False
+- cc2 pred_cc tolerance pass: True
+- single_defect tolerance pass: True
+- cc3 tolerance pass: True
+- overall tolerance pass: True
+- task gate accuracy: 0.9726027397260274
+- gate collapse: False
+- residual scale: 0.35
+- residual/base absolute ratio mean: 0.010593626737584478
+- residual dominance rate: 0.0
+- residual dominates base logits: False
+- single_defect degradation vs COMSOL_DATA_BASELINE: False
+- cc2 degradation vs COMSOL_MULTI_DEFECT_DATA_BASELINE: True
+- cc3 degradation vs COMSOL_THREE_COMPONENT_DATA_BASELINE: False
+- model still predicts correct component counts for cc2/cc3: False
+- hardest group: component_type_combination=rectangular_notch+rectangular_notch dice=0.6488
+- dominant failure mode: component_count_mismatch
+- source_dataset/source_pack issue: True
+- recommended next step: stop and record rejection
+
+## Interpretation
+
+Topology-aware residual gated decoder v2 POC is not promising enough for 3-seed validation; do not create a candidate baseline document.

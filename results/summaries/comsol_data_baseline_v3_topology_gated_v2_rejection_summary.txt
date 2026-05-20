@@ -1,0 +1,70 @@
+# COMSOL_DATA_BASELINE_V3 topology-aware residual gated decoder v2 rejection summary
+
+Stage 20.45 tested a topology-aware residual gated decoder v2 on the existing COMSOL_DATA_BASELINE_V3 candidate pack.
+
+## Decision
+
+- rejected: True
+- reason: POC seed 42 did not pass acceptance, so Stage B 3-seed validation was not run.
+- candidate document created: False
+- final COMSOL_DATA_BASELINE_V3.md created: False
+
+## Protocol
+
+- input NPZ: data/comsol_mfl/prepared/comsol_data_baseline_v3_candidate.npz
+- model input: delta_bz only
+- auxiliary labels: task_group and component_count for CE losses only
+- gating: predicted from shared Bz latent
+- routing: no true-label hard routing
+- final logits: base_mask_logits + 0.35 * predicted-gate weighted residual adapters
+- residual penalty: lambda_residual = 1e-4
+- checkpoint score: mean(validation task-group scores) - 0.25 * std(validation task-group scores)
+- normalization: train split only
+- test use: final evaluation only
+
+## POC Result
+
+- seed: 42
+- overall test IoU/Dice: 0.6461 / 0.7757
+- single_defect test IoU/Dice: 0.6468 / 0.7813
+- cc2 test IoU/Dice: 0.5592 / 0.7047
+- cc3 test IoU/Dice: 0.6887 / 0.8042
+- cc2 pred_cc_is_2: 0.8500
+- cc3 pred_cc_is_3: 0.9750
+- task gate accuracy: 0.9726
+- component_count head accuracy: 0.9726
+- gate collapse: False
+- residual/base absolute ratio mean: 0.0106
+- residual dominance rate: 0.0000
+
+## Acceptance Check
+
+Compared against the 20.42 lightweight V3 reference:
+
+- cc2 improvement: failed
+  - cc2 IoU delta: -0.0006
+  - cc2 Dice delta: +0.0051
+  - required: cc2 IoU >= 0.5700 or cc2 Dice >= 0.7120
+- cc2 pred_cc_is_2 tolerance: passed
+- cc3 preservation: passed
+- single_defect preservation: passed
+- overall tolerance: passed
+- gate accuracy above majority baseline: passed
+- gate collapse check: passed
+- residual dominance check: passed
+
+## Review Outcome
+
+Claude review found no data leakage, metadata-input violation, true-label hard routing, normalization issue, checkpoint/test leakage, or baseline document overwrite.
+
+The review did identify must-fix performance/method issues:
+
+- cc2 did not improve and regressed versus 20.44 gated v1.
+- residual adapters contributed too weakly to affect the output.
+- source_pack differences should be investigated before any further V3 promotion attempt.
+
+These are not safe in-place fixes under the fixed 20.45 POC rules, because addressing them would require a new method or controlled hyperparameter experiment. This run is therefore recorded as a rejected POC rather than repaired in place.
+
+## Next Recommendation
+
+Test a different Deep Research method or redesign the topology-aware method around the part that worked in v1: stronger task-specific decoding for cc2, with an explicit protection mechanism for cc3.
