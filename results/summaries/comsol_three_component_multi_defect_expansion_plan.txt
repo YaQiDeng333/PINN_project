@@ -1,0 +1,13 @@
+# COMSOL 3-component multi_defect expansion plan
+
+- Current pack: 60 true 3-component multi_defect pilot samples with 40 train / 10 val / 10 test.
+- Component combinations include rectangular_notch+rectangular_notch+rectangular_notch, rectangular_notch+rectangular_notch+rotated_rect, rectangular_notch+rotated_rect+rotated_rect, and rotated_rect+rotated_rect+rotated_rect.
+- Keep component_count=3 and rectangular_notch/rotated_rect components until this pilot gate is externally reviewed.
+- Stratify min_component_distance into near / medium / far bins and ensure each split covers all bins.
+- Stratify relative component area and depth so one component is not always dominant.
+- Preserve train-only normalization and validation-only threshold/checkpoint selection.
+- Keep component-aware metrics: predicted connected component count, missed component flag, merge flag, extra fragment flag, and component recall heuristic.
+- Do not merge with baseline data or declare a component_count>2 baseline from this 60-sample pilot alone.
+- Expansion-readiness condition: schema complete, no data corruption, no systematic missed third component, stable 3-seed val/test behavior, and val/test contain all combinations and distance bins.
+- Stop condition: COMSOL geometry instability, components_json/mask mismatch, or frequent predicted connected count collapse below 3 on val/test.
+- Current three-component pilot signal: Do not establish a component_count>2 COMSOL baseline yet; use this pilot to guide a larger 3-component pack.
