@@ -1,0 +1,13 @@
+# COMSOL combined baseline v2 candidate failure audit
+
+- single_defect degradation vs COMSOL_DATA_BASELINE: False
+- multi_defect degradation vs COMSOL_MULTI_DEFECT_DATA_BASELINE: False
+- model still predicts 2 components for multi_defect: True
+- hardest group: component_type_combination=rectangular_notch+rectangular_notch dice=0.7484
+- dominant failure mode: area_error
+- source_dataset/source_pack issue: False
+- combined baseline stable enough to document: True
+
+## Interpretation
+
+Combined training is acceptable as a baseline v2 candidate because it preserves multi_defect component behavior and does not show substantial degradation against the single-defect or multi_defect data-domain baselines.
