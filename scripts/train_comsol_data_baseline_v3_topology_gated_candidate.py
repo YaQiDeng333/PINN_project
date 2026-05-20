@@ -325,6 +325,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--failure-cases", type=Path, default=DEFAULT_FAILURE_CASES)
     parser.add_argument("--preview-dir", type=Path, default=DEFAULT_PREVIEW_DIR)
     parser.add_argument("--seeds", type=int, nargs="+", default=SEEDS)
+    parser.add_argument("--stage-label", default="POC")
     parser.add_argument("--epochs", type=int, default=200)
     parser.add_argument("--batch-size", type=int, default=8)
     parser.add_argument("--lr", type=float, default=3e-3)
@@ -1040,7 +1041,7 @@ def summary_lookup(rows: list[dict[str, Any]], group: str, split: str) -> dict[s
 
 def build_training_summary(context: dict[str, Any]) -> str:
     lines = [
-        "# COMSOL_DATA_BASELINE_V3 topology-aware gated decoder POC summary",
+        f"# COMSOL_DATA_BASELINE_V3 topology-aware gated decoder {context['stage_label']} summary",
         "",
         f"- combined NPZ readable: {context['npz_readable']}",
         f"- schema complete: {context['schema_complete']}",
@@ -1086,7 +1087,7 @@ def build_training_summary(context: dict[str, Any]) -> str:
         f"- single_defect tolerance pass: {context['single_ok']}",
         f"- cc3 tolerance pass: {context['cc3_ok']}",
         f"- finite metrics / no NaN: {context['finite_metrics']}",
-        f"- POC acceptance passed: {context['poc_acceptance_passed']}",
+        f"- {context['stage_label']} acceptance passed: {context['acceptance_passed']}",
         "",
         "## Standalone Baseline Comparison",
         "",
@@ -1095,7 +1096,7 @@ def build_training_summary(context: dict[str, Any]) -> str:
         f"- cc3 substantial degradation vs COMSOL_THREE_COMPONENT_DATA_BASELINE: {context['cc3_degraded']}",
         f"- preview generated: {context['preview_generated']}",
         f"- preview dir: {context['preview_dir']}",
-        f"- should run Stage B 3-seed: {context['poc_acceptance_passed']}",
+        f"- should run Stage B 3-seed: {context['should_run_stage_b']}",
         "",
         "## Limitations",
         "",
@@ -1110,9 +1111,9 @@ def build_training_summary(context: dict[str, Any]) -> str:
 
 def build_audit_summary(context: dict[str, Any]) -> str:
     lines = [
-        "# COMSOL_DATA_BASELINE_V3 topology-aware gated decoder POC failure audit",
+        f"# COMSOL_DATA_BASELINE_V3 topology-aware gated decoder {context['stage_label']} failure audit",
         "",
-        f"- POC acceptance passed: {context['poc_acceptance_passed']}",
+        f"- {context['stage_label']} acceptance passed: {context['acceptance_passed']}",
         f"- cc2 improved vs 20.42: {context['cc2_improved']}",
         f"- cc2 pred_cc tolerance pass: {context['cc2_pred_ok']}",
         f"- single_defect tolerance pass: {context['single_ok']}",
@@ -1126,7 +1127,7 @@ def build_audit_summary(context: dict[str, Any]) -> str:
         f"- hardest group: {context['hardest_group']}",
         f"- dominant failure mode: {context['dominant_failure']}",
         f"- source_dataset/source_pack issue: {context['source_issue']}",
-        f"- recommended next step: {'run 3-seed topology-gated candidate' if context['poc_acceptance_passed'] else 'stop and record rejection'}",
+        f"- recommended next step: {context['recommended_next_step']}",
         "",
         "## Interpretation",
         "",
@@ -1226,6 +1227,7 @@ def main() -> int:
     )
     cc2_rows = [row for row in all_metric_rows if row["split"] == "test" and row["task_group"] == "multi_defect_cc2"]
     cc3_rows = [row for row in all_metric_rows if row["split"] == "test" and row["task_group"] == "multi_defect_cc3"]
+    test_rows = [row for row in all_metric_rows if row["split"] == "test"]
     multi_rows = [row for row in all_metric_rows if row["split"] == "test" and row["defect_group"] == "multi_defect"]
     cc2_pred_cc2 = float(np.mean([float(row["predicted_component_count_is_2"]) for row in cc2_rows])) if cc2_rows else float("nan")
     cc3_pred_cc3 = float(np.mean([float(row["predicted_component_count_is_3"]) for row in cc3_rows])) if cc3_rows else float("nan")
@@ -1251,7 +1253,6 @@ def main() -> int:
         if len(source_dices) > 1 and max(source_dices) - min(source_dices) > 0.08:
             source_issue = True
     multi_pred_cc_ok = cc2_pred_cc2 >= 0.90 and cc3_pred_cc3 >= 0.90
-    test_rows = [row for row in all_metric_rows if row["split"] == "test"]
     task_gate_accuracy = mean_or_nan([float(row["task_gate_correct"]) for row in test_rows])
     count_head_accuracy = mean_or_nan([float(row["count_head_correct"]) for row in test_rows])
     pred_task_counts = Counter(TASK_LABELS[int(row["pred_task_label"])] for row in test_rows)
@@ -1267,15 +1268,38 @@ def main() -> int:
     cc3_ok = cc3_iou_delta >= -0.02
     gate_above_majority = task_gate_accuracy > MAJORITY_TASK_BASELINE + 0.05
     finite_metrics = all(np.isfinite(float(row["iou"])) and np.isfinite(float(row["dice"])) for row in all_metric_rows)
+    overall_test = summarize(test_rows, "all", "test")
+    overall_ok = (
+        float(overall_test["iou_mean"]) >= LIGHTWEIGHT_V3_REFERENCE["overall_iou"] - 0.01
+        and float(overall_test["dice_mean"]) >= LIGHTWEIGHT_V3_REFERENCE["overall_dice"] - 0.01
+    )
+    seed_collapse = False
+    gate_stable = True
+    for seed in args.seeds:
+        seed_test_rows = [row for row in test_rows if int(row["seed"]) == seed]
+        seed_cc2_rows = [row for row in seed_test_rows if row["task_group"] == "multi_defect_cc2"]
+        seed_cc3_rows = [row for row in seed_test_rows if row["task_group"] == "multi_defect_cc3"]
+        seed_gate_acc = mean_or_nan([float(row["task_gate_correct"]) for row in seed_test_rows])
+        gate_stable = gate_stable and seed_gate_acc > MAJORITY_TASK_BASELINE + 0.05
+        if mean_or_nan([float(row["dice"]) for row in seed_test_rows]) < LIGHTWEIGHT_V3_REFERENCE["overall_dice"] - 0.05:
+            seed_collapse = True
+        if mean_or_nan([float(row["dice"]) for row in seed_cc2_rows]) < LIGHTWEIGHT_V3_REFERENCE["cc2_dice"] - 0.05:
+            seed_collapse = True
+        if mean_or_nan([float(row["dice"]) for row in seed_cc3_rows]) < LIGHTWEIGHT_V3_REFERENCE["cc3_dice"] - 0.05:
+            seed_collapse = True
     poc_acceptance_passed = cc2_improved and cc2_pred_ok and single_ok and cc3_ok and gate_above_majority and not gate_collapse and finite_metrics
+    candidate_acceptance_passed = poc_acceptance_passed and overall_ok and gate_stable and not seed_collapse
+    is_three_seed = len(args.seeds) > 1
+    acceptance_passed = candidate_acceptance_passed if is_three_seed else poc_acceptance_passed
     context = {
+        "stage_label": args.stage_label,
         "npz_readable": True,
         "schema_complete": True,
         "split_counts": validation["split_counts"],
         "input_shape": tuple(data["delta_bz"].shape),
         "output_shape": tuple(data["masks"].shape),
         "normalization_train_only": True,
-        "seeds_completed": len(seed_results) == len(SEEDS),
+        "seeds_completed": len(seed_results) == len(args.seeds),
         "seed_best": {
             result["seed"]: {
                 "best_epoch": result["best_epoch"],
@@ -1324,8 +1348,14 @@ def main() -> int:
         "gate_above_majority": gate_above_majority,
         "gate_pred_distribution": dict(pred_task_counts),
         "gate_collapse": gate_collapse,
+        "gate_stable": gate_stable,
         "finite_metrics": finite_metrics,
+        "overall_ok": overall_ok,
+        "seed_collapse": seed_collapse,
         "poc_acceptance_passed": poc_acceptance_passed,
+        "candidate_acceptance_passed": candidate_acceptance_passed,
+        "acceptance_passed": acceptance_passed,
+        "should_run_stage_b": poc_acceptance_passed and not is_three_seed,
         "single_degraded": single_degraded,
         "cc2_degraded": cc2_degraded,
         "cc3_degraded": cc3_degraded,
@@ -1336,9 +1366,22 @@ def main() -> int:
         "dominant_failure": dominant_failure,
         "source_issue": source_issue,
         "interpretation": (
-            "Topology-aware gated decoder POC is promising against the 20.42 lightweight reference and can advance to 3-seed validation."
-            if poc_acceptance_passed
-            else "Topology-aware gated decoder POC is not promising enough for 3-seed validation; do not create a candidate baseline document."
+            (
+                "Topology-aware gated decoder POC is promising against the 20.42 lightweight reference and can advance to 3-seed validation."
+                if not is_three_seed
+                else "Topology-aware gated decoder 3-seed candidate passes acceptance against the 20.42 lightweight reference."
+            )
+            if acceptance_passed
+            else (
+                "Topology-aware gated decoder POC is not promising enough for 3-seed validation; do not create a candidate baseline document."
+                if not is_three_seed
+                else "Topology-aware gated decoder 3-seed candidate does not pass acceptance; do not create a candidate baseline document."
+            )
+        ),
+        "recommended_next_step": (
+            "run 3-seed topology-gated candidate"
+            if poc_acceptance_passed and not is_three_seed
+            else ("create topology-gated candidate doc for human confirmation" if acceptance_passed else "stop and record rejection")
         ),
     }
     paths["summary"].parent.mkdir(parents=True, exist_ok=True)
@@ -1363,6 +1406,8 @@ def main() -> int:
                 "gate_collapse": context["gate_collapse"],
                 "cc2_improvement": context["cc2_improvement"],
                 "poc_acceptance_passed": context["poc_acceptance_passed"],
+                "candidate_acceptance_passed": context["candidate_acceptance_passed"],
+                "acceptance_passed": context["acceptance_passed"],
                 "summary": str(paths["summary"]),
             },
             indent=2,
