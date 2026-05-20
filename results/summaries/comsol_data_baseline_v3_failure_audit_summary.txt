@@ -1,0 +1,14 @@
+# COMSOL_DATA_BASELINE_V3 candidate failure audit
+
+- single_defect degradation vs COMSOL_DATA_BASELINE: False
+- cc2 degradation vs COMSOL_MULTI_DEFECT_DATA_BASELINE: True
+- cc3 degradation vs COMSOL_THREE_COMPONENT_DATA_BASELINE: False
+- model still predicts correct component counts for cc2/cc3: False
+- hardest group: component_type_combination=rectangular_notch+polygon dice=0.6400
+- dominant failure mode: component_count_mismatch
+- source_dataset/source_pack issue: True
+- combined baseline stable enough to document: False
+
+## Interpretation
+
+Combined training should not be documented as COMSOL_DATA_BASELINE_V3 yet because one or more degradation/component criteria failed.
