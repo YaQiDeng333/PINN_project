@@ -1,0 +1,46 @@
+# COMSOL three-component multi_defect pilot_v4 pack summary
+
+created_at: 2026-05-20T22:58:29
+pilot_v3_loaded: True
+v4_topup_loaded: True
+coordinates_matched: True
+final_pilot_v4_npz_generated: True
+npz_path: C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\prepared\comsol_multi_defect_three_component_multiline_forward_pack_v4_pilot.npz
+sample_count: 480
+split_distribution: {'test': 80, 'train': 320, 'val': 80}
+component_count_distribution: {'3': 480}
+connected_component_count_distribution: {'3': 480}
+component_type_combination_distribution: {'rectangular_notch+rectangular_notch+rectangular_notch': 120, 'rectangular_notch+rectangular_notch+rotated_rect': 120, 'rectangular_notch+rotated_rect+rotated_rect': 120, 'rotated_rect+rotated_rect+rotated_rect': 120}
+distance_bin_distribution: {'far': 160, 'medium': 160, 'near': 160}
+source_pack_distribution: {'pilot_v3': 240, 'pilot_v4_topup': 240}
+split_component_type_combination_distribution: {'test': {'rectangular_notch+rectangular_notch+rectangular_notch': 20, 'rectangular_notch+rectangular_notch+rotated_rect': 20, 'rectangular_notch+rotated_rect+rotated_rect': 20, 'rotated_rect+rotated_rect+rotated_rect': 20}, 'train': {'rectangular_notch+rectangular_notch+rectangular_notch': 80, 'rectangular_notch+rectangular_notch+rotated_rect': 80, 'rectangular_notch+rotated_rect+rotated_rect': 80, 'rotated_rect+rotated_rect+rotated_rect': 80}, 'val': {'rectangular_notch+rectangular_notch+rectangular_notch': 20, 'rectangular_notch+rectangular_notch+rotated_rect': 20, 'rectangular_notch+rotated_rect+rotated_rect': 20, 'rotated_rect+rotated_rect+rotated_rect': 20}}
+split_distance_bin_distribution: {'test': {'far': 26, 'medium': 27, 'near': 27}, 'train': {'far': 108, 'medium': 106, 'near': 106}, 'val': {'far': 26, 'medium': 27, 'near': 27}}
+split_source_pack_distribution: {'test': {'pilot_v3': 40, 'pilot_v4_topup': 40}, 'train': {'pilot_v3': 160, 'pilot_v4_topup': 160}, 'val': {'pilot_v3': 40, 'pilot_v4_topup': 40}}
+delta_bz_shape: (480, 3, 201)
+masks_shape: (480, 64, 128)
+sensor_z_m: 0.008
+liftoff_m: 0.008
+scan_line_y_m: [-0.001, 0.0, 0.001]
+delta_matches_bz_defect_minus_reference: True
+finite_delta_bz: True
+finite_bz_defect_and_reference: True
+non_empty_masks: True
+sample_id_unique: True
+coordinates_monotonic: True
+components_json_parseable: True
+duplicate_geometry_count: 0
+schema_ready: True
+pilot_v4_train_ready: True
+inventory_path: C:\Users\19166\Desktop\PINN_project\results\metrics\comsol_three_component_multi_defect_pilot_v4_inventory.csv
+
+## Self-review
+
+1. final NPZ exists: True
+2. N = 480: True
+3. split = train 320 / val 80 / test 80: True
+4. component_count all 3: True
+5. connected_component_count all 3: True
+6. component combination distribution correct: True
+7. distance_bin and source_pack split coverage reasonable: True
+8. data / NPZ generated but must remain uncommitted.
+9. summary and inventory agree: True
