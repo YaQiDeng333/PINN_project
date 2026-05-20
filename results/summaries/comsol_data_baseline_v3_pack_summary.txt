@@ -1,0 +1,50 @@
+# COMSOL_DATA_BASELINE_V3 pack summary
+
+created_at: 2026-05-20T23:53:12
+all_three_source_npzs_loaded: True
+coordinates_matched: True
+combined_npz_generated: True
+combined_npz_path: C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\prepared\comsol_data_baseline_v3_candidate.npz
+N: 1320
+split_distribution: {'val': 219, 'train': 882, 'test': 219}
+defect_group_distribution: {'single_defect': 600, 'multi_defect': 720}
+task_group_distribution: {'single_defect': 600, 'multi_defect_cc2': 240, 'multi_defect_cc3': 480}
+defect_type_distribution: {'rectangular_notch': 200, 'rotated_rect': 200, 'polygon': 200, 'multi_defect': 720}
+component_count_distribution: {1: 600, 2: 240, 3: 480}
+connected_component_count_distribution: {1: 600, 2: 240, 3: 480}
+split_task_group_distribution: {'train': {'single_defect': 402, 'multi_defect_cc2': 160, 'multi_defect_cc3': 320}, 'val': {'single_defect': 99, 'multi_defect_cc2': 40, 'multi_defect_cc3': 80}, 'test': {'single_defect': 99, 'multi_defect_cc2': 40, 'multi_defect_cc3': 80}}
+split_defect_type_distribution: {'train': {'rectangular_notch': 134, 'rotated_rect': 134, 'polygon': 134, 'multi_defect': 480}, 'val': {'rectangular_notch': 33, 'rotated_rect': 33, 'polygon': 33, 'multi_defect': 120}, 'test': {'rectangular_notch': 33, 'rotated_rect': 33, 'polygon': 33, 'multi_defect': 120}}
+delta_bz_shape: (1320, 3, 201)
+masks_shape: (1320, 64, 128)
+delta_matches_bz_defect_minus_reference: True
+has_nan_or_inf: False
+masks_non_empty: True
+sample_ids_unique: True
+geometry_params_parseable_where_present: True
+components_json_parseable_where_present: True
+coordinates_monotonic: True
+each_split_contains_task_groups: True
+each_split_contains_defect_types: True
+schema_ready: True
+baseline_v3_candidate_train_ready: True
+inventory_path: C:\Users\19166\Desktop\PINN_project\results\metrics\comsol_data_baseline_v3_inventory.csv
+
+## Current Limitations
+
+- Controlled synthetic COMSOL data only.
+- Combined candidate preserves source splits and does not reshuffle.
+- Component_count coverage is limited to 1, 2, and 3.
+- Component_count=3 samples do not include polygon components.
+- The pack is a candidate input for training; it is not itself a baseline result.
+- No data, NPZ, checkpoint, or preview PNG should be committed.
+
+## Self-review
+
+1. Combined NPZ exists: True
+2. N = 1320: True
+3. split = 882 / 219 / 219: True
+4. task_group distribution correct: True
+5. component_count distribution correct: True
+6. no data leakage introduced: True
+7. data / NPZ generated but must remain uncommitted.
+8. summary and inventory agree: True
