@@ -1,0 +1,14 @@
+# COMSOL 3-component multi_defect baseline readiness plan
+
+- Current pack: true 3-component multi_defect pilot_v4 samples with 320 train / 80 val / 80 test for the full 480-sample run.
+- Component combinations include rectangular_notch+rectangular_notch+rectangular_notch, rectangular_notch+rectangular_notch+rotated_rect, rectangular_notch+rotated_rect+rotated_rect, and rotated_rect+rotated_rect+rotated_rect.
+- component_count=3 is fixed; only rectangular_notch/rotated_rect components are included.
+- min_component_distance is stratified into near / medium / far bins and each split covers all bins.
+- source_pack is tracked for pilot_v3 and pilot_v4_topup; it is used only for metrics, never as model input.
+- Stratify relative component area and depth so one component is not always dominant.
+- Preserve train-only normalization and validation-only threshold/checkpoint selection.
+- Keep component-aware metrics: predicted connected component count, missed component flag, merge flag, extra fragment flag, and component recall heuristic.
+- Do not update existing baseline documents in this run.
+- Baseline-readiness condition: schema complete, no data corruption, no systematic missed third component, stable 3-seed val/test behavior, and val/test contain all combinations, distance bins, and source packs.
+- Stop condition: COMSOL geometry instability, components_json/mask mismatch, or frequent predicted connected count collapse below 3 on val/test.
+- Current three-component pilot signal: The 480-sample component_count=3 pack is stable enough to enter an external review for a component_count=3 COMSOL baseline candidate, but this script does not create that baseline.

@@ -1,0 +1,64 @@
+# COMSOL true 3-component multi_defect pilot_v4 3-seed training gate
+
+## Schema
+
+- three-component NPZ readable: True
+- schema complete: True
+- split is 320 / 80 / 80: True ({'train': 320, 'val': 80, 'test': 80})
+- component_count all 3: True
+- true connected count all 3: True
+- component_type combination distribution: {'rotated_rect+rotated_rect+rotated_rect': 120, 'rectangular_notch+rotated_rect+rotated_rect': 120, 'rectangular_notch+rectangular_notch+rotated_rect': 120, 'rectangular_notch+rectangular_notch+rectangular_notch': 120}
+- min_component_distance bins: {'medium': 160, 'near': 160, 'far': 160}
+- source_pack distribution: {'pilot_v3': 240, 'pilot_v4_topup': 240}
+- union_mask_area bins: {'small': 162, 'medium': 160, 'large': 158}
+- delta_bz input shape: (480, 3, 201)
+- mask output shape: (480, 64, 128)
+- components_json/mask IoU min/mean/max: [1.0, 1.0, 1.0]
+
+## Normalization And Model
+
+- Normalization: per-channel delta_bz mean/std computed only from train split for each seed run.
+- train mean shape: (1, 3, 1)
+- train std shape: (1, 3, 1)
+- Model: lightweight mask-only Conv1d encoder for `(3, 201)` delta_bz and ConvTranspose2d decoder to `(64, 128)` union-mask logits.
+- Loss: BCEWithLogits + soft Dice. No component_count, component_type, geometry, bz_defect, or bz_no_defect input.
+
+## Training Gate
+
+- seeds: [42, 123, 2026]
+- epochs: 200
+- batch_size: 8
+- Checkpoint selection: each epoch scans validation thresholds and uses best validation IoU + Dice - area_error.
+- seed best epochs / thresholds: {42: {'best_epoch': 36, 'selected_threshold': 0.6, 'best_val_score': 1.4065281120265314}, 123: {'best_epoch': 38, 'selected_threshold': 0.7, 'best_val_score': 1.4117465278283603}, 2026: {'best_epoch': 39, 'selected_threshold': 0.6, 'best_val_score': 1.4267420528521408}}
+- all seeds completed: True
+- train loss decreased all seeds: True
+- can fit train samples: True
+
+## 3-Seed Pilot Metrics
+
+- train mean+/-std: IoU=0.7923+/-0.0130, Dice=0.8825+/-0.0087, area_error=0.0645+/-0.0011, center_error=1.7320+/-0.0704, pred_cc_is_3=0.9990+/-0.0015, missed=0.0000+/-0.0000, merged=0.0000+/-0.0000, split=0.0010+/-0.0015, extra=0.0010+/-0.0015
+- val mean+/-std: IoU=0.6895+/-0.0046, Dice=0.8053+/-0.0035, area_error=0.0797+/-0.0026, center_error=2.3917+/-0.0115, pred_cc_is_3=0.9917+/-0.0059, missed=0.0292+/-0.0059, merged=0.0000+/-0.0000, split=0.0083+/-0.0059, extra=0.0083+/-0.0059
+- test mean+/-std: IoU=0.6761+/-0.0034, Dice=0.7958+/-0.0037, area_error=0.0827+/-0.0024, center_error=2.4622+/-0.0824, pred_cc_is_3=0.9875+/-0.0177, missed=0.0083+/-0.0059, merged=0.0000+/-0.0000, split=0.0125+/-0.0177, extra=0.0125+/-0.0177
+- predicted connected component count summary: C:\Users\19166\Desktop\PINN_project\results\metrics\comsol_three_component_multi_defect_pilot_v4_connected_component_summary.csv
+- component combination summary: C:\Users\19166\Desktop\PINN_project\results\metrics\comsol_three_component_multi_defect_pilot_v4_component_combination_summary.csv
+- missed / merged / split / extra rates on test: {'missed_rate': 0.008333333333333333, 'merged_rate': 0.0, 'split_rate': 0.0125, 'extra_fragment_rate': 0.0125, 'predicted_component_count_is_3_rate': 0.9875}
+- hardest component_type combination: component_types=rectangular_notch+rotated_rect+rotated_rect
+- empty predictions: False
+- full-image predictions: False
+- NaN detected: False
+
+## Preview And Audit
+
+- preview generated: True
+- preview dir: C:\Users\19166\Desktop\PINN_project\results\previews\comsol_three_component_multi_defect_pilot_v4_gate
+- preview sample ids: ['v3_sample_004', 'v3_sample_017', 'v3_sample_059', 'v3_sample_061', 'v3_sample_107', 'v3_sample_117', 'v3_sample_131', 'v3_sample_148', 'v3_sample_182', 'v4_topup_023', 'v4_topup_033', 'v4_topup_094', 'v4_topup_130', 'v4_topup_160', 'v4_topup_177', 'v4_topup_190', 'v4_topup_212']
+- failure audit summary: C:\Users\19166\Desktop\PINN_project\results\summaries\comsol_three_component_multi_defect_pilot_v4_failure_audit_summary.txt
+- failure cases CSV: C:\Users\19166\Desktop\PINN_project\results\metrics\comsol_three_component_multi_defect_pilot_v4_failure_audit_cases.csv
+- failure audit main conclusion: Three-component pilot is trainable and component diagnostics are meaningful; dominant failures remain boundary / shape smoothing, with test missed/merged/split/extra rates 0.008/0.000/0.013/0.013.
+
+## Conclusion
+
+- This is a 3-component multi_defect pilot gate only, not a baseline and not a v3_complex comparison.
+- recommend expanding component_count>2 data: False
+- recommend component_count>2 COMSOL baseline now: True
+- current limitations: three-component pilot only, rectangular_notch/rotated_rect components only, no polygon components, no real experimental data, not a baseline
