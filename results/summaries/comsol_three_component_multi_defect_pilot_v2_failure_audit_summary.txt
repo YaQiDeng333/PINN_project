@@ -1,0 +1,19 @@
+# COMSOL true 3-component multi_defect pilot_v2 failure audit
+
+- model predicts non-empty union masks: True
+- missed component rate on test: 0.0500
+- merged component rate on test: 0.0000
+- extra fragment / split rate on test: 0.0167
+- hardest component combination: component_types=rotated_rect+rotated_rect+rotated_rect
+- dominant failure category: boundary / shape smoothing
+- near-distance issue: False
+- schema / mask / components_json issue found: False
+- preview dir: C:\Users\19166\Desktop\PINN_project\results\previews\comsol_three_component_multi_defect_pilot_v2_gate
+
+## Interpretation
+
+Three-component pilot is trainable and component diagnostics are meaningful; dominant failures remain boundary / shape smoothing, with test missed/merged/split rates 0.050/0.000/0.017.
+
+## Recommendation
+
+Do not establish a component_count>2 COMSOL baseline yet; use this pilot to guide a larger 3-component pack.
