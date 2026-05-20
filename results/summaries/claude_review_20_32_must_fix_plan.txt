@@ -1,0 +1,19 @@
+# Claude review 20.32 must-fix plan
+
+must_fix_id: MF-001
+issue_summary: COMSOL_Multiphysics_MCP has no repository .gitignore, so newly generated .mph files, NPZ files, raw generated data, preview images, logs, and Python cache files could be accidentally staged.
+affected_repo: C:\Users\19166\Desktop\COMSOL_Multiphysics_MCP
+affected_files: .gitignore
+planned_fix: Add a repository .gitignore that excludes COMSOL model files (*.mph), prepared NPZ/data artifacts, generated model/data directories, raw per-sample CSV output, preview/checkpoint/log/cache artifacts, while leaving already tracked files untouched.
+whether_rerun_needed: No training or audit rerun needed.
+whether_data_regeneration_needed: No.
+safety_notes: Do not delete or untrack any existing files. Do not stage generated data, .mph, NPZ, raw CSV, preview PNG, notes, or __pycache__.
+
+must_fix_id: MF-002
+issue_summary: multi_defect pilot_v2 changed sensor_z/liftoff from v1's 0.002 m to 0.008 m without enough explanatory documentation.
+affected_repo: C:\Users\19166\Desktop\COMSOL_Multiphysics_MCP
+affected_files: scripts/generate_mfl_multi_defect_pilot_v2.py; results/comsol_multi_defect_multiline_generation_pilot_v2_summary.txt
+planned_fix: Document that pilot_v2 intentionally uses sensor_z_m/liftoff_m = 0.008 to align with the single-defect pilot_v9 top-up/generation setting, while v1 used 0.002 and should be treated as a separate earlier pilot. Add the policy to future metadata/summary generation and to the existing committed summary text.
+whether_rerun_needed: No training or audit rerun needed because the generated NPZ already records sensor_z_m, sensor_height_m, and liftoff_m = 0.008.
+whether_data_regeneration_needed: No.
+safety_notes: Do not regenerate COMSOL data. This is a documentation / safety guard fix only.
