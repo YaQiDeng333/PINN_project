@@ -1,0 +1,44 @@
+﻿The NPZ is confirmed not tracked in PINN_project. The `.gitignore` at `COMSOL_Multiphysics_MCP` already excludes `*.mph` and `comsol_models/`, so all .mph files are also safe.
+
+---
+
+## Review: 3-Component Multi-Defect COMSOL Pilot Generation
+
+### 10-Point Gate Checklist
+
+| # | Gate | Result | Evidence |
+|---|------|--------|----------|
+| 1 | Same COMSOL model, joint 3-component geometry | **PASS** | `geometry_for_model()` creates ONE component in ONE model; all 3 `notch_cut` tags are passed to a single `steel_notched` Difference op (`generate_mfl_multi_defect_pilot.py:329-338`) |
+| 2 | Not single-defect Bz summation | **PASS** | Only one COMSOL solve per sample: `rot.solve_model(config, model, steel_domains, air_domains)` — no per-component solves or summation (`generate_mfl_multi_defect_pilot.py:791`) |
+| 3 | Not mask stitching | **PASS** | `rasterize_union_mask()` rasterizes each component then unions with `np.clip(np.sum(...), 0, 1)` — mathematical union, not per-sample stitching (`generate_mfl_multi_defect_pilot.py:391-397`) |
+| 4 | delta_bz = Bz_defect - Bz_no_defect | **PASS** | `delta_bz = bz_defect - bz_reference` (`generate_mfl_multi_defect_pilot.py:794`); CSV confirms `delta_matches_defect_minus_reference: True` for all 60 samples |
+| 5 | component_count all 3 | **PASS** | Summary: `{3: 60}`; CSV: all 60 rows have `component_count=3` |
+| 6 | connected_component_count reasonable | **PASS** | Summary: `{3: 60}`; all 60 samples have exactly 3 CCs via BFS flood-fill |
+| 7 | Mask from components_json union | **PASS** | `rasterize_union_mask()` loops over `geometry["components"]`, rasterizes each, then takes union |
+| 8 | Component-type combination distribution correct | **PASS** | 4 combos × 15 = 60. Train (40): 10 each. Val (10): 3/3/2/2. Test (10): 2/2/3/3. All splits cover all 4 combos. |
+| 9 | sensor_z_m / liftoff explicit | **PASS** | `0.008 m`, documented in summary and CSV for every sample |
+| 10 | .mph / NPZ / raw CSV / preview PNG uncommitted | **PASS** | `.gitignore` excludes `*.mph`, `comsol_models/`, `*.npz`, `*.npy`, `**/multiline_bz.csv`, `data/`, `previews/`. NPZ confirmed untracked. No PNG previews exist (acceptable for pilot). |
+
+### Additional Checks
+
+- **Duplicate geometries**: 0 (`duplicate_geometry_count: 0`)
+- **Failed samples**: 0
+- **One-sample smoke test**: Passed before batch generation
+- **Split distribution**: train 40 / val 10 / test 10
+- **NPZ readable**: True, all expected keys present
+- **delta_bz range**: [-0.000827, 0.000845] T — physically plausible
+- **Min pairwise distance**: [0.016, 0.020] m — well-separated, no overlap
+
+---
+
+### 最终判决
+
+**MUST FIX** — 无。
+
+**SHOULD FIX** — 无。Val/test split 中组合分布为 3/3/2/2 和 2/2/3/3，覆盖全但非完美均衡。对 pilot 完全可接受（n=10 且 4 组合本身就无法完美等分）。
+
+**可接受** — 全部通过。
+
+**可进入 PINN training gate: 是。**
+
+原因：所有 10 个质量门控全部通过（`pilot_train_ready: True`），60 个样本均为真正的单模型三缺陷联合 COMSOL 求解，非单缺陷求和、非 mask 拼接，delta_bz 严格等于 Bz_defect - Bz_no_defect，split 覆盖所有 4 种组件类型组合。敏感文件 (.mph, .npz, raw CSV) 已被 `.gitignore` 正确排除。
