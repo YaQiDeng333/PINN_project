@@ -1,0 +1,27 @@
+COMSOL rect/rot dense-initialized Priewald refinement input check summary
+
+Input NPZ: C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\prepared\comsol_single_defect_multiline_forward_pack_v1_pilot_v9_balanced_single_defect.npz
+Geometry labels: C:\Users\19166\Desktop\PINN_project\results\metrics\comsol_single_defect_geometry_labels.csv
+Dense/coarse initializer geometry: C:\Users\19166\Desktop\PINN_project\results\metrics\comsol_rect_rot_dense_coarse_initializer_geometry.csv
+Dense initializer metrics: C:\Users\19166\Desktop\PINN_project\results\metrics\comsol_rect_rot_dense_coarse_initializer_metrics.csv
+Scope: rectangular_notch + rotated_rect only; polygon excluded.
+Forward surrogate source: retrained in-memory with the 20.51/20.52 protocol; no checkpoint written.
+Refinement policy: true mask / true geometry are metrics only and are not used in optimization.
+
+rect+rot N: 400
+split counts: {'train': 268, 'val': 66, 'test': 66}
+forward surrogate best epoch: 16
+forward surrogate val MSE/NRMSE/corr: 0.185878 / 0.464851 / 0.9355
+forward surrogate test MSE/NRMSE/corr: 0.203995 / 0.463204 / 0.9389
+
+Initial dense mask metrics:
+- train IoU/Dice = 0.8634 / 0.9239
+- val IoU/Dice = 0.6192 / 0.7579
+- test IoU/Dice = 0.5664 / 0.7179
+
+Initial extracted geometry raster metrics:
+- train IoU/Dice = 0.8495 / 0.9152
+- val IoU/Dice = 0.6108 / 0.7510
+- test IoU/Dice = 0.5652 / 0.7169
+
+Leakage check: dense model input was delta_bz only; geometry proposal came from predicted mask; refinement selection uses val only.

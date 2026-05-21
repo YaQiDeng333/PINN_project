@@ -139,9 +139,9 @@ forward consistency 已通过 review 和 baseline 决策，后续应进入 physi
 
 如果后续发现 forward consistency 仍无法解决 polygon / rotated_rect 精细边界，则下一步应转向更严格的 geometry parameterization + forward consistency，而不是继续调 decoder、threshold、loss、head 或手工 Bz feature。
 
-## 第 20.42-20.51 方法路线阶段判断
+## 第 20.42-20.53 方法路线阶段判断
 
-第 20.42-20.51 的结论进一步确认：外部 deep research 报告的核心路线不是普通 segmentation，也不是继续做 dense decoder patch，而是把 MFL 缺陷边界问题视为 inverse reconstruction。当前算法主线已经从 mask-only decoder / combined baseline 评估，切换到：
+第 20.42-20.53 的结论进一步确认：外部 deep research 报告的核心路线不是普通 segmentation，也不是继续做 dense decoder patch，而是把 MFL 缺陷边界问题视为 inverse reconstruction。当前算法主线已经从 mask-only decoder / combined baseline 评估，切换到：
 
 ```text
 geometry-aware representation
@@ -157,5 +157,7 @@ geometry-aware representation
 * Piao 2019 当前只适合作为弱适配探索：本项目只有 multi-line Bz / quasi-2D geometry，而论文核心是三轴 MFL、RBC 3D profile、NLS 物理特征和 LS-SVM。20.47-revised 的 Bz-only NLS-style features + SVR/KRR/Ridge 没有通过 acceptance，后续若进入 3D / 三轴数据阶段再考虑更深入的 Piao-style 方法。
 * 20.48 证明 differentiable rotated-rectangle rasterizer 与 geometry labels 可用，说明 geometry-aware route 本身有可行性；但 20.49 / 20.50 说明继续修 direct neural geometry head 难以解决 type / angle 学习不足。
 * 20.51 的 feature-assisted geometry head + lightweight forward consistency 只带来边际 mask / angle 改善，type confusion 仍未解决。因此 direct Bz -> geometry head 不应继续小修补。
+* 20.52 证明 Priewald-style low-dimensional refinement 有正信号：frozen forward surrogate residual 能显著降低 forward NRMSE，并带来小幅 geometry-raster mask 改善，但 geometry-head initializer 偏弱。
+* 20.53 的 dense/coarse initializer + refinement 进一步说明，refinement 上限主要受 proposal 质量限制。当前 binary dense mask + PCA rotated bbox extraction 没有超过 20.51 geometry-head proposal，type / angle 初始化仍弱，因此不能作为 candidate 或 baseline。
 
-Priewald 2013 对当前阶段更重要的启发不是复现完整 FEM、解析 Jacobian 或 Gauss-Newton 工程，而是 forward-model-based inversion / refinement：用 predicted geometry 通过 forward surrogate 生成 MFL，再用 observed MFL residual 约束低维几何参数。下一步优先做 coarse-to-fine / forward-consistent low-dimensional refinement，而不是继续直接从 Bz 一步输出完整 geometry。
+Priewald 2013 对当前阶段更重要的启发不是复现完整 FEM、解析 Jacobian 或 Gauss-Newton 工程，而是 forward-model-based inversion / refinement：用 predicted geometry 通过 forward surrogate 生成 MFL，再用 observed MFL residual 约束低维几何参数。当前应停止 direct neural geometry head 小修补；下一步优先改进 dense-to-geometry proposal extraction，若仍不稳定，则转向 mask/profile basis refinement，避免把复杂边界强行压成单个 rotated bbox。

@@ -1,0 +1,29 @@
+COMSOL rect/rot dense-initialized Priewald refinement failure audit summary
+
+Selected config: steps20_lr0.03_prior0.1
+Test refinement categories: {'improved': 35, 'neutral': 9, 'surrogate_mismatch': 13, 'worsened': 9}
+Extracted geometry proposal meets 20.51 initializer reference: False
+Surrogate mismatch risk: False
+Dense mask stronger than extracted geometry: False
+
+Worst / risk cases:
+- rect_v9_0049: surrogate_mismatch, dense IoU=0.691, geom 0.802->0.609, F 0.618->0.403, drift=0.747
+- rot_v7_0027: surrogate_mismatch, dense IoU=0.723, geom 0.738->0.629, F 0.506->0.279, drift=0.716
+- rect_v9_0016: surrogate_mismatch, dense IoU=0.523, geom 0.609->0.516, F 0.692->0.380, drift=0.669
+- rect_v9_0038: surrogate_mismatch, dense IoU=0.637, geom 0.669->0.597, F 0.650->0.395, drift=0.625
+- rot_v8_0025: surrogate_mismatch, dense IoU=0.768, geom 0.753->0.694, F 0.458->0.322, drift=0.778
+- rot_p3_0046: surrogate_mismatch, dense IoU=0.756, geom 0.742->0.695, F 0.429->0.372, drift=1.373
+- rot_v8_0018: surrogate_mismatch, dense IoU=0.589, geom 0.615->0.579, F 0.595->0.395, drift=0.690
+- rect_v9_0050: surrogate_mismatch, dense IoU=0.521, geom 0.578->0.546, F 1.131->0.608, drift=0.754
+- rect_p2_0089: surrogate_mismatch, dense IoU=0.595, geom 0.601->0.578, F 0.457->0.375, drift=1.316
+- rot_p3_0040: surrogate_mismatch, dense IoU=0.621, geom 0.648->0.625, F 0.376->0.296, drift=1.262
+- rot_v8_0026: surrogate_mismatch, dense IoU=0.483, geom 0.483->0.462, F 0.325->0.270, drift=0.571
+- rect_v9_0073: surrogate_mismatch, dense IoU=0.483, geom 0.582->0.565, F 0.333->0.223, drift=0.833
+- rect_v9_0014: surrogate_mismatch, dense IoU=0.515, geom 0.545->0.530, F 0.626->0.339, drift=0.590
+- rect_p2_0063: worsened, dense IoU=0.624, geom 0.635->0.564, F 0.450->0.411, drift=1.157
+- rect_v9_0010: worsened, dense IoU=0.455, geom 0.492->0.457, F 0.254->0.230, drift=0.321
+- rect_v9_0055: worsened, dense IoU=0.477, geom 0.507->0.479, F 0.336->0.311, drift=0.490
+- rot_p3_0045: worsened, dense IoU=0.594, geom 0.607->0.580, F 0.449->0.400, drift=0.830
+- rot_p3_0042: worsened, dense IoU=0.655, geom 0.675->0.654, F 0.315->0.309, drift=0.471
+- rect_p2_0071: worsened, dense IoU=0.540, geom 0.552->0.532, F 0.415->0.381, drift=0.712
+- rect_p2_0081: worsened, dense IoU=0.611, geom 0.455->0.435, F 0.280->0.266, drift=0.534

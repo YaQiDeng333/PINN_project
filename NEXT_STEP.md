@@ -15,21 +15,23 @@
 
 ## 最近下一步
 
-当前不要继续普通 dense decoder patch，也不要继续单独 geometry head 小修补。第 20.48-20.51 已证明：
+当前不要继续普通 dense decoder patch，也不要继续单独 geometry head 小修补。第 20.48-20.53 已证明：
 
 1. geometry labels 和 differentiable rotated-rectangle rasterizer 没有 blocker；
 2. direct delta_bz-only geometry head 的 type / angle 学习不足；
 3. controlled architecture sweep 没有找到有效 head 结构；
-4. feature-assisted geometry head + lightweight forward consistency 只带来边际 mask / angle 改善，type confusion 仍是主因。
+4. feature-assisted geometry head + lightweight forward consistency 只带来边际 mask / angle 改善，type confusion 仍是主因；
+5. Priewald-style low-dimensional refinement 能降低 forward residual，并可小幅改善 geometry-raster mask，但 initializer / proposal 质量决定上限；
+6. dense/coarse mask initializer + PCA bbox extraction 在 20.53 中没有超过 20.51 geometry-head proposal，type / angle proposal 仍弱。
 
 因此最近下一步优先转向：
 
-1. **Priewald-style coarse-to-fine / forward-consistent low-dimensional refinement**：先用现有 dense / geometry proposal 得到 coarse shape，再在低维几何参数空间用 frozen forward surrogate residual 精修。
-2. 若要继续 neural geometry route，必须回答 forward residual 是否能在 refinement 阶段稳定降低 type / angle / size 错误，而不是再调 head / loss / threshold。
-3. 如果 coarse-to-fine refinement 也失败，再考虑暂停 geometry route，回到数据多样性或更强 forward surrogate 设计。
+1. **改进 dense-to-geometry proposal extraction**：优先解决 predicted mask 到 low-dimensional geometry 的信息损失，避免简单 binary threshold + PCA bbox 导致 type / angle 初始化过弱。
+2. 若 proposal extraction 仍不稳定，转向 **mask/profile basis refinement**，减少对单个 rotated bbox 的硬假设。
+3. forward surrogate 仍有价值，但在进入更重的 refinement 前，需要确认 proposal 质量足以承载优化。
 4. 继续保持 train-only normalization、validation checkpoint / threshold selection、test-only final evaluation。
 
-如果第 20.51 这类 feature-assisted + forward consistency 后续被人工确认成功，才考虑扩展到 polygon、multi-component 或更正式的 forward consistency candidate；当前不建立新 baseline。
+如果后续 refinement 不能在更强 proposal 上稳定改善 mask / geometry，再暂停 rect/rot geometry route，等待更丰富观测、更多通道或更强 forward surrogate；当前不建立新 baseline。
 
 ## 当前不要继续的方向
 

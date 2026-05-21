@@ -2351,7 +2351,7 @@ validation 在 `proposal_only` 和 `proposal_forward` 中选择了 `proposal_for
 
 ---
 
-## 第 20.42-20.51 步：combined COMSOL V3 与 geometry-aware / forward-consistent 方法审计
+## 第 20.42-20.53 步：combined COMSOL V3 与 geometry-aware / forward-consistent 方法审计
 
 本节只记录阶段性路线结论，完整数值以对应 `results/summaries/` 和 `results/metrics/` 为准。
 
@@ -2363,4 +2363,8 @@ validation 在 `proposal_only` 和 `proposal_forward` 中选择了 `proposal_for
 
 第 20.48 进入外部报告更推荐的路线：neural geometry head + PyTorch differentiable rotated-rectangle rasterization。它证明 geometry labels 与 rasterizer 没有 blocker，true geometry raster IoU 可达 1.0000，且显著优于 Piao weak adaptation；但 type accuracy 和 rotated angle prediction 仍不足。第 20.49 separate rect/rot heads 没有改善，说明简单拆分 head 可能带来分支样本不足。第 20.50 受控比较 5 个 geometry head 结构，best candidate 仍未超过 20.48，未找到能稳定减少 type confusion / angle error 的结构。
 
-第 20.51 将 delta_bz-derived physics features 与 lightweight forward surrogate consistency 接入 neural geometry head。结果显示 mask IoU/Dice 相比 20.48 / 20.50 有小幅提升，angle MAE 也有改善，但 type accuracy 仍低于门槛，wrong_type 仍是主要失败模式；Claude Code review 通过且认为没有实现 blocker，但不建议继续 direct neural geometry head 小修补。下一步优先转向 Priewald-style coarse-to-fine / forward-consistent low-dimensional refinement：先从 coarse mask / geometry proposal 出发，再在低维几何空间用 forward residual 精修，而不是继续直接从 Bz 一步预测所有 geometry 参数。
+第 20.51 将 delta_bz-derived physics features 与 lightweight forward surrogate consistency 接入 neural geometry head。结果显示 mask IoU/Dice 相比 20.48 / 20.50 有小幅提升，angle MAE 也有改善，但 type accuracy 仍低于门槛，wrong_type 仍是主要失败模式；Claude Code review 通过且认为没有实现 blocker，但不建议继续 direct neural geometry head 小修补。
+
+第 20.52 转向 Priewald-style coarse-to-fine / forward-consistent low-dimensional refinement：从 20.51 geometry-head proposal 出发，在低维几何参数空间用 frozen forward surrogate residual 精修。结果显示 forward NRMSE 明显下降，test IoU/Dice 也从 `0.6138 / 0.7577` 小幅提升到 `0.6194 / 0.7619`，说明 forward residual 对 refinement 有价值；但 area_error 变差，且 initializer 本身偏弱，因此不应把 20.52 写成 baseline。
+
+第 20.53 改用 dense/coarse mask initializer 提取 rotated bbox / geometry proposal，再做同样的 Priewald-style refinement。refinement 相对 extracted geometry proposal 有稳定局部收益：test geometry-raster IoU/Dice 从 `0.5652 / 0.7169` 提升到 `0.5810 / 0.7300`，forward NRMSE 从 `0.4869` 降到 `0.3641`；但 dense/coarse proposal 低于 20.51 initializer 和 dense single-defect baseline，type / angle 提取仍弱，Claude review 认为方法协议可接受但当前结果无 acceptance 价值。下一步不继续 direct geometry head，也不把 20.53 提升为 candidate；优先改进 dense-to-geometry proposal extraction，或转向更少依赖 hard bbox 的 mask/profile basis refinement。
