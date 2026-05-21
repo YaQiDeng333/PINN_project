@@ -1,0 +1,52 @@
+﻿现在我已掌握所有信息，以下是审查结果：
+
+---
+
+## 必须修复
+
+无。关于 13 个检查项，没有发现需要从零开始的严重违规。
+
+## 建议修复
+
+1. **Surrogate mismatch 分类对温和退化情况漏检。** 第 533–537 行仅在 `forward_reduction > 0.05` 且 mask 恶化时标记 `surrogate_mismatch`。但存在 10 个 `worsened` 案例，其 forward NRMSE 降幅虽小但仍为正值（例如 rot_v7_0012：forward 降 0.023，但 IoU 降 0.067）。这些案例可能同样属于 surrogate 不匹配，只是表现较轻。应将阈值调低，或在审计中同时报告所有 forward 改善 + mask 恶化的案例。
+
+2. **初始预测质量设定了上限。** `comsol_rect_rot_refinement_input_check_summary.txt` 显示 val IoU = 0.6387，测试 IoU = 0.6138，而密集单缺陷基线为 0.6515。当前的反向模型本身比基线更差。在此基础上进行精炼，梯度下降的空间极小 — 这本身就解释了为何 0/8 个配置对 mask 有正面改善。应优先使用密集基线预测器作为精炼初始化，或将其作为消融项添加。
+
+3. **Forward surrogate NRMSE ~0.465 作为代理偏高。** 观察到的信号幅度归一化后，~46% 的残差意味着替代模型无法完美分辨小的几何参数扰动。当优化器在寻找 ~0.001–0.01 的 IoU 增益时，替代模型自身的噪声可能比该信号更大。改进建议：a) 使用更优的替代架构（transformer / 傅里叶特征）并/或 b) 对替代模型在参数扰动下进行校准（数值 Jacobian 验证）。
+
+4. **`parameter_drift_norm` 未区分有物理意义与无物理意义的偏移。** 精炼会让 width、length、center 各自偏移 ~0.1–0.3 mm，但面积却在增大（val 面积误差 +0.02）。这暗示优化器是通过略微增大矩形来降低 forward 损失，而非修正其形状。应添加逐维度的 drift 报告，以判断漂移方向是否正确。
+
+## 可以接受
+
+1. **未运行 COMSOL** — 已确认。精炼迭代仅使用预计算的标准化 `delta_bz` 信号。
+2. **精炼损失中未使用 true mask / true geometry** — 已确认。损失项为 forward MSE（替代模型 vs 观测信号）+ prior drift + shape + mask_prior。`arrays["masks"]` 和 `arrays["raw_geom"]` 仅用于评估，不出现在梯度计算中。
+3. **Forward surrogate 仅用 train 训练，val 检查点，test 最终** — 已确认（train_forward_surrogate.py 第 420–422 行，第 452–459 行，第 489–490 行）。
+4. **Forward surrogate 已冻结** — 已确认（第 483–484 行：对所有参数设置 `requires_grad_(False)`，并在每次 `refine_indices` 调用时设置 `model.eval()`）。
+5. **精炼仅优化预测的 geometry parameters** — 已确认（第 398 行：`optimizer = torch.optim.Adam([geom_logits, angle_raw], ...)`；`type_prob` 固定；替代模型冻结）。
+6. **精炼损失使用观测 `delta_bz` + surrogate forward residual** — 已确认（第 404 行：`forward_loss = F.mse_loss(forward_pred, obs)`，其中 `obs` 为 `signals_norm`）。
+7. **验证配置选择仅用 val** — 已确认（`config_score` 第 564–597 行，仅使用 `split_stats(rows, "val")`）。
+8. **Test 仅用于最终 selected config** — 已确认（第 998–1002 行：仅在配置选择后才调用 `refine_indices` 和 `evaluate_rows` 用于 test）。
+9. **Pre-refinement vs post-refinement 已正确记录** — 已确认。所有 CSV（metrics、group、geometry、forward）均包含完整的初始列和精炼后列。总结报告清晰显示前后对比。
+10. **Forward residual 下降 vs mask 改善判断合理** — 代码设置了三级分类（improved / worsened / neutral）及显式的 `surrogate_mismatch` 标签。总结在第 1048–1049 行计算 `surrogate_mismatch` 并在审计中报告。合理的起点。
+11. **存在 Surrogate mismatch** — 测试集中有 8 个案例（12%）。这些案例 forward NRMSE 确实下降（代理目标改善），但 mask IoU/Dice 出现退化。这是该方法的已知局限性，并已如实报告。
+12. **未修改基线文档** — git 状态显示 `MODEL_STRUCTURE_PLAN.md` 被删除（已暂存），新增 3 个未跟踪文件。除此之外，未提交任何文件。
+13. **未提交 data / NPZ / checkpoint / preview PNG** — 已确认。HEAD 树中不存在 `.npz`、`.png`、`.pt`、`.ckpt`、`.pth` 或 `.h5` 文件。
+
+## Priewald-style refinement POC 是否具有实质性价值？
+
+有，但方式与其可能希望的有所不同。该 POC 证明了一个**负向结果** — 即：在将 proxy forward residual 最小化，结合参数先验 + shape + mask 先验正则化，且无 true mask 信息的情况下，当前替代模型（NRMSE ~0.46）在将 mask IoU 引向系统性的正确方向时，缺乏足够的保真度。所有 8 个验证配置都给出了负向 mask delta，且“最优”配置仅是在损害最小上胜出。这是一个在方法论上有价值的有效消融实验。
+
+## 是否建议继续 refinement 路线？
+
+有条件地建议。在以下条件满足前，不应继续进行：
+- **更好的初始化。** 当前反向模型（IoU ~0.61）比密集基线（IoU ~0.65）更差，因此在向真值方向进行有意义的参数偏移之前，优化器必须消耗优化预算来修复初始化的错误。
+- **更好的替代模型。** NRMSE 0.46 意味着替代模型在目标函数方面的信噪比低于 ~1.1：即它所分辨的参数扰动，与在寻找 1% IoU 增益时所需的数值精度处于同一量级。
+
+## 下一步更建议什么？
+
+**切换为密集/粗糙基线初始化器**（如 POC 自身推荐的“B 方案”），然后重新运行精炼。同时，利用真值几何标签训练一个更强的 forward 替代模型 — 不改变精炼协议本身，仅提升输入信息源。如果精炼在从密集基线开始且替代模型更优时仍然失败，则应放弃该方法的这一具体变体。
+
+## 简短原因
+
+0/8 个配置改善了验证 mask。Forward 代理方向错误。问题不在于精炼协议本身（结构上避免了泄露漏洞），而在于信号质量 — 无论是初始预测器还是 forward 替代模型 — 均不足以支撑物理上有意义的参数更新。
+

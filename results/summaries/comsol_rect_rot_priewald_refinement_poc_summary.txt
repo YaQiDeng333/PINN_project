@@ -1,0 +1,48 @@
+COMSOL rect/rot Priewald-style coarse-to-fine refinement POC summary
+
+Input NPZ: C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\prepared\comsol_single_defect_multiline_forward_pack_v1_pilot_v9_balanced_single_defect.npz
+Initial predictions: C:\Users\19166\Desktop\PINN_project\results\metrics\comsol_rect_rot_feature_forward_geometry_head_metrics.csv
+Scope: rectangular_notch + rotated_rect only; polygon excluded.
+No COMSOL run; no new data; no baseline update.
+Refinement uses observed normalized delta_bz and frozen surrogate forward residual.
+True mask / true geometry are metrics only and are not used in optimization.
+
+Forward surrogate:
+- source: retrained in-memory with 20.51 protocol; no checkpoint written
+- best epoch = 16
+- val MSE/NRMSE/corr = 0.185878 / 0.464851 / 0.9355
+
+Selected validation config:
+- config = steps20_lr0.01_prior0.1
+- steps/lr/lambda_prior = 20 / 0.01 / 0.1
+- val_refinement_score = -0.012696
+- val delta IoU/Dice = -0.001406 / -0.001290
+- val forward NRMSE reduction = 0.052096
+- sweep finding = All validation configs had negative mask IoU/Dice deltas; the selected config is the least harmful by validation score, not a true validation mask improvement.
+
+Pre-refine vs post-refine metrics:
+- train IoU: 0.6571 -> 0.6562 (delta -0.0009)
+- train Dice: 0.7891 -> 0.7879 (delta -0.0012)
+- train area_error: 0.1515 -> 0.1581 (delta 0.0066)
+- train forward NRMSE: 0.4628 -> 0.4060 (reduction 0.0568)
+- train angle MAE: 20.2385 -> 20.0390 (delta -0.1995)
+- train parameter drift norm: 0.3654
+- val IoU: 0.6387 -> 0.6373 (delta -0.0014)
+- val Dice: 0.7748 -> 0.7735 (delta -0.0013)
+- val area_error: 0.2085 -> 0.2290 (delta 0.0204)
+- val forward NRMSE: 0.4520 -> 0.3999 (reduction 0.0521)
+- val angle MAE: 18.8217 -> 19.8994 (delta 1.0777)
+- val parameter drift norm: 0.3526
+- test IoU: 0.6138 -> 0.6194 (delta 0.0056)
+- test Dice: 0.7577 -> 0.7619 (delta 0.0042)
+- test area_error: 0.2227 -> 0.2395 (delta 0.0168)
+- test forward NRMSE: 0.4515 -> 0.3967 (reduction 0.0548)
+- test angle MAE: 18.5798 -> 18.1578 (delta -0.4219)
+- test parameter drift norm: 0.3600
+
+Dense single-defect baseline IoU/Dice reference: 0.6515 / 0.7861
+Stage 20.51 initial reference IoU/Dice/type/angle: 0.6138 / 0.7577 / 0.6212 / 18.5798
+Preview PNG generated: 23 (not for submission)
+Surrogate mismatch risk: False
+POC promising by acceptance criteria: False
+Next recommendation: B. Use dense/coarse initializer for refinement.

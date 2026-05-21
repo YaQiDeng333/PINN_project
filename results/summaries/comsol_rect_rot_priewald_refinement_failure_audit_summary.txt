@@ -1,0 +1,27 @@
+COMSOL rect/rot Priewald refinement failure audit summary
+
+Selected config: steps20_lr0.01_prior0.1
+Test refinement categories: {'improved': 31, 'neutral': 17, 'surrogate_mismatch': 8, 'worsened': 10}
+Surrogate mismatch risk: False
+
+Worst / risk cases:
+- rect_v9_0054: surrogate_mismatch, IoU 0.649->0.590, Dice 0.787->0.742, F 0.396->0.343, drift=0.315
+- rect_v9_0050: surrogate_mismatch, IoU 0.642->0.611, Dice 0.782->0.759, F 1.109->0.879, drift=0.359
+- rot_v7_0027: surrogate_mismatch, IoU 0.745->0.715, Dice 0.854->0.834, F 0.373->0.284, drift=0.300
+- rect_v9_0010: surrogate_mismatch, IoU 0.520->0.494, Dice 0.684->0.661, F 0.331->0.262, drift=0.267
+- rect_v9_0016: surrogate_mismatch, IoU 0.509->0.484, Dice 0.675->0.652, F 0.555->0.397, drift=0.326
+- rot_v9_0041: surrogate_mismatch, IoU 0.772->0.748, Dice 0.872->0.856, F 0.734->0.599, drift=0.360
+- rot_v7_0006: surrogate_mismatch, IoU 0.663->0.639, Dice 0.798->0.780, F 0.399->0.306, drift=0.281
+- rect_v9_0038: surrogate_mismatch, IoU 0.521->0.509, Dice 0.685->0.674, F 1.070->0.960, drift=0.477
+- rot_v7_0012: worsened, IoU 0.642->0.575, Dice 0.782->0.730, F 0.279->0.256, drift=0.194
+- rect_v9_0055: worsened, IoU 0.620->0.559, Dice 0.765->0.717, F 0.433->0.387, drift=0.381
+- rect_v9_0073: worsened, IoU 0.625->0.583, Dice 0.769->0.737, F 0.237->0.220, drift=0.253
+- rect_p2_0102: worsened, IoU 0.701->0.661, Dice 0.824->0.796, F 0.383->0.364, drift=0.394
+- rot_v8_0012: worsened, IoU 0.666->0.640, Dice 0.799->0.781, F 0.348->0.308, drift=0.266
+- rot_v8_0019: worsened, IoU 0.675->0.651, Dice 0.806->0.788, F 0.269->0.243, drift=0.197
+- rot_p3_0046: worsened, IoU 0.679->0.658, Dice 0.809->0.794, F 0.446->0.427, drift=0.432
+- rot_p3_0042: worsened, IoU 0.684->0.666, Dice 0.813->0.799, F 0.344->0.331, drift=0.415
+- rect_p2_0068: worsened, IoU 0.498->0.480, Dice 0.665->0.649, F 0.495->0.479, drift=0.416
+- rect_p2_0116: worsened, IoU 0.614->0.598, Dice 0.761->0.748, F 0.426->0.393, drift=0.455
+- rot_v9_0028: neutral, IoU 0.634->0.626, Dice 0.776->0.770, F 0.365->0.295, drift=0.272
+- rect_p2_0115: neutral, IoU 0.631->0.624, Dice 0.774->0.768, F 0.393->0.376, drift=0.414

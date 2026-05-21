@@ -1,0 +1,2 @@
+diagnostic,executed,reason,next_action
+dense_or_coarse_initializer,False,No reusable dense baseline prediction artifact was available; dense baseline retraining is outside this stage.,Use dense/coarse initializer in a separate approved stage if needed.
