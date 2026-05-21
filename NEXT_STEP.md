@@ -15,20 +15,21 @@
 
 ## 最近下一步
 
-当前不要继续普通 dense decoder patch，也不要继续单独 geometry head 小修补。第 20.48-20.53 已证明：
+当前不要继续普通 dense decoder patch，也不要继续单独 geometry head 小修补。第 20.48-20.54 已证明：
 
 1. geometry labels 和 differentiable rotated-rectangle rasterizer 没有 blocker；
 2. direct delta_bz-only geometry head 的 type / angle 学习不足；
 3. controlled architecture sweep 没有找到有效 head 结构；
 4. feature-assisted geometry head + lightweight forward consistency 只带来边际 mask / angle 改善，type confusion 仍是主因；
 5. Priewald-style low-dimensional refinement 能降低 forward residual，并可小幅改善 geometry-raster mask，但 initializer / proposal 质量决定上限；
-6. dense/coarse mask initializer + PCA bbox extraction 在 20.53 中没有超过 20.51 geometry-head proposal，type / angle proposal 仍弱。
+6. dense/coarse mask initializer + PCA bbox extraction 在 20.53 中没有超过 20.51 geometry-head proposal，type / angle proposal 仍弱；
+7. 第 20.54 的 strong dense initializer 和 improved proposal extraction 已把 rect/rot geometry proposal 提到 test IoU/Dice `0.6726 / 0.8017`，但 Priewald-style refinement 让 test IoU/Dice 回落到 `0.6646 / 0.7958`，同时 forward NRMSE 下降，说明当前主要 blocker 已从 proposal quality 转为 forward surrogate mismatch。
 
 因此最近下一步优先转向：
 
-1. **改进 dense-to-geometry proposal extraction**：优先解决 predicted mask 到 low-dimensional geometry 的信息损失，避免简单 binary threshold + PCA bbox 导致 type / angle 初始化过弱。
-2. 若 proposal extraction 仍不稳定，转向 **mask/profile basis refinement**，减少对单个 rotated bbox 的硬假设。
-3. forward surrogate 仍有价值，但在进入更重的 refinement 前，需要确认 proposal 质量足以承载优化。
+1. **改进 forward surrogate**：当前 refinement 能降低 forward residual，但不能稳定提升 mask / geometry，优先降低 surrogate 的空间峰位误差和 non-identifiability 风险。
+2. 若 forward surrogate 短期内不能显著改善，则转向 **mask/profile basis refinement**，减少对单个 rotated bbox 和当前 surrogate residual 的依赖。
+3. dense-to-geometry proposal extraction 已有明显进步，后续不应继续围绕阈值 / PCA 小调，除非它服务于更强 forward surrogate 或 profile/basis refinement。
 4. 继续保持 train-only normalization、validation checkpoint / threshold selection、test-only final evaluation。
 
 如果后续 refinement 不能在更强 proposal 上稳定改善 mask / geometry，再暂停 rect/rot geometry route，等待更丰富观测、更多通道或更强 forward surrogate；当前不建立新 baseline。

@@ -2351,7 +2351,7 @@ validation 在 `proposal_only` 和 `proposal_forward` 中选择了 `proposal_for
 
 ---
 
-## 第 20.42-20.53 步：combined COMSOL V3 与 geometry-aware / forward-consistent 方法审计
+## 第 20.42-20.54 步：combined COMSOL V3 与 geometry-aware / forward-consistent 方法审计
 
 本节只记录阶段性路线结论，完整数值以对应 `results/summaries/` 和 `results/metrics/` 为准。
 
@@ -2368,3 +2368,5 @@ validation 在 `proposal_only` 和 `proposal_forward` 中选择了 `proposal_for
 第 20.52 转向 Priewald-style coarse-to-fine / forward-consistent low-dimensional refinement：从 20.51 geometry-head proposal 出发，在低维几何参数空间用 frozen forward surrogate residual 精修。结果显示 forward NRMSE 明显下降，test IoU/Dice 也从 `0.6138 / 0.7577` 小幅提升到 `0.6194 / 0.7619`，说明 forward residual 对 refinement 有价值；但 area_error 变差，且 initializer 本身偏弱，因此不应把 20.52 写成 baseline。
 
 第 20.53 改用 dense/coarse mask initializer 提取 rotated bbox / geometry proposal，再做同样的 Priewald-style refinement。refinement 相对 extracted geometry proposal 有稳定局部收益：test geometry-raster IoU/Dice 从 `0.5652 / 0.7169` 提升到 `0.5810 / 0.7300`，forward NRMSE 从 `0.4869` 降到 `0.3641`；但 dense/coarse proposal 低于 20.51 initializer 和 dense single-defect baseline，type / angle 提取仍弱，Claude review 认为方法协议可接受但当前结果无 acceptance 价值。下一步不继续 direct geometry head，也不把 20.53 提升为 candidate；优先改进 dense-to-geometry proposal extraction，或转向更少依赖 hard bbox 的 mask/profile basis refinement。
+
+第 20.54 先查找可复用 COMSOL single-defect dense baseline artifact；只找到 pilot_v9 summary / metrics / script，没有可复用 checkpoint 或 prediction artifact，因此训练了一个只作为 proposal generator 的 strong rect/rot dense initializer。该 initializer 明显强于 20.53：test dense mask IoU/Dice 为 `0.6689 / 0.7994`，improved proposal extraction 的 geometry-raster test IoU/Dice 为 `0.6726 / 0.8017`，说明 initializer / proposal quality 瓶颈已被大幅缓解。但 Priewald-style refinement 从该强 proposal 出发后，test geometry-raster IoU/Dice 反而为 `0.6646 / 0.7958`，forward NRMSE 从 `0.4632` 降到 `0.4049` 的同时 mask 指标下降，属于 surrogate mismatch。Claude Code review 通过且无必须修复；结论是不把 20.54 写成 baseline，下一步优先改进 forward surrogate，若短期内不能降低空间峰位误差，则转向 mask/profile basis refinement。

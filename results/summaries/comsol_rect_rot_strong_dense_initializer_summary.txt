@@ -1,0 +1,26 @@
+COMSOL rect/rot strong dense initializer summary
+
+Input NPZ: C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\prepared\comsol_single_defect_multiline_forward_pack_v1_pilot_v9_balanced_single_defect.npz
+Scope: rectangular_notch + rotated_rect only; polygon excluded from training/evaluation.
+Input policy: delta_bz only. No defect_type, geometry_params, source_pack, true angle, true size, or true mask as model input.
+True masks are used only as train supervision and final metrics.
+This initializer is only a proposal generator, not a baseline. No checkpoint is written.
+
+Device: cuda
+Seed / epochs / batch_size / lr: 42 / 200 / 8 / 0.003
+rect+rot N and split counts: 400 / {'train': 268, 'val': 66, 'test': 66}
+Best epoch: 12
+Selected threshold from validation: 0.8
+Best validation score IoU+Dice-area_error: 1.341162
+
+Mask metrics:
+- train IoU/Dice/area_error/center_error_px = 0.6772 / 0.8044 / 0.1656 / 2.3499
+- val IoU/Dice/area_error/center_error_px = 0.6819 / 0.8090 / 0.1497 / 2.3973
+- test IoU/Dice/area_error/center_error_px = 0.6689 / 0.7994 / 0.1979 / 2.2833
+
+Acceptance check:
+- 20.53 small dense initializer reference test IoU/Dice = 0.5664 / 0.7179
+- improves over 20.53: True
+- target: test IoU >= 0.62 OR Dice >= 0.76
+- target hit: True
+- usable for proposal extraction gate (test IoU >= 0.60): True

@@ -1,0 +1,12 @@
+COMSOL rect/rot improved dense Priewald refinement failure audit summary
+
+Selected config: steps20_lr0.01_prior0.05
+Test refinement categories: {'improved': 22, 'neutral': 13, 'surrogate_mismatch': 11, 'worsened': 20}
+Surrogate mismatch risk: True
+20.54 promising: False
+Next recommendation: A. Improve forward surrogate.
+
+Interpretation:
+- Dense initializer and extracted geometry proposal are much stronger than 20.53.
+- The refinement step is judged separately from proposal quality.
+- If forward residual improves but raster metrics fail to improve, the blocker is surrogate/refinement mismatch rather than initializer quality.

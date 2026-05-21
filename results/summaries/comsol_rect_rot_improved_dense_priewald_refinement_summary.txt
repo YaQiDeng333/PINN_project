@@ -1,0 +1,56 @@
+COMSOL rect/rot improved dense proposal + Priewald-style refinement retry summary
+
+Input NPZ: C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\prepared\comsol_single_defect_multiline_forward_pack_v1_pilot_v9_balanced_single_defect.npz
+Improved proposal source: C:\Users\19166\Desktop\PINN_project\results\metrics\comsol_rect_rot_proposal_extraction_selected_geometry.csv
+No COMSOL run; no new data; no baseline update.
+Dense initializer is only a proposal generator, not a new baseline.
+Refinement uses observed normalized delta_bz and a frozen lightweight forward surrogate.
+True mask / true geometry are not used in optimization; they are metrics and validation-selection references only.
+
+Forward surrogate:
+- source: retrained in-memory through the reused 20.53 refinement implementation; no checkpoint written
+- protocol: train split fitting, validation checkpoint, test final only
+
+Selected validation refinement config:
+- config = steps20_lr0.01_prior0.05
+- steps/lr/lambda_prior = 20 / 0.01 / 0.05
+- val_refinement_score = 0.007286
+- val delta geometry-raster IoU/Dice = -0.002170 / -0.001881
+- val forward NRMSE reduction = 0.056686
+
+Dense mask vs extracted geometry vs refined geometry:
+- train dense mask IoU/Dice/area = 0.7093 / 0.8273 / 0.1277
+- train extracted geometry IoU/Dice/area = 0.6962 / 0.8182 / 0.1416
+- train refined geometry IoU/Dice/area = 0.6916 / 0.8147 / 0.1336
+- train forward NRMSE = 0.4749 -> 0.4161 (reduction 0.0588)
+- train angle MAE = 20.0696 -> 20.1553 (delta 0.0858)
+- train parameter drift norm = 0.4134
+- val dense mask IoU/Dice/area = 0.6760 / 0.8038 / 0.1576
+- val extracted geometry IoU/Dice/area = 0.6775 / 0.8055 / 0.1517
+- val refined geometry IoU/Dice/area = 0.6753 / 0.8036 / 0.1387
+- val forward NRMSE = 0.4654 -> 0.4087 (reduction 0.0567)
+- val angle MAE = 19.5283 -> 20.8575 (delta 1.3292)
+- val parameter drift norm = 0.3997
+- test dense mask IoU/Dice/area = 0.6684 / 0.7982 / 0.1898
+- test extracted geometry IoU/Dice/area = 0.6726 / 0.8017 / 0.1945
+- test refined geometry IoU/Dice/area = 0.6646 / 0.7958 / 0.1753
+- test forward NRMSE = 0.4632 -> 0.4049 (reduction 0.0584)
+- test angle MAE = 19.3983 -> 19.2322 (delta -0.1661)
+- test parameter drift norm = 0.4062
+
+Reference comparison:
+- 20.53 dense initializer test IoU/Dice = 0.5664 / 0.7179
+- 20.53 extracted geometry test IoU/Dice/area = 0.5652 / 0.7169 / 0.3804
+- 20.53 refined geometry test IoU/Dice = 0.5810 / 0.7300
+- 20.53 forward NRMSE test = 0.4869 -> 0.3641
+- dense single-defect baseline test IoU/Dice = 0.6515 / 0.7861
+
+Acceptance check:
+- strong dense initializer improves over 20.53: True
+- extracted geometry proposal improves over 20.53 by required margin: True
+- post-refinement improves over extracted proposal by required margin: False
+- forward NRMSE decreases on val and test: True
+- area_error not materially worse: True
+- surrogate mismatch risk: True
+- 20.54 promising: False
+- next recommendation: A. Improve forward surrogate.
