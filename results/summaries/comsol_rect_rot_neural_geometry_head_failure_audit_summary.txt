@@ -1,0 +1,30 @@
+COMSOL rect/rot neural geometry head failure audit summary
+
+Failure categories on test: {'acceptable_or_minor_error': 23, 'rasterized_geometry_mismatch': 1, 'wrong_angle': 11, 'wrong_center': 1, 'wrong_size': 6, 'wrong_type': 24}
+
+Audit focus:
+- Type confusion is evaluated from predicted type probabilities; true defect_type is not used for routing.
+- Predicted geometry is rasterized, so boundary shape is rectangle-like by construction rather than blob-like.
+- Failure cases should be attributed to wrong type, center, size, or angle errors.
+
+Worst test cases:
+- rect_p2_0026: wrong_center, IoU=0.318, Dice=0.483, type=rectangular_notch->rectangular_notch, angle_error=nan
+- rect_p2_0095: wrong_type, IoU=0.426, Dice=0.597, type=rectangular_notch->rotated_rect, angle_error=nan
+- rot_v7_0006: rasterized_geometry_mismatch, IoU=0.434, Dice=0.605, type=rotated_rect->rotated_rect, angle_error=13.71
+- rect_v9_0027: wrong_type, IoU=0.440, Dice=0.611, type=rectangular_notch->rotated_rect, angle_error=nan
+- rect_v9_0017: acceptable_or_minor_error, IoU=0.455, Dice=0.625, type=rectangular_notch->rectangular_notch, angle_error=nan
+- rect_v9_0016: wrong_type, IoU=0.457, Dice=0.627, type=rectangular_notch->rotated_rect, angle_error=nan
+- rot_v9_0041: wrong_type, IoU=0.460, Dice=0.630, type=rotated_rect->rectangular_notch, angle_error=25.62
+- rot_p3_0045: wrong_type, IoU=0.460, Dice=0.631, type=rotated_rect->rectangular_notch, angle_error=33.31
+- rect_v9_0055: wrong_type, IoU=0.484, Dice=0.653, type=rectangular_notch->rotated_rect, angle_error=nan
+- rot_p3_0043: wrong_type, IoU=0.487, Dice=0.655, type=rotated_rect->rectangular_notch, angle_error=6.58
+- rot_v9_0067: wrong_type, IoU=0.493, Dice=0.660, type=rotated_rect->rectangular_notch, angle_error=8.17
+- rect_v9_0014: wrong_type, IoU=0.502, Dice=0.669, type=rectangular_notch->rotated_rect, angle_error=nan
+- rot_v7_0027: acceptable_or_minor_error, IoU=0.511, Dice=0.676, type=rotated_rect->rotated_rect, angle_error=7.72
+- rect_p2_0068: wrong_size, IoU=0.519, Dice=0.684, type=rectangular_notch->rectangular_notch, angle_error=nan
+- rot_p3_0044: wrong_type, IoU=0.527, Dice=0.690, type=rotated_rect->rectangular_notch, angle_error=16.81
+- rect_p2_0117: acceptable_or_minor_error, IoU=0.529, Dice=0.692, type=rectangular_notch->rectangular_notch, angle_error=nan
+- rot_v8_0026: acceptable_or_minor_error, IoU=0.534, Dice=0.696, type=rotated_rect->rotated_rect, angle_error=12.39
+- rot_v7_0017: wrong_angle, IoU=0.539, Dice=0.701, type=rotated_rect->rotated_rect, angle_error=28.66
+- rot_p3_0041: wrong_type, IoU=0.541, Dice=0.702, type=rotated_rect->rectangular_notch, angle_error=23.77
+- rect_v9_0049: wrong_size, IoU=0.543, Dice=0.704, type=rectangular_notch->rectangular_notch, angle_error=nan

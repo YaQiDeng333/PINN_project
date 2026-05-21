@@ -168,6 +168,7 @@ def extract_labels(npz_path: Path) -> tuple[list[dict[str, Any]], dict[str, Any]
             "split": split,
             "defect_type": defect_type,
             "geometry_type": geometry_type,
+            "include_in_rect_rot_poc": str(defect_type in {"rectangular_notch", "rotated_rect"}).lower(),
             "center_x": center_x,
             "center_y": center_y,
             "width": width,
@@ -220,6 +221,9 @@ def extract_labels(npz_path: Path) -> tuple[list[dict[str, Any]], dict[str, Any]
         "parse_failures": parse_failures,
         "train_normalization_stats": stats,
         "polygon_vertex_counts": Counter(str(row["vertex_count"]) for row in rows if row["defect_type"] == "polygon"),
+        "rect_rot_poc_counts": Counter(
+            row["split"] for row in rows if row["include_in_rect_rot_poc"] == "true"
+        ),
     }
     return rows, diagnostics
 
@@ -260,6 +264,7 @@ def write_summary(out_path: Path, npz_path: Path, labels_path: Path, diagnostics
         f"Defect counts: {dict(diagnostics['defect_counts'])}",
         f"Geometry type counts: {dict(diagnostics['geometry_counts'])}",
         f"Polygon vertex counts: {dict(diagnostics['polygon_vertex_counts'])}",
+        f"Rect+rotated POC split counts: {dict(diagnostics['rect_rot_poc_counts'])}",
         f"Sample IDs unique: {diagnostics['sample_id_unique']}",
         f"geometry_params parse failures: {len(diagnostics['parse_failures'])}",
         "",
@@ -268,6 +273,7 @@ def write_summary(out_path: Path, npz_path: Path, labels_path: Path, diagnostics
         "- rectangular_notch uses angle_rad=0 and angle_deg=0.",
         "- rotated_rect preserves true angle_rad / angle_deg from geometry_params.",
         "- polygon preserves polygon_vertices and pads them to max_vertices=6; polygon is not coerced into rotated_rect.",
+        "- include_in_rect_rot_poc is true only for rectangular_notch and rotated_rect; polygon is parsed for reporting only.",
         "- Continuous label normalization was fit on train split only and written as *_norm columns.",
         "",
         "Train normalization fields:",

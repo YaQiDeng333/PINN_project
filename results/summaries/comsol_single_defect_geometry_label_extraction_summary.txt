@@ -8,6 +8,7 @@ Split counts: {'val': 99, 'train': 402, 'test': 99}
 Defect counts: {'rectangular_notch': 200, 'rotated_rect': 200, 'polygon': 200}
 Geometry type counts: {'axis_aligned_rectangle': 200, 'rotated_rectangle': 200, 'polygon': 200}
 Polygon vertex counts: {'4': 67, '5': 67, '6': 66}
+Rect+rotated POC split counts: {'val': 66, 'train': 268, 'test': 66}
 Sample IDs unique: True
 geometry_params parse failures: 0
 
@@ -16,6 +17,7 @@ Label policy:
 - rectangular_notch uses angle_rad=0 and angle_deg=0.
 - rotated_rect preserves true angle_rad / angle_deg from geometry_params.
 - polygon preserves polygon_vertices and pads them to max_vertices=6; polygon is not coerced into rotated_rect.
+- include_in_rect_rot_poc is true only for rectangular_notch and rotated_rect; polygon is parsed for reporting only.
 - Continuous label normalization was fit on train split only and written as *_norm columns.
 
 Train normalization fields:
