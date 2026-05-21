@@ -1,0 +1,138 @@
+# Deep Research Method Alignment Audit
+
+Stage: 20.46
+
+## Scope
+
+This audit reviews the Stage 20.42-20.45 COMSOL_DATA_BASELINE_V3 algorithm attempts against the external-method report direction. No training, COMSOL run, new data generation, baseline-document update, or checkpoint/preview/data submission was performed.
+
+The repository does not contain `MFL_缺陷边界反演外部方法深度研究报告.pdf`, `MFL_缺陷边界反演外部方法深度研究报告.md`, or an equivalent report file found by repository filename search. This audit therefore uses the report points supplied in the task prompt as the external-method basis.
+
+## External Report Direction Used For Audit
+
+The report frames MFL defect reconstruction as an inverse reconstruction problem rather than ordinary segmentation. Its priority order is:
+
+1. Geometry component set decoder + differentiable rasterization + lightweight forward consistency.
+2. Coarse prediction + low-dimensional shape refinement.
+3. Multi-component basis / implicit profile decoder + consistency.
+
+The report explicitly deprioritizes ordinary decoder tweaks, plain CNN/U-Net patching, loss/threshold tricks, hand-crafted Bz features, small post-processing, and simple latent-shape priors. It also emphasizes that polygon, rotated_rect, and multi_defect behavior should be handled through explicit geometry, components, vertices/control points, and forward consistency rather than expecting a dense mask decoder to infer structure implicitly.
+
+## Evidence Read
+
+Read and checked:
+
+- 20.42 script and summaries: `scripts/train_comsol_data_baseline_v3_candidate.py`, `results/summaries/comsol_data_baseline_v3_training_summary.txt`, `results/summaries/comsol_data_baseline_v3_failure_audit_summary.txt`, and task/seed/connected-component CSVs.
+- 20.43 script and summaries: `scripts/train_comsol_data_baseline_v3_enhanced_candidate.py`, enhanced training/audit summaries, seed CSV, Claude review, and rejection summary.
+- 20.44 script and summaries: `scripts/train_comsol_data_baseline_v3_topology_gated_candidate.py`, POC and 3-seed summaries, Claude review, and rejection summary.
+- 20.45 script and summaries: `scripts/train_comsol_data_baseline_v3_topology_gated_v2_candidate.py`, POC/audit summaries, Claude review, rejection summary, and related metrics.
+- Existing COMSOL baseline docs: `COMSOL_DATA_BASELINE.md`, `COMSOL_DATA_BASELINE_V2.md`, `COMSOL_MULTI_DEFECT_DATA_BASELINE.md`, and `COMSOL_THREE_COMPONENT_DATA_BASELINE.md`.
+
+No missing required 20.42-20.45 artifact was found. The external report file itself was missing, so the prompt-provided report points are the authority for this audit.
+
+Important implementation distinction: some scripts contain `rasterize_component` helpers for label checks, component-recall metrics, preview/audit support, or prior data preparation. Those helpers are not part of the train-time model forward pass, are not differentiable component-to-mask rendering in the learned model, and therefore do not count as the report's differentiable rasterization route.
+
+## Method Classification
+
+### 20.42 lightweight combined decoder
+
+This is a mask-only Conv1d BzEncoder + grid decoder. It uses `delta_bz` only, train-only normalization, validation-only threshold/checkpoint selection, and final-only test evaluation. Metadata is used for grouping and audit only.
+
+Classification: ordinary dense mask decoder / combined benchmark control. It is not a geometry-aware inverse reconstruction method.
+
+Result: overall test IoU/Dice `0.6461 / 0.7735`; single `0.6602 / 0.7917`; cc2 `0.5598 / 0.6996`; cc3 `0.6717 / 0.7879`. It failed V3 baseline acceptance mainly because cc2 degraded relative to the standalone component_count=2 baseline.
+
+### 20.43 enhanced-capacity decoder
+
+This keeps the same dense mask-only objective and input but widens the Conv1d encoder and grid decoder. It does not add geometry parameters, differentiable rasterization, forward residual, refinement, unrolling, basis profiles, or external inverse-problem framework structure.
+
+Classification: capacity scaling / ordinary decoder patch. It is explicitly in the class the report says not to keep investing in.
+
+Result: overall `0.6100 / 0.7377`; single `0.6485 / 0.7832`; cc2 `0.5181 / 0.6563`; cc3 `0.6083 / 0.7222`. This failed harder than 20.42, showing the problem is not solved by capacity alone.
+
+### 20.44 topology-aware gated decoder v1
+
+This adds a shared Bz encoder, predicted task_group gate, component_count auxiliary head, and three topology-specific dense mask decoders. The gate is predicted from `delta_bz`, and true task labels are used only for auxiliary loss. This avoids metadata input leakage, but it still outputs only dense mask logits.
+
+It does not output component sets, centers, sizes, rotations, vertices, control points, existence logits, or geometry parameters. It does not rasterize vector geometry differentiably. It does not predict shape -> forward Bz -> observed Bz residual. It does not include refinement/unrolling.
+
+The script has component rasterization utilities for metrics/audit, but the model forward output is still dense `mask_logits`; no predicted component geometry is rasterized during training or inference.
+
+Classification: weak topology-aware decoder architecture patch. It is a partial / weak inspiration from "multi-component/topology-aware" language, not a faithful implementation of the report's geometry component set route.
+
+Result: POC seed 42 improved cc2, but the 3-seed candidate failed: cc2 improved to `0.5753 / 0.7182`, while cc3 degraded to `0.6493 / 0.7620` and overall dropped to `0.6323 / 0.7609`. This exposed task trade-off rather than solving inverse reconstruction.
+
+### 20.45 topology-aware residual gated decoder v2
+
+This keeps the predicted gate but uses a shared base decoder plus gate-weighted residual adapters, with residual scale and residual L2 penalty. It also uses a balanced validation score across task groups.
+
+It still outputs dense mask logits only. It has no explicit geometry component decoder, no differentiable rasterization, no forward consistency, no refinement/unrolling, and no basis/profile representation. The residual/base ratio was about `0.0106`, so the residual mechanism barely affected the base decoder.
+
+As in 20.44, any rasterization helper is outside the differentiable model path and is used for evaluation/audit, not for train-time geometry rendering.
+
+Classification: weak topology-aware residual decoder patch. It is mostly a self-designed minimal version responding to 20.44's trade-off, not a faithful external-method implementation.
+
+Result: POC seed 42 protected cc3 (`0.6887 / 0.8042`) but failed the core cc2 objective (`0.5592 / 0.7047`), so Stage B 3-seed was not run.
+
+## Direct Answers On 20.44 / 20.45 Literature Alignment
+
+1. Did 20.44 strictly implement the report's geometry component set decoder? No.
+2. Did 20.44 or 20.45 implement diffvg-style differentiable rasterization? No.
+3. Did 20.44 or 20.45 implement forward consistency? No.
+4. Did 20.44 or 20.45 implement DeepInv, MoDL, Learned Primal-Dual, or unrolled/refinement optimization? No.
+5. Were they mostly minimal internal versions based on the broad "multi-component/topology-aware" idea? Yes.
+6. Is it worth continuing gating-decoder tuning after 20.44 and 20.45? No, not as the primary route.
+7. Would a topology-gated v3 comply with the report's "do not keep making ordinary decoder patches" warning? No. A v3 gate tweak would mostly continue the decoder-patch route unless it changes the output representation to explicit geometry and differentiable rendering/consistency.
+
+Required conclusion: mostly self-designed minimal version.
+
+## Why The Attempts Failed
+
+20.43 failed because increasing dense decoder capacity did not add the missing inductive bias. It made cc2 and cc3 worse, suggesting optimization/overfitting or cross-task interference rather than insufficient channel count.
+
+20.44 partially worked because predicted gating can identify task_group and specialize mask decoders. However, the specialization redistributed performance: cc2 improved at the expense of cc3 and overall quality. This is not a geometry-level solution and does not constrain the output to valid component geometry.
+
+20.45 protected cc3 by preserving a shared base decoder, but the residual branch became too weak to improve cc2. It showed a stability/improvement trade-off inside dense decoder space: strong task-specific branches help cc2 but hurt cc3; weak residual branches preserve cc3 but do not fix cc2.
+
+The common failure is that all methods still ask a dense mask decoder to learn topology, geometry, vertices, rotations, and component interactions implicitly from Bz. That is exactly the mismatch highlighted by the external report.
+
+## Route Decision
+
+Stop the topology-gated decoder route as the primary next step.
+
+The unique recommended next direction is:
+
+A. Geometry component set decoder + differentiable rasterization.
+
+Rationale:
+
+- It is the external report's first-priority route.
+- Existing data already carries geometry-rich metadata (`geometry_params`, `components_json`, `component_types`, component counts, and polygon/rotation information) that can be converted into supervision labels.
+- It addresses the actual failure mode: the model should predict components and geometry, then rasterize to masks, rather than directly emit dense masks without a shape representation.
+- It creates a clean path to forward consistency later, once a reliable forward surrogate exists.
+
+## Required Next Preparation
+
+Before implementing the new model, do a data-label preparation step:
+
+- Extract normalized component labels from existing `geometry_params` and `components_json`.
+- Define a fixed maximum component slot count for V3 candidate data, likely K=3 for current component_count 1/2/3 coverage.
+- Define component existence, type, center, scale, rotation, depth/proxy, and polygon/shape parameters where available.
+- Define how single_defect, cc2, and cc3 examples map into the same slot schema.
+
+Then do a differentiable rasterization POC:
+
+- Use mask supervision first.
+- Predict component parameters and rasterize them to soft masks.
+- Validate gradients, slot assignment / matching, parameter ranges, mask IoU/Dice, and component-count behavior.
+- Keep forward consistency deferred until the geometry decoder and differentiable rasterizer are stable.
+
+Forward consistency should be staged after the mask-supervised geometry decoder POC unless a reliable forward surrogate already exists. A premature forward residual would confound two unvalidated parts: geometry parameterization and Bz forward prediction.
+
+## Human Confirmation
+
+Human confirmation is required before implementation because this route changes the model output representation and training target structure. It is not a small continuation of the existing mask-only decoder family.
+
+## File Safety
+
+No baseline documents were modified. No data, NPZ, checkpoint, preview PNG, or notes files were created for submission by this audit.

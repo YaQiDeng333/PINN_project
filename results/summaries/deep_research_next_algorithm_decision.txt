@@ -1,0 +1,69 @@
+# Deep Research Next Algorithm Decision
+
+Stage: 20.46
+
+## Decision
+
+Proceed to:
+
+A. Geometry component set decoder + differentiable rasterization.
+
+Do not continue topology-aware gated decoder tuning as the primary next route.
+
+## Basis
+
+The 20.42-20.45 sequence tested four variants of dense mask decoding:
+
+- 20.42: lightweight combined mask-only decoder.
+- 20.43: wider mask-only decoder.
+- 20.44: predicted-gate multi-decoder.
+- 20.45: predicted-gate residual-adapter decoder.
+
+None implemented the external report's central ingredients:
+
+- explicit component set prediction;
+- center / scale / rotation / vertices / shape parameter output;
+- vector or component parameters converted to masks by differentiable rasterization;
+- predicted shape -> forward Bz -> observed Bz residual;
+- low-dimensional refinement / unrolling;
+- basis or implicit profile representation.
+
+20.44 and 20.45 should therefore be classified as mostly self-designed minimal topology-aware decoder variants. They are not faithful implementations of DeepInv, MoDL, Learned Primal-Dual, diffvg, BoundaryFormer, PolygonRNN++, DeepSnake, or the report's geometry component set route.
+
+## Why Not Continue Gated Decoder v3
+
+The existing results show an internal trade-off inside dense decoder space:
+
+- stronger topology-specific decoding helped cc2 but hurt cc3 and overall metrics in 20.44;
+- base-preserving residual decoding protected cc3 but did not improve cc2 in 20.45;
+- plain capacity scaling hurt both cc2 and cc3 in 20.43.
+
+A topology-gated v3 would likely be another decoder patch unless it changes the output representation to explicit geometry and differentiable rendering. Continuing that line would contradict the report warning against ordinary decoder patching.
+
+## Immediate Next Work
+
+Before training a new model, prepare geometry labels from existing data:
+
+- create a unified component-slot schema for component_count 1, 2, and 3;
+- derive component existence labels;
+- derive component type labels;
+- normalize center, scale, rotation, and depth/proxy labels;
+- derive polygon or shape-control labels where available;
+- define slot matching and padding rules;
+- verify labels against existing `components_json`, `geometry_params`, masks, and connected-component counts.
+
+Then implement a small differentiable rasterization POC:
+
+- predict geometry component parameters from `delta_bz`;
+- rasterize predicted components to soft masks;
+- train initially with mask supervision and parameter supervision where labels are reliable;
+- evaluate IoU/Dice, connected-component counts, slot usage, and parameter plausibility;
+- keep forward consistency disabled in the first POC unless a reliable forward surrogate is already available.
+
+## Forward Consistency Timing
+
+Forward consistency should be deferred until after a geometry decoder and differentiable rasterizer are working. The first POC should be mask-supervised geometry reconstruction. After that, add lightweight forward residual only if there is a validated differentiable or surrogate forward model from predicted geometry/mask to Bz.
+
+## Human Confirmation
+
+Human confirmation is required before implementation because this route changes the model output representation, label preparation, and training objective structure. It is the right direction according to the audit, but it is not a small continuation of the existing mask-only code.
