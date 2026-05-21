@@ -1,0 +1,16 @@
+COMSOL rect/rot forward surrogate mismatch audit summary
+
+Input 20.54 metrics: C:\Users\19166\Desktop\PINN_project\results\metrics\comsol_rect_rot_improved_dense_priewald_refinement_metrics.csv
+Audit uses 20.54 pre-refine and post-refine rows only; no training or COMSOL run.
+
+Test overall:
+- forward NRMSE reduction mean = 0.0584
+- delta IoU/Dice = -0.0079 / -0.0059
+- delta area_error = -0.0192
+- forward reduction vs IoU delta corr = -0.0398
+- forward reduction vs Dice delta corr = -0.0734
+- residual_down_mask_down count = 39
+- residual_down_mask_up count = 27
+
+Interpretation:
+20.54 residual decreased on most samples, but the mean IoU/Dice delta was negative. This confirms a residual-objective mismatch risk rather than an initializer/proposal blocker.

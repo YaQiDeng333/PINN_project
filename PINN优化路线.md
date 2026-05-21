@@ -139,9 +139,9 @@ forward consistency 已通过 review 和 baseline 决策，后续应进入 physi
 
 如果后续发现 forward consistency 仍无法解决 polygon / rotated_rect 精细边界，则下一步应转向更严格的 geometry parameterization + forward consistency，而不是继续调 decoder、threshold、loss、head 或手工 Bz feature。
 
-## 第 20.42-20.54 方法路线阶段判断
+## 第 20.42-20.55 方法路线阶段判断
 
-第 20.42-20.54 的结论进一步确认：外部 deep research 报告的核心路线不是普通 segmentation，也不是继续做 dense decoder patch，而是把 MFL 缺陷边界问题视为 inverse reconstruction。当前算法主线已经从 mask-only decoder / combined baseline 评估，切换到：
+第 20.42-20.55 的结论进一步确认：外部 deep research 报告的核心路线不是普通 segmentation，也不是继续做 dense decoder patch，而是把 MFL 缺陷边界问题视为 inverse reconstruction。当前算法主线已经从 mask-only decoder / combined baseline 评估，切换到：
 
 ```text
 geometry-aware representation
@@ -160,5 +160,6 @@ geometry-aware representation
 * 20.52 证明 Priewald-style low-dimensional refinement 有正信号：frozen forward surrogate residual 能显著降低 forward NRMSE，并带来小幅 geometry-raster mask 改善，但 geometry-head initializer 偏弱。
 * 20.53 的 dense/coarse initializer + refinement 进一步说明，refinement 上限主要受 proposal 质量限制。当前 binary dense mask + PCA rotated bbox extraction 没有超过 20.51 geometry-head proposal，type / angle 初始化仍弱，因此不能作为 candidate 或 baseline。
 * 20.54 用 strong dense initializer + improved proposal extraction 显著修复了 proposal 质量：geometry-raster test IoU/Dice 达到 `0.6726 / 0.8017`。但从该强 proposal 做 Priewald-style refinement 后，forward NRMSE 下降而 mask IoU/Dice 回落到 `0.6646 / 0.7958`，说明当前主要 bottleneck 已从 initializer/proposal extraction 转为 forward surrogate mismatch / non-identifiability。
+* 20.55 进一步确认 bottleneck 不是简单 waveform fit，而是 residual objective calibration：S1/S2/S3 三个 calibrated surrogate candidate 均未让 residual 与 geometry/mask error 建立非平凡正相关，Stage C refinement 因 gate 未过被跳过。这个阴性结果说明继续调当前 surrogate loss 或 refinement objective 意义有限。
 
-Priewald 2013 对当前阶段更重要的启发不是复现完整 FEM、解析 Jacobian 或 Gauss-Newton 工程，而是 forward-model-based inversion / refinement：用 predicted geometry 通过 forward surrogate 生成 MFL，再用 observed MFL residual 约束低维几何参数。当前应停止 direct neural geometry head 小修补；20.54 之后优先改进 forward surrogate 的空间定位能力和物理保真度。若 surrogate 短期内不能让 residual 下降同时带来 mask / geometry 改善，则转向 mask/profile basis refinement，避免把复杂边界强行压成单个 rotated bbox，也避免被低保真 surrogate residual 牵引到错误几何。
+Priewald 2013 对当前阶段更重要的启发不是复现完整 FEM、解析 Jacobian 或 Gauss-Newton 工程，而是 forward-model-based inversion / refinement：用 predicted geometry 通过 forward surrogate 生成 MFL，再用 observed MFL residual 约束低维几何参数。当前应停止 direct neural geometry head 小修补；20.55 之后若继续 Priewald-style refinement，前置条件应是 synthetic perturbation forward data 或等价局部扰动数据，让 surrogate 学到 geometry perturbation 与 signal residual 的局部排序关系。若无法补足这个 calibration 证据，则转向 mask/profile basis refinement，避免被低保真 residual objective 牵引到错误几何。
