@@ -1,0 +1,146 @@
+COMSOL Piao-2019-inspired Bz-only NLS-style geometry parameter inversion POC summary
+
+Method alignment note:
+- This is not a Piao 2019 full reproduction.
+- This is a weak Piao-2019-inspired Bz-only 2D/quasi-2D engineering adaptation.
+- Paper RBC / tri-axis NLS / LS-SVM are not fully implemented here.
+- The revised POC adds Bz-only NLS-style exponential fitting features inspired by the paper's local/global exponential feature idea.
+- Project targets are rectangular_notch / rotated_rect geometry parameters from geometry_params, then hard rasterized into masks.
+
+Input NPZ: C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\prepared\comsol_single_defect_multiline_forward_pack_v1_pilot_v9_balanced_single_defect.npz
+Prediction CSV: C:\Users\19166\Desktop\PINN_project\results\metrics\comsol_piao2019_geometry_parameter_prediction_errors.csv
+Metrics CSV: C:\Users\19166\Desktop\PINN_project\results\metrics\comsol_piao2019_geometry_parameter_poc_metrics.csv
+Group summary CSV: C:\Users\19166\Desktop\PINN_project\results\metrics\comsol_piao2019_geometry_parameter_group_summary.csv
+Preview directory: C:\Users\19166\Desktop\PINN_project\results\previews\comsol_piao2019_geometry_parameter_poc
+Preview PNG generated: 24 (not for submission)
+
+Scope:
+- Input features use delta_bz / sensor_x / scan_line_y only.
+- Geometry labels come from geometry_params, not predicted masks.
+- Main reconstruction result is rect+rotated only.
+- Polygon participates in all-3 type classification but is excluded from main geometry regression and mask metrics.
+- No dense mask decoder, no COMSOL run, no new simulation data, and no baseline document update.
+
+Models:
+- Type classifier: LogisticRegression with train-fit StandardScaler.
+- Geometry regressors: validation-selected KernelRidge(RBF), SVR(RBF), or Ridge substitute for LS-SVM.
+- Main setting: features -> classifier + geometry regressors, no true defect_type input.
+- Validation split selects regressor hyperparameters; test split is final evaluation only.
+
+Train / val / test metrics:
+{
+  "generic_only": {
+    "test": {
+      "area_error": 0.5041719260266623,
+      "center_error_mask_px": 2.7605340168331627,
+      "center_mae_m": 0.0013827129054741056,
+      "depth_mae_m": 0.0002838936265197344,
+      "dice": 0.5317413824093834,
+      "iou": 0.42996072510545424,
+      "length_mae_m": 0.0011399791858351484,
+      "n_main_rect_rotated": 66.0,
+      "rotated_angle_mae_deg": 18.54062918265821,
+      "type_accuracy_all3": 0.35353535353535354,
+      "width_mae_m": 0.0019734326642654567
+    },
+    "train": {
+      "area_error": 0.23300866981063986,
+      "center_error_mask_px": 0.3367330102221757,
+      "center_mae_m": 0.00011723383398314919,
+      "depth_mae_m": 6.279820619033297e-05,
+      "dice": 0.7834792738882876,
+      "iou": 0.7463977160514892,
+      "length_mae_m": 0.0003035288313161799,
+      "n_main_rect_rotated": 268.0,
+      "rotated_angle_mae_deg": 4.017515651543263,
+      "type_accuracy_all3": 0.6517412935323383,
+      "width_mae_m": 0.00031620783909884975
+    },
+    "val": {
+      "area_error": 0.46408911637014844,
+      "center_error_mask_px": 2.812572460083729,
+      "center_mae_m": 0.001284786042243102,
+      "depth_mae_m": 0.00023552126742554897,
+      "dice": 0.5613161017060213,
+      "iou": 0.45191954447035293,
+      "length_mae_m": 0.00089842142140532,
+      "n_main_rect_rotated": 66.0,
+      "rotated_angle_mae_deg": 18.9070305696631,
+      "type_accuracy_all3": 0.47474747474747475,
+      "width_mae_m": 0.001952097461037801
+    }
+  },
+  "nls_style_main": {
+    "test": {
+      "area_error": 0.45442681982742517,
+      "center_error_mask_px": 2.7358868021737255,
+      "center_mae_m": 0.0013317452343936777,
+      "depth_mae_m": 0.000293882915214673,
+      "dice": 0.5499264196144416,
+      "iou": 0.4466680752650879,
+      "length_mae_m": 0.0010541465444219443,
+      "n_main_rect_rotated": 66.0,
+      "rotated_angle_mae_deg": 18.285694043694747,
+      "type_accuracy_all3": 0.40404040404040403,
+      "width_mae_m": 0.0016277367674351257
+    },
+    "train": {
+      "area_error": 0.15608227118813206,
+      "center_error_mask_px": 0.24665726916978017,
+      "center_mae_m": 8.368462549424393e-05,
+      "depth_mae_m": 6.143017595394027e-05,
+      "dice": 0.866229380286085,
+      "iou": 0.8336036504749734,
+      "length_mae_m": 0.0002734888792863245,
+      "n_main_rect_rotated": 268.0,
+      "rotated_angle_mae_deg": 3.0387084766076304,
+      "type_accuracy_all3": 0.7661691542288557,
+      "width_mae_m": 0.00025924949031664403
+    },
+    "val": {
+      "area_error": 0.4508956818440522,
+      "center_error_mask_px": 2.9641251205231725,
+      "center_mae_m": 0.001294869909814216,
+      "depth_mae_m": 0.0002784360171256705,
+      "dice": 0.564689158145557,
+      "iou": 0.4551640317748108,
+      "length_mae_m": 0.0008743335965572906,
+      "n_main_rect_rotated": 66.0,
+      "rotated_angle_mae_deg": 19.396134665968344,
+      "type_accuracy_all3": 0.48484848484848486,
+      "width_mae_m": 0.0017646232289815936
+    }
+  }
+}
+
+Test headline for nls_style_main:
+- all-3 type accuracy: 0.4040
+- rect test IoU/Dice: 0.4702 / 0.5769
+- rotated test IoU/Dice: 0.4232 / 0.5229
+- rect+rotated test IoU/Dice: 0.4467 / 0.5499
+- test center MAE (m): 0.001332
+- test width / length / depth MAE (m): 0.001628 / 0.001054 / 0.000294
+- rotated_rect test angle MAE (deg): 18.2857
+
+Bz-only NLS-style feature benefit vs generic_only:
+- test IoU gain: 0.0167
+- test Dice gain: 0.0182
+- generic_only test IoU/Dice: 0.4300 / 0.5317
+- nls_style_main test IoU/Dice: 0.4467 / 0.5499
+
+Dense decoder comparison:
+- COMSOL single-defect pilot_v9 dense baseline test IoU/Dice: 0.6515 / 0.7861
+- This POC nls_style_main rect+rotated test IoU/Dice: 0.4467 / 0.5499
+- This POC is not expected to beat the dense baseline; value is interpretability and parameterized failure attribution.
+
+POC acceptance judgement:
+- Promising Piao-style geometry-parameter route: False
+- Acceptance considers type accuracy, parameter errors, non-trivial mask IoU/Dice, NLS-style feature benefit or interpretability, and coherent failure categories.
+
+Failure source judgement:
+- If performance is weak, the primary suspects are Bz-only information limits, NLS-style feature instability, and KernelRidge/SVR/Ridge substitute capacity.
+- Labels and rect/rotated rasterization are expected to be stable because geometry_params exactly rasterize to the source masks for those shapes.
+- A future neural geometry head with differentiable rasterization may be a better continuation than further hand-crafted feature tuning.
+
+Next recommended direction:
+- B. Add differentiable rasterizer + neural geometry head.

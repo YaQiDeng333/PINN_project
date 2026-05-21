@@ -1,0 +1,60 @@
+﻿All four scripts and five summaries have been read. Here is the systematic review.
+
+---
+
+## 14 项逐项检查结果
+
+| # | 检查项 | 结论 | 证据 |
+|---|--------|------|------|
+| 1 | 正确区分原论文方法和本项目 adaptation | ✅ 通过 | `piao2019_revised_poc_scope_summary.txt` 明确列出 RBC / tri-axis NLS / LS-SVM 为论文方法，并区分 "weak Piao-2019-inspired Bz-only 2D/quasi-2D engineering adaptation" |
+| 2 | 没有声称完整复现 Piao 2019 | ✅ 通过 | 所有 summary 均声明 "This is not a Piao 2019 full reproduction"；`RBC / tri-axis NLS / LS-SVM are not fully implemented` |
+| 3 | 准确说明 RBC / NLS / LS-SVM | ✅ 通过 | Scope summary 第7-9行准确描述了论文的 RBC 3D 缺陷轮廓、tri-axis NLS 指数拟合（Bx/By/Bz）、RBF-kernel LS-SVM 映射；POC 明确 KernelRidge/SVR/Ridge 为 "engineering substitutes, not LS-SVM" |
+| 4 | Bz-only NLS-style feature extraction 只使用 delta_bz / sensor coordinates | ✅ 通过 | `extract_comsol_mfl_physics_features.py:197-199` 仅 require `delta_bz, sensor_x, scan_line_y, sample_ids, split`；summary 第18行确认 "no mask, geometry label, defect type, source_pack, or metadata is used as an input feature" |
+| 5 | geometry labels 来自 geometry_params，不是 predicted mask | ✅ 通过 | `extract_comsol_single_defect_geometry_labels.py:105,113` 从 `data["geometry_params"]` 解析所有 label；summary 第15行声明 "Labels come from geometry_params / metadata stored in the NPZ, not from predicted masks" |
+| 6 | feature scaler train-only | ✅ 通过 | `extract_comsol_mfl_physics_features.py:278-290`：stats 仅基于 `train_rows` 计算，所有行（含 val/test）用同样 stats 做 z-score |
+| 7 | validation selection 只用 val | ✅ 通过 | `train_comsol_piao2019_geometry_parameter_poc.py:295-297`：`val_rows` 仅从 `split=="val"` 筛选；`_select_regressor` 仅用 val 做模型选择 |
+| 8 | test 只做最终评估 | ✅ 通过 | test split 从不出现在训练或超参选择中；仅在 `evaluate_comsol_piao2019_geometry_rasterization.py` 中使用 |
+| 9 | regression / classification 没有使用 geometry metadata 作为输入 | ✅ 通过 | `_feature_sets` 仅选取 `z_` 前缀列（来自 delta_bz 特征的 train-scaled 版本），不含 center_x/width/depth/defect_type 等 |
+| 10 | rasterization evaluation 合理 | ✅ 通过 | `_raster_rect` 正确实现轴对齐/旋转矩形的硬光栅化；`_mask_metrics` 的 IoU/Dice/area_error/center_error 计算正确；对 rect/rotated 形状 geometry_params→mask 映射是精确的 |
+| 11 | 正确解释 rect/rotated/polygon 支持范围 | ✅ 通过 | Label extraction 正确区分为 axis_aligned_rectangle / rotated_rectangle / polygon；polygon 明确排除于 main regression；所有 summary 一致说明 polygon "participates in all-3 type classification but is excluded from main geometry regression and mask metrics" |
+| 12 | 合理对照 dense decoder baseline | ✅ 通过 | `DENSE_SINGLE_BASELINE_IOU=0.6515, DICE=0.7861` 硬编码对照；summary 声明 "This POC is not expected to beat the dense baseline; value is interpretability and parameterized failure attribution" |
+| 13 | 未修改 baseline docs | ✅ 通过 | `git diff --stat HEAD` 无输出 — 所有文件均为新增 untracked，无任何已有文件被修改 |
+| 14 | 未提交 data / NPZ / checkpoint / preview PNG | ✅ 通过 | `git status` 仅显示 scripts/ summaries/ metrics/ 及一个 .tmp 文件；summary 明确标注 "Preview PNG generated: 24 (not for submission)" |
+
+---
+
+## 最终输出
+
+### 必须修复
+无。代码无 bug，文档 scope 声明准确一致，数据流正确（geometry_params → labels，delta_bz → features → regression → 硬光栅化 → 评估）。
+
+### 建议修复
+
+1. **type classifier 准确率过低（test 0.40）是系统性失败源**。failure audit 显示 60/600 样本为 wrong_type，其中许多 rect/rotated 被误分类为 polygon（导致 IoU=0）。建议在 summary 中更突出地标注 type accuracy 为该 POC 的首要瓶颈，并考虑是否增加针对 rect-vs-rotated 的二阶段分类器或增大 classifier 正则化力度。
+
+2. **rotated_rect 角度 MAE ~18° 偏高**。考虑到 angle_sin/angle_cos 直接回归（不经归一化逆变换），可能存在 sin/cos 不一致（预测的 (sin, cos) 范数未必为 1）。`_angle_deg_from_sincos` 使用了 `atan2` 可容忍非单位范数，但回归器未约束 sin²+cos²=1。建议在 summary 中标注这一已知限制。
+
+3. **`_feature_sets` 的安全检查略显脆弱**（`train_comsol_piao2019_geometry_parameter_poc.py:76`）。当前逻辑 `len(generic) == len(all_z)` 判断"无 NLS 特征"隐式依赖 generic 列数 ≠ 总列数。如果未来新增非 NLS 的 z_ 列，此检查不会误触发（generic 也会变多），但语义不够直接。建议改为显式检查是否存在 `_nls_` 列。
+
+### 可以接受
+
+- 代码结构清晰、无冗余，四脚本 pipeline 解耦合理（labels → features → train → evaluate）。
+- NLS-style 指数拟合特征带来 +0.017 IoU / +0.018 Dice 的正向增益（虽小但非负），证明 Bz-only 指数拟合思路有一定信号。
+- Failure audit 分类合理（wrong_type / wrong_angle / wrong_center / wrong_size / rasterizer_or_parameter_mismatch / polygon_unsupported），便于归因。
+- 所有 scope 声明诚实、一致，没有越界声称。
+
+### 是否认为该 revised POC 忠实参考了 Piao 2019 的核心思想，但未冒充完整复现？
+**是。** 该 POC 正确捕捉了 Piao 2019 的核心 pipeline 思想（physics-inspired 指数特征提取 → ML 回归 → 几何参数 → 重建），并将每步诚实地降级为工程可用的替代方案（Bz-only 替代 tri-axis、指数拟合替代 NLS、KernelRidge/SVR 替代 LS-SVM、2D 矩形替代 RBC 3D 轮廓）。所有文档均一致声明 "weak adaptation, not reproduction"。
+
+### 是否建议继续 Piao-style geometry parameter route？
+**谨慎建议暂停（E），但不完全关闭。** 核心理由：
+- NLS-style 特征增益微弱（+0.017 IoU），Bz-only 信息瓶颈可能是根本性限制（单一 Bz 分量无法唯一确定 5-7 个几何参数）。
+- type accuracy 0.40 意味着分类器是严重瓶颈，而分类错误直接导致 IoU=0。
+- 改善 Bz-only NLS feature extraction（选项 A）的边际收益可能很低，因为已经是穷举式手工特征工程（231 raw features）。
+
+### 下一步更建议
+**B. 加 differentiable rasterizer + neural geometry head。**
+理由：手工特征 + 经典 ML 在该数据规模（train=402）和 Bz-only 信息限制下已接近上限。可微分光栅化器 + 轻量 neural geometry head 可以直接从 delta_bz 字段端到端学习几何参数，绕过手工特征工程和独立分类器的级联误差。这与 summary 自身的建议一致。
+
+若选 B，建议同时保留当前 POC 的 geometry_params→hard rasterization 评估管线作为 baseline 对照。
+

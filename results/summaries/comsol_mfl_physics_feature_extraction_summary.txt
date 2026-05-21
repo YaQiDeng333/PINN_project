@@ -1,0 +1,77 @@
+COMSOL MFL physics-inspired feature extraction summary
+
+Input NPZ: C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\prepared\comsol_single_defect_multiline_forward_pack_v1_pilot_v9_balanced_single_defect.npz
+Output features CSV: C:\Users\19166\Desktop\PINN_project\results\metrics\comsol_mfl_physics_features.csv
+delta_bz shape: (600, 3, 201)
+N: 600
+Split counts: {'val': 99, 'train': 402, 'test': 99}
+Raw feature count: 231
+Raw Bz-only NLS-style feature count: 96
+Raw + train-scaled feature count: 462
+curve_fit available: True
+Bz-only NLS-style fit failure rate: 0.000000
+All raw features finite: True
+sensor_x monotonic: True
+scan_line_y: [-0.001, 0.0, 0.001]
+
+Feature policy:
+- Features use only delta_bz, sensor_x, scan_line_y, and split for train-only scaling.
+- No mask, geometry label, defect type, source_pack, or metadata is used as an input feature.
+- Feature scaler mean/std was fit on train split only; val/test reuse train statistics.
+- Extracted generic line-wise peak, integral, energy, gradient, zero-crossing, width, asymmetry, and cross-line correlation features.
+- Added Bz-only NLS-style exponential fitting features for abs, positive-lobe, and negative-lobe delta_bz on each scan line.
+- This is not the tri-axis Piao 2019 NLS implementation: no Bx/By, no full axial/tangential matrices, and no 18-parameter paper-faithful feature vector.
+
+Scaler preview:
+{
+  "line0_abs_integral": {
+    "mean": 2.7166153414983486e-05,
+    "std": 1.0323428317985345e-05
+  },
+  "line0_abs_peak_x": {
+    "mean": -0.006346268656716417,
+    "std": 0.011872703695546834
+  },
+  "line0_energy": {
+    "mean": 1.5944605753623823e-08,
+    "std": 1.2840019533260172e-08
+  },
+  "line0_integral": {
+    "mean": -2.0675430524256315e-06,
+    "std": 2.3926987802157603e-06
+  },
+  "line0_max": {
+    "mean": 0.0008194892350044009,
+    "std": 0.00039396652485334757
+  },
+  "line0_mean": {
+    "mean": -2.5140438438658517e-05,
+    "std": 2.9614093092221843e-05
+  },
+  "line0_min": {
+    "mean": -0.0009247486504745812,
+    "std": 0.0004445857890517274
+  },
+  "line0_neg_peak_x": {
+    "mean": -0.012392039800995026,
+    "std": 0.004645774447529858
+  },
+  "line0_peak_distance": {
+    "mean": 0.023908457711442788,
+    "std": 0.007519048983837385
+  },
+  "line0_pos_peak_x": {
+    "mean": 0.011410945273631843,
+    "std": 0.00605073735089719
+  },
+  "line0_ptp": {
+    "mean": 0.0017442378854789823,
+    "std": 0.0008226363405759884
+  },
+  "line0_std": {
+    "mean": 0.00041115704305486034,
+    "std": 0.00016750678652978975
+  }
+}
+
+Quality gate passed: True

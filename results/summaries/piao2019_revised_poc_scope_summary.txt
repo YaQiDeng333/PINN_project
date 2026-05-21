@@ -1,0 +1,33 @@
+Piao 2019 revised POC scope summary
+
+Stage
+- 20.47-revised: Piao-2019-inspired Bz-only NLS-style geometry parameter inversion POC.
+
+Paper alignment
+- Piao et al. 2019 uses a Rational Bezier Curve (RBC) model to generate 3D defect profiles from six geometric parameters: L, W, D, wLD, wWD, wLW.
+- Piao et al. 2019 uses nonlinear least squares (NLS) to fit exponential models to three-axis MFL signals Bx, By, Bz, first along the axial direction and then along the tangential direction, yielding 18 key physics-based feature parameters.
+- Piao et al. 2019 uses RBF-kernel LS-SVM to map those 18 feature parameters to the six RBC geometry parameters.
+
+Current revised POC position
+- This is not a Piao 2019 full reproduction.
+- This is a weak Piao-2019-inspired Bz-only 2D/quasi-2D engineering adaptation.
+- The current project input is multi-line delta_bz only, not tri-axis Bx / By / Bz matrices.
+- The current project target is 2D/quasi-2D geometry parameters from geometry_params, not a 3D RBC profile.
+- RBC / tri-axis NLS / LS-SVM are not fully implemented.
+
+Revision from interrupted 20.47
+- The feature extractor now adds Bz-only NLS-style exponential fitting features in addition to generic hand-crafted delta_bz features.
+- The regression script compares generic_only features to nls_style_main features so the NLS-style contribution is auditable.
+- KernelRidge(RBF), SVR(RBF), and Ridge are documented as LS-SVM engineering substitutes, not LS-SVM.
+- Summary wording is required to preserve the weak-adaptation scope and avoid faithful-reproduction claims.
+
+Execution boundaries
+- No COMSOL run.
+- No new simulation data.
+- No split modification.
+- No dense mask decoder.
+- No baseline document update.
+- No data / NPZ / checkpoint / preview PNG submission.
+
+Proceed gate
+- It is valid to continue this revised POC only if scripts compile and summaries preserve the weak-adaptation scope.
