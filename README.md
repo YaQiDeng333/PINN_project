@@ -35,6 +35,16 @@
 
 如果 README 与 [CURRENT_BASELINE.md](CURRENT_BASELINE.md) 冲突，以 CURRENT_BASELINE 为准。
 
+## COMSOL Data-Domain References
+
+COMSOL 数据域 baseline / reference 与 v3_complex `CURRENT_BASELINE` 分开记录，不互相替换：
+
+- [COMSOL_DATA_BASELINE.md](COMSOL_DATA_BASELINE.md): single-defect COMSOL data-domain baseline。
+- [COMSOL_DATA_BASELINE_V2.md](COMSOL_DATA_BASELINE_V2.md): single + `component_count=2` combined COMSOL data-domain reference。
+- [COMSOL_MULTI_DEFECT_DATA_BASELINE.md](COMSOL_MULTI_DEFECT_DATA_BASELINE.md): true two-component multi_defect COMSOL reference。
+- [COMSOL_THREE_COMPONENT_DATA_BASELINE.md](COMSOL_THREE_COMPONENT_DATA_BASELINE.md): true three-component multi_defect COMSOL reference。
+- `COMSOL_DATA_BASELINE_V3.md` 尚未创建；combined single + cc2 + cc3 candidate 未通过 baseline acceptance。
+
 ## 当前主线阶段
 
 项目已经进入第 20 阶段：forward 数据增强 / COMSOL multi-line forward data。
@@ -51,6 +61,8 @@
 - 已完成 36-sample rectangular_notch pilot pack，验证 pilot training gate。
 - 已完成 120-sample rectangular_notch pilot_v2 pack，验证 train-only normalization 和 pilot_v2 training gate。
 - 已完成 rotated_rect / angle variation pilot_v3 数据生成与 ingest / training gate。
+- 已完成 single / `component_count=2` / `component_count=3` COMSOL 数据域 reference 与 combined V3 candidate 审计；V3 candidate 未通过 baseline acceptance。
+- 当前 geometry / forward-consistency experimental direction 是：显式 geometry representation + differentiable rasterization + forward residual / coarse-to-fine refinement。
 - COMSOL_Multiphysics_MCP 是外部 forward generation 工程，不属于 PINN_project 主线训练仓库。
 
 这些 COMSOL pilot 结果只证明数据链路和训练入口可用，不更新 v3_complex CURRENT_BASELINE，也不能直接作为正式泛化结论。
@@ -83,6 +95,7 @@
 - [NEXT_STEP.md](NEXT_STEP.md): 最近下一步，不堆长期历史。
 - [PINN优化路线.md](PINN优化路线.md): 路线级判断、已停止方向、阶段切换原则。
 - [术语说明.md](术语说明.md): 项目术语、baseline、forward consistency、COMSOL 数据包等定义。
+- [COMSOL_DATA_BASELINE_V2.md](COMSOL_DATA_BASELINE_V2.md) / [COMSOL_THREE_COMPONENT_DATA_BASELINE.md](COMSOL_THREE_COMPONENT_DATA_BASELINE.md): 当前 COMSOL data-domain reference 文档。
 - [AGENTS.md](AGENTS.md): Codex 执行规范、Git / 数据安全、Markdown 文档管理规则。
 - README.md: 项目入口页和当前状态摘要。
 

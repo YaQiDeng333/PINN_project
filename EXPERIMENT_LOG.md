@@ -2348,3 +2348,19 @@ validation 在 `proposal_only` 和 `proposal_forward` 中选择了 `proposal_for
 ## 第 20.1 步：forward model / COMSOL feasibility planning
 
 19.x 后内部 geometry / basis / proposal / mask-logit refinement 路线已基本到达边界，继续围绕现有单条 Bz 和当前 decoder 做小修补不再是主线。下一阶段转向 forward model / COMSOL / 多观测数据可行性，目标是提高缺陷边界反演问题本身的可辨识性。
+
+---
+
+## 第 20.42-20.51 步：combined COMSOL V3 与 geometry-aware / forward-consistent 方法审计
+
+本节只记录阶段性路线结论，完整数值以对应 `results/summaries/` 和 `results/metrics/` 为准。
+
+第 20.42 将 single-defect、`component_count=2`、`component_count=3` 合并为 COMSOL_DATA_BASELINE_V3 candidate，并训练统一 lightweight mask-only decoder。数据包和 schema 通过 review，但 baseline acceptance 未通过：single 和 cc3 尚可，cc2 相比独立 `COMSOL_MULTI_DEFECT_DATA_BASELINE` 明显退化，说明 combined benchmark 的主要瓶颈不是数据读取，而是不同拓扑任务在单一 dense decoder 中互相干扰。
+
+第 20.43 单纯提升模型 capacity 后整体、cc2、cc3 都退化，证明“加宽普通 decoder”不能解决 combined V3 的 cc2 退化。第 20.44 / 20.45 的 topology-gated decoder 有一定方向信号，但本质仍是 weak topology-aware decoder patch：没有显式 geometry 参数、没有 differentiable rasterization、没有 predicted geometry -> forward Bz residual，也不是外部报告建议的 faithful implementation。20.46 方法审计后，停止继续 topology-gated decoder 小修补。
+
+第 20.47-revised 按 Piao 2019 思路做 Bz-only weak adaptation：从 multi-line `delta_bz` 提取 hand-crafted / NLS-style features，再用 SVR / KRR / Ridge 预测 2D/quasi-2D geometry 参数。该路线没有完整实现 RBC、三轴 NLS 或 LS-SVM，且 test all-3 type accuracy 与 rect/rot rasterized mask IoU/Dice 均不足，结论是 Bz-only handcrafted/NLS-style features + classical regressor 不足以稳定完成 geometry inversion。
+
+第 20.48 进入外部报告更推荐的路线：neural geometry head + PyTorch differentiable rotated-rectangle rasterization。它证明 geometry labels 与 rasterizer 没有 blocker，true geometry raster IoU 可达 1.0000，且显著优于 Piao weak adaptation；但 type accuracy 和 rotated angle prediction 仍不足。第 20.49 separate rect/rot heads 没有改善，说明简单拆分 head 可能带来分支样本不足。第 20.50 受控比较 5 个 geometry head 结构，best candidate 仍未超过 20.48，未找到能稳定减少 type confusion / angle error 的结构。
+
+第 20.51 将 delta_bz-derived physics features 与 lightweight forward surrogate consistency 接入 neural geometry head。结果显示 mask IoU/Dice 相比 20.48 / 20.50 有小幅提升，angle MAE 也有改善，但 type accuracy 仍低于门槛，wrong_type 仍是主要失败模式；Claude Code review 通过且认为没有实现 blocker，但不建议继续 direct neural geometry head 小修补。下一步优先转向 Priewald-style coarse-to-fine / forward-consistent low-dimensional refinement：先从 coarse mask / geometry proposal 出发，再在低维几何空间用 forward residual 精修，而不是继续直接从 Bz 一步预测所有 geometry 参数。
