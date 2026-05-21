@@ -1,0 +1,30 @@
+COMSOL rect/rot feature-forward geometry head failure audit summary
+
+Failure categories on test: {'acceptable_or_minor_error': 18, 'forward_surrogate_mismatch': 2, 'wrong_angle': 15, 'wrong_size': 7, 'wrong_type': 24}
+Type report on test: {'rect_precision': 0.6333333333333333, 'rect_recall': 0.5757575757575758, 'rotated_precision': 0.6111111111111112, 'rotated_recall': 0.6666666666666666, 'rect_as_rotated': 14.0, 'rotated_as_rect': 11.0}
+Forward residual test NRMSE: 0.451499
+
+Conclusion:
+- Candidate did not pass acceptance; stop direct head tuning and prefer Priewald-style coarse-to-fine refinement.
+
+Worst test cases:
+- rect_v9_0027: wrong_type, IoU=0.428, Dice=0.599, type=rectangular_notch->rotated_rect, angle_error=nan, forward_nrmse=0.292
+- rect_v9_0017: wrong_type, IoU=0.481, Dice=0.650, type=rectangular_notch->rotated_rect, angle_error=nan, forward_nrmse=0.803
+- rot_p3_0045: wrong_type, IoU=0.483, Dice=0.652, type=rotated_rect->rectangular_notch, angle_error=28.85, forward_nrmse=0.435
+- rect_v9_0014: wrong_type, IoU=0.485, Dice=0.653, type=rectangular_notch->rotated_rect, angle_error=nan, forward_nrmse=0.697
+- rect_v9_0034: wrong_type, IoU=0.498, Dice=0.664, type=rectangular_notch->rotated_rect, angle_error=nan, forward_nrmse=0.219
+- rect_p2_0068: wrong_size, IoU=0.498, Dice=0.665, type=rectangular_notch->rectangular_notch, angle_error=nan, forward_nrmse=0.495
+- rect_v9_0049: wrong_type, IoU=0.502, Dice=0.669, type=rectangular_notch->rotated_rect, angle_error=nan, forward_nrmse=0.566
+- rect_p2_0081: wrong_size, IoU=0.503, Dice=0.669, type=rectangular_notch->rectangular_notch, angle_error=nan, forward_nrmse=0.404
+- rect_v9_0016: wrong_type, IoU=0.509, Dice=0.675, type=rectangular_notch->rotated_rect, angle_error=nan, forward_nrmse=0.555
+- rect_v9_0044: wrong_type, IoU=0.512, Dice=0.677, type=rectangular_notch->rotated_rect, angle_error=nan, forward_nrmse=0.257
+- rot_v8_0033: wrong_type, IoU=0.514, Dice=0.679, type=rotated_rect->rectangular_notch, angle_error=9.69, forward_nrmse=0.567
+- rect_v9_0010: wrong_type, IoU=0.520, Dice=0.684, type=rectangular_notch->rotated_rect, angle_error=nan, forward_nrmse=0.331
+- rect_p2_0026: wrong_size, IoU=0.520, Dice=0.684, type=rectangular_notch->rectangular_notch, angle_error=nan, forward_nrmse=0.554
+- rect_v9_0038: forward_surrogate_mismatch, IoU=0.521, Dice=0.685, type=rectangular_notch->rectangular_notch, angle_error=nan, forward_nrmse=1.070
+- rot_v7_0017: wrong_type, IoU=0.522, Dice=0.686, type=rotated_rect->rectangular_notch, angle_error=17.01, forward_nrmse=0.732
+- rect_p2_0095: wrong_type, IoU=0.525, Dice=0.689, type=rectangular_notch->rotated_rect, angle_error=nan, forward_nrmse=0.520
+- rot_v9_0014: wrong_angle, IoU=0.531, Dice=0.694, type=rotated_rect->rotated_rect, angle_error=18.74, forward_nrmse=0.403
+- rect_p2_0089: wrong_size, IoU=0.550, Dice=0.710, type=rectangular_notch->rectangular_notch, angle_error=nan, forward_nrmse=0.457
+- rect_p2_0117: wrong_size, IoU=0.559, Dice=0.717, type=rectangular_notch->rectangular_notch, angle_error=nan, forward_nrmse=0.442
+- rect_p2_0118: wrong_size, IoU=0.577, Dice=0.731, type=rectangular_notch->rectangular_notch, angle_error=nan, forward_nrmse=0.431

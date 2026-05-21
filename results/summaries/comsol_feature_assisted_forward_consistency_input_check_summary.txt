@@ -1,0 +1,20 @@
+COMSOL feature-assisted forward-consistency input check summary
+
+Input NPZ: C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\prepared\comsol_single_defect_multiline_forward_pack_v1_pilot_v9_balanced_single_defect.npz
+Geometry labels: C:\Users\19166\Desktop\PINN_project\results\metrics\comsol_single_defect_geometry_labels.csv
+Physics features: C:\Users\19166\Desktop\PINN_project\results\metrics\comsol_mfl_physics_features.csv
+Scope: rectangular_notch + rotated_rect only; polygon parsed/reported but excluded.
+Feature policy: only delta_bz / sensor_x / scan_line_y derived features are used; no masks or geometry labels are feature inputs.
+Feature scaler policy: feature script writes z_ columns using train-only scaler; val/test reuse train statistics.
+Rasterizer policy: fixed PyTorch soft rotated-rectangle SDF, temperature=0.0005; prior true-geometry validation IoU=1.0000.
+
+rect+rot N: 400
+split counts: {'train': 268, 'val': 66, 'test': 66}
+type counts: {'rectangular_notch': 200, 'rotated_rect': 200}
+raw feature count: 231
+z feature count: 231
+Bz-only NLS-style raw feature count: 96
+NLS-style fit failure rate: 0.000000
+all features finite: True
+missing rect/rot feature rows: 0
+input check passed: True

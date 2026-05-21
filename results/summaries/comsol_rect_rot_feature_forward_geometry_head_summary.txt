@@ -1,0 +1,65 @@
+COMSOL rect/rot feature-assisted geometry head + lightweight forward consistency summary
+
+Input NPZ: C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\prepared\comsol_single_defect_multiline_forward_pack_v1_pilot_v9_balanced_single_defect.npz
+Geometry labels: C:\Users\19166\Desktop\PINN_project\results\metrics\comsol_single_defect_geometry_labels.csv
+Physics features: C:\Users\19166\Desktop\PINN_project\results\metrics\comsol_mfl_physics_features.csv
+Scope: rectangular_notch + rotated_rect only; polygon parsed/reported but excluded.
+Inverse model input: raw delta_bz and delta_bz-derived physics/NLS-style features only.
+Forbidden metadata is not used as inverse input: defect_type, geometry_params, source_pack, true angle, true size, mask.
+Labels are used only for supervision and metrics.
+This is a candidate, not a baseline; no COMSOL run, no new data, no baseline doc update.
+
+Forward surrogate:
+- best epoch = 16
+- val MSE/NRMSE/corr = 0.185878 / 0.464851 / 0.9355
+- frozen during inverse training
+- consistency uses predicted geometry vector, not true geometry
+
+Feature encoder:
+- feature_dim = 231
+- missing feature rows = 0
+- features are train-scaled z_ columns from the physics feature extractor.
+
+Inverse training:
+- device = cuda
+- seed = 42
+- inverse epochs = 200
+- best epoch = 4
+- selected threshold = 0.6
+- checkpoint and threshold selection use validation only.
+- validation score = IoU + Dice - area_error + 0.10*type_accuracy - 0.003*rotated_angle_mae_deg - 0.05*forward_nrmse.
+
+Mask metrics:
+- train IoU/Dice/area_error = 0.6571 / 0.7891 / 0.1515
+- val IoU/Dice/area_error = 0.6387 / 0.7748 / 0.2085
+- test IoU/Dice/area_error = 0.6138 / 0.7577 / 0.2227
+
+Type / geometry metrics:
+- test type accuracy = 0.6212
+- test rect precision / recall = 0.6333 / 0.5758
+- test rotated precision / recall = 0.6111 / 0.6667
+- test type confusion rect->rotated / rotated->rect = 14 / 11
+- test type entropy = 0.5058
+- test center MAE m = 0.001110
+- test width MAE m = 0.001907
+- test length MAE m = 0.001106
+- test depth MAE m = 0.000412
+- test rotated angle MAE deg = 18.5798
+
+Forward residual metrics:
+- train forward MSE/NRMSE/corr = 0.180715 / 0.462790 / 0.9382
+- val forward MSE/NRMSE/corr = 0.180157 / 0.451981 / 0.9348
+- test forward MSE/NRMSE/corr = 0.204021 / 0.451499 / 0.9363
+
+Comparisons:
+- 20.48 IoU/Dice/type/angle = 0.5908 / 0.7385 / 0.6364 / 20.14
+- 20.50 IoU/Dice/type/angle = 0.5877 / 0.7351 / 0.6515 / 20.73
+- gain vs 20.48 IoU/Dice/type/angle-improvement = 0.0230 / 0.0192 / -0.0152 / 1.56
+- gain vs 20.50 IoU/Dice/type/angle-improvement = 0.0261 / 0.0226 / -0.0303 / 2.15
+- Piao weak adaptation IoU/Dice = 0.4467 / 0.5499
+- Dense single-defect baseline IoU/Dice = 0.6515 / 0.7861
+
+Failure categories on test: {'acceptable_or_minor_error': 18, 'forward_surrogate_mismatch': 2, 'wrong_angle': 15, 'wrong_size': 7, 'wrong_type': 24}
+Preview PNG generated: 20 (not for submission)
+Candidate promising by acceptance criteria: False
+Next recommendation: B. Priewald-style coarse-to-fine refinement.
