@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-05-22 更新：第 20.56 后的下一步
+
+第 20.56 已生成小规模 local geometry perturbation forward-calibration pack，并完成 surrogate residual ordering audit。实际 COMSOL pack 是 96 行 partial pack（12 个 base，train/val/test = 64/16/16，rect/rot = 48/48），84 行为真实 COMSOL forward，12 行 true reference 复用原始 NPZ；`delta_bz = bz_defect - bz_no_defect` 校验通过。
+
+关键结论是：COMSOL oracle residual 的 val/test ordering accuracy 为 `0.6607 / 0.8393`，选中的 `S1_perturb_geom_mlp` surrogate 的 val/test ordering accuracy 为 `0.7321 / 0.8036`，mismatch_rate 为 `0.2679 / 0.1964`，较 20.55 明显改善。这说明 perturbation forward data 对 surrogate mismatch 有帮助，下一步可以回到 **controlled Priewald-style refinement retry**，但必须继续把它作为 POC/candidate，不更新 baseline。
+
+限制也很明确：当前 pack 只有 96/192 行，且 selected surrogate 的 test residual-error correlation 仍为负（`-0.0462`）。因此下一步不要直接扩大为正式路线，也不要继续训练新的 direct geometry head；应先用 perturbation-calibrated surrogate 做一次受控 refinement retry，观察 residual ordering 是否能转化为 mask / geometry 改善。如果 retry 仍出现 residual 下降但 mask 退化，则优先扩 perturbation data 或转向 mask/profile basis refinement。
+
 ## 当前状态
 
 `CURRENT_BASELINE` 仍以 [CURRENT_BASELINE.md](CURRENT_BASELINE.md) 为准：

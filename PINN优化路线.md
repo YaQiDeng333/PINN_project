@@ -1,5 +1,11 @@
 # PINN 优化路线
 
+## 2026-05-22 路线同步：20.56 perturbation forward calibration
+
+第 20.56 把 20.55 的 forward surrogate mismatch 问题拆成两个问题验证：真实 COMSOL residual 是否能排序局部几何质量，以及 surrogate 是否能学到这种排序。结果显示，在 rect/rot local perturbation partial pack（96 行，84 行真实 COMSOL forward）上，COMSOL oracle residual 的 val/test ordering accuracy 为 `0.6607 / 0.8393`，选中的 `S1_perturb_geom_mlp` 的 val/test ordering accuracy 为 `0.7321 / 0.8036`，mismatch_rate 相比 20.55 明显降低。
+
+这说明当前 Priewald-style 路线的瓶颈不是“forward residual 完全无信息”，而是原先 surrogate 缺少围绕同一几何样本的局部扰动校准数据。后续如果继续 refinement，应使用 perturbation-calibrated surrogate 做受控 retry，并继续记录 residual-ordering、mask/geometry improvement 和 surrogate mismatch。由于当前 pack 仍是 96/192 partial pack，且 test residual-error correlation 仍为负，不能把 20.56 写成 baseline，也不能直接扩大为正式方法结论。
+
 ## 当前路线同步：第 20 阶段 forward data / COMSOL pilot
 
 当前 `CURRENT_BASELINE` 仍是 v3_complex mask-only grid decoder + forward consistency `lambda_forward=0.10` + validation-selected threshold `0.80`。第 18.x / 19.x 已经说明继续做 decoder、loss、threshold、geometry、basis 或 refinement 小修补收益不足。

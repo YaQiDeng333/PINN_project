@@ -1,0 +1,21 @@
+COMSOL rect/rot perturbation residual objective audit summary
+
+Question 1: Does real COMSOL oracle residual rank geometry quality?
+- val/test oracle ordering accuracy = 0.660714 / 0.839286
+- val/test oracle residual-error correlation = 0.499654 / 0.419195
+
+Question 2: Does surrogate residual approximate oracle ordering?
+- selected surrogate = S1_perturb_geom_mlp
+- val/test surrogate ordering accuracy = 0.732143 / 0.803571
+- val/test surrogate-vs-oracle residual correlation = 0.322838 / 0.587107
+
+Question 3: Is prior surrogate mismatch caused by lack of perturbation data?
+- selected val mismatch rate = 0.267857; 20.55 S2 val mismatch = 0.303000
+- selected test mismatch rate = 0.196429; 20.55 S2 test mismatch = 0.393900
+
+Question 4: Is local perturbation forward data enough to make surrogate useful?
+- usable gate passed = True
+- caveat: selected test residual-error correlation = -0.046164; treat next refinement as controlled retry, not baseline evidence.
+
+Question 5: Recommended next step:
+- A. Use the perturbation-calibrated surrogate in a controlled Priewald refinement retry.

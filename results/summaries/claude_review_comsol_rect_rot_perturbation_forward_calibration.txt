@@ -1,0 +1,122 @@
+ÿþAll data integrity verified. Now I can produce the full audit. Here's the comprehensive review:
+
+---
+
+# COMSOL Local Perturbation Forward-Calibration Pack + Surrogate Residual Ordering Audit
+
+## Q1: Perturbation plan balanced? Polygon included?
+
+**Pass with scope note.** The plan is balanced across rect/rot (96/96 rows) and split (train 128, val 32, test 32). Polygon is **explicitly excluded**   this is an intentional scope decision, not a bug. The `MAIN_TYPES` tuple at `design_comsol_rect_rot_local_perturbation_plan.py:22` gates to only `rectangular_notch` and `rotated_rect`. The plan is self-consistent: 24 bases × 8 variants = 192 rows. Coverage-based selection (`select_coverage_indices`) ensures geometric diversity within each (split, defect_type) group.
+
+## Q2: Fake Bz / signal summation in COMSOL pack?
+
+**Pass.** The COMSOL generation script (`generate_mfl_rect_rot_local_perturbation_forward_pack.py`) declares a strict policy (lines 12-15 of its summary):
+- `delta_bz = bz_defect - bz_no_defect` for every row
+- No fake Bz, no signal summation, no predicted Bz
+- Verified: `np.allclose(delta_bz, bz_defect - bz_no_defect)` returns `True` across all 96 rows
+- `delta_matches_defect_minus_reference: True` for every inventory entry
+
+## Q3: true_geometry_reference reused or generated?
+
+**Pass.** 12 rows are `true_geometry_reference`   all reuse the original pilot_v9 NPZ arrays (`bz_no_defect`, `bz_defect`, `delta_bz`, `mask`) directly. Marked `reused_true_reference=true`, `generated_real_forward=False`. Verified in NPZ: `reference_observed_delta_bz == delta_bz` exactly for these 12 rows (`allclose` passes).
+
+## Q4: delta_bz = bz_defect - bz_no_defect verification?
+
+**Pass.** Two independent checks:
+1. COMSOL generator: `np.allclose(delta, bz_def - bz_no, rtol=1e-9, atol=1e-12)` per row (line 243)
+2. Direct NPZ verification: `np.allclose(data['delta_bz'], data['bz_defect'] - data['bz_no_defect'])` ’! `True`
+
+The single no-defect reference field (`bz_reference`) is computed once from a shared no-defect model and reused (`bz_no = bz_reference.copy()`) for each perturbed geometry   correct for this setup since perturbations are local geometry changes that don't affect the no-defect baseline.
+
+## Q5: Split leakage? Base sample preservation?
+
+**Pass.** Each perturbation variant inherits its base sample's `split` assignment. The COMSOL pack has 64 train / 16 val / 16 test   exactly 12 bases (8 train, 2 val, 2 test) × 8 variants. No cross-split leakage: all 8 variants of a given base stay in the same split. The surrogate trainer respects these split boundaries for train/val/test.
+
+## Q6: Surrogate training   val/test also from perturbation pack?
+
+**Pass with context.** Train (64), val (16), and test (16) all come from the perturbation pack. This is the correct design for this experiment: the question is *"can the surrogate learn to rank geometry quality within a local perturbation neighborhood?"* Using held-out **bases** for val/test (not held-out perturbation variants of seen bases) means the surrogate must generalize to completely unseen base geometries and their perturbation families.
+
+## Q7: Surrogate predicts observed delta_bz vs COMSOL delta_bz?
+
+**Pass.** The surrogate is trained to predict `delta_bz` (COMSOL-computed, line 248), NOT `reference_observed_delta_bz`. The observed delta_bz is used **only** in the residual objective: `residual_nrmse(surrogate_prediction, reference_observed_delta_bz)`. This is the correct design: the surrogate learns the forward map (geometry ’! field), and the residual between predicted field and observed field is used to rank geometry candidates.
+
+## Q8: Oracle vs surrogate residual ordering results?
+
+**Mixed but honestly reported.** Key numbers:
+
+| Metric | Oracle | S1 (geom_mlp) | S2 (geom_mask_mlp) |
+|---|---|---|---|
+| Val ordering accuracy | 0.661 | **0.732** | 0.625 |
+| Test ordering accuracy | 0.839 | 0.804 | 0.768 |
+| Val mismatch rate | 0.339 | 0.268 | 0.375 |
+| Test mismatch rate | 0.161 | 0.196 | 0.232 |
+| Val residual-error corr | 0.500 | 0.390 | 0.207 |
+| Test residual-error corr | 0.419 | **-0.046** | -0.046 |
+
+**Key observation:** S1 surrogate actually **beats oracle on val ordering** (0.732 vs 0.661). This is plausible if COMSOL has numerical noise that the surrogate smooths out. But the **negative residual-error correlation on test** (-0.046) is a red flag: the surrogate residual magnitude does not linearly correlate with geometry error on unseen bases. The summary correctly flags this: *"test residual-error correlation = -0.046; treat next refinement as controlled retry, not baseline evidence."*
+
+## Q9: Waveform fit vs residual ranking ability gap?
+
+**Identified.** S1 achieves val NRMSE=0.367 (decent waveform fit) and val ordering=0.732 (good pairwise ranking), but val residual-error corr=0.39 (weak continuous correlation) and test residual-error corr=-0.046 (essentially zero/negative). The gap is: **pairwise "better/worse" works, but "how much better" doesn't**. The residual magnitude is not a reliable continuous proxy for geometry error on unseen data. This is called out in the audit summary line: *"this POC primarily validates pairwise local ordering; residual-error correlation can still be split-sensitive on the small partial pack."*
+
+## Q10: Ready for Priewald refinement?
+
+**Conditional yes.** S1 passes all usability gates:
+- Oracle val ordering e" 0.60: ' (0.661)
+- Surrogate val ordering > 0.50: ' (0.732)
+- Val mismatch < 20.55 S2 baseline (0.303): ' (0.268)
+- Test ordering doesn't collapse: ' (0.804)
+- Val residual-error corr > 0.05: ' (0.390)
+- Test residual-error corr > 0.05: **' (-0.046)**
+
+The acceptance section flags this honestly: *"- residual-error correlation positive on test: False"*. The recommendation is appropriately scoped   **use for a controlled Priewald retry, not production**.
+
+## Q11: Baseline docs / inspection?
+
+**Present but from a different branch of work.** `scripts/visualize_current_baseline.py` exists (untracked). It targets the v3_complex test set with the mask-boundary + forward consistency baseline (not the perturbation surrogate). This is a **mask-to-Bz inverse** pipeline, not the forward surrogate from this pack. It is unrelated to the perturbation pack audit and appears to be in-progress work.
+
+## Q12: Reproducible artifacts?
+
+**Mostly complete at 50% scale.**
+
+| Artifact | Status | Path |
+|---|---|---|
+| Plan CSV | 192 rows ' | `results/metrics/comsol_rect_rot_local_perturbation_plan.csv` |
+| COMSOL inventory CSV | 96 rows ' | COMSOL repo `results/inventory_...v1.csv` |
+| Prepared NPZ | 96 rows (3,201) ' | `data/comsol_mfl/prepared/comsol_rect_rot_local_perturbation_forward_pack_v1.npz` |
+| Per-sample .mph | 84 generated ' | COMSOL repo `comsol_models/mfl_rect_rot_local_perturbation_forward_pack_v1/` |
+| Surrogate summary | ' | `results/summaries/comsol_rect_rot_perturbation_forward_surrogate_summary.txt` |
+| Residual audit summary | ' | `results/summaries/comsol_rect_rot_perturbation_residual_objective_audit_summary.txt` |
+| Candidates CSV | ' | `results/metrics/comsol_rect_rot_perturbation_forward_surrogate_candidates.csv` |
+| Ordering audit CSV | ' | `results/metrics/comsol_rect_rot_perturbation_forward_surrogate_ordering_audit.csv` |
+| Residual objective audit CSV | ' | `results/metrics/comsol_rect_rot_perturbation_residual_objective_audit.csv` |
+| Preview PNG | ' Missing |   |
+| Raw CSV exports | ' Missing |   |
+
+---
+
+## Critical finding: Partial pack at 50% scale
+
+The plan designed 192 rows (24 bases), but the COMSOL generator produced only 96 rows (12 bases). The COMSOL summary confirms `target_full_192_ready: False`. At `max_base_samples=24`, the `select_plan_rows` logic would select all 24 bases (since `24 >= 24` triggers the `all` fallback at line 176), producing 192 rows. The actual 96-row output implies the script was run with a lower `--max-base-samples` value (likely 12). This is a **significant coverage gap**: only 12 of 24 planned perturbation families were forward-solved.
+
+## Pipeline integrity
+
+The data pipeline **is self-consistent at its actual scale**:
+
+```
+design_plan (192 rows planned)
+  ’! COMSOL generator (96 rows solved, 84 real + 12 reused)
+    ’! prepared NPZ (96 rows, all integrity checks pass)
+      ’! surrogate trainer (S1/S2 MLPs, 64/16/16 split)
+        ’! residual ordering audit (oracle + surrogate)
+```
+
+No schema mismatches between stages. NPZ keys, geometry param field names (`center_x_m`, `width_m`, `depth_m`, etc.), and split assignments all align end-to-end.
+
+## Surrogate key gap: S1 beats S2
+
+S1 (geometry-only MLP) outperforms S2 (geometry + mask features MLP) on ordering (0.732 vs 0.625 val) despite S2 having strictly more input information. The mask features appear to introduce noise rather than signal at this data scale. This is correctly reflected in the selection: S1 is chosen as the usable surrogate.
+
+## Overall verdict
+
+**The pack is honest and internally consistent.** The 12 audit questions are all addressed correctly in the artifacts. The main limitation is the 50% scale gap (96 vs 192 planned rows), which likely contributes to the weak/negative test residual-error correlation. The recommendation to proceed with a controlled Priewald retry using S1 is appropriate, with the caveat that this is a POC, not production-ready.
