@@ -1,0 +1,8 @@
+COMSOL rect/rot profile basis representation audit summary
+
+1. Profile basis is more flexible than a single rotated box, and no-forward refinement can recover test IoU/Dice near the dense initializer while remaining low-dimensional.
+2. Test profile forward-refined IoU/Dice: 0.6620 / 0.7938.
+3. Forward residual helped in profile space: False.
+4. Compared with 20.57 rect/rot refinement, profile basis improves test IoU/Dice by +0.0128 / +0.0109.
+5. Compared with 20.54 extracted rotated-box geometry, profile basis changes test IoU/Dice by -0.0106 / -0.0079.
+6. Remaining failure is attributed to profile-compatible surrogate mismatch if forward does not win, otherwise to area/roughness trade-off.

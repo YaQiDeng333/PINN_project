@@ -1,0 +1,5 @@
+check,status,value,notes
+rect_rot_subset_count,pass,400,
+rect_rot_split,pass,"{'train': 268, 'val': 66, 'test': 66}",
+dense_initializer_test_iou,pass,0.6625480785622264,"Dense initializer is a proposal generator only, not a baseline."
+polygon_excluded,pass,"{'rectangular_notch': 200, 'rotated_rect': 200}",

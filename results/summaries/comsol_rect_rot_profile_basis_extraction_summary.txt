@@ -1,0 +1,17 @@
+COMSOL rect/rot profile basis extraction summary
+
+Scope: profile/basis proposal extraction from predicted dense mask/probability only; true mask is used only for validation selection and final metrics.
+Dense initializer source: in-memory 20.54 strong dense initializer protocol; selected threshold=0.9; no checkpoint written.
+Depth proxy: train-only raw-geometry median physical depth = 0.0015 m; used only for profile-to-forward-surrogate compatibility, not mask extraction.
+Candidate methods: ['P1_hardmask_profile', 'P2_prob_weighted_profile', 'P3_hybrid_profile']
+Selected method by validation score: P1_hardmask_profile
+
+Candidate validation summary:
+- P1_hardmask_profile: IoU/Dice/area_error=0.6843/0.8106/0.1665, fallback=0.0000, score=1.3284
+- P2_prob_weighted_profile: IoU/Dice/area_error=0.6758/0.8044/0.1824, fallback=0.0000, score=1.2979
+- P3_hybrid_profile: IoU/Dice/area_error=0.6734/0.8026/0.1919, fallback=0.0000, score=1.2842
+
+Selected train dense/profile IoU/Dice/area_error: 0.6898/0.8137/0.1647 -> 0.6751/0.8035/0.1697
+Selected val dense/profile IoU/Dice/area_error: 0.6894/0.8138/0.1645 -> 0.6843/0.8106/0.1665
+Selected test dense/profile IoU/Dice/area_error: 0.6625/0.7947/0.2225 -> 0.6589/0.7921/0.2170
+Profile extraction usable for refinement gate: True

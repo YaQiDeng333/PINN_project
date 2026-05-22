@@ -1,5 +1,13 @@
 # PINN 优化路线
 
+## 2026-05-22 路线同步：20.58 mask/profile basis refinement
+
+第 20.58 将第 20.57 否定的 single rect/rot low-dimensional refinement，替换为从 dense/coarse initializer 提取的 K=8 mask/profile basis 表示。该路线的目标是避免单个 rotated rectangle 参数空间过窄，同时不回到完全自由的 dense mask decoder。
+
+结果显示 profile basis 有边际价值：profile extraction 基本保留 dense proposal，no-forward profile refinement 在 test 上达到 `0.6697 / 0.8002 / 0.2196`，好于第 20.57 calibrated rect/rot refinement `0.6492 / 0.7829 / 0.2417`，也接近第 20.54 strong dense initializer。它说明 profile/basis 表示能作为更柔性的低维形状空间，但尚未稳定超过第 20.54 extracted rotated-box proposal `0.6726 / 0.8017 / 0.1945`。
+
+更关键的是 forward profile refinement 的 validation sweep 选择了 `lambda_forward=0.0`，说明当前 S1 perturbation-calibrated surrogate 通过 lossy profile-to-rect summary 接入后，不能可靠驱动 profile-space optimization。路线判断因此更新为：当前瓶颈不是再换一个更复杂的 shape basis，而是需要 profile-compatible forward surrogate 或 richer observations。继续在 current surrogate + current profile space 上调 steps、lr、lambda_forward 意义有限；下一步若继续 geometry/refinement route，应优先改进 forward surrogate 的输入表示和 residual calibration，而不是继续增加 direct geometry head 或单 box refinement 变体。
+
 ## 2026-05-22 路线同步：20.57 calibrated refinement retry
 
 第 20.57 验证了一个关键负面结果：第 20.56 的 perturbation-calibrated `S1_perturb_geom_mlp` 虽然能复现较好的 pairwise residual ordering（val/test `0.7321 / 0.8036`），但把它放进连续低维 Priewald-style refinement 后，mask / geometry 指标没有同步改善。以第 20.54 的 strong dense/extracted proposal 为初值，test geometry-raster IoU/Dice 从 `0.6726 / 0.8017` 下降到 `0.6492 / 0.7829`；forward residual 继续下降，但 mismatch_rate 达到 `0.6212`，residual reduction 与 IoU/Dice delta 呈负相关。

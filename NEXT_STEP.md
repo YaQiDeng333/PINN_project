@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-05-22 更新：第 20.58 后的下一步
+
+第 20.58 已完成 mask/profile basis refinement POC。profile extraction 从 predicted dense mask/probability 中提取 K=8 profile 表示，validation 选择 `P1_hardmask_profile`；profile-extracted test IoU/Dice/area_error 为 `0.6589 / 0.7921 / 0.2170`。no-forward profile refinement 只拟合 dense initial probability 并加 smoothness / area / bounds prior，test 提升到 `0.6697 / 0.8002 / 0.2196`，说明 profile basis 相比第 20.57 的 single rotated-box refinement 更稳，但没有稳定超过第 20.54 extracted rotated-box proposal `0.6726 / 0.8017 / 0.1945`。
+
+forward profile refinement 已执行受控 sweep，但 validation 选择 `lambda_forward=0.0`，test 为 `0.6620 / 0.7938 / 0.2243`。这说明当前第 20.56/20.57 的 S1 surrogate 通过 lossy profile-to-rect summary 接入后，不能作为可靠的 profile-space forward consistency 约束。Claude Code review 通过且无必须修复；审查结论是不建议继续在当前 surrogate-dependent profile refinement 上小调。
+
+当前下一步唯一优先级：**改进 profile-compatible forward surrogate**。如果继续 profile/basis 路线，应先让 forward model 直接接受 profile/basis 或 rasterized-profile derived features，而不是把 profile 压回单个 rect/rot summary；否则应暂停 geometry/refinement route，等待更丰富观测或更强 forward data。仍不更新 `CURRENT_BASELINE.md`，也不创建新的 COMSOL baseline 文档。
+
 ## 2026-05-22 更新：第 20.57 后的下一步
 
 第 20.57 已完成 perturbation-calibrated surrogate 的受控 Priewald-style refinement retry。`S1_perturb_geom_mlp` 按第 20.56 protocol 重训于内存中，recovery 指标与 20.56 对齐：val/test waveform NRMSE 为 `0.3666 / 0.4289`，residual ordering accuracy 为 `0.7321 / 0.8036`，mismatch_rate 为 `0.2679 / 0.1964`。

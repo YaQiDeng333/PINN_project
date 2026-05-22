@@ -1,5 +1,15 @@
 # 实验工作日志
 
+## 2026-05-22 更新：第 20.58 mask/profile basis refinement POC
+
+第 20.58 在第 20.57 否定当前 rect/rot low-dimensional Priewald 小调路线后，改为从 strong dense/coarse initializer 的预测 mask 中提取 K=8 profile/basis 表示。该轮不运行 COMSOL、不生成新数据、不训练 direct geometry head，也不更新任何 baseline。
+
+输入检查通过：rect+rot subset 仍为 400，split 为 train/val/test = 268/66/66；dense initializer 只按 20.54 protocol 在内存中复现作为 proposal generator，不写 checkpoint。profile extraction 只比较 P1/P2/P3 三个方法，并由 validation 选择 `P1_hardmask_profile`。最新一次输出中，dense mask test IoU/Dice/area_error 为 `0.6625 / 0.7947 / 0.2225`，profile-extracted mask 为 `0.6589 / 0.7921 / 0.2170`，说明 profile 投影基本保留了 dense proposal 的主要形状，但没有超过第 20.54 的 extracted rotated-box geometry `0.6726 / 0.8017 / 0.1945`。
+
+no-forward profile refinement 只使用 dense initial probability、smoothness、area/bounds prior，不使用 true mask / true geometry 做 optimization。validation 选择 `lambda_smooth=0.01`；test 从 `0.6589 / 0.7921 / 0.2170` 改为 `0.6697 / 0.8002 / 0.2196`，说明 profile basis 本身有边际价值，且明显好于第 20.57 的 rect/rot calibrated refinement `0.6492 / 0.7829 / 0.2417`。但它仍只是接近、没有稳定超过第 20.54 extracted rotated-box proposal。
+
+forward profile refinement 使用第 20.56/20.57 的 S1 surrogate 时只做谨慎 sweep，并保留 `lambda_forward=0` 对照。validation 最终选择 `lambda_forward=0.0, steps=50, lr=0.003`；test post-refine 为 `0.6620 / 0.7938 / 0.2243`，forward residual 未被选择为有效约束。Claude Code review 通过且无必须修复；结论是 mask/profile basis 有边际表示价值，但当前 profile-compatible forward surrogate 不足，继续增加 profile 表示复杂度前应优先解决 forward surrogate mismatch，或暂停 surrogate-dependent refinement。
+
 ## 主线同步补充：第 20.x forward data augmentation / COMSOL 数据阶段
 
 第 18.x / 19.x 的内部模型、几何参数化、basis、profile、proposal refinement 和 mask-logit refinement 已基本收口，均未替代当前 `CURRENT_BASELINE`。第 20 阶段的主线已经转向 forward 数据增强和 COMSOL multi-line forward data，目标是提高 MFL 反演问题本身的可辨识性，而不是继续调 decoder / loss / threshold。

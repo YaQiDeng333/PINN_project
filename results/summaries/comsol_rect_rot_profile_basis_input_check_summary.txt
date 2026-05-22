@@ -1,0 +1,8 @@
+COMSOL rect/rot profile basis input check summary
+
+No COMSOL run and no new data generation. Dense initializer is retrained in memory using 20.54 protocol only as proposal generator.
+Input NPZ: C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\prepared\comsol_single_defect_multiline_forward_pack_v1_pilot_v9_balanced_single_defect.npz
+Rect+rot subset / split: 400 / {'train': 268, 'val': 66, 'test': 66}
+Dense initializer selected threshold: 0.9
+Dense train/val/test IoU/Dice/area_error: 0.6898/0.8137/0.1647; 0.6894/0.8138/0.1645; 0.6625/0.7947/0.2225
+Input check passed: True
