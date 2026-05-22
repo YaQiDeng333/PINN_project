@@ -1,0 +1,12 @@
+COMSOL profile perturbation residual objective audit summary
+
+Question 1: Does real COMSOL oracle residual rank profile quality?
+- Validation oracle ordering accuracy = 0.678571; test = 0.535714.
+Question 2: Does surrogate residual approximate oracle ordering?
+- Selected PPF1_profile_station_mlp validation surrogate ordering = 0.660714; test = 0.214286.
+Question 3: Was the 20.59 failure caused by lack of profile-native perturbation data?
+- Evidence is incomplete: the pack is profile-native, but one or more validation gates remain weak.
+Question 4: Is profile perturbation forward data enough to make surrogate useful?
+- Yes for waveform fit if NRMSE/correlation are stable; residual ordering usefulness follows the gate result above.
+Question 5: Next step?
+- Expand profile perturbation data or improve the profile surrogate; do not run another refinement small tweak yet.

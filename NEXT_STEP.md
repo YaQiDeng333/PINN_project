@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-05-22 更新：第 20.60 后的下一步
+
+第 20.60 已完成 profile perturbation forward pack + profile-compatible surrogate calibration POC。按修正版 row-count gate，COMSOL 侧生成 minimum partial pack：`total_rows=96`，`reused_original_rows=12`，`real_comsol_forward_rows=84`，represented base samples = 12，split = 64/16/16，rect/rot = 48/48，8 类 profile variant 各 12 行。`true_reference` 行只作为 residual ordering anchor 复用 pilot_v9 原始数组，不计入真实 COMSOL forward rows；真实生成行使用 profile polygon geometry，delta check 通过。
+
+profile-native surrogate 的 waveform fit 可以接受但 residual ordering 不足。validation 选中 `PPF1_profile_station_mlp`，val/test NRMSE/correlation 为 `0.4396 / 0.8990` 和 `0.3758 / 0.9274`；但 oracle residual ordering val/test 只有 `0.6786 / 0.5357`，selected surrogate residual ordering 为 `0.6607 / 0.2143`，mismatch_rate 为 `0.3393 / 0.7857`。因此第 20.60 没有进入 profile-forward refinement，也不更新任何 baseline。
+
+当前下一步唯一优先级：**扩 profile perturbation data**。需要优先增加 base sample 覆盖，尤其是 val/test base 数，重新检查 oracle residual 是否能稳定排序 profile quality；若 oracle ordering 仍弱，则应转向 richer observations / multi-axis / multi-height 或保留 no-forward profile basis，不应继续对当前 profile-forward surrogate 做小幅架构或 loss 微调。仍不更新 `CURRENT_BASELINE.md`，不创建或修改 COMSOL baseline 文档。
+
 ## 2026-05-22 更新：第 20.58 后的下一步
 
 第 20.58 已完成 mask/profile basis refinement POC。profile extraction 从 predicted dense mask/probability 中提取 K=8 profile 表示，validation 选择 `P1_hardmask_profile`；profile-extracted test IoU/Dice/area_error 为 `0.6589 / 0.7921 / 0.2170`。no-forward profile refinement 只拟合 dense initial probability 并加 smoothness / area / bounds prior，test 提升到 `0.6697 / 0.8002 / 0.2196`，说明 profile basis 相比第 20.57 的 single rotated-box refinement 更稳，但没有稳定超过第 20.54 extracted rotated-box proposal `0.6726 / 0.8017 / 0.1945`。

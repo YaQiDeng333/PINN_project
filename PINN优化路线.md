@@ -1,5 +1,13 @@
 # PINN 优化路线
 
+## 2026-05-22 路线同步：20.60 profile perturbation forward calibration
+
+第 20.60 将第 20.59 的结论进一步落地：如果要让 forward residual 支撑 profile-basis refinement，校准数据必须围绕 profile representation 本身，而不是继续复用 rect/rot geometry perturbation。为此本轮设计了 24 base / 192 rows 的 profile perturbation plan，并在 COMSOL 侧按 minimum partial 生成 12 base / 96 rows forward pack，其中 84 行是真实 profile polygon COMSOL forward，12 行 `true_reference` 复用原始 pilot_v9 作为 residual anchor。
+
+该实验确认了两点。第一，profile polygon generation 和 forward-pack schema 本身可行：split/type/variant coverage 达到 minimum partial，`delta_bz = bz_defect - bz_no_defect` 校验通过，且没有把 profile perturbation 退回 single rotated box。第二，当前数据规模仍不足以支撑 profile-forward refinement：`PPF1_profile_station_mlp` 的 waveform val/test NRMSE 为 `0.4396 / 0.3758`，但 residual ordering test collapse 到 `0.2143`，mismatch_rate 达到 `0.7857`；同时 COMSOL oracle residual test ordering 也只有 `0.5357`，说明在当前 2 个 test base 的 partial pack 上，真实 residual 对 profile quality 的排序信号也不稳定。
+
+路线判断因此更新为：profile-compatible surrogate 方向没有被实现错误否定，但当前 partial pack 不能支撑 profile-forward refinement retry。下一步若继续 forward-guided profile route，必须先扩大 profile perturbation data，特别是增加 val/test base 覆盖并重新验证 oracle ordering；若扩展后 oracle residual 仍弱，则主要瓶颈可能是观测 non-identifiability，需要 richer observations / multi-axis / multi-height，而不是继续调 surrogate architecture 或 refinement loss。第 20.60 仍是 POC，不更新 baseline。
+
 ## 2026-05-22 路线同步：20.58 mask/profile basis refinement
 
 第 20.58 将第 20.57 否定的 single rect/rot low-dimensional refinement，替换为从 dense/coarse initializer 提取的 K=8 mask/profile basis 表示。该路线的目标是避免单个 rotated rectangle 参数空间过窄，同时不回到完全自由的 dense mask decoder。

@@ -1,0 +1,11 @@
+第 20.60 Claude Code review verdict
+
+Claude Code review 已在终端调用。Claude 的原始输出较长且未严格遵守七项格式；本文件保留 review verdict 摘要。
+
+- 必须修复：无。
+- 建议修复：当前 profile perturbation pack 只有 12 个 base / 96 rows，val/test 每侧 base 数偏少；若继续 profile-forward route，应先扩大 profile perturbation data，特别是增加 validation / test base 覆盖，并重新验证 oracle residual ordering。
+- 可以接受：可以接受。review 认为 preflight、profile-native plan、真实 COMSOL forward、true_reference reused 标记、delta check、split preservation、surrogate train/val/test 隔离、未运行 refinement、未改 baseline docs、未提交 data/NPZ/checkpoint/preview PNG/.mph/raw CSV 的边界均可接受。
+- 是否认为 profile perturbation forward data 有助于解决 profile surrogate mismatch：有局部帮助，但证据不足。validation residual-error correlation 为正，说明 profile-native perturbation data 提供了比 20.59 更直接的校准信号；但 selected surrogate 在 test 上 ordering collapse，不能证明 mismatch 已解决。
+- 是否建议下一步回到 profile-forward refinement：不建议立即回到 refinement。当前 Stage C gate=False，profile-forward refinement 应继续跳过。
+- 下一步更建议什么：扩大 profile perturbation data；如果扩展后 oracle residual ordering 仍弱，再转向 richer observations / multi-axis / multi-height 或保留 no-forward profile basis。
+- 简短原因：本轮 pipeline 和数据边界正确，COMSOL pack 达到 minimum partial gate；但 `PPF1_profile_station_mlp` 的 test residual ordering accuracy 只有 0.2143、mismatch_rate 0.7857，且 oracle test ordering 也只有 0.5357。当前数据规模和残差排序信号不足以支撑 profile-forward refinement。

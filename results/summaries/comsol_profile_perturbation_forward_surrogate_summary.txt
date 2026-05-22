@@ -1,0 +1,36 @@
+COMSOL profile perturbation forward surrogate calibration summary
+
+No profile refinement, no inverse model training, no checkpoint writing, and no baseline update.
+Inputs are profile-native parameters and optional profile raster features; observed base delta_bz is not a model input.
+
+total_rows: 96
+reused_original_rows: 12
+real_comsol_forward_rows: 84
+represented_base_samples: 12
+rows_by_split: {'train': 64, 'val': 16, 'test': 16}
+rows_by_source_defect_type: {'rectangular_notch': 48, 'rotated_rect': 48}
+rows_by_variant: {'true_reference': 12, 'profile_extracted_reference': 12, 'half_width_shrink_local': 12, 'half_width_expand_local': 12, 'smooth_global_width_scale': 12, 'centerline_offset_small': 12, 'roughness_noise': 12, 'mixed_profile_perturbation': 12}
+
+selected_candidate: PPF1_profile_station_mlp
+selected_by_validation_score: 0.323549
+stage_c_gate_passed: False
+
+Waveform metrics for selected candidate:
+- train: NRMSE=0.314147, corr=0.949379, MAE=7.486336e-05, peak_index_error=30.786
+- val: NRMSE=0.439634, corr=0.898950, MAE=1.025646e-04, peak_index_error=23.792
+- test: NRMSE=0.375849, corr=0.927385, MAE=9.024643e-05, peak_index_error=32.292
+
+Ordering metrics for selected candidate:
+- train: oracle_ordering=0.549107, surrogate_ordering=0.580357, mismatch_rate=0.419643, residual_error_corr=-0.133894
+- val: oracle_ordering=0.678571, surrogate_ordering=0.660714, mismatch_rate=0.339286, residual_error_corr=0.570280
+- test: oracle_ordering=0.535714, surrogate_ordering=0.214286, mismatch_rate=0.785714, residual_error_corr=-0.716693
+
+Gate criteria:
+- oracle ordering should not be poor on validation.
+- validation surrogate ordering should be meaningfully above random.
+- validation mismatch_rate should be materially below 20.59 value 0.3393.
+- validation residual-error correlation should be non-negative and meaningful.
+- test ordering audit should not collapse.
+
+Conclusion:
+The selected surrogate did not pass all usability gates; do not run profile refinement in this stage.

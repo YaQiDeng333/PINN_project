@@ -1,5 +1,17 @@
 # 实验工作日志
 
+## 2026-05-22 更新：第 20.60 profile perturbation forward pack + profile surrogate calibration
+
+第 20.60 按修正版 gate 执行 profile-native perturbation forward calibration POC，不训练 inverse model，不运行 refinement，不更新 baseline。Stage 0 先完成 multi-agent preflight：结论是 profile perturbation forward data 符合 Priewald-style forward-model / profile-basis 路线，20.59 只否定了现有 profile surrogate 的 validation gate，没有否定 profile-native perturbation 数据本身；但必须严格区分 true reference 复用行和真实 COMSOL forward 行。
+
+Stage A 在 rect/rot 子集上生成 24 个 base sample、192 行 profile perturbation plan，split 为 train/val/test = 128/32/32 rows，rect/rot = 96/96，每个 base 覆盖 8 类 variant：`true_reference`、`profile_extracted_reference`、`half_width_shrink_local`、`half_width_expand_local`、`smooth_global_width_scale`、`centerline_offset_small`、`roughness_noise`、`mixed_profile_perturbation`。K=8 profile stations 被转换为 16-vertex top-view polygon，polygon validity、non-empty mask、variant completeness 均通过。
+
+Stage B 在 COMSOL 仓库按 minimum acceptable partial 生成 forward pack：`total_rows=96`，`reused_original_rows=12`，`real_comsol_forward_rows=84`，represented base samples = 12，split = 64/16/16，rect/rot = 48/48，8 类 variant 各 12 行。`true_reference` 行明确 `reused_original=True`，其 `delta_bz / bz_defect / bz_no_defect` 来自原始 pilot_v9 NPZ，不计入真实 COMSOL forward rows；真实生成行使用 profile polygon geometry 做 COMSOL forward，`delta_bz = bz_defect - bz_no_defect` 校验通过。
+
+Stage C 只训练两个 profile-compatible surrogate：`PPF1_profile_station_mlp` 和 `PPF2_profile_raster_sequence`，只用 train rows 训练、val 选择、test final，不写 checkpoint。validation score 选中 `PPF1_profile_station_mlp`，其 waveform val/test NRMSE/correlation 为 `0.4396 / 0.8990` 和 `0.3758 / 0.9274`。但是 residual ordering gate 未通过：oracle residual ordering val/test = `0.6786 / 0.5357`，selected surrogate residual ordering val/test = `0.6607 / 0.2143`，mismatch_rate = `0.3393 / 0.7857`，residual-error correlation = `0.5703 / -0.7167`。这说明 profile perturbation data 在 validation 上有局部正信号，但 test split 发生明显 collapse，且 oracle residual 本身在 test 上也偏弱。
+
+因此 Stage D 只写 residual objective audit，不运行 profile refinement。Claude Code review 通过且无 must-fix；review 结论是 pipeline / data boundary / split discipline 可接受，但当前 96-row partial pack 不足以支撑 profile-forward refinement。第 20.60 不作为 baseline。下一步若继续 profile-forward route，应先扩大 profile perturbation data，特别是增加 base sample 覆盖和 test split 稳定性；如果 oracle residual 继续弱，则应转向 richer observations / multi-axis 或保留 no-forward profile basis，而不是继续小调 forward-guided refinement。
+
 ## 2026-05-22 更新：第 20.58 mask/profile basis refinement POC
 
 第 20.58 在第 20.57 否定当前 rect/rot low-dimensional Priewald 小调路线后，改为从 strong dense/coarse initializer 的预测 mask 中提取 K=8 profile/basis 表示。该轮不运行 COMSOL、不生成新数据、不训练 direct geometry head，也不更新任何 baseline。

@@ -1,0 +1,66 @@
+COMSOL profile perturbation forward preflight summary
+
+Stage: 20.60 profile perturbation forward pack + profile-compatible surrogate calibration.
+
+Subagent status:
+- Agent A / Method: completed read-only literature and method preflight.
+- Agent B / Codebase: completed read-only artifact and codebase preflight.
+- Agent C / Experiment Design: completed read-only design preflight.
+- Agent D / Safety: completed read-only git/data boundary preflight.
+- Agent E / Feasibility: completed read-only implementation feasibility preflight.
+
+Literature and method read depth:
+- IEEE Xplore Full-Text PDF_.pdf: read as full text. The relevant route is Priewald-style profile/geometry parameterization with forward-model residual driven inversion/refinement.
+- Fast reconstruction of 3-D defect profile from MFL signals using key physics-based parameters and SVM.pdf: direct PDF text extraction was not reliable because of embedded/font encoded text; only metadata/title and project summaries were used.
+- MFL_缺陷边界反演外部方法深度研究报告.pdf: direct PDF text extraction was not reliable because of font encoding; project summary was used.
+- No MD files were found in C:\Users\19166\Desktop\PINN_literature.
+
+Preflight decision:
+- Worth executing 20.60: yes.
+- Existing results do not negate profile-native perturbation forward data.
+- 20.58 negated the lossy profile-to-rect-summary forward bridge.
+- 20.59 showed profile waveform fit is possible, but validation residual ordering was insufficient with the existing 20.56 rect/rot perturbation pack.
+- New COMSOL forward data is required because old rect/rot perturbation Bz cannot stand in for profile-polygon perturbation Bz.
+
+COMSOL support:
+- COMSOL_Multiphysics_MCP already supports true polygon notch geometry through WorkPlane -> Polygon(table) -> Extrude.
+- PINN profile CSV has K=8 profile stations with center, angle, u_station, half_width, center_offset, occupancy, and depth_proxy fields.
+- The feasible geometry for this stage is top-view profile footprint with constant depth extrusion.
+- Per-station variable-depth 3D profile is not supported by the existing profile fields and is out of scope.
+
+Recommended execution:
+- Build a profile perturbation plan from 20.58 selected profiles and pilot_v9 rect/rot source rows.
+- Convert each K=8 profile to a 2K=16 vertex polygon.
+- Run real COMSOL forward only for profile perturbation rows.
+- Reuse original pilot_v9 arrays only for true_reference rows, and do not count them as real COMSOL forward rows.
+- Train a small profile-compatible forward surrogate on the generated pack.
+- Audit oracle residual ordering and surrogate residual ordering.
+- Do not run refinement in this stage.
+
+Row-count gate correction:
+- Full target total_rows=192, reused_original_rows=24, real_comsol_forward_rows=168.
+- Minimum acceptable partial total_rows=96, reused_original_rows=12, real_comsol_forward_rows=84.
+- Stop if total_rows < 96, real_comsol_forward_rows < 84, represented_base_samples < 12, or minimum split / rect-rot / variant coverage is not met.
+- Do not use real_comsol_forward_rows < 96 as a blocker.
+
+Required reporting:
+- total_rows
+- reused_original_rows
+- real_comsol_forward_rows
+- generated_rows_by_variant
+- generated_rows_by_split
+- generated_rows_by_source_defect_type
+- delta check split by reused rows and generated rows
+
+Must avoid:
+- No fake Bz, no signal summation, no predicted Bz.
+- Do not approximate profile perturbations back into single rotated rectangles.
+- Do not use polygon base samples.
+- Do not submit data, NPZ, .mph, raw CSV, checkpoints, preview PNG, notes, or baseline docs.
+- Do not stage pre-existing unrelated dirty worktree items.
+
+Stop conditions:
+- Profile polygon conversion produces self-intersection, invalid area, out-of-domain vertices, empty masks, or severe split/base leakage.
+- COMSOL cannot stably solve the 16-vertex profile polygon smoke.
+- Oracle residual ordering is poor, indicating non-identifiability under the current observation setup.
+- Surrogate ordering remains weak or mismatch rate does not improve over the 20.59 validation mismatch rate of 0.3393.
