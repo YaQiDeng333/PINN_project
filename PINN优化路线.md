@@ -1,5 +1,13 @@
 # PINN 优化路线
 
+## 2026-05-23 路线同步：20.61 expanded profile perturbation forward calibration
+
+第 20.61 将第 20.60 的 profile-native perturbation 数据覆盖从 12 base / 96 rows 扩大到 36 base / 288 rows，其中 252 行是真实 profile polygon COMSOL forward，36 行 `true_reference` 复用 pilot_v9 原始数组作为 residual anchor。该实验仍是 forward surrogate calibration POC：不做 profile refinement，不训练 inverse model，不更新 baseline。
+
+结果显示扩大数据确实缓解了 20.60 的极端 test collapse：selected `EPPF1_profile_station_mlp` 的 test surrogate ordering 从 20.60 的 `0.2143` 提升到 `0.5569`，test mismatch_rate 从 `0.7857` 降到 `0.4431`，waveform val/test correlation 也保持在 `0.9435 / 0.9299`。但是 strict gate 未通过，validation ordering 只有 `0.5361`，test ordering 也未达到 `>0.65`；更关键的是 COMSOL oracle residual ordering 在 train/val/test 只有 `0.4471 / 0.5120 / 0.5030`，说明当前观测配置下真实 residual 本身无法稳定排序 profile quality。
+
+路线判断因此更新为：profile-compatible surrogate 的 waveform fit 不是主要 blocker，当前瓶颈转为 **profile residual objective / observation identifiability**。在 3 条 scan line、单 Bz、constant-depth top-view profile polygon 设置下，继续扩同类 profile perturbation data 或小调 surrogate architecture 的收益有限；下一步如果继续 forward-guided route，应优先转向 richer observations（multi-height / multi-axis / more scan lines）或专门做 non-identifiability audit。第 20.61 不支持直接回到 profile-forward refinement retry，也不改变现有 baseline。
+
 ## 2026-05-22 路线同步：20.60 profile perturbation forward calibration
 
 第 20.60 将第 20.59 的结论进一步落地：如果要让 forward residual 支撑 profile-basis refinement，校准数据必须围绕 profile representation 本身，而不是继续复用 rect/rot geometry perturbation。为此本轮设计了 24 base / 192 rows 的 profile perturbation plan，并在 COMSOL 侧按 minimum partial 生成 12 base / 96 rows forward pack，其中 84 行是真实 profile polygon COMSOL forward，12 行 `true_reference` 复用原始 pilot_v9 作为 residual anchor。

@@ -1,0 +1,37 @@
+COMSOL expanded profile perturbation forward surrogate calibration summary
+
+Stage 20.61 only trains/audits profile-compatible forward surrogates; it does not run profile refinement, inverse training, checkpoints, or baseline updates.
+Surrogate inputs are profile station/global features and optional rasterized profile features. Observed base delta_bz is only used for residual-ordering audit, not as model input.
+
+pack: C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\prepared\comsol_rect_rot_expanded_profile_perturbation_forward_pack_v1.npz
+expanded_pack_total_rows: 288
+expanded_pack_reused_original_rows: 36
+expanded_pack_real_comsol_forward_rows: 252
+
+selected_candidate: EPPF1_profile_station_mlp
+selected_by_validation_score: -0.029794
+stage_c_gate_passed: False
+
+Waveform metrics for selected candidate:
+- train: NRMSE=0.295637, corr=0.955366, MAE=7.265612e-05, peak_index_error=31.731
+- val: NRMSE=0.331394, corr=0.943500, MAE=7.753497e-05, peak_index_error=28.986
+- test: NRMSE=0.373544, corr=0.929853, MAE=8.140181e-05, peak_index_error=29.764
+
+Ordering metrics for selected candidate:
+- train: oracle_ordering=0.447094, surrogate_ordering=0.529061, mismatch_rate=0.470939, residual_error_corr=0.031305
+- val: oracle_ordering=0.512048, surrogate_ordering=0.536145, mismatch_rate=0.463855, residual_error_corr=-0.394471
+- test: oracle_ordering=0.502994, surrogate_ordering=0.556886, mismatch_rate=0.443114, residual_error_corr=0.233581
+
+20.60 reference:
+- val/test surrogate ordering = 0.6607 / 0.2143
+- val/test mismatch = 0.3393 / 0.7857
+- val/test residual-error corr = 0.5703 / -0.7167
+
+Strict 20.61 usability gate:
+- val and test surrogate ordering accuracy both > 0.65.
+- test mismatch_rate < 0.35.
+- test residual-error correlation non-negative, preferably > 0.20.
+- oracle residual ordering is not poor and no split leakage is allowed.
+
+Conclusion:
+Expanded profile perturbation data did not satisfy all strict gates; do not run profile refinement in 20.61.

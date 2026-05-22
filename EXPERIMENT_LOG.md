@@ -1,5 +1,19 @@
 # 实验工作日志
 
+## 2026-05-23 更新：第 20.61 expanded profile perturbation forward pack + surrogate ordering audit
+
+第 20.61 在第 20.60 阴性结果基础上扩大 profile-native perturbation forward data 覆盖，只做 forward pack、profile-compatible surrogate calibration 和 residual ordering audit；不做 refinement，不训练 inverse model，不更新 baseline。
+
+Stage 0 已完成 multi-agent preflight。Method / literature agent 判断 expanded profile perturbation data 符合 profile/basis + forward consistency 路线，且 20.60 只否定了小 partial pack 的稳定性，没有否定 profile-native route；Codebase / Artifact agent 确认可复用 20.58 profile basis、20.60 profile polygon generator 和 20.60 surrogate training code；Experiment Design agent 建议 target 36 base / 288 rows，minimum 24 base / 192 rows；Safety agent 明确禁止提交 data、NPZ、checkpoint、preview PNG、.mph、raw CSV、notes 和 baseline docs；Implementation Feasibility agent 确认需要 COMSOL 和 surrogate training，但不需要 refinement。
+
+Stage A 生成 expanded profile perturbation plan：36 base samples、288 rows，split = train/val/test 192/48/48，rect/rot = 144/144，8 类 variant 各 36 行。row accounting 为 reused_original_rows=36、reused_from_20_60_rows=0、planned_real_comsol_forward_rows=252；所有 profile polygon valid、mask non-empty、variant coverage complete。
+
+Stage B 在 COMSOL 仓库生成 expanded forward pack：total_rows=288，reused_original_rows=36，reused_from_20_60_rows=0，real_comsol_forward_rows=252。`true_reference` 行复用 pilot_v9 原始数组，不计入 real COMSOL forward；其余 profile perturbation 行使用 profile polygon geometry 做真实 COMSOL forward，`delta_bz = bz_defect - bz_no_defect` 校验通过，split/type/variant coverage 达到 target。
+
+Stage C 训练两个 profile-compatible surrogate：`EPPF1_profile_station_mlp` 和 `EPPF2_profile_raster_sequence`。validation 选择 `EPPF1_profile_station_mlp`。selected waveform train/val/test NRMSE = `0.2956 / 0.3314 / 0.3735`，correlation = `0.9554 / 0.9435 / 0.9299`。但 residual ordering gate 未通过：oracle ordering train/val/test = `0.4471 / 0.5120 / 0.5030`，surrogate ordering = `0.5291 / 0.5361 / 0.5569`，mismatch_rate = `0.4709 / 0.4639 / 0.4431`，residual-error correlation = `0.0313 / -0.3945 / 0.2336`。
+
+结论：expanded data 相比 20.60 的 test collapse 有方向性改善（test surrogate ordering 从 `0.2143` 到 `0.5569`，mismatch_rate 从 `0.7857` 到 `0.4431`），但没有达到可用于 refinement 的 gate；更关键的是 COMSOL oracle residual 本身接近随机排序，说明当前 3 条 scan line、单 Bz、constant-depth profile polygon 设置下，profile residual 对 profile quality 的可辨识性不足。Claude Code review 通过，无 must-fix。第 20.61 不更新 baseline；下一步不应直接回到 profile-forward refinement，优先转向 richer observations / multi-height / multi-axis 或 non-identifiability audit。
+
 ## 2026-05-22 更新：第 20.60 profile perturbation forward pack + profile surrogate calibration
 
 第 20.60 按修正版 gate 执行 profile-native perturbation forward calibration POC，不训练 inverse model，不运行 refinement，不更新 baseline。Stage 0 先完成 multi-agent preflight：结论是 profile perturbation forward data 符合 Priewald-style forward-model / profile-basis 路线，20.59 只否定了现有 profile surrogate 的 validation gate，没有否定 profile-native perturbation 数据本身；但必须严格区分 true reference 复用行和真实 COMSOL forward 行。

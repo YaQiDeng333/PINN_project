@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-05-23 更新：第 20.61 后的下一步
+
+第 20.61 已完成 expanded profile perturbation forward pack + profile-compatible surrogate calibration POC。expanded pack 达到 target：36 base samples、288 rows，其中 `reused_original_rows=36`、`reused_from_20_60_rows=0`、`real_comsol_forward_rows=252`；split = 192/48/48，rect/rot = 144/144，8 类 profile variant 各 36 行。COMSOL 侧 profile polygon geometry 有效，`delta_bz = bz_defect - bz_no_defect` 校验通过。
+
+selected surrogate 为 `EPPF1_profile_station_mlp`，waveform val/test NRMSE/correlation = `0.3314 / 0.9435` 和 `0.3735 / 0.9299`。相比 20.60，test surrogate ordering 从 `0.2143` 提升到 `0.5569`，mismatch_rate 从 `0.7857` 降到 `0.4431`，说明扩大 profile perturbation data 缓解了最严重的 test collapse；但 val/test surrogate ordering 仍低于可用 gate，且 COMSOL oracle residual ordering train/val/test 仅 `0.4471 / 0.5120 / 0.5030`，接近随机。
+
+当前下一步唯一优先级：**richer observations / multi-height / multi-axis 或 non-identifiability audit**。不要直接回到 profile-forward refinement retry，也不要继续小调当前 profile surrogate architecture / loss；因为 oracle residual 本身不能可靠排序 profile quality，继续优化 surrogate 很难把不可辨识的 residual objective 变成可用 refinement 梯度。仍不更新 `CURRENT_BASELINE.md`，不创建或修改 COMSOL baseline 文档。
+
 ## 2026-05-22 更新：第 20.60 后的下一步
 
 第 20.60 已完成 profile perturbation forward pack + profile-compatible surrogate calibration POC。按修正版 row-count gate，COMSOL 侧生成 minimum partial pack：`total_rows=96`，`reused_original_rows=12`，`real_comsol_forward_rows=84`，represented base samples = 12，split = 64/16/16，rect/rot = 48/48，8 类 profile variant 各 12 行。`true_reference` 行只作为 residual ordering anchor 复用 pilot_v9 原始数组，不计入真实 COMSOL forward rows；真实生成行使用 profile polygon geometry，delta check 通过。
