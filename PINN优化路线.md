@@ -183,3 +183,10 @@ geometry-aware representation
 * 20.55 进一步确认 bottleneck 不是简单 waveform fit，而是 residual objective calibration：S1/S2/S3 三个 calibrated surrogate candidate 均未让 residual 与 geometry/mask error 建立非平凡正相关，Stage C refinement 因 gate 未过被跳过。这个阴性结果说明继续调当前 surrogate loss 或 refinement objective 意义有限。
 
 Priewald 2013 对当前阶段更重要的启发不是复现完整 FEM、解析 Jacobian 或 Gauss-Newton 工程，而是 forward-model-based inversion / refinement：用 predicted geometry 通过 forward surrogate 生成 MFL，再用 observed MFL residual 约束低维几何参数。当前应停止 direct neural geometry head 小修补；20.55 之后若继续 Priewald-style refinement，前置条件应是 synthetic perturbation forward data 或等价局部扰动数据，让 surrogate 学到 geometry perturbation 与 signal residual 的局部排序关系。若无法补足这个 calibration 证据，则转向 mask/profile basis refinement，避免被低保真 residual objective 牵引到错误几何。
+## 第 20.59 方法路线判断：profile-compatible forward surrogate
+
+第 20.59 将第 20.58 的结论进一步拆开验证：profile basis 本身仍有价值，但 forward consistency 必须换成 profile-compatible forward surrogate，不能把 K=8 profile stations 再压缩成 single rotated-box summary。外部文献路线，尤其 Priewald-style forward-model-based inversion，支持这种判断：关键不是复现完整 FEM Jacobian，而是让 forward residual 对待优化的 shape/profile representation 有一致、可校准的响应。
+
+本轮使用已有 pilot_v9 original samples 和 20.56 perturbation pack 构建 profile-forward dataset，没有运行 COMSOL，也没有生成新数据。`PFS3_profile_station_sequence` 的 waveform fit 可接受（val/test NRMSE `0.3841 / 0.3995`），说明 profile-native 表示可被 forward surrogate 消化；但 validation residual ordering accuracy 只有 `0.6607`，mismatch_rate 为 `0.3393`，未达到 refinement gate。因此第 20.59 不执行 profile-forward refinement retry。
+
+路线判断：profile-compatible surrogate 相比旧 rect-like bridge 有边际价值，但当前 perturbation coverage 太小，不足以支撑连续优化。下一步若继续 forward-guided profile refinement，应先扩展 profile perturbation data；否则保留 20.58 的 no-forward profile basis 作为更稳的 representation 证据，并暂停对当前 forward residual objective 的小调。该阶段仍是 POC，不更新任何 baseline。

@@ -1,0 +1,45 @@
+COMSOL rect/rot profile-compatible forward route decision summary
+
+Stage: 20.59 profile-compatible forward surrogate + controlled profile refinement retry.
+
+Decision:
+- Stage C profile-forward refinement retry was not executed.
+- Reason: Stage B selected PFS3_profile_station_sequence by validation score, but the Stage B usable-surrogate gate failed.
+- This follows the stage rule: do not run refinement if no profile-compatible surrogate passes waveform + ordering + mismatch + residual-correlation checks.
+
+Evidence:
+- Selected candidate: PFS3_profile_station_sequence.
+- Validation waveform NRMSE / corr: 0.384092 / 0.923314.
+- Test waveform NRMSE / corr: 0.399492 / 0.917664.
+- Validation residual ordering accuracy: 0.660714.
+- Validation mismatch rate: 0.339286.
+- Validation residual-error correlation: 0.315028.
+- Test residual ordering accuracy: 0.892857.
+- Test mismatch rate: 0.107143.
+- Test residual-error correlation: 0.354411.
+
+Why the gate failed:
+- The validation ordering accuracy did not reach the conservative usable threshold.
+- The validation mismatch rate remained above the target threshold.
+- The perturbation validation split is small, so the strong test ordering result is not enough to justify test-time refinement.
+
+Route interpretation:
+- Profile-compatible input improves waveform fit relative to the older rect-like profile bridge used in 20.58, but it is not yet reliable enough for optimization.
+- The result does not negate profile basis refinement itself; 20.58 no-forward profile refinement remains the stronger evidence.
+- The result does negate running another small forward-refinement retry with the current profile surrogate and small perturbation calibration set.
+
+Recommended next step:
+- A. expand profile perturbation data.
+
+Rationale:
+- The current profile-compatible surrogate needs more local perturbation coverage before its residual can be trusted as a continuous optimization objective.
+- If expanded perturbation data still fails validation ordering/mismatch gates, the route should fall back to profile basis without current forward residual or richer observations.
+
+Safety:
+- No COMSOL was run in this stage.
+- No new data, NPZ, checkpoint, preview PNG, .mph, raw CSV, or notes were generated for submission.
+- No baseline documentation was updated.
+- Pre-existing unrelated dirty worktree items must remain unstaged:
+  - MODEL_STRUCTURE_PLAN.md deleted in working tree before this stage.
+  - scripts/visualize_current_baseline.py untracked before this stage.
+  These are intentionally not reverted or staged because they are outside the 20.59 scope.

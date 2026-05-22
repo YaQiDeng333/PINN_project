@@ -2396,3 +2396,12 @@ validation 在 `proposal_only` 和 `proposal_forward` 中选择了 `proposal_for
 validation 上 8 个 refinement config 全部使 mask 指标退化或 mismatch 过高，因此只选出最高分配置作为 diagnostic：`steps=50, lr=0.003, lambda_prior=0.10`。最终 test geometry-raster IoU/Dice/area_error 从 `0.6726 / 0.8017 / 0.1945` 变为 `0.6492 / 0.7829 / 0.2417`，forward NRMSE 虽下降 `0.0713`，但 mismatch_rate 达 `0.6212`，residual reduction 与 IoU/Dice delta 的相关性为 `-0.1824 / -0.2250`。这说明 20.56 的 pairwise ordering 改善没有转化为连续低维 geometry refinement 的可靠梯度。
 
 结论：第 20.57 不通过 promising gate，不更新任何 baseline。当前 evidence 指向 residual objective / low-dimensional rect-rot parameterization 的连续优化瓶颈；不建议继续在该设置上小调 config。下一步若继续 geometry-aware route，应优先转向 mask/profile basis refinement，或在更大 perturbation pack / richer observations 上重新验证 forward residual landscape。
+## 第 20.59 步：profile-compatible forward surrogate + controlled profile refinement retry
+
+第 20.59 先按要求完成 multi-agent preflight。Method agent 结合 `PINN_literature` 中 Priewald 2013 等资料判断：profile-compatible forward surrogate 符合 forward-model-based inversion / refinement 路线；已有结果只否定了把 profile 压缩回 rect-like summary 的旧桥接方式，没有否定 profile-native surrogate。Codebase / safety / design / feasibility agents 均确认：本轮不需要 COMSOL，不生成新数据，复用 20.54 / 20.56 / 20.58 产物即可。
+
+随后构建两个 profile-forward dataset：original profile dataset 为 400 个 rect/rot pilot_v9 样本，split = 268 / 66 / 66；perturb profile dataset 为 20.56 的 96 行 partial perturbation pack，split = 64 / 16 / 16。输入 profile representation 保留 K=8 station、half_width、occupancy、global center/angle/length/area/roughness 等 profile/basis 信息，不再压缩成 single rotated box。
+
+训练的 3 个 profile-compatible surrogate candidate 中，validation score 选中 `PFS3_profile_station_sequence`。其 val/test waveform NRMSE/correlation 为 `0.3841 / 0.9233` 和 `0.3995 / 0.9177`，说明 profile 表示能拟合 waveform；但 val ordering accuracy 只有 `0.6607`，mismatch_rate 为 `0.3393`，未通过可用于 refinement 的 gate。test ordering 虽较高（`0.8929`），但只作为 final diagnostic，不能反向用于选择。
+
+因此 Stage C controlled profile-forward refinement 被正确跳过，没有继续优化 profile 参数。Claude Code review 复审通过，无必须修复。结论是：profile-compatible forward surrogate 有边际价值，但当前 small perturbation coverage 还不足以支撑 forward-guided profile refinement。下一步优先扩展 profile perturbation data；若扩展后 validation ordering / mismatch 仍不通过，则应回到 no-forward profile basis 或 richer observations，而不是继续小调当前 forward refinement objective。

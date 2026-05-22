@@ -1,0 +1,86 @@
+COMSOL profile-compatible forward surrogate preflight summary
+
+Scope
+- Stage 0 was completed with Codex subagents in read-only mode.
+- No subagent modified files, ran COMSOL, ran training, committed files, or copied literature PDFs into this repository.
+- Main controller will execute any training, Claude review, and git commit serially.
+
+Subagent conclusions
+1. Agent A Method / Literature:
+   - Project summaries and existing 20.56-20.58 results do not negate profile-compatible forward surrogate.
+   - Existing failures negate the lossy path profile -> rect summary -> S1 surrogate, not profile-native forward modeling.
+   - Unique recommendation: train a profile-native forward surrogate and gate it on residual ordering before any refinement.
+
+2. Agent A2 Literature supplement:
+   - External literature directory checked read-only: C:\Users\19166\Desktop\PINN_literature\
+   - IEEE Xplore Full-Text PDF_.pdf: read depth = full text readable enough for title/abstract/method/results/conclusion; interpreted as Priewald 2013 forward-model inversion with MFL residual and geometry/profile optimization.
+   - Fast reconstruction of 3-D defect profile from MFL signals using key physics-based parameters and SVM.pdf: read depth = project summary only; direct PDF extraction was unreliable due embedded font/encoding issues.
+   - MFL_缺陷边界反演外部方法深度研究报告.pdf: read depth = project summary plus PDF directory/index only; direct body extraction unreliable.
+   - No MD files were found in the literature directory.
+   - The literature supports shape/profile -> forward MFL -> residual -> inverse/refinement, but does not support continuing the old rect-summary bridge.
+
+3. Agent B Codebase / Artifact:
+   - 20.58 profile basis artifacts are available, including comsol_rect_rot_profile_basis_selected_profiles.csv with 400 rows.
+   - 20.56 perturbation pack is available at data/comsol_mfl/prepared/comsol_rect_rot_local_perturbation_forward_pack_v1.npz, with 96 rows.
+   - 20.54 proposal artifacts are available for comparison; no dense initializer checkpoint or dense probability NPZ is available.
+   - Exact model-state reuse is impossible because prior checkpoints were intentionally not saved.
+
+4. Agent C Experiment Design:
+   - Minimal experiment should first test profile-compatible surrogate candidates with validation-only selection.
+   - Do not run refinement unless the surrogate passes waveform, ordering, mismatch, and residual-correlation gates.
+   - Stop if the selected candidate only improves waveform but fails residual ordering/correlation.
+
+5. Agent D Safety / Git / Data Boundary:
+   - Current unrelated dirty worktree remains: D MODEL_STRUCTURE_PLAN.md and ?? scripts/visualize_current_baseline.py.
+   - Do not stage those files unless explicitly requested.
+   - Forbidden: data/, NPZ, checkpoint, preview PNG, .mph, raw CSV, notes, baseline docs, scripts/visualize_current_baseline.py.
+   - Use explicit git add paths only; never use git add . or git add -f data/.
+
+6. Agent E Implementation Feasibility:
+   - Go for a bounded implementation using existing data only.
+   - Add independent scripts; do not modify 20.56 or 20.58 negative-evidence scripts.
+   - Surrogate input must use profile parameters or rasterized profile features directly, not a compressed single rotated rectangle.
+
+Preflight answers
+1. Worth executing 20.59: yes, conditionally.
+2. Existing results negate profile-compatible surrogate: no. They negate rect-like surrogate reuse and lossy profile-to-rect bridge.
+3. COMSOL needed: no.
+4. Training needed: yes, a new forward surrogate training POC is needed; no inverse geometry head or dense baseline training.
+5. Refinement retry allowed directly: no. It is allowed only if Stage B surrogate gate passes.
+6. Unique recommended execution plan:
+   - Build original and perturbation profile-forward datasets from existing NPZ/CSV artifacts.
+   - Train small profile-compatible forward surrogate candidates.
+   - Gate on validation waveform, residual ordering, mismatch rate, and residual-error correlation.
+   - Run a controlled profile refinement retry only if the gate passes.
+7. Must avoid:
+   - Do not run COMSOL.
+   - Do not generate new data.
+   - Do not use observed delta_bz as surrogate input.
+   - Do not use true mask/geometry in refinement optimization.
+   - Do not use true defect_type as an inverse/refinement input.
+   - Do not compress profile back into a single rect-like vector as the main forward model.
+   - Do not tune steps/lr/lambda if the gate fails.
+8. Allowed submit files:
+   - scripts/build_comsol_rect_rot_profile_forward_dataset.py
+   - scripts/train_comsol_rect_rot_profile_compatible_forward_surrogates.py
+   - scripts/refine_comsol_rect_rot_profile_basis_with_profile_forward_surrogate.py, only if Stage C runs
+   - Explicitly listed 20.59 summaries/metrics
+   - EXPERIMENT_LOG.md, NEXT_STEP.md, PINN优化路线.md
+9. Forbidden submit files:
+   - data/
+   - NPZ/NPY
+   - checkpoints or model weights
+   - preview PNG/JPG
+   - .mph
+   - raw COMSOL CSV
+   - notes/
+   - __pycache__/
+   - CURRENT_BASELINE.md or any COMSOL baseline docs
+   - scripts/visualize_current_baseline.py
+10. Stop conditions:
+   - Profile dataset cannot be built without leakage or split mismatch.
+   - Perturbation dataset unavailable and ordering audit would be too weak.
+   - Candidate validation ordering is near random or residual-error correlation is non-positive.
+   - Candidate mismatch rate remains high.
+   - Stage C validation selects lambda_forward=0 again.
+   - Forward residual decreases while mask IoU/Dice degrade or area_error worsens materially.

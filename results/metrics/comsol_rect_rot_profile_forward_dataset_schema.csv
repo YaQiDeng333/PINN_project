@@ -1,0 +1,57 @@
+field,description,used_as_model_input
+dataset,original or perturb,no
+sample_id,stable sample id,no
+split,preserved train/val/test split,no
+defect_type,metrics grouping only; not a model input,no
+target_index,row index into source NPZ target arrays,no
+center_x,profile-derived scalar/station feature,yes
+center_y,profile-derived scalar/station feature,yes
+angle_rad,profile-derived scalar/station feature,yes
+angle_sin,profile-derived scalar/station feature,yes
+angle_cos,profile-derived scalar/station feature,yes
+length,profile-derived scalar/station feature,yes
+depth_proxy,profile-derived scalar/station feature,yes
+area_from_profile_params,profile-derived scalar/station feature,yes
+roughness_penalty,profile-derived scalar/station feature,yes
+u_station_0,profile-derived scalar/station feature,yes
+u_station_1,profile-derived scalar/station feature,yes
+u_station_2,profile-derived scalar/station feature,yes
+u_station_3,profile-derived scalar/station feature,yes
+u_station_4,profile-derived scalar/station feature,yes
+u_station_5,profile-derived scalar/station feature,yes
+u_station_6,profile-derived scalar/station feature,yes
+u_station_7,profile-derived scalar/station feature,yes
+half_width_0,profile-derived scalar/station feature,yes
+half_width_1,profile-derived scalar/station feature,yes
+half_width_2,profile-derived scalar/station feature,yes
+half_width_3,profile-derived scalar/station feature,yes
+half_width_4,profile-derived scalar/station feature,yes
+half_width_5,profile-derived scalar/station feature,yes
+half_width_6,profile-derived scalar/station feature,yes
+half_width_7,profile-derived scalar/station feature,yes
+center_offset_0,profile-derived scalar/station feature,yes
+center_offset_1,profile-derived scalar/station feature,yes
+center_offset_2,profile-derived scalar/station feature,yes
+center_offset_3,profile-derived scalar/station feature,yes
+center_offset_4,profile-derived scalar/station feature,yes
+center_offset_5,profile-derived scalar/station feature,yes
+center_offset_6,profile-derived scalar/station feature,yes
+center_offset_7,profile-derived scalar/station feature,yes
+occupancy_0,profile-derived scalar/station feature,yes
+occupancy_1,profile-derived scalar/station feature,yes
+occupancy_2,profile-derived scalar/station feature,yes
+occupancy_3,profile-derived scalar/station feature,yes
+occupancy_4,profile-derived scalar/station feature,yes
+occupancy_5,profile-derived scalar/station feature,yes
+occupancy_6,profile-derived scalar/station feature,yes
+occupancy_7,profile-derived scalar/station feature,yes
+mean_half_width,profile-derived scalar/station feature,yes
+max_half_width,profile-derived scalar/station feature,yes
+min_half_width,profile-derived scalar/station feature,yes
+std_half_width,profile-derived scalar/station feature,yes
+mean_abs_offset,profile-derived scalar/station feature,yes
+max_abs_offset,profile-derived scalar/station feature,yes
+profile_area_proxy,profile-derived scalar/station feature,yes
+true_mask_iou,metrics / ordering audit only,no
+true_mask_dice,metrics / ordering audit only,no
+true_area_error,metrics / ordering audit only,no

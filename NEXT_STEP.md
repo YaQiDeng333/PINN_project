@@ -64,3 +64,10 @@ forward profile refinement 已执行受控 sweep，但 validation 选择 `lambda
 不要继续围绕现有 v3_complex grid decoder 做 selection metric、ensemble、threshold trick、loss trick、decoder head、SDF / boundary head、coordinate refinement、hand-crafted Bz features、U-Net-like decoder、shape-type conditional、star-convex、retrieval、box / quad / basis / profile 或 mask-logit refinement 小修补。
 
 也不要继续单独调 rect/rot neural geometry head。新的实验必须回答：显式 geometry representation、differentiable rasterization 和 forward residual 是否能稳定提高边界反演可辨识性，而不是只带来局部指标波动。
+## 2026-05-22 更新：第 20.59 后的下一步
+
+第 20.59 已完成 profile-compatible forward surrogate POC。preflight 结论是该方向符合 Priewald-style forward-model-based inversion / refinement 路线，但必须先证明 profile-native residual 能在 validation 上稳定排序 geometry/profile quality，不能再使用把 profile 压缩为单个 rotated box 的旧 surrogate bridge。
+
+本轮构建 original profile-forward dataset（rect/rot N=400，split=268/66/66）和 perturb profile-forward dataset（20.56 partial pack N=96，split=64/16/16），并训练 3 个 profile-compatible surrogate。validation 选中 `PFS3_profile_station_sequence`，其 waveform val/test NRMSE 为 `0.3841 / 0.3995`，但 validation ordering accuracy 仅 `0.6607`，mismatch_rate 为 `0.3393`，未通过 usable-surrogate gate。因此 profile-forward refinement retry 被跳过。
+
+当前下一步唯一优先级：**扩展 profile perturbation data**。如果扩展后的 validation ordering / mismatch gate 仍不通过，则不再继续 forward-guided profile refinement 小调，改回 no-forward profile basis 或等待 richer observations / multi-axis data。当前仍不更新 `CURRENT_BASELINE.md`，不创建或修改 COMSOL baseline 文档。
