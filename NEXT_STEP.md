@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-05-23 更新：第 20.62 后的下一步
+
+第 20.62 已完成 multi-height Bz profile perturbation oracle ordering feasibility POC。本轮只做 oracle residual audit，不训练 surrogate、不做 refinement、不更新 baseline。multi-height pack 覆盖 12 base samples、96 profile rows、3 个 sensor_z heights `[0.004, 0.008, 0.012]`，共 288 个 height observations；其中 0.008m 的 96 个 observation 复用第 20.61 exact rows，0.004m 和 0.012m 共 192 个 observation 由真实 COMSOL forward 生成。profile polygon geometry 有效，`delta_bz = bz_defect - bz_no_defect` 校验通过。
+
+结果是否定性的：test single-height 0.008m oracle ordering = `0.4909`，0.004m = `0.4364`，0.012m = `0.4545`，multi-height train-std normalized ordering = `0.4545`，mismatch_rate = `0.5455`，residual-error correlation = `-0.5920`。multi-height 没有超过 20.61 single-height oracle test reference `0.5030`，也没有达到 `>0.65` 或 `+0.10` improvement gate。
+
+当前下一步唯一优先级：**multi-axis / multi-direction observation**。不要训练 multi-height profile surrogate，也不要回到 profile-forward refinement retry；因为真实 COMSOL oracle residual 在 multi-liftoff Bz 下仍不能稳定排序 profile quality。若继续 forward-guided route，应改变观测信息维度，例如不同扫描方向、横向 scan lines / components 或更丰富观测，而不是继续小调当前 profile surrogate、refinement loss 或单纯扩大同类 lift-off 数据。仍不更新 `CURRENT_BASELINE.md`，不创建或修改 COMSOL baseline 文档。
+
 ## 2026-05-23 更新：第 20.61 后的下一步
 
 第 20.61 已完成 expanded profile perturbation forward pack + profile-compatible surrogate calibration POC。expanded pack 达到 target：36 base samples、288 rows，其中 `reused_original_rows=36`、`reused_from_20_60_rows=0`、`real_comsol_forward_rows=252`；split = 192/48/48，rect/rot = 144/144，8 类 profile variant 各 36 行。COMSOL 侧 profile polygon geometry 有效，`delta_bz = bz_defect - bz_no_defect` 校验通过。

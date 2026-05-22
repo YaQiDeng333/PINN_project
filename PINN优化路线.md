@@ -1,5 +1,13 @@
 # PINN 优化路线
 
+## 2026-05-23 路线同步：20.62 multi-height profile oracle ordering feasibility
+
+第 20.62 将第 20.61 的 observation-identifiability 判断进一步拆开验证：如果 single-height Bz residual 不能稳定排序 profile quality，那么先不训练 surrogate，而是直接用真实 COMSOL oracle residual 比较 multi-liftoff observation 是否更有辨识力。本轮使用 12 base / 96 profile rows，在 `sensor_z_m = [0.004, 0.008, 0.012]` 下生成 multi-height Bz；0.008m 复用第 20.61 exact observation，0.004m 和 0.012m 共 192 个 observation 使用真实 COMSOL forward。
+
+结果显示 multi-height / multi-liftoff alone 没有解决 profile residual non-identifiability。test ordering accuracy 为：0.008m single-height `0.4909`，0.004m `0.4364`，0.012m `0.4545`，multi-height normalized `0.4545`；multi-height mismatch_rate 为 `0.5455`，residual-error correlation 为 `-0.5920`。它没有超过 20.61 single-height oracle test reference `0.5030`，也没有达到 `>0.65` 或 `+0.10` improvement gate。
+
+路线判断因此更新为：当前问题不是 profile-compatible surrogate 训练不足，也不只是 profile perturbation data 规模不足，而是单 Bz、少量 scan line、仅改变 lift-off 的 observation 对 profile boundary quality 的排序信息仍不够。下一步若继续 forward-guided profile route，应优先转向 **multi-axis / multi-direction observation** 或更丰富 scan pattern / component，而不是训练 multi-height profile surrogate 或继续扩大同类 lift-off pack。第 20.62 仍是 POC，不更新任何 baseline。
+
 ## 2026-05-23 路线同步：20.61 expanded profile perturbation forward calibration
 
 第 20.61 将第 20.60 的 profile-native perturbation 数据覆盖从 12 base / 96 rows 扩大到 36 base / 288 rows，其中 252 行是真实 profile polygon COMSOL forward，36 行 `true_reference` 复用 pilot_v9 原始数组作为 residual anchor。该实验仍是 forward surrogate calibration POC：不做 profile refinement，不训练 inverse model，不更新 baseline。

@@ -1,5 +1,19 @@
 # 实验工作日志
 
+## 2026-05-23 更新：第 20.62 multi-height Bz profile perturbation oracle ordering feasibility
+
+第 20.62 在第 20.61 证明 single-height Bz oracle residual 接近随机后，只做 richer observation feasibility：生成同一 profile perturbation 的 multi-height Bz observation，并审计真实 COMSOL oracle residual 是否更能排序 profile quality。本轮没有训练 surrogate、没有训练 inverse model、没有运行 profile refinement，也没有更新 baseline。
+
+Stage 0 已完成 multi-agent preflight。Method / literature agent 判断 multi-height / multi-liftoff Bz 符合 richer observation / forward consistency 路线，但只应作为 oracle feasibility；Codebase / Artifact agent 确认 20.61 expanded profile plan / pack 可复用，COMSOL 侧 profile polygon generator 可扩展；Experiment Design agent 建议 target 12 base / 96 profile rows / 3 heights；Safety agent 明确禁止提交 data、NPZ、checkpoint、preview PNG、.mph、raw CSV、notes 和 baseline docs；Implementation Feasibility agent 确认使用 `sensor_z_m = [0.004, 0.008, 0.012]` 可行。
+
+Stage A 生成 multi-height profile perturbation plan：12 base samples、96 profile rows，split = train/val/test 64/16/16 rows，rect/rot = 48/48，8 类 variant 各 12 行。每行固定 3 个 sensor_z heights，因此 total height observations = 288；0.008m observation 标记为可从 20.61 expanded pack 复用，0.004m 和 0.012m 需要真实 COMSOL forward。
+
+Stage B 在 COMSOL 仓库生成 multi-height forward pack：profile_rows=96，height_count=3，total_height_observations=288，reused_observations=96，real_comsol_forward_observations=192。0.008m observation 复用 20.61 exact row；0.004m 和 0.012m observation 使用 profile polygon geometry 做真实 COMSOL forward。`delta_bz = bz_defect - bz_no_defect` 校验通过，profile polygon valid、mask non-empty、split/type/variant coverage 达到 target。
+
+Stage C 只做 oracle residual ordering audit。结果显示 multi-height lift-off 没有改善 profile quality ordering：test single-height 0.008m ordering = `0.4909`，0.004m = `0.4364`，0.012m = `0.4545`，multi-height train-std normalized = `0.4545`；test mismatch_rate = `0.5455`，residual-error correlation = `-0.5920`。相比 20.61 single-height oracle test `0.5030`，multi-height 没有达到 `>0.65` gate，也没有 `+0.10` improvement。
+
+结论：multi-height Bz / multi-liftoff alone 没有缓解 profile residual non-identifiability。Claude Code review 通过，无 must-fix；review 结论是数据生成、row accounting、delta check 和 split discipline 可接受，但 oracle residual 仍接近随机且 test correlation 为负。第 20.62 不支持训练 multi-height profile surrogate，下一步优先转向 **multi-axis / multi-direction observation**，而不是继续扩大同类 multi-liftoff 或回到 profile-forward refinement。
+
 ## 2026-05-23 更新：第 20.61 expanded profile perturbation forward pack + surrogate ordering audit
 
 第 20.61 在第 20.60 阴性结果基础上扩大 profile-native perturbation forward data 覆盖，只做 forward pack、profile-compatible surrogate calibration 和 residual ordering audit；不做 refinement，不训练 inverse model，不更新 baseline。

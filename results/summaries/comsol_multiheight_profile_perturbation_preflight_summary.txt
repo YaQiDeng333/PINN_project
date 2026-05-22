@@ -1,0 +1,53 @@
+COMSOL multi-height profile perturbation preflight summary
+
+Stage: 20.62 multi-height Bz profile perturbation oracle ordering feasibility
+Scope: read-only preflight completed before implementation. No code, COMSOL solve, training, refinement, commit, or baseline update was performed during preflight.
+
+Question 1: Is it worth executing 20.62?
+- Yes. The 20.61 expanded profile perturbation result showed that single-height COMSOL oracle residual ordering is near random, so the next meaningful gate is to test whether richer observations improve oracle residual ordering before training any surrogate.
+
+Question 2: Do prior results negate the multi-height observation route?
+- No. 20.60/20.61 negate the current single-height profile residual objective for reliable profile ordering; they do not test multi-height or multi-liftoff observations.
+
+Question 3: Does this require COMSOL?
+- Yes. 0.004 m and 0.012 m observations require real COMSOL forward solves. The 0.008 m observation can reuse exact 20.61 rows where geometry and scan lines match.
+
+Question 4: Does COMSOL support multi sensor_z / liftoff for the same geometry?
+- Codebase preflight found no structural blocker. The generator evaluates Bz at arbitrary 3D sensor points, so the same solved geometry can be evaluated at multiple z coordinates.
+
+Question 5: Final sensor_z_m heights
+- Use fixed heights [0.004, 0.008, 0.012] m.
+- Rationale: 0.008 m is the existing main liftoff and reuse anchor; 0.004 m tests closer / more detailed signal; 0.012 m tests farther / smoother signal.
+- If 0.004 m fails at runtime due to COMSOL numerical or geometry constraints, record it as a runtime blocker and recommend fallback heights rather than silently searching.
+
+Question 6: Is this only oracle residual ordering?
+- Yes. Stage 20.62 is oracle-only: no surrogate training and no profile refinement.
+
+Question 7: Unique recommended execution plan
+- Select 12 base samples / 96 profile rows from the 20.61 expanded plan, preserving train/val/test and rect/rot balance.
+- Reuse 0.008 m observations from the 20.61 expanded pack when exact geometry matches.
+- Generate 0.004 m and 0.012 m real COMSOL observations for the same profile polygon geometries.
+- Audit single-height, per-height, concatenated multi-height, and normalized multi-height COMSOL oracle residual ordering.
+
+Subagent summary:
+- Agent A Method / Literature: supports multi-height as richer-observation feasibility. PDF full-text extraction was not stable; conclusion is based on 20.58-20.61 project summaries plus PDF title-level direction, not fabricated literature details.
+- Agent B Codebase / Artifact: 20.61 plan / pack / inventory are reusable; 20.61 generator is single-height and needs a new multi-height schema.
+- Agent C Experiment Design: target 12 base / 96 profile rows / 3 heights; minimum 8 base / 64 rows / 3 heights; compare 0.008, each height, and multi-height residuals.
+- Agent D Safety / Git: do not touch or stage existing dirty items; do not submit data, NPZ, .mph, raw CSV, checkpoint, preview PNG, notes, baseline docs, or scripts/visualize_current_baseline.py.
+- Agent E Implementation Feasibility: 0.004 / 0.008 / 0.012 m is code-feasible; no-defect reference can be evaluated per height and reused; only runtime COMSOL failure would change the height recommendation.
+
+Allowed future submissions:
+- PINN scripts and results explicitly whitelisted for 20.62.
+- COMSOL multi-height generator script and COMSOL summary / inventory.
+- EXPERIMENT_LOG.md, NEXT_STEP.md, PINN优化路线.md after successful review.
+
+Forbidden submissions:
+- data/, NPZ, NPY, .mph, raw CSV, checkpoint / model weights, preview PNG, notes/, __pycache__, CURRENT_BASELINE.md, COMSOL baseline docs, scripts/visualize_current_baseline.py, and unrelated dirty items.
+
+Stop conditions:
+- COMSOL cannot produce stable multi-height Bz for the same profile geometry.
+- 0.004 m fails and there is no explicit fallback decision.
+- profile_rows < 64 or height_count < 3.
+- train/val/test, rect/rot, or variant coverage is incomplete without documented reason.
+- delta_bz check or finite-value check fails.
+- Multi-height oracle ordering remains near random and does not improve over 0.008 m.
