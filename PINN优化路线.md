@@ -1,5 +1,11 @@
 # PINN 优化路线
 
+## 2026-05-22 路线同步：20.57 calibrated refinement retry
+
+第 20.57 验证了一个关键负面结果：第 20.56 的 perturbation-calibrated `S1_perturb_geom_mlp` 虽然能复现较好的 pairwise residual ordering（val/test `0.7321 / 0.8036`），但把它放进连续低维 Priewald-style refinement 后，mask / geometry 指标没有同步改善。以第 20.54 的 strong dense/extracted proposal 为初值，test geometry-raster IoU/Dice 从 `0.6726 / 0.8017` 下降到 `0.6492 / 0.7829`；forward residual 继续下降，但 mismatch_rate 达到 `0.6212`，residual reduction 与 IoU/Dice delta 呈负相关。
+
+路线判断因此更新为：当前瓶颈不只是 surrogate waveform fit，也不只是 pairwise ordering，而是 residual objective 在连续 rect/rot parameter space 中的可优化性。继续对 steps、lr、prior、surrogate loss 做小调意义不大；direct neural geometry head 也已经在 20.48-20.51 收口。下一步若继续 geometry-aware route，应优先转向 **mask/profile basis refinement** 或更高维形状表示；如果未来回到 Priewald-style refinement，需要先扩大 perturbation pack 或引入 richer observations，再重新证明 residual landscape 能提供稳定梯度。
+
 ## 2026-05-22 路线同步：20.56 perturbation forward calibration
 
 第 20.56 把 20.55 的 forward surrogate mismatch 问题拆成两个问题验证：真实 COMSOL residual 是否能排序局部几何质量，以及 surrogate 是否能学到这种排序。结果显示，在 rect/rot local perturbation partial pack（96 行，84 行真实 COMSOL forward）上，COMSOL oracle residual 的 val/test ordering accuracy 为 `0.6607 / 0.8393`，选中的 `S1_perturb_geom_mlp` 的 val/test ordering accuracy 为 `0.7321 / 0.8036`，mismatch_rate 相比 20.55 明显降低。

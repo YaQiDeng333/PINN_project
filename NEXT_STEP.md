@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-05-22 更新：第 20.57 后的下一步
+
+第 20.57 已完成 perturbation-calibrated surrogate 的受控 Priewald-style refinement retry。`S1_perturb_geom_mlp` 按第 20.56 protocol 重训于内存中，recovery 指标与 20.56 对齐：val/test waveform NRMSE 为 `0.3666 / 0.4289`，residual ordering accuracy 为 `0.7321 / 0.8036`，mismatch_rate 为 `0.2679 / 0.1964`。
+
+但是连续低维 refinement 没有通过 gate。validation 上 8 个 config 全部导致 mask 指标退化或 mismatch 过高，最终仅选最高分 config 做 diagnostic：`steps=50, lr=0.003, lambda_prior=0.10`。test geometry-raster IoU/Dice/area_error 从 `0.6726 / 0.8017 / 0.1945` 变为 `0.6492 / 0.7829 / 0.2417`；forward NRMSE 下降 `0.0713`，但 mismatch_rate 为 `0.6212`，residual reduction 与 IoU/Dice delta 相关性为 `-0.1824 / -0.2250`。
+
+当前判断：20.56 的 pairwise residual ordering 改善没有转化为可用的连续 geometry optimization 梯度。不要继续在当前 rect/rot low-dimensional refinement objective 上小调 steps / lr / prior；也不要回到 direct geometry head 或 dense baseline patch。最近下一步优先转向 **mask/profile basis refinement**，降低对 single rect/rot parameter residual landscape 的依赖。若未来重新尝试 Priewald-style refinement，应先扩大 perturbation pack 或加入 richer observations，再重新验证 residual landscape。
+
 ## 2026-05-22 更新：第 20.56 后的下一步
 
 第 20.56 已生成小规模 local geometry perturbation forward-calibration pack，并完成 surrogate residual ordering audit。实际 COMSOL pack 是 96 行 partial pack（12 个 base，train/val/test = 64/16/16，rect/rot = 48/48），84 行为真实 COMSOL forward，12 行 true reference 复用原始 NPZ；`delta_bz = bz_defect - bz_no_defect` 校验通过。

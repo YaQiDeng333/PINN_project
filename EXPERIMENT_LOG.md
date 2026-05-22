@@ -2379,3 +2379,10 @@ validation 在 `proposal_only` 和 `proposal_forward` 中选择了 `proposal_for
 随后只训练两个 perturbation-calibrated forward surrogate 候选并做 residual ordering audit。COMSOL oracle residual 对 geometry quality 的 val/test 排序准确率为 `0.6607 / 0.8393`，说明真实 forward residual 在该局部扰动包上具备排序信号。选中的 `S1_perturb_geom_mlp` 的 val/test waveform NRMSE 为 `0.3666 / 0.4289`，surrogate residual ordering accuracy 为 `0.7321 / 0.8036`，mismatch_rate 为 `0.2679 / 0.1964`，较 20.55 的 S2 mismatch `0.3030 / 0.3939` 明显改善。
 
 结论：local perturbation forward data 缓解了 20.55 的 surrogate mismatch，至少证明“好几何 residual 较小、坏几何 residual 较大”的 pairwise ordering 可以被学习。但 test residual-error correlation 仍为负值（`-0.0462`），因此只能建议下一步做受控 Priewald refinement retry，不能把它写成 baseline 或 production-ready forward objective。
+## 第 20.57 步：perturbation-calibrated surrogate controlled refinement retry
+
+第 20.57 用第 20.56 选中的 `S1_perturb_geom_mlp` 做一次受控 Priewald-style refinement retry。S1 没有 checkpoint 复用，因此按 20.56 protocol 在 perturbation pack 上重训于内存中，recovery 指标完全对齐：val/test waveform NRMSE 为 `0.3666 / 0.4289`，residual ordering accuracy 为 `0.7321 / 0.8036`，mismatch_rate 为 `0.2679 / 0.1964`。初始化仍使用第 20.54 的 improved dense/extracted geometry proposal，true mask / true geometry 只用于 validation selection 和 final metrics，不参与 optimization。
+
+validation 上 8 个 refinement config 全部使 mask 指标退化或 mismatch 过高，因此只选出最高分配置作为 diagnostic：`steps=50, lr=0.003, lambda_prior=0.10`。最终 test geometry-raster IoU/Dice/area_error 从 `0.6726 / 0.8017 / 0.1945` 变为 `0.6492 / 0.7829 / 0.2417`，forward NRMSE 虽下降 `0.0713`，但 mismatch_rate 达 `0.6212`，residual reduction 与 IoU/Dice delta 的相关性为 `-0.1824 / -0.2250`。这说明 20.56 的 pairwise ordering 改善没有转化为连续低维 geometry refinement 的可靠梯度。
+
+结论：第 20.57 不通过 promising gate，不更新任何 baseline。当前 evidence 指向 residual objective / low-dimensional rect-rot parameterization 的连续优化瓶颈；不建议继续在该设置上小调 config。下一步若继续 geometry-aware route，应优先转向 mask/profile basis refinement，或在更大 perturbation pack / richer observations 上重新验证 forward residual landscape。

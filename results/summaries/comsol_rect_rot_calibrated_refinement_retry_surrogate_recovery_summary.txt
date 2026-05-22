@@ -1,0 +1,11 @@
+20.57 S1 perturbation-calibrated surrogate recovery summary
+
+No checkpoint is reused or written. S1 is retrained with the 20.56 protocol from the perturbation forward pack.
+Device: cuda
+Best epoch: 11
+Val/test waveform NRMSE: 0.366621 / 0.428885
+Val/test waveform correlation: 0.931205 / 0.904714
+Val/test ordering accuracy: 0.732143 / 0.803571
+Val/test mismatch rate: 0.267857 / 0.196429
+Val/test residual-error correlation: 0.389600 / -0.046164
+Close enough to 20.56 gate for controlled retry: True

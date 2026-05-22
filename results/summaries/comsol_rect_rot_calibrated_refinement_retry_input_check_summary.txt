@@ -1,0 +1,12 @@
+20.57 calibrated refinement retry input check summary
+
+Scope: controlled retry only. No COMSOL run, no new perturbation data, no inverse head or dense baseline training.
+Selected 20.56 surrogate: S1_perturb_geom_mlp
+20.56 val/test ordering: 0.7321428571428571 / 0.8035714285714286
+20.56 val/test mismatch: 0.26785714285714285 / 0.19642857142857142
+20.56 test residual-error correlation caveat: -0.046164349385919665
+20.56 perturbation pack rows: 96; split={np.str_('train'): 64, np.str_('val'): 16, np.str_('test'): 16}; type={np.str_('rectangular_notch'): 48, np.str_('rotated_rect'): 48}
+20.54 proposal rows available: 400
+Rect+rot pilot subset: 400; split={np.str_('val'): 66, np.str_('train'): 268, np.str_('test'): 66}
+
+Input check passed: True

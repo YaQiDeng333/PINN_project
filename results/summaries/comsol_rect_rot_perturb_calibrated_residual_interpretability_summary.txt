@@ -1,0 +1,12 @@
+20.57 perturbation-calibrated residual interpretability summary
+
+Question 1: Did perturbation-calibrated residual become more refinement-useful?
+- Test residual reduction vs IoU/Dice delta correlation = -0.182421 / -0.225014
+- Test mismatch rate = 0.621212
+
+Question 2: Does pairwise ordering improvement transfer to continuous optimization?
+- Test pre/post IoU/Dice = 0.672558/0.801713 -> 0.649231/0.782901
+- Test forward NRMSE reduction = 0.071340
+
+Question 3: Remaining failure mode:
+- Pairwise ordering did not robustly transfer; likely residual objective / representation limit or non-identifiability remains.

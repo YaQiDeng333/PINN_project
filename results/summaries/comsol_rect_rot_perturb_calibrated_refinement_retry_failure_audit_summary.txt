@@ -1,0 +1,14 @@
+20.57 perturbation-calibrated refinement retry failure audit
+
+Promising gate passed: False
+Test IoU delta: -0.023327
+Test Dice delta: -0.018812
+Test area_error delta: 0.047211
+Test angle error delta: -0.181428
+Test parameter drift norm: 1.339717
+Test forward NRMSE reduction: 0.071340
+Test mismatch rate: 0.621212
+
+Failure mode judgement:
+- Surrogate mismatch / representation limit remains: forward residual improves while mask metric degrades.
+- True mask / true geometry were not used in optimization; they only support validation selection and final metrics.
