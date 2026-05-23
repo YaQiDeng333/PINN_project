@@ -1,5 +1,13 @@
 # PINN 优化路线
 
+## 2026-05-24 路线同步：20.69 watertight imported solid builder hardening
+
+20.69 继续 true 3D / Piao-style 主线，但只攻 imported watertight mesh solid builder，不进入 pilot、不训练、不更新 baseline。相对 20.68，真正推进点是把 imported mesh route 从 “Boolean 后 empty steel domain” 推进到 “RBC watertight STL 可 import / repair / form solid / Boolean subtract / mesh precheck”。这一步不再依赖 high-layer control，也没有把 high-layer stepped control 写成 smooth / near-smooth。
+
+当前分级状态是：Python watertight mesh pass，RBC imported solid geometry gate pass，forward smoke fail。`medium_round` mesh 明确记录了 `mesh_units=m`、top cap `z=0`、bottom surface `z=-depth`、defect void 嵌入 steel 并与 surface 相交；COMSOL 侧 `import_success=True`、`form_solid_success=True`、`boolean_subtract_success=True`、`mesh_precheck_success=True`。但 imported watertight defect model 的 stationary solve 不收敛，因此没有 `b_defect`、没有 `delta_b`、没有 NPZ/schema validation。
+
+路线判断：imported watertight solid route 技术上可行到 geometry gate，但还不是 smooth/mesh-based pilot-ready。下一步应修 imported solid 的 COMSOL solve robustness、mesh quality 或 solver setting；在 forward smoke 通过前，不扩样、不训练、不进入 60-sample pilot。dense mask baseline 继续只作 comparator，2D profile-forward 小修继续暂停。
+
 ## 2026-05-24 路线同步：20.68 smooth / near-smooth true 3D builder completion
 
 第 20.68 继续沿 true 3D / Piao-style 主线推进，但没有进入 pilot，也没有训练任何模型。本轮专门验证 smooth / near-smooth variable-depth defect builder：从 `medium_round` RBC-style depth map 出发，有限尝试 lofted contour、stacked workplane contour loft、interpolated surface、imported closed mesh，再以 24-layer high-layer control 作对照。

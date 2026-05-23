@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-05-24 更新：第 20.69 后的下一步
+
+第 20.69 已完成 watertight imported solid builder hardening。本轮不训练模型、不进入 pilot、不更新 `CURRENT_BASELINE.md`，也不创建或修改 COMSOL baseline 文档。`medium_round` 的 RBC-style depth map 已由 pure NumPy 生成 watertight closed STL：`mesh_units=m`，top cap 位于 `z=0`，bottom surface 使用 `z=-depth`，defect void 嵌入 steel 且与 steel surface 相交；mesh validation 通过，`is_watertight=True`，`nonmanifold_edges_count=0`，`zero_area_triangles_count=0`，`volume_m3=1.2918e-07`，`max_depth_m=0.0025`。
+
+COMSOL 侧结果比 20.68 更进一步：known prism sanity probe 通过；RBC watertight STL 的 `import_success=True`、`repair_success=True`、`form_solid_success=True`、`imported_domain_count=1`、`boolean_subtract_success=True`、`steel_notched_domain_count=1`、`mesh_precheck_success=True`。这说明 20.68 的 imported mesh Boolean empty steel domain blocker 已被推进到 geometry gate 通过。
+
+但 one-sample forward smoke 只完成到 no-defect solve；defect model 的 stationary solver 不收敛，未生成 `true_3d_imported_watertight_forward_smoke_v1.npz`，因此没有运行 NPZ/schema validator，也没有 `delta_b`。当前 route decision 是 `C_import_boolean_pass_forward_not_run_or_failed`：imported watertight solid geometry route 技术上可行，但尚不是 pilot-ready。下一步唯一建议是先修 COMSOL imported solid 的 solve / mesh-quality / solver robustness，再考虑 smooth/mesh-based true 3D RBC pilot；不要扩样、不要训练、不要回退到 2D profile-forward 小修。dense mask baseline 仍只作 comparator。
+
 ## 2026-05-24 更新：第 20.68 后的下一步
 
 第 20.68 已完成 smooth / near-smooth true 3D variable-depth builder completion feasibility。本轮没有训练模型、没有进入 pilot、没有生成 20.68 forward NPZ、没有更新 `CURRENT_BASELINE.md`，也没有创建或修改 COMSOL baseline 文档。bounded geometry probe 的结论是：`lofted_contour_solid`、`stacked_workplane_contour_loft`、`interpolated_surface_solid`、`imported_closed_mesh_solid` 均未形成可进入 forward 的 smooth / near-smooth candidate；唯一通过的是 `high_layer_control_24`。

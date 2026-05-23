@@ -1,0 +1,38 @@
+20.69 watertight imported solid builder preflight summary
+
+Decision: GO for a bounded imported watertight mesh solid hardening pass.
+
+Agent A Method/Literature:
+- Imported watertight solid hardening is consistent with the true 3D / Piao-style route after 20.66-20.68.
+- This is geometry-builder work only, not a full Piao 2019 reproduction and not a training stage.
+
+Agent B Mesh/Geometry Construction:
+- Use pure NumPy because the available environments do not reliably provide trimesh, meshio, numpy-stl, pyvista, or open3d.
+- The mesh must be a closed positive-depth volume with a top cap at z=0, bottom surface z=-depth(x,y), side walls, consistent edge incidence, positive volume, and no zero-area triangles.
+
+Agent C COMSOL Import Capability:
+- COMSOL Import exists, but 20.68 showed import alone is not enough: imported_closed_mesh_solid failed because Boolean subtract produced an empty steel domain selection.
+- 20.69 must separate import_success, repair_success, form_solid_success, imported_domain_count, boolean_subtract_success, steel_notched_domain_count, and mesh_precheck_success.
+
+Agent D Experiment Design:
+- Use one primary RBC sample: medium_round.
+- Run a known cube/prism import sanity probe separately, then the RBC mesh probe. The known probe can validate the import pipeline only; it never counts as RBC success.
+- Run one-sample Bx/By/Bz forward only if the RBC imported solid gate passes.
+
+Agent E Safety/Git/Data Boundary:
+- Correct target repositories are C:\Users\19166\Desktop\PINN_project and C:\Users\19166\Desktop\COMSOL_Multiphysics_MCP.
+- Current known PINN dirty items to exclude: MODEL_STRUCTURE_PLAN.md deletion and scripts/visualize_current_baseline.py.
+- Current known COMSOL dirty items to exclude: src/tools/physics.py, src/tools/results.py, src/tools/study.py, configs/, knowledge_base/chroma.sqlite3, scripts/generate_mfl_rectangular_sweep.py.
+- Do not commit data/, NPZ, .mph, raw CSV, checkpoint, preview PNG, notes, temp STL/temp mesh, baseline docs, MODEL_STRUCTURE_PLAN.md deletion, or unrelated dirty items.
+
+Agent F Implementation Feasibility:
+- Execute as pure-Python mesh validation -> COMSOL import/Boolean/mesh precheck -> optional forward -> optional NPZ validation -> route decision.
+- If RBC mesh is watertight but not placed inside/intersecting the steel surface correctly, stop before COMSOL Boolean.
+
+Hard blockers:
+- watertight closed mesh cannot be generated or validated;
+- mesh is not embedded in steel volume or does not intersect z=0 steel surface;
+- COMSOL cannot form/import a solid domain from the STL;
+- Boolean subtract or mesh precheck fails for the RBC mesh;
+- only high-layer or constant-depth routes remain;
+- forbidden generated artifacts cannot be kept out of git.

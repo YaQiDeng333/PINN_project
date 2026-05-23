@@ -1,0 +1,31 @@
+20.69 watertight RBC mesh validation summary
+
+sample_id: medium_round
+mesh_validation_pass: True
+mesh_units: m
+mesh_source: triangulated_depth_grid
+surface_continuity_assumption: piecewise-linear depth surface from positive-depth RBC-style grid cells; not stepped layers
+top_cap_plane: z=0
+depth_sign_convention: bottom surface z=-depth
+defect_void_embedded_in_steel: True
+defect_intersects_top_surface: True
+bbox_inside_steel: True
+is_watertight: True
+edge_incidence_all_two: True
+nonmanifold_edges_count: 0
+zero_area_triangles_count: 0
+volume_m3: 1.2918224074218747e-07
+max_depth_m: 0.0025
+target_D_m: 0.0025
+depth_rmse_vs_target: 2.5766991211075875e-05
+vertex_count: 614
+face_count: 1224
+export_path: C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\generated\temp_true_3d_mesh_import\medium_round_watertight_depth_surface.stl
+
+Coordinate / placement boundary:
+- mesh_units=m
+- steel surface is z=0, defect top cap lies on z=0, and bottom surface uses z=-depth.
+- The mesh must be embedded in the steel block and intersect the top surface before COMSOL Boolean is attempted.
+
+Git boundary:
+- The exported STL is a generated temp artifact under data/ and must not be committed.
