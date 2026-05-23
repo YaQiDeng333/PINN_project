@@ -1,0 +1,5 @@
+decision_option,selected,condition,observed,next_step
+A_variable_depth_pass,False,smooth continuous variable-depth closed solid passes geometry gate and forward/schema validation,high_layer_control_pass,generate true 3D RBC pilot
+B_near_smooth_pass,False,near-smooth loft/import/interpolated closed solid passes; approximation is explicit,high_layer_control_pass,consider near-smooth approximation pilot or continue smooth builder improvement
+C_high_layer_control_pass,True,only high-layer control passes; no smooth/near-smooth candidate qualifies,high_layer_control_pass,human confirmation required before accepting high-layer approximation as pilot definition
+D_failed,False,no variable-depth/non-constant-depth candidate passes the geometry-only gate,high_layer_control_pass,continue COMSOL geometry builder work; do not expand samples or train

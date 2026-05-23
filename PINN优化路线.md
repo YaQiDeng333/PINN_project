@@ -1,5 +1,13 @@
 # PINN 优化路线
 
+## 2026-05-24 路线同步：20.68 smooth / near-smooth true 3D builder completion
+
+第 20.68 继续沿 true 3D / Piao-style 主线推进，但没有进入 pilot，也没有训练任何模型。本轮专门验证 smooth / near-smooth variable-depth defect builder：从 `medium_round` RBC-style depth map 出发，有限尝试 lofted contour、stacked workplane contour loft、interpolated surface、imported closed mesh，再以 24-layer high-layer control 作对照。
+
+路线判断是：smooth / near-smooth builder 仍未完成。Loft、workplane loft、ParametricSurface 和 imported closed mesh 都没有同时满足 `closed_body_success=True`、`boolean_subtract_success=True`、`mesh_precheck_success=True`、`spatial_depth_variation=True`、`is_constant_depth=False` 的 Stage C gate；imported mesh route 的失败点是 Boolean subtract 产生 empty steel domain selection。唯一通过的是 `high_layer_control_24`，它比 20.66 的 5-layer 和 20.67 的 12-layer 更细，但仍是 high-layer stepped control，不能当作 smooth / near-smooth 或 exact Piao RBC。
+
+因此 true 3D 路线继续保留，但后续扩样需要先做口径选择：接受 high-layer approximation 作为 pilot label / geometry definition，或继续修 smooth closed-surface builder。当前不允许自动进入 60-sample pilot，不回退到 2D profile-forward 小修，也不更新 `CURRENT_BASELINE.md`；dense mask baseline 仍只作 comparator。
+
 ## 2026-05-23 路线同步：20.63 multi-axis profile oracle ordering feasibility
 
 第 20.63 将第 20.62 的 richer observation 判断继续拆开验证：如果 multi-liftoff Bz residual 仍不能稳定排序 profile quality，那么先不训练 surrogate，而是直接用真实 COMSOL oracle residual 比较 same-liftoff Bx/By/Bz vector observation 是否更有辨识力。本轮使用 24 base / 192 profile rows，在 `sensor_z_m=0.008` 下导出 `[mf.Bx, mf.By, mf.Bz]`；所有 profile row 都是真实 COMSOL forward，包括 `true_reference`，不复用旧 Bz-only 数组。

@@ -1,5 +1,13 @@
 # 实验工作日志
 
+## 2026-05-24 更新：第 20.68 smooth / near-smooth true 3D variable-depth builder completion
+
+第 20.68 只做 smooth / near-smooth true 3D defect builder feasibility，不进入 pilot、不训练 surrogate / inverse model、不做 refinement，也不更新 baseline。Stage A 从 20.66/20.67 的 RBC-style plan 中生成 `medium_round` 主样本和 `deep_round`、`medium_boxy` geometry-only 备选样本；3 个样本的 depth map、projected mask、max-depth tolerance、candidate method metadata 均通过 plan validation。
+
+Stage B 在 COMSOL 仓库按 bounded rule 测试 `lofted_contour_solid`、`stacked_workplane_contour_loft`、`interpolated_surface_solid`、`imported_closed_mesh_solid` 和 `high_layer_control_24_or_32`。四个 smooth / near-smooth candidate 均未通过 Stage C hard gate：Loft 操作无法在当前 COMSOL API context 中创建，workplane contour-to-solid loft closure 未验证，ParametricSurface 没有 verified closed-solid / Boolean subtract route，imported closed mesh 虽记录 `mesh_source=triangulated_depth_grid`、`surface_continuity_assumption=piecewise-linear continuous depth surface from RBC-style depth grid; not stepped_layers`、`depth_rmse_vs_target=0.0`，但 Boolean subtract 产生 empty steel domain selection。唯一通过的是 `high_layer_control_24`，其 `closed_body_success=True`、`boolean_subtract_success=True`、`mesh_precheck_success=True`、`spatial_depth_variation=True`、`is_constant_depth=False`，但它被严格标记为 `high_layer_control_pass`，不是 smooth / near-smooth，也不是 exact Piao RBC。
+
+因此 Stage C forward smoke 未执行：没有生成 20.68 smooth NPZ，没有导出 20.68 Bx/By/Bz field，没有计算 20.68 `delta_b`，也没有运行 20.68 NPZ/schema validation。route decision 明确写为 smooth builder remains incomplete；除非人工确认接受 high-layer approximation 作为 pilot 口径，否则不能自动进入 60-sample true 3D RBC pilot。Claude Code review 已完成；其对 `MODEL_STRUCTURE_PLAN.md` 删除项的提示属于用户已有无关 dirty item，本轮按白名单 staging 排除且不回滚用户改动。第 20.68 不修改 `CURRENT_BASELINE.md` 或任何 COMSOL baseline 文档。
+
 ## 2026-05-23 更新：第 20.63 multi-axis MFL profile perturbation oracle ordering feasibility
 
 第 20.63 在第 20.62 证明 multi-height Bz 仍不能稳定排序 profile quality 后，转向 same-liftoff multi-axis MFL observation feasibility。本轮只做真实 COMSOL oracle residual ordering audit，不训练 surrogate、不训练 inverse model、不运行 profile refinement，也不更新 baseline。

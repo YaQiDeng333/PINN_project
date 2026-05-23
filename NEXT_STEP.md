@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-05-24 更新：第 20.68 后的下一步
+
+第 20.68 已完成 smooth / near-smooth true 3D variable-depth builder completion feasibility。本轮没有训练模型、没有进入 pilot、没有生成 20.68 forward NPZ、没有更新 `CURRENT_BASELINE.md`，也没有创建或修改 COMSOL baseline 文档。bounded geometry probe 的结论是：`lofted_contour_solid`、`stacked_workplane_contour_loft`、`interpolated_surface_solid`、`imported_closed_mesh_solid` 均未形成可进入 forward 的 smooth / near-smooth candidate；唯一通过的是 `high_layer_control_24`。
+
+当前状态必须写成 `high_layer_control_pass`，不能写成 `variable_depth_pass` 或 `near_smooth_pass`。`high_layer_control_24` 比 20.67 的 12-layer control 更进一步，记录了 24 个 depth levels，且 `closed_body_success=True`、`boolean_subtract_success=True`、`mesh_precheck_success=True`、`spatial_depth_variation=True`、`is_constant_depth=False`；但它仍是 stepped/high-layer control，不是 smooth RBC surface，也不是 exact Piao RBC geometry。
+
+下一步唯一需要人工确认：是否接受 high-layer approximation 作为后续 pilot 口径。如果接受，可以设计 true 3D RBC pilot，但所有文件必须显式标注 `high_layer_approximation`，不能写成 smooth / near-smooth；如果不接受，则继续修 COMSOL smooth / closed-surface builder，优先诊断 imported mesh Boolean empty steel domain 或寻找可用的 closed-surface / convert-to-solid 路径。dense mask baseline 仍只作 comparator。
+
 ## 2026-05-23 更新：第 20.66 后的下一步
 
 第 20.66 已完成 true 3D RBC-style smoke pack generation。本轮只做 smoke pack generation 和 schema validation：没有训练 forward surrogate 或 inverse model，没有做 refinement，没有更新 `CURRENT_BASELINE.md`，也没有创建或修改 COMSOL baseline 文档。Claude Code review 完成且无 must-fix。

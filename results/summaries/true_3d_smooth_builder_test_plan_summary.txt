@@ -1,0 +1,19 @@
+20.68 smooth builder test plan summary
+
+sample_count: 3
+primary_sample: medium_round
+stage_a_validation_pass_count: 3
+candidate_order: lofted_contour_solid -> stacked_workplane_contour_loft -> interpolated_surface_solid -> imported_closed_mesh_solid -> high_layer_control_24_or_32
+stage_c_gate: variable_depth_pass or near_smooth_pass only
+high_layer_control_policy: no Stage C forward; human confirmation required before any pilot expansion
+exact_piao_rbc: False
+rbc_formula_status: RBC-style / RBC-inspired engineering approximation; exact Piao RBC formula not implemented
+
+Selected samples:
+- medium_round: L=0.018, W=0.01, D=0.0025, forward_eligible=True, validation_pass=True
+- deep_round: L=0.02, W=0.012, D=0.0055, forward_eligible=False, validation_pass=True
+- medium_boxy: L=0.022, W=0.014, D=0.003, forward_eligible=False, validation_pass=True
+
+Important boundary:
+- projected_mask_2d is only a 2D comparator label.
+- The 3D label remains reconstructable from rbc_params, profile_pose, profile_depth_grid_m/profile_depth_map_xy_m, and geometry_params_json.
