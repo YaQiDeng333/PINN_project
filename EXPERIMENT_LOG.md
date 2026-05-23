@@ -2483,3 +2483,18 @@ COMSOL 能力边界也保持明确：当前 COMSOL 链路支持真实 3D volume 
 第一个 3D pilot 推荐采用 Piao-style RBC six parameters：`L, W, D, wLD, wWD, wLW`，并派生 depth grid / projected 2D mask 用于 QA 和兼容对照。第一版只做 single-defect，不纳入 polygon、multi_defect 或 arbitrary free-form 3D volume。20.66 smoke 的第一目标固定为 `Bx/By/Bz @ sensor_z_m=0.008`，验证 `RBC params -> depth map -> COMSOL variable-depth defect solid -> same-source projected mask -> delta_B check`；`0.012m` 只保留为 20.67 或后续 ablation 的 schema 选项。
 
 20.67 pilot 的 projected mask IoU `>=0.65`、Dice `>=0.78`、profile error `<=0.25` 等阈值只作为 preliminary acceptance guidance，不是已验证硬标准。dense mask baseline 只保留为 comparator，不再作为当前 geometry-forward 主线。
+## 第 20.66 步：true 3D RBC-style smoke pack generation
+
+本轮执行 true 3D / Piao-style 路线的第一个 smoke，只验证 `RBC params -> depth/profile grid -> COMSOL 3D/stepped-depth defect -> Bx/By/Bz @ sensor_z_m=0.008 -> delta_b check -> schema validation`。没有训练 forward surrogate 或 inverse model，没有做 refinement，没有更新 `CURRENT_BASELINE.md`，也没有创建或修改 COMSOL baseline 文档。
+
+Stage 0 preflight 结论是：20.66 值得执行，但当前 COMSOL 能力边界必须诚实记录。现有链路支持真实 3D volume solve、Boolean Difference、no-defect/defect pair 和 `[mf.Bx, mf.By, mf.Bz]` 三轴导出；但 smooth RBC variable-depth surface / solid 仍未验证。RBC generator 本轮标记为 `exact_piao_rbc=False`，属于 RBC-style / RBC-inspired engineering approximation，不声称完整复现 Piao 2019。
+
+Stage A 生成 6 个 single-defect RBC-style smoke samples，范围为 `L_m=0.010-0.030`、`W_m=0.006-0.020`、`D_m=0.001-0.006`，覆盖 shallow / medium / deep、narrow / wide、round / boxy / sharper profile。pure-Python validation 6/6 通过，`profile_depth_grid_m`、`profile_depth_map_xy_m`、`projected_mask_2d`、`profile_pose`、`rbc_params`、`geometry_params_json` 均可序列化且 mask 非空。
+
+Stage B 使用真实 COMSOL forward 生成 6/6 smoke rows，几何实现为 `stepped_depth_layered_approximation`：每个样本使用 5 层 nested depth-level polygon prisms 做 stepped-depth approximation。`smooth_variable_depth_solid_verified=False`，`stepped_depth_approximation=True`，`constant_depth_extrusion_used_as_success=False`。本轮通过状态因此是 `stepped_depth_smoke_pass`，不是 `variable_depth_pass`。
+
+Stage C schema validation 6/6 通过。NPZ 中保存了 `delta_b` / `b_defect` / `b_no_defect`，shape 为 `(N, 3, 3, 201)`；同时保存 `rbc_params`、`profile_pose`、`profile_depth_grid_m`、`profile_depth_map_xy_m`、`projected_mask_2d`、`depth_levels_m`、`stepped_depth_approximation` 和 `geometry_params_json`。`projected_mask_2d` 只作为 2D comparator，不替代 3D profile label。`delta_b = b_defect - b_no_defect` 的保存数组校验通过，Bx / By / Bz 均 finite 且非零。
+
+Claude Code review 完成且无 must-fix。review 认可本轮没有把 constant-depth extrusion 伪装成 true 3D，也认可 Bx/By/Bz、depth map、projected mask 和 RBC params schema 一致；建议项是 COMSOL inventory 中的 delta error 计算偏定义式，后续可增强为更独立的求解漂移检查，但不构成本轮 blocker。
+
+路线结论：20.66 技术链路在 stepped-depth smoke 层级通过，说明 true 3D / Piao-style 路线具备继续验证价值；但 smooth true variable-depth RBC solid 仍未通过。下一步唯一建议不是直接声称 smooth 3D pilot ready，而是先决策：继续攻 smooth variable-depth COMSOL geometry，还是明确接受 stepped-depth 作为 20.67 pilot approximation。dense mask baseline 仍只作为 comparator。

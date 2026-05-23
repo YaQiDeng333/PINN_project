@@ -222,6 +222,16 @@ Priewald 2013 对当前阶段更重要的启发不是复现完整 FEM、解析 J
 本轮使用已有 pilot_v9 original samples 和 20.56 perturbation pack 构建 profile-forward dataset，没有运行 COMSOL，也没有生成新数据。`PFS3_profile_station_sequence` 的 waveform fit 可接受（val/test NRMSE `0.3841 / 0.3995`），说明 profile-native 表示可被 forward surrogate 消化；但 validation residual ordering accuracy 只有 `0.6607`，mismatch_rate 为 `0.3393`，未达到 refinement gate。因此第 20.59 不执行 profile-forward refinement retry。
 
 路线判断：profile-compatible surrogate 相比旧 rect-like bridge 有边际价值，但当前 perturbation coverage 太小，不足以支撑连续优化。下一步若继续 forward-guided profile refinement，应先扩展 profile perturbation data；否则保留 20.58 的 no-forward profile basis 作为更稳的 representation 证据，并暂停对当前 forward residual objective 的小调。该阶段仍是 POC，不更新任何 baseline。
+## 2026-05-23 路线同步：20.66 true 3D RBC-style smoke pack
+
+第 20.66 是 true 3D / Piao-style 主线的第一个执行 smoke，不是 baseline，也不是正式训练数据集。本轮只验证 `RBC params -> depth/profile grid -> COMSOL 3D/stepped-depth defect -> Bx/By/Bz @ sensor_z_m=0.008 -> delta_b check -> schema validation`，没有训练 surrogate / inverse model，没有做 refinement，也没有更新 `CURRENT_BASELINE.md` 或 COMSOL baseline 文档。
+
+结果分级为 `stepped_depth_smoke_pass`。6 个 RBC-style single-defect samples 的 pure-Python depth/profile validation 全部通过，真实 COMSOL forward 6/6 通过，NPZ/schema validation 6/6 通过。输出 schema 已包含 `rbc_params`、`profile_pose`、`profile_depth_grid_m`、`profile_depth_map_xy_m`、`projected_mask_2d`、`depth_levels_m`、`stepped_depth_approximation` 和 `geometry_params_json`；其中 `projected_mask_2d` 只作为 2D comparator，不能替代 3D profile label。
+
+本轮必须保持诚实边界：`exact_piao_rbc=False`，当前 generator 是 RBC-style / RBC-inspired engineering approximation，不是完整 Piao 2019 RBC 公式复现；`smooth_variable_depth_solid_verified=False`，COMSOL 几何是 5 层 `stepped_depth_layered_approximation`，不是 smooth true variable-depth solid；`constant_depth_extrusion_used_as_success=False`，没有把恒深 extrusion 伪装成 true 3D。
+
+路线判断：true 3D / Piao-style 技术链路已经在 stepped-depth smoke 层级跑通，说明该方向值得继续；但 smooth variable-depth COMSOL geometry 仍是主 blocker。下一步不应直接训练模型，也不应回到 2D profile-forward 小修，而应先决策：继续实现 smooth variable-depth RBC solid，还是接受 stepped-depth approximation 作为 20.67 pilot 的明确标签。
+
 ## 2026-05-23 路线同步：20.65 true 3D / Piao-style feasibility design
 
 第 20.65 完成的是 feasibility design，不是数据生成或模型训练。本轮没有运行 COMSOL、没有生成 NPZ / raw CSV / `.mph` / preview PNG、没有训练 surrogate 或 inverse model、没有做 refinement，也没有修改 `CURRENT_BASELINE.md` 或 COMSOL baseline 文档。Claude Code review 通过且无 must-fix。

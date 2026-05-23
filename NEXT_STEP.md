@@ -1,5 +1,15 @@
 # NEXT_STEP
 
+## 2026-05-23 更新：第 20.66 后的下一步
+
+第 20.66 已完成 true 3D RBC-style smoke pack generation。本轮只做 smoke pack generation 和 schema validation：没有训练 forward surrogate 或 inverse model，没有做 refinement，没有更新 `CURRENT_BASELINE.md`，也没有创建或修改 COMSOL baseline 文档。Claude Code review 完成且无 must-fix。
+
+当前通过状态是 `stepped_depth_smoke_pass`。Stage A 生成 6 个 RBC-style single-defect samples，`L_m=0.010-0.030`、`W_m=0.006-0.020`、`D_m=0.001-0.006`，pure-Python depth/profile/mask validation 6/6 通过；Stage B 真实 COMSOL forward 6/6 通过，输出 `[mf.Bx, mf.By, mf.Bz] @ sensor_z_m=0.008`，`delta_b = b_defect - b_no_defect` 校验通过；Stage C NPZ schema validation 6/6 通过。
+
+边界必须写清：本轮没有通过 smooth true variable-depth RBC solid。COMSOL 几何实现是 5 层 `stepped_depth_layered_approximation`，`smooth_variable_depth_solid_verified=False`，`stepped_depth_approximation=True`，`constant_depth_extrusion_used_as_success=False`。RBC generator 也标记为 `exact_piao_rbc=False`，属于 RBC-style / RBC-inspired engineering approximation，不是完整复现 Piao 2019。
+
+下一步唯一建议：先做路线决策，不要直接把 20.66 写成 smooth 3D pilot ready。需要在两个选项中选择：继续改 COMSOL smooth variable-depth geometry，或明确接受 stepped-depth 作为 20.67 pilot approximation 后再设计 60-sample pilot。dense mask baseline 仍只作为 comparator。
+
 ## 2026-05-23 更新：第 20.65 后的下一步
 
 第 20.65 已完成 true 3D / Piao-style geometry profile feasibility design。本轮是 design-only：没有运行 COMSOL、没有生成数据、没有训练 surrogate / inverse model、没有做 refinement，也没有更新 `CURRENT_BASELINE.md` 或任何 COMSOL baseline 文档。Claude Code review 通过且无 must-fix。
