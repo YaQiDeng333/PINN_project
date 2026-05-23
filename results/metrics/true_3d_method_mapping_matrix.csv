@@ -1,0 +1,10 @@
+method_component,original_method_role,project_migration_status,20_65_decision,notes
+Piao_three_axis_MFL,primary input observation,partially_migratable,use_Bx_By_Bz_for_true_3d_smoke,Bx/By/Bz export is proven but true 3D labels are not yet proven
+Piao_NLS_features,physics feature extraction,not_directly_implemented,defer_to_later_feature_adapter,Do not claim full NLS reproduction in 20.65
+Piao_LS_SVM,feature_to_RBC_regressor,not_directly_implemented,defer_modeling,Do not call SVR/KRR weak adaptation a full LS-SVM reproduction
+Piao_RBC_six_params,low_dimensional_3D_profile_label,migratable_as_first_pilot,select_as_primary_representation,"Use L,W,D,wLD,wWD,wLW"
+Piao_profile_reconstruction,3D profile from RBC,migratable_after_geometry_smoke,design_schema_only,Requires variable-depth COMSOL solid validation
+Priewald_forward_residual,candidate_profile_to_MFL_consistency,migratable_later,defer_refinement_until_oracle_gate,Use after true 3D oracle residual is meaningful
+Priewald_Gauss_Newton_LM,continuous profile refinement,not_for_20_65,defer,Requires reliable forward residual landscape
+Current_2D_profile_basis,top_view_profile_refinement,insufficient,stop_small_tuning,20.61-20.64 failed ordering gates
+Dense_mask_baseline,2D comparator,reference_only,keep_as_comparator,Do not make it the main route

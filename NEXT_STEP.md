@@ -1,5 +1,15 @@
 # NEXT_STEP
 
+## 2026-05-23 更新：第 20.65 后的下一步
+
+第 20.65 已完成 true 3D / Piao-style geometry profile feasibility design。本轮是 design-only：没有运行 COMSOL、没有生成数据、没有训练 surrogate / inverse model、没有做 refinement，也没有更新 `CURRENT_BASELINE.md` 或任何 COMSOL baseline 文档。Claude Code review 通过且无 must-fix。
+
+当前判断是：20.61-20.64 已足以暂停 2D profile-forward 小修。single-height Bz、multi-height Bz、same-direction Bx/By/Bz、multi-direction excitation 都没有让真实 COMSOL oracle residual 稳定排序 profile quality；继续训练 2D profile surrogate 或继续 refinement config 微调没有主线价值。下一步主线切换为 **true 3D / Piao-style geometry profile**，dense mask baseline 只作为 comparator。
+
+第 20.66 的唯一推荐任务是 small smoke，不是正式数据集：验证 `RBC params -> depth map -> COMSOL variable-depth defect solid -> same-source projected mask -> Bx/By/Bz @ sensor_z_m=0.008 -> delta_B = B_defect - B_no_defect`。当前只能写成 COMSOL 支持真实 3D volume solve；RBC / variable-depth true 3D profile generation 尚未验证，是 20.66 的核心 blocker。不要把 20.66 smoke 扩成 multi-height，`0.012m` 只作为后续 pilot / ablation 设计保留。
+
+如果 20.66 无法构建 variable-depth true 3D solid，应暂停 geometry-forward route，先解决 COMSOL geometry blocker；如果 smoke 通过，再进入小规模 3D pilot。未来 20.67 的 IoU/Dice/profile-error 阈值目前只是 preliminary acceptance guidance，不是已验证硬标准。
+
 ## 2026-05-23 更新：第 20.64 后的下一步
 
 第 20.64 已完成 multi-direction excitation profile perturbation oracle ordering feasibility POC。本轮只做 oracle residual audit，不训练 surrogate、不做 refinement、不更新 baseline。COMSOL pack 覆盖 12 base samples / 96 profile rows / 3 directions / 3 axes；`direction_0` 复用同 geometry 的 20.63 default-direction rows，`direction_45` 和 `direction_90` 使用真实 COMSOL forward，并通过 `ExternalCurrentDensity.Je` 设置真实改变 excitation / magnetization direction。direction probe 显示 `direction_90` 相对 `direction_0` 的 no-defect / defect response NRMSE 为 `1.6479 / 1.7981`，因此不是数组旋转或信号伪造。

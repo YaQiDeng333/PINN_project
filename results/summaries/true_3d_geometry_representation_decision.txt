@@ -1,0 +1,26 @@
+True 3D geometry representation decision
+
+Selected representation:
+- Piao-style RBC six parameters as the primary first-pilot representation.
+- Parameters: L, W, D, wLD, wWD, wLW.
+- The pilot is single-defect and single-component only.
+- Derived arrays are saved for training and QA: depth grid, projected depth map, projected footprint mask.
+
+Why RBC first:
+- It is low-dimensional and auditable.
+- It aligns with the Piao-style route without claiming full Piao reproduction.
+- It avoids immediately returning to dense/free-form grid targets.
+- It provides explicit length, width, depth, and shape-curvature parameters that can be compared with geometry metrics.
+- It can be used later by Piao-style feature regression or Priewald-style constrained refinement.
+
+Rejected for first pilot:
+- Bézier/spline surface as primary representation: too flexible for the first identifiability smoke.
+- depth-map/profile DOF grid as primary representation: high-dimensional and likely to repeat dense decoder problems.
+- RBF/basis profile as primary representation: possible second-stage compromise, but not first.
+- multi-component 3D set: deferred until single-component true 3D is proven.
+- polygon/free-form 3D: deferred because it weakens alignment with Piao RBC and increases COMSOL QA risk.
+
+Important boundary:
+- Selecting RBC as the design representation does not mean the current COMSOL generator can already generate RBC variable-depth solids.
+- 20.66 must prove the geometry construction path before any training or pack generation.
+

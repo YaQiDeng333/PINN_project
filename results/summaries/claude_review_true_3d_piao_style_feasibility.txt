@@ -1,0 +1,61 @@
+﻿我已完整阅读所有指定文件。以下是我的 review 结论。
+
+---
+
+## 必须修复
+
+**无。**
+
+---
+
+## 建议修复
+
+1. **`EXPERIMENT_LOG.md`、`NEXT_STEP.md`、`PINN优化路线.md` 均未写入 20.65 条目。** 这三个文件的最新条目止于 20.64。20.65 虽是 design-only，但仍应有对应的日志条目记录"已完成 true 3D / Piao-style feasibility design，未运行 COMSOL / 未生成数据 / 未训练模型"，以保持版本链完整。当前状态会让人以为 20.65 尚未执行。
+
+---
+
+## 可以接受
+
+以下 14 项全部通过：
+
+| # | 检查项 | 结论 |
+|---|--------|------|
+| 1 | 未运行 COMSOL | 通过。route alignment summary line 6、capability audit line 6 均明确声明未运行 |
+| 2 | 未生成数据 | 通过。capability audit line 7 明确声明无 NPZ/.mph/CSV/PNG 产出 |
+| 3 | 未训练模型 | 通过。route alignment line 6、minimal pilot plan line 4-5 均确认 |
+| 4 | Piao 2019 原方法 vs 迁移版区分 | 通过。route alignment lines 18-38 清晰列出原始路线、可迁移项、不可迁移项；mapping matrix CSV 逐组件标注 status |
+| 5 | RBC / NLS / LS-SVM 说明 | 通过。RBC 六参数逐字段列出；NLS 标注为 "not directly implemented"；LS-SVM 标注为 "defer_modeling"，且明确 "Do not call SVR/KRR weak adaptation a full LS-SVM reproduction" |
+| 6 | Priewald 2013 可迁移点总结 | 通过。正确提取 forward-model-based inversion 核心原则，明确 Gauss-Newton/LM/解析 Jacobian 不是前置条件；mapping matrix row 7-8 准确标注 |
+| 7 | COMSOL true 3D capability audit 可信度 | 通过。capability matrix 逐能力标注 supported/not_verified；blocker（constant-depth extrusion）准确识别；safety boundary（line 38-40）明确禁止写成既成事实 |
+| 8 | 3D representation decision 合理性 | 通过。RBC 六参数为首选，理由充分（低维、可审计、Piao 对齐）；被拒方案（Bézier/grid/RBF/multi-component/polygon）各有明确原因；boundary 声明 RBC 选中不等于 COMSOL 已可用 |
+| 9 | pilot dataset schema 完整性 | 通过。schema fields CSV 覆盖 30 个字段，含 observation/label/derived 3D/2D compatibility/metadata 五层；shape、required status、notes 均完整 |
+| 10 | minimal pilot plan 可执行性 | 通过。20.66 smoke 仅 8 样本、仅 Bx/By/Bz @ 0.008 m、仅几何与观测 plumbing；6 个 smoke goals 和 6 个 non-goals 清晰；stop conditions 明确；20.67 preliminary design 有具体参数范围和 acceptance guidance |
+| 11 | 合理停止 2D profile-forward 小修 | 通过。route decision summary 和 decision matrix 均标注 "Stop_2D_profile_forward_small_tuning = true"，引用 20.61-20.64 连续 gate failure 为证据 |
+| 12 | 未把 dense baseline 重新当主线 | 通过。三处一致声明 "comparator only, not the main route"；decision matrix row 4 标注 "Use_dense_mask_as_main_route = false" |
+| 13 | 未修改 baseline docs | 通过。route decision summary line 7 声明 "CURRENT_BASELINE.md remains unchanged"；git diff 仅显示 `MODEL_STRUCTURE_PLAN.md` 删除和 `scripts/visualize_current_baseline.py` untracked |
+| 14 | 未提交 data/NPZ/checkpoint/PNG/.mph/CSV | 通过。git status 无此类文件 |
+
+**补充约束也全部通过：**
+
+- 约束 1（不得将 true 3D profile generation 写成既成事实）：capability audit lines 38-40 和 route decision lines 28-31 均正确限定为"volume solve 已支持，RBC variable-depth generation 未验证"
+- 约束 2（不得声称重新阅读 Piao PDF 全文）：route alignment lines 7-9 明确声明使用已有 summary 和 PDF 标题/摘要/章节级上下文，未声称新提取全文
+- 约束 3（20.66 smoke 仅 0.008 m）：schema design line 53、minimal pilot plan line 9 和 non-goals line 20 三处约束一致
+- 约束 4（20.67 acceptance thresholds 为 preliminary）：minimal pilot plan lines 36-37 明确标注 "provisional targets, not validated hard standards"
+
+---
+
+## 是否同意 true 3D / Piao-style 作为下一研究主线
+
+**同意。** 20.61–20.64 系统性证明了 2D top-view profile（constant-depth）在现有观测配置下的 residual 无法稳定排序 profile quality。转向 variable-depth 3D profile / Piao-style route 是逻辑上唯一有辨识力提升空间的下一步，且 20.65 的 feasibility design 正确地将此路线定位为"下一研究路线"而非"已证明路线"。
+
+---
+
+## 是否建议进入 3D smoke pack generation（20.66）
+
+**建议进入。** 20.66 smoke 的 scope 严格限定为 8 样本几何与观测 plumbing 验证（RBC→depth map→COMSOL variable-depth solid→projected mask→Bx/By/Bz @ 0.008→delta check），不训练模型，不建大数据集。前置条件（RBC schema、projection rule、stop conditions）已在 20.65 设计完整。唯一实际风险是 COMSOL variable-depth solid construction（loft/sweep/slice-union）是否可行——而这正是 smoke 本身要回答的问题。
+
+---
+
+## 简短原因
+
+20.65 是一份干净的 feasibility design。无 COMSOL 执行、无数据生成、无模型训练；Piao 2019 原方法与迁移版的边界清晰；RBC/NLS/LS-SVM 的 mapping 准确；Priewald 原则被正确提取而非过度承诺；COMSOL capability audit 诚实标注了已支持与未验证的能力；3D representation 选择有充分理由；schema 完整可执行；minimal pilot plan 的 scope 约束得当（0.008 m only, 8 samples, no training）；2D profile-forward 路线的停止决定有 20.61–20.64 的连续 gate failure 证据支撑；所有 safety boundary 和 capability wording 约束均被遵守。唯一不足是 EXPERIMENT_LOG / NEXT_STEP / PINN优化路线 尚未写入 20.65 条目，但不影响设计文件本身的质量和可执行性。

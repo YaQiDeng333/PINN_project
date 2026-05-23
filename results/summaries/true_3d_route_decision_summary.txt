@@ -1,0 +1,32 @@
+True 3D route decision summary
+
+Decision:
+- 2D profile-forward small tuning is formally paused.
+- true 3D / Piao-style geometry profile feasibility becomes the next research route.
+- dense mask baseline remains a comparator only.
+- CURRENT_BASELINE.md remains unchanged.
+- No COMSOL baseline docs are created or modified.
+
+Why:
+- 20.61-20.64 show that 2D top-view profile residual ordering is not stable under single-height Bz, multi-height Bz, same-direction Bx/By/Bz, or multi-direction excitation.
+- 20.64 provided only marginal Bz-only signal and failed the all-axis normalized gate.
+- The next meaningful question is whether true 3D profile labels and geometry can make the inverse problem identifiable, not whether another 2D refinement setting can be tuned.
+
+Next recommended step:
+- Stage 20.66 true 3D smoke pack design/execution.
+- First verify RBC params -> depth map -> COMSOL variable-depth defect solid -> same-source projected mask -> Bx/By/Bz @ 0.008 -> delta check.
+
+If 20.66 succeeds:
+- Proceed to a small 20.67 trainable true 3D pilot.
+
+If 20.66 fails:
+- Do not train models.
+- Do not generate a larger pack.
+- Pause geometry-forward route until COMSOL variable-depth geometry construction is fixed.
+
+Important capability wording:
+- Current COMSOL supports real 3D volume solves.
+- Current COMSOL profile geometry is mostly constant-depth prism/top-view extrusion.
+- RBC depth-varying true 3D profile generation is not yet verified.
+- No true 3D profile pack is train-ready at 20.65.
+

@@ -222,6 +222,20 @@ Priewald 2013 对当前阶段更重要的启发不是复现完整 FEM、解析 J
 本轮使用已有 pilot_v9 original samples 和 20.56 perturbation pack 构建 profile-forward dataset，没有运行 COMSOL，也没有生成新数据。`PFS3_profile_station_sequence` 的 waveform fit 可接受（val/test NRMSE `0.3841 / 0.3995`），说明 profile-native 表示可被 forward surrogate 消化；但 validation residual ordering accuracy 只有 `0.6607`，mismatch_rate 为 `0.3393`，未达到 refinement gate。因此第 20.59 不执行 profile-forward refinement retry。
 
 路线判断：profile-compatible surrogate 相比旧 rect-like bridge 有边际价值，但当前 perturbation coverage 太小，不足以支撑连续优化。下一步若继续 forward-guided profile refinement，应先扩展 profile perturbation data；否则保留 20.58 的 no-forward profile basis 作为更稳的 representation 证据，并暂停对当前 forward residual objective 的小调。该阶段仍是 POC，不更新任何 baseline。
+## 2026-05-23 路线同步：20.65 true 3D / Piao-style feasibility design
+
+第 20.65 完成的是 feasibility design，不是数据生成或模型训练。本轮没有运行 COMSOL、没有生成 NPZ / raw CSV / `.mph` / preview PNG、没有训练 surrogate 或 inverse model、没有做 refinement，也没有修改 `CURRENT_BASELINE.md` 或 COMSOL baseline 文档。Claude Code review 通过且无 must-fix。
+
+路线判断更新为：2D top-view profile-forward 小修正式暂停。20.61 expanded profile perturbation、20.62 multi-height Bz、20.63 same-direction Bx/By/Bz、20.64 multi-direction excitation 都没有让真实 COMSOL residual 稳定排序 profile quality；问题已经不是再调一个 2D profile surrogate、再换一个 residual weight 或再扩一点同类 observation 能稳定解决的。下一条主线切到 **true 3D profile / Piao-style geometry profile**，dense mask baseline 只作为 comparator。
+
+Piao-style 的迁移边界必须保持诚实：本轮基于既有 fullpaper alignment summary 和已上传 PDF 的标题、摘要、章节级上下文，不声称重新阅读全文，也不声称完整复现 Piao 2019。可迁移的是 three-axis MFL、RBC six-parameter 3D profile、geometry parameter regression、projection metrics 和 forward consistency；不可直接迁移的是当前 Bz-only、2D top-view mask、2D profile perturbation residual 和完整 PIG experimental setup。
+
+COMSOL 能力边界也同步更新：当前链路支持真实 3D volume solve，并已有 Bx/By/Bz 输出和 `Je` 方向控制证据；但现有 rect/rot/polygon/profile geometry 主要仍是 constant-depth prism / top-view extrusion。RBC depth-varying defect solid、variable-depth surface、loft/sweep/slice-union geometry 仍是第 20.66 必须验证的 blocker，不能写成当前已支持 true 3D profile generation 或 train-ready pack。
+
+第一个 3D pilot 的 representation 选择为 `Piao RBC six params + derived depth/profile grid`：`L, W, D, wLD, wWD, wLW` 是主标签，depth map / projected 2D mask 是派生监督和 QA。第一版只做 single-defect，不做 polygon、multi_defect 或 arbitrary free-form 3D volume。20.66 smoke 只验证 `Bx/By/Bz @ sensor_z_m=0.008`，目标链路是 `RBC params -> depth map -> COMSOL variable-depth defect solid -> same-source projected mask -> delta_B check`；`0.012m` 只作为 20.67 或后续 ablation 的 schema 选项。
+
+20.67 中 projected mask IoU `>=0.65`、Dice `>=0.78`、profile error `<=0.25` 等阈值只作为 preliminary acceptance guidance，不是已验证硬标准。如果 20.66 不能构建 variable-depth true 3D solid，就暂停 geometry-forward route，先解决 COMSOL geometry blocker。
+
 ## 2026-05-23 路线同步：20.64 multi-direction excitation profile oracle ordering feasibility
 
 第 20.64 在 20.63 same-direction multi-axis 失败后，进一步验证真实改变 COMSOL excitation / magnetization direction 是否能让 profile perturbation oracle residual 更稳定排序 profile quality。本轮仍是 feasibility POC：不训练 forward surrogate，不训练 inverse model，不做 profile refinement，不更新 baseline。实验固定 `sensor_z_m=0.008`、scan lines 为 `[-0.001, 0.0, 0.001]`，使用 12 base / 96 profile rows，并导出 `[mf.Bx, mf.By, mf.Bz]` 三轴响应。

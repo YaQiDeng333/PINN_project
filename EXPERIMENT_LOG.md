@@ -2470,3 +2470,16 @@ Direction convention 固定为：`direction_0` default +Y `Je=["0","1e6[A/m^2]",
 Stage C same-pack oracle audit 显示：test `direction_0` Bz-only ordering = `0.4545`，`direction_0` all-axis normalized = `0.4182`，`direction_90` Bz-only = `0.5273`，`direction_45` Bz-only = `0.4364`，multi-direction Bz train-std normalized = `0.5636`，multi-direction all-axis normalized = `0.3455`。multi-direction all-axis mismatch_rate = `0.6545`，residual-error correlation = `-0.8028`。因此 Bz-only multi-direction 有边际提升，但 all-axis normalized 明显更差，20.64 promising gate 未通过。
 
 Claude Code review 最终通过且无 must-fix。review 同意真实 excitation direction change 有部分信号价值，但不足以支撑 multi-direction profile surrogate training；建议不训练 surrogate，不回到 profile-forward refinement。路线结论是：20.64 未证明 richer direction observation 稳定缓解 profile residual non-identifiability；下一步建议 true 3D profile / Piao-style route，但本轮不进入下一阶段，不更新 `CURRENT_BASELINE.md`，不创建或修改 COMSOL baseline 文档。
+## 第 20.65 步：true 3D / Piao-style geometry profile feasibility design
+
+本轮只完成 feasibility design，没有运行 COMSOL、没有生成数据、没有训练 surrogate / inverse model、没有执行 refinement，也没有更新任何 baseline 文档。Claude Code review 已通过且无 must-fix；review 的唯一建议是同步更新 `EXPERIMENT_LOG.md`、`NEXT_STEP.md` 和 `PINN优化路线.md`。
+
+方法判断是：20.61-20.64 已连续证明当前 2D top-view profile-forward 小修不足以让真实 COMSOL residual 稳定排序 profile quality。single-height Bz、multi-height Bz、same-direction Bx/By/Bz、multi-direction excitation 都没有通过 same-pack oracle ordering gate。因此 2D profile-forward 小修正式暂停，下一条研究主线切换到 true 3D / Piao-style geometry profile。
+
+Piao 2019 的迁移口径保持保守：本轮基于既有 fullpaper alignment summary 和已上传 PDF 的标题、摘要、章节级上下文，不声称本轮重新抽取并阅读全文，也不声称完整复现 Piao 2019。可迁移部分是 three-axis MFL observation、RBC six-parameter 3D profile label、geometry parameter regression、profile projection metrics 和 forward consistency；不可直接迁移的是当前 Bz-only、2D top-view mask、2D profile perturbation residual，以及 full PIG experimental setup。
+
+COMSOL 能力边界也保持明确：当前 COMSOL 链路支持真实 3D volume solve，并已验证 Bx/By/Bz 输出和 source `Je` 方向控制；但现有 rect/rot/polygon/profile geometry 主要仍是 constant-depth prism / top-view extrusion。RBC depth-varying defect solid、variable-depth surface、loft/sweep/slice-union geometry 仍是 20.66 smoke 必须验证的 blocker，不能写成已支持或 train-ready。
+
+第一个 3D pilot 推荐采用 Piao-style RBC six parameters：`L, W, D, wLD, wWD, wLW`，并派生 depth grid / projected 2D mask 用于 QA 和兼容对照。第一版只做 single-defect，不纳入 polygon、multi_defect 或 arbitrary free-form 3D volume。20.66 smoke 的第一目标固定为 `Bx/By/Bz @ sensor_z_m=0.008`，验证 `RBC params -> depth map -> COMSOL variable-depth defect solid -> same-source projected mask -> delta_B check`；`0.012m` 只保留为 20.67 或后续 ablation 的 schema 选项。
+
+20.67 pilot 的 projected mask IoU `>=0.65`、Dice `>=0.78`、profile error `<=0.25` 等阈值只作为 preliminary acceptance guidance，不是已验证硬标准。dense mask baseline 只保留为 comparator，不再作为当前 geometry-forward 主线。

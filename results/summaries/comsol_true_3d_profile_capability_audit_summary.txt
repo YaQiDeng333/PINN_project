@@ -1,0 +1,41 @@
+COMSOL true 3D profile capability audit summary
+
+Stage: 20.65 design-only static audit
+
+Scope:
+- No COMSOL model was run.
+- No data, NPZ, .mph, raw CSV, preview PNG, checkpoint, or notes were generated.
+- This summary is a capability boundary, not an execution result.
+
+Supported today:
+- The COMSOL repository can run real 3D volume solves.
+- Rectangular and rotated-rectangle defects are represented as 3D blocks/prisms with Boolean operations.
+- Polygon/profile defects are represented using WorkPlane -> Polygon(table) -> Extrude.
+- Bx/By/Bz expressions have been exported in prior multi-axis work as mf.Bx, mf.By, mf.Bz.
+- sensor_z, scan_line_y, sensor_x sampling, no-defect/defect fields, and delta_B checks are established in prior scripts.
+- ExternalCurrentDensity.Je can be changed, as shown in Stage 20.64.
+
+Not supported as a verified capability today:
+- RBC 3D profile generation.
+- variable-depth defect surface generation.
+- depth-varying defect solid construction.
+- loft/sweep/slice-union construction for a smooth 3D defect bottom surface.
+- train-ready true 3D profile forward pack generation.
+
+Current blocker:
+- Existing profile geometry is still a top-view footprint plus constant-depth extrusion. This is a real 3D COMSOL volume but not a true depth-varying 3D defect profile.
+- Existing geometry_params generally contain a single depth_m, polygon vertices, and pose/size fields. They do not contain z(x,y), RBC control weights, surface vertices, depth stations, or a 3D depth map.
+- Existing PINN data ingestion is oriented around delta_bz or delta_b_multi_axis plus a 2D mask, not a true 3D profile target.
+
+20.66 smoke must verify:
+- RBC params can generate a finite depth map.
+- The depth map can generate a COMSOL variable-depth defect solid.
+- The projected mask and depth map are derived from the same source geometry as the COMSOL solid.
+- Bx/By/Bz at sensor_z_m=0.008 can be exported.
+- delta_B = B_defect - B_no_defect passes for all axes.
+
+Safety boundary:
+- Do not write that COMSOL already supports true 3D RBC profile generation.
+- Do not write that depth-varying surfaces have been validated.
+- Do not write that a true 3D profile pack is train-ready.
+

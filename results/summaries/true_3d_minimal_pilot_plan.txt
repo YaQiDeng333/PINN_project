@@ -1,0 +1,50 @@
+True 3D minimal pilot plan
+
+Stage 20.66 smoke, next stage:
+- Do not train a model.
+- Do not build a large dataset.
+- Validate geometry and observation plumbing only.
+- Suggested sample count: 8 samples.
+- Composition: 4 rect-like degenerate RBC samples and 4 variable-depth RBC samples.
+- sensor_z_m: 0.008 only.
+- field axes: Bx, By, Bz.
+
+20.66 smoke goals:
+1. RBC params -> finite depth map.
+2. depth map -> COMSOL variable-depth defect solid.
+3. projected mask and COMSOL solid are same-source.
+4. Bx/By/Bz output is finite.
+5. delta_B = B_defect - B_no_defect passes.
+6. no .mph, raw CSV, data pack, NPZ, preview PNG, checkpoint, or notes are committed.
+
+20.66 explicit non-goals:
+- No 0.012 m multi-height requirement.
+- No multi-direction requirement.
+- No surrogate training.
+- No inverse model training.
+- No profile refinement.
+- No baseline update.
+
+Stage 20.67 pilot, preliminary design:
+- Sample count: 120 samples minimum, split 80/20/20.
+- If COMSOL runtime is acceptable, expand to 240 samples, split 160/40/40.
+- Single-defect only.
+- Shape coverage: flat rectangular-like, smooth RBC/ellipsoid-like, rotated rectangular-like.
+- Parameter ranges: L 4-14 mm, W 2-8 mm, D 0.4-2.0 mm, angle 0-75 deg where applicable.
+- Observation ablations: Bz @ 0.008, BxByBz @ 0.008, Bz @ 0.008+0.012, BxByBz @ 0.008+0.012.
+
+Preliminary acceptance guidance for 20.67:
+- These are provisional targets, not validated hard standards.
+- projected mask IoU >= 0.65.
+- Dice >= 0.78.
+- normalized profile error <= 0.25.
+- D MAE <= 0.30 mm.
+- Main richer observation candidate improves over Bz @ 0.008 by IoU >= +0.04 or normalized profile error <= -0.05.
+
+Stop conditions:
+- variable-depth COMSOL solid cannot be constructed.
+- projected mask, depth map, and COMSOL solid are not same-source.
+- delta_B check fails.
+- true-geometry forward residual shows systematic peak shift.
+- future oracle residual cannot exceed the weak 20.64 signal.
+

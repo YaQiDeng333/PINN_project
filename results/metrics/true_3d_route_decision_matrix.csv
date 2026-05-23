@@ -1,0 +1,8 @@
+option,selected,reason,next_action
+Stop_2D_profile_forward_small_tuning,true,20.61-20.64 residual ordering gates failed,Do not tune current 2D profile surrogate/refinement
+Make_true_3D_Piao_style_main_route,true,Only route aligned with 3D profile reconstruction after 2D identifiability failure,Prepare 20.66 smoke
+Use_dense_mask_as_main_route,false,Dense mask is a comparator not a physics geometry route,Keep as reference only
+Generate_3D_smoke_pack_next,true,Need geometry build/projection/BxByBz proof before training,20.66 smoke
+Train_true_3D_model_now,false,No variable-depth COMSOL geometry proof yet,Wait for smoke
+Expand_multi_direction_2D,false,20.64 all-axis gate failed and Bz-only signal unstable,Do not continue 2D observation patches
+Pause_if_COMSOL_true_3D_blocked,true,Variable-depth solid is the hard blocker,Fix geometry construction first

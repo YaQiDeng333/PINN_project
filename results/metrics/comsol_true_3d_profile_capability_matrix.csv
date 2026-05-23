@@ -1,0 +1,12 @@
+capability,status,evidence_or_basis,next_action
+real_3d_volume_solve,supported_existing,rect/rot Block/Rotate/Difference and polygon prism workflows exist,Reuse volume solve framework
+constant_depth_rectangular_notch,supported_existing,geometry uses one depth_m,Keep as degenerate sanity case
+constant_depth_rotated_rect,supported_existing,rotated block geometry exists,Keep as degenerate sanity case
+top_view_polygon_prism,supported_existing,WorkPlane Polygon Extrude path exists,Use projection/raster logic only
+Bx_By_Bz_export,supported_existing,mf.Bx/mf.By/mf.Bz export used in prior multi-axis pack,Use in 20.66 smoke
+Je_direction_control,supported_existing,20.64 direction probe changed field response,Optional later diagnostic
+RBC_param_schema,not_verified,no current RBC fields in geometry_params,Design schema in 20.65
+variable_depth_surface,not_verified,current profile is constant-depth extrusion,Verify in 20.66 smoke
+variable_depth_COMSOL_solid,not_verified,no loft/sweep/slice-union proof,Verify in 20.66 smoke
+same_source_projected_mask_for_3d,not_verified,current masks are top-view projections of 2D footprints,Implement projection check before data generation
+true_3d_train_ready_pack,not_supported_yet,no data/schema/generation proof,Do not claim train-ready status
