@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-05-23 更新：第 20.63 后的下一步
+
+第 20.63 已完成 multi-axis MFL profile perturbation oracle ordering feasibility POC。本轮只做 oracle residual audit，不训练 surrogate、不做 refinement、不更新 baseline。multi-axis pack 覆盖 24 base samples、192 profile rows、3 个 field axes `[Bx, By, Bz]`，共 576 个 axis observations；所有行包括 `true_reference` 均由真实 COMSOL forward 生成，未复用旧 Bz-only 数组。实际 COMSOL expressions 为 `[mf.Bx, mf.By, mf.Bz]`，expression probe 通过，`delta_B = B_defect - B_no_defect` 三轴校验通过。
+
+结果是否定性的：test Bx-only oracle ordering = `0.4505`，By-only = `0.4955`，Bz-only = `0.4505`，Bx+By+Bz train-std normalized ordering = `0.4505`，mismatch_rate = `0.5495`，residual-error correlation = `0.0242`。multi-axis 没有超过同 pack 的 Bz-only，也没有超过 20.61 single-height Bz oracle test reference `0.5030`，未达到 `>0.65` 或 `+0.10` improvement gate。
+
+当前下一步唯一优先级：**multi-direction excitation / richer scan geometry**。不要训练 multi-axis profile surrogate，也不要回到 profile-forward refinement retry；因为真实 COMSOL oracle residual 在 same-liftoff Bx/By/Bz 下仍不能稳定排序 profile quality。若继续 forward-guided route，应改变激励方向、扫描方向或 scan geometry；若不扩展观测物理，则应暂停 profile-forward residual route。仍不更新 `CURRENT_BASELINE.md`，不创建或修改 COMSOL baseline 文档。
+
 ## 2026-05-23 更新：第 20.62 后的下一步
 
 第 20.62 已完成 multi-height Bz profile perturbation oracle ordering feasibility POC。本轮只做 oracle residual audit，不训练 surrogate、不做 refinement、不更新 baseline。multi-height pack 覆盖 12 base samples、96 profile rows、3 个 sensor_z heights `[0.004, 0.008, 0.012]`，共 288 个 height observations；其中 0.008m 的 96 个 observation 复用第 20.61 exact rows，0.004m 和 0.012m 共 192 个 observation 由真实 COMSOL forward 生成。profile polygon geometry 有效，`delta_bz = bz_defect - bz_no_defect` 校验通过。

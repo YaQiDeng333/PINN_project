@@ -1,0 +1,6 @@
+option,label,selected,evidence
+A,train multi-axis profile-compatible surrogate,False,test_all_axis_ordering=0.450450; delta_vs_bz=0.000000; test_corr=0.024241
+B,adjust axis weighting / expand multi-axis pack,False,partial_improvement=False; test_all_axis_ordering=0.450450
+C,multi-direction excitation,True,multi_axis_gate_pass=False; rect_all=0.467262; rotated_all=0.514970
+D,focus strongest axis + Bz,False,test_bx=0.450450; test_by=0.495495; test_bz=0.450450
+E,stop current geometry/refinement route,False,Reserved for no observation family showing any usable ordering signal.

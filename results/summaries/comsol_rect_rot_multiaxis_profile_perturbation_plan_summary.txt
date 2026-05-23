@@ -1,0 +1,32 @@
+COMSOL rect/rot multi-axis profile perturbation plan summary
+
+expanded_plan: C:\Users\19166\Desktop\PINN_project\results\metrics\comsol_rect_rot_expanded_profile_perturbation_plan.csv
+expanded_pack: C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\prepared\comsol_rect_rot_expanded_profile_perturbation_forward_pack_v1.npz
+sensor_z_m: 0.008
+axis_names: ['Bx', 'By', 'Bz']
+axis_expressions: ['mf.Bx', 'mf.By', 'mf.Bz']
+target_base_samples: 24
+minimum_base_samples: 12
+target_selection_used: True
+represented_base_samples: 24
+profile_rows: 192
+axis_count: 3
+total_axis_observations: 576
+real_comsol_forward_rows: 192
+planned_real_comsol_forward_observations: 576
+reused_bz_only_rows_for_audit: 0
+split_distribution: {'train': 128, 'val': 32, 'test': 32}
+source_defect_type_distribution: {'rectangular_notch': 96, 'rotated_rect': 96}
+variant_distribution: {'true_reference': 24, 'profile_extracted_reference': 24, 'half_width_shrink_local': 24, 'half_width_expand_local': 24, 'smooth_global_width_scale': 24, 'centerline_offset_small': 24, 'roughness_noise': 24, 'mixed_profile_perturbation': 24}
+base_split_type_distribution: {('train', 'rectangular_notch'): 8, ('train', 'rotated_rect'): 8, ('val', 'rectangular_notch'): 2, ('val', 'rotated_rect'): 2, ('test', 'rectangular_notch'): 2, ('test', 'rotated_rect'): 2}
+polygon_valid_rows: 192
+mask_non_empty_rows: 192
+all_variants_complete_per_base: True
+target_gate_passed: True
+minimum_gate_passed: True
+
+Selection note:
+- Bases are selected from the 20.61 expanded profile perturbation plan.
+- Selection alternates easy and hard 0.008m Bz oracle-ordering bases within each split/source type.
+- Existing Bz-only rows are not reused in this pack; Bz-only comparison is computed from the freshly generated Bz axis in the multi-axis pack.
+- If simultaneous Bx/By/Bz expression export is not stable, Stage 20.63 must stop as blocked with no Bz-only or multi-height fallback.

@@ -1,5 +1,19 @@
 # 实验工作日志
 
+## 2026-05-23 更新：第 20.63 multi-axis MFL profile perturbation oracle ordering feasibility
+
+第 20.63 在第 20.62 证明 multi-height Bz 仍不能稳定排序 profile quality 后，转向 same-liftoff multi-axis MFL observation feasibility。本轮只做真实 COMSOL oracle residual ordering audit，不训练 surrogate、不训练 inverse model、不运行 profile refinement，也不更新 baseline。
+
+Stage 0 已完成 multi-agent preflight。Method / literature agent 判断 Bx/By/Bz 三轴观测符合 richer observation / forward consistency 路线，且 20.60-20.62 只否定了 Bz-only 与 multi-liftoff Bz，并未否定 multi-axis；Codebase / Artifact agent 确认 20.60/20.61/20.62 profile plan、profile polygon generator 和 audit 代码可复用；Experiment Design agent 强调若 `mf.Bx/mf.By/mf.Bz` 不能稳定同步导出则必须 block；Safety agent 明确 `MODEL_STRUCTURE_PLAN.md` 删除和 `scripts/visualize_current_baseline.py` 均为无关 dirty item，不提交；Implementation Feasibility agent 确认 `_evaluate_at_points` 支持 expression list，但 `mf.Bx/mf.By` 必须先实测。
+
+Stage A 生成 multi-axis profile perturbation plan：24 base samples、192 profile rows，split = train/val/test 128/32/32 rows，rect/rot = 96/96，8 类 variant 各 24 行。每行固定 `sensor_z_m=0.008`、axis = `[Bx, By, Bz]`、expressions = `[mf.Bx, mf.By, mf.Bz]`；所有 profile polygon valid、mask non-empty，且不使用 polygon base samples。
+
+Stage B 在 COMSOL 仓库生成 multi-axis forward pack。Expression probe 通过，`mf.Bx/mf.By/mf.Bz` 在同一次 expression-list export 中稳定导出；pack 覆盖 192 profile rows、3 axes、576 axis observations，所有行（包括 `true_reference`）均为真实 COMSOL forward，不复用旧 Bz-only 数组。`delta_B = B_defect - B_no_defect` 对三轴全部校验通过，profile polygon valid、mask non-empty、split/type/variant coverage 达到 target。
+
+Stage C 只做 oracle residual ordering audit。结果显示 same-liftoff multi-axis 并没有缓解 profile residual non-identifiability：test Bx-only ordering = `0.4505`，By-only = `0.4955`，Bz-only = `0.4505`，Bx+By+Bz train-std normalized = `0.4505`，mismatch_rate = `0.5495`，residual-error correlation = `0.0242`。三轴 normalized 与 Bz-only 没有 improvement，且低于 20.61 single-height oracle test reference `0.5030`。
+
+结论：same-liftoff Bx/By/Bz multi-axis observation 没有提供可用的 profile quality residual ordering signal，不建议训练 multi-axis profile surrogate，也不应回到 profile-forward refinement。Claude Code review 复审通过，无 method/data must-fix；其提醒 `MODEL_STRUCTURE_PLAN.md` 删除与 `scripts/visualize_current_baseline.py` 为未提交的无关 dirty item，提交时按白名单显式 staging 排除。第 20.63 不更新 baseline。下一步唯一建议转向 **multi-direction excitation / richer scan geometry**，而不是继续扩同 liftoff multi-axis 数据或训练 surrogate。
+
 ## 2026-05-23 更新：第 20.62 multi-height Bz profile perturbation oracle ordering feasibility
 
 第 20.62 在第 20.61 证明 single-height Bz oracle residual 接近随机后，只做 richer observation feasibility：生成同一 profile perturbation 的 multi-height Bz observation，并审计真实 COMSOL oracle residual 是否更能排序 profile quality。本轮没有训练 surrogate、没有训练 inverse model、没有运行 profile refinement，也没有更新 baseline。

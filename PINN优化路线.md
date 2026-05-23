@@ -1,5 +1,13 @@
 # PINN 优化路线
 
+## 2026-05-23 路线同步：20.63 multi-axis profile oracle ordering feasibility
+
+第 20.63 将第 20.62 的 richer observation 判断继续拆开验证：如果 multi-liftoff Bz residual 仍不能稳定排序 profile quality，那么先不训练 surrogate，而是直接用真实 COMSOL oracle residual 比较 same-liftoff Bx/By/Bz vector observation 是否更有辨识力。本轮使用 24 base / 192 profile rows，在 `sensor_z_m=0.008` 下导出 `[mf.Bx, mf.By, mf.Bz]`；所有 profile row 都是真实 COMSOL forward，包括 `true_reference`，不复用旧 Bz-only 数组。
+
+结果显示 same-liftoff multi-axis alone 仍没有解决 profile residual non-identifiability。test ordering accuracy 为：Bx-only `0.4505`，By-only `0.4955`，Bz-only `0.4505`，Bx+By+Bz train-std normalized `0.4505`；all-axis mismatch_rate 为 `0.5495`，residual-error correlation 为 `0.0242`。它没有超过同 pack Bz-only，也没有超过 20.61 single-height Bz oracle test reference `0.5030`，更没有达到 `>0.65` 或 `+0.10` improvement gate。
+
+路线判断因此更新为：当前瓶颈不再是 profile-compatible surrogate 训练、profile perturbation data 规模、lift-off 选择或单纯 field component 数量，而是当前 scan geometry / excitation 下 observation 对 profile boundary quality 的排序信息不足。下一步若继续 forward-guided profile route，应优先转向 **multi-direction excitation / richer scan geometry**，而不是训练 multi-axis profile surrogate、继续扩同 liftoff 三轴数据，或回到 profile-forward refinement。第 20.63 仍是 POC，不更新任何 baseline。
+
 ## 2026-05-23 路线同步：20.62 multi-height profile oracle ordering feasibility
 
 第 20.62 将第 20.61 的 observation-identifiability 判断进一步拆开验证：如果 single-height Bz residual 不能稳定排序 profile quality，那么先不训练 surrogate，而是直接用真实 COMSOL oracle residual 比较 multi-liftoff observation 是否更有辨识力。本轮使用 12 base / 96 profile rows，在 `sensor_z_m = [0.004, 0.008, 0.012]` 下生成 multi-height Bz；0.008m 复用第 20.61 exact observation，0.004m 和 0.012m 共 192 个 observation 使用真实 COMSOL forward。
