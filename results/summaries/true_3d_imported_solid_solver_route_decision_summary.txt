@@ -1,0 +1,13 @@
+20.70 imported-solid solver route decision summary
+
+selected_decision: A_imported_solid_solve_forward_validation_pass
+next_step: smooth/mesh-based true 3D RBC pilot generation
+validation_pass: True
+selected_solver_protocol: default
+direct_solver_used: False
+pilot_scalability_risk: 
+
+Evidence:
+- Full-source Jscale=1.0 imported-solid defect solve, Bx/By/Bz export, delta check, and NPZ validation passed.
+- Full-source means Jscale=1.0; lower source-scale probes remain diagnostic only.
+- high_layer_approx_12 was not used as fallback success.

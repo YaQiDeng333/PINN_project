@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-05-24 更新：第 20.70 后的下一步
+
+第 20.70 已把 20.69 的 imported watertight solid 路线从 geometry gate pass 推进到 full-source forward smoke pass。原始 blocker 不是 Python mesh 或 Boolean subtract，而是 imported solid 后的 domain/material selection：COMSOL 未暴露稳定 cavity domain selection，且原始 air selection 与 steel selection 重叠。采用最小 selection/material fix 后，`material_domain_fixed` 在 `mesh_auto_size=5`、default solver、`Jscale=1.0` 下通过 defect stationary solve。
+
+当前 forward-ready 证据是：`medium_round` one-sample imported watertight solid 已真实导出 `[mf.Bx, mf.By, mf.Bz] @ sensor_z_m=0.008`，`delta_b = b_defect - b_no_defect` 校验误差为 `0.0`，NPZ/schema validation 通过，`selected_solver_protocol=default`，没有 direct solver 依赖，也没有使用 high-layer fallback。
+
+下一步唯一建议：进入 **smooth/mesh-based true 3D RBC pilot generation design**，先做小规模 pilot 计划与 mesh/material selection QA，而不是回到 high-layer approximation、2D profile-forward 小修或训练 surrogate。`CURRENT_BASELINE.md` 仍不更新，dense mask baseline 继续只作为 comparator；generated NPZ、temp STL、raw CSV、`.mph` 等仍不能提交。
+
 ## 2026-05-24 更新：第 20.69 后的下一步
 
 第 20.69 已完成 watertight imported solid builder hardening。本轮不训练模型、不进入 pilot、不更新 `CURRENT_BASELINE.md`，也不创建或修改 COMSOL baseline 文档。`medium_round` 的 RBC-style depth map 已由 pure NumPy 生成 watertight closed STL：`mesh_units=m`，top cap 位于 `z=0`，bottom surface 使用 `z=-depth`，defect void 嵌入 steel 且与 steel surface 相交；mesh validation 通过，`is_watertight=True`，`nonmanifold_edges_count=0`，`zero_area_triangles_count=0`，`volume_m3=1.2918e-07`，`max_depth_m=0.0025`。

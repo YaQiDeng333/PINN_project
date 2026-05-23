@@ -1,5 +1,13 @@
 # PINN 优化路线
 
+## 2026-05-24 路线同步：20.70 imported watertight solid solver robustness
+
+20.70 的路线意义是：true 3D / Piao-style 主线第一次跑通了 imported watertight mesh solid 的 full-source COMSOL forward smoke。20.69 已经证明 Python watertight mesh、COMSOL import / repair / form solid / Boolean subtract / mesh precheck 可行；20.70 进一步证明，失败点可由 domain/material selection 最小修复解决，而不是必须回退 high-layer approximation。
+
+关键修复边界必须保留：没有重做 mesh builder，没有改 defect geometry，没有换回 high-layer，也没有简化为 constant-depth；只是动态查询 post-Boolean selections，并把 air material selection 中与 `steel_notched` 重叠的 domain 去掉。`material_domain_fixed` 在 default solver、`mesh_auto_size=5`、`Jscale=1.0` 下通过，随后 Bx/By/Bz forward、`delta_b` check 和 NPZ/schema validation 全部通过。
+
+路线判断更新为：imported watertight solid route 已从 “geometry feasible but solver blocked” 变为 “one-sample forward-ready”。下一步可以进入 smooth/mesh-based true 3D RBC pilot 的设计/小规模生成，但 pilot 必须继续记录 material selection protocol、mesh sensitivity 和 generated data boundary；dense mask baseline 仍只是 comparator，2D profile-forward 小修继续暂停，`CURRENT_BASELINE.md` 不更新。
+
 ## 2026-05-24 路线同步：20.69 watertight imported solid builder hardening
 
 20.69 继续 true 3D / Piao-style 主线，但只攻 imported watertight mesh solid builder，不进入 pilot、不训练、不更新 baseline。相对 20.68，真正推进点是把 imported mesh route 从 “Boolean 后 empty steel domain” 推进到 “RBC watertight STL 可 import / repair / form solid / Boolean subtract / mesh precheck”。这一步不再依赖 high-layer control，也没有把 high-layer stepped control 写成 smooth / near-smooth。

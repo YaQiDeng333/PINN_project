@@ -1,5 +1,17 @@
 # 实验工作日志
 
+## 2026-05-24 更新：第 20.70 imported watertight solid solver robustness diagnostic
+
+第 20.70 只诊断 20.69 之后的 imported watertight mesh solid defect model stationary solve blocker；本轮不重新生成 Python watertight mesh、不修改 Boolean subtract、不回退 high-layer、不扩样、不训练 surrogate / inverse model、不做 refinement，也不更新 `CURRENT_BASELINE.md` 或任何 COMSOL baseline 文档。
+
+Stage A 的 domain/material audit 复现了关键问题：no-defect reference 的动态 material / source selection 通过，但 imported solid 原始 post-Boolean selection 中 `steel_domains=[2]`、`external_air_domains=[1,2]`、`cavity_domains=[]`，导致 air/steel overlap 且 COMSOL API 未暴露稳定的 cavity domain selection。修复边界被限制为最小 selection/material fix：保持 imported watertight mesh geometry 不变，只把 air selection 动态过滤为 `external_air - steel_notched + exposed cavity if any`，source `Je` 仍只作用于动态 steel selection，没有使用固定 domain ID。
+
+Stage B 的 bounded solver probes 先用 `baseline_reproduce_failure` 复现原始失败，然后 `material_domain_fixed` 在 `mesh_auto_size=5`、`selected_solver_protocol=default`、`source_scale=1.0` 下通过 full-source defect solve；`Jscale=0/0.1/0.3` 仍只作为 diagnostic，不计入 forward-ready。由于已经获得 full-source success，后续 mesh bracket / direct solver / ramp probes 按 bounded rule 标记为 `not_run_after_full_source_success`，没有无界调参，也没有切回 `high_layer_approx_12`。
+
+Stage C-D 完成 one-sample `medium_round` imported-solid forward smoke 和 PINN schema validation：`axis_names=[Bx, By, Bz]`、`axis_expressions=[mf.Bx, mf.By, mf.Bz]`、`sensor_z_m=0.008`，`delta_b / b_defect / b_no_defect` shape 均为 `(1, 3, 3, 201)`；`delta_b = b_defect - b_no_defect` 的 `delta_max_abs_error=0.0`，`defect_signal_norm=0.0205825717`，`Bx/By/Bz` norms 分别为 `0.0153035969 / 0.0023070441 / 0.0135690725`，所有值 finite 且非零。NPZ 只作为 generated data 留在 data 路径，不提交。
+
+Route decision 更新为 `A_imported_solid_solve_forward_validation_pass`：imported watertight solid solve / forward 已在 one-sample smoke 层级可用，且无需 direct solver；下一步可以设计 smooth/mesh-based true 3D RBC pilot，但 pilot 阶段仍应保留 mesh sensitivity / material selection QA。Claude Code review 经 must-fix loop 后最终通过，无剩余 must-fix；本轮不建立 baseline。
+
 ## 2026-05-24 更新：第 20.68 smooth / near-smooth true 3D variable-depth builder completion
 
 第 20.68 只做 smooth / near-smooth true 3D defect builder feasibility，不进入 pilot、不训练 surrogate / inverse model、不做 refinement，也不更新 baseline。Stage A 从 20.66/20.67 的 RBC-style plan 中生成 `medium_round` 主样本和 `deep_round`、`medium_boxy` geometry-only 备选样本；3 个样本的 depth map、projected mask、max-depth tolerance、candidate method metadata 均通过 plan validation。

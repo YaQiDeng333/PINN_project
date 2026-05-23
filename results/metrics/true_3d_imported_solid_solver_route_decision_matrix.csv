@@ -1,0 +1,3 @@
+decision_key,selected,evidence,next_step
+A_imported_solid_solve_forward_validation_pass,True,"Full-source Jscale=1.0 imported-solid defect solve, Bx/By/Bz export, delta check, and NPZ validation passed.",smooth/mesh-based true 3D RBC pilot generation
+high_layer_fallback,False,20.67 high_layer_approx_12 is a comparator only and was not used as 20.70 success.,not used

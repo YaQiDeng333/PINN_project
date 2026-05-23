@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Validate the 20.69 imported watertight forward smoke NPZ."""
+"""Validate the 20.70 imported watertight forward smoke NPZ."""
 
 from __future__ import annotations
 
@@ -16,6 +16,8 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_NPZ = ROOT / "data/comsol_mfl/prepared/true_3d_imported_watertight_forward_smoke_v1.npz"
 DEFAULT_SUMMARY = ROOT / "results/summaries/true_3d_imported_watertight_forward_smoke_validation_summary.txt"
 DEFAULT_METRICS = ROOT / "results/metrics/true_3d_imported_watertight_forward_smoke_validation_metrics.csv"
+DEFAULT_ROUTE_SUMMARY = ROOT / "results/summaries/true_3d_imported_solid_solver_route_decision_summary.txt"
+DEFAULT_ROUTE_MATRIX = ROOT / "results/metrics/true_3d_imported_solid_solver_route_decision_matrix.csv"
 
 METRIC_FIELDS = [
     "sample_id",
@@ -31,6 +33,13 @@ METRIC_FIELDS = [
     "mesh_source",
     "top_cap_plane",
     "depth_sign_convention",
+    "selected_solver_protocol",
+    "mesh_auto_size",
+    "domain_material_audit_pass",
+    "solver_probe_pass",
+    "full_source_jscale",
+    "direct_solver_used",
+    "pilot_scalability_risk",
     "projected_mask_shape",
     "projected_mask_area_px",
     "profile_depth_grid_shape",
@@ -51,10 +60,12 @@ METRIC_FIELDS = [
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Validate 20.69 imported watertight forward smoke.")
+    parser = argparse.ArgumentParser(description="Validate 20.70 imported watertight forward smoke.")
     parser.add_argument("--npz-path", type=Path, default=DEFAULT_NPZ)
     parser.add_argument("--summary", type=Path, default=DEFAULT_SUMMARY)
     parser.add_argument("--metrics", type=Path, default=DEFAULT_METRICS)
+    parser.add_argument("--route-summary", type=Path, default=DEFAULT_ROUTE_SUMMARY)
+    parser.add_argument("--route-matrix", type=Path, default=DEFAULT_ROUTE_MATRIX)
     parser.add_argument("--overwrite", action="store_true")
     return parser.parse_args()
 
@@ -91,8 +102,61 @@ def scalar_str(array: np.ndarray) -> str:
     return str(np.asarray(array).reshape(-1)[0])
 
 
+def scalar_int(array: np.ndarray) -> int:
+    return int(np.asarray(array).reshape(-1)[0])
+
+
+def scalar_float(array: np.ndarray) -> float:
+    return float(np.asarray(array).reshape(-1)[0])
+
+
+def write_route_decision(summary: Path, matrix: Path, metrics: list[dict[str, Any]], pass_count: int) -> None:
+    validation_pass = bool(metrics) and pass_count == len(metrics)
+    protocol = str(metrics[0]["selected_solver_protocol"]) if metrics else "none"
+    direct = bool(metrics[0]["direct_solver_used"]) if metrics else False
+    risk = str(metrics[0]["pilot_scalability_risk"]) if metrics else ""
+    if validation_pass:
+        decision = "A_imported_solid_solve_forward_validation_pass"
+        next_step = "smooth/mesh-based true 3D RBC pilot generation"
+        evidence = "Full-source Jscale=1.0 imported-solid defect solve, Bx/By/Bz export, delta check, and NPZ validation passed."
+        if direct:
+            next_step = "evaluate direct-solver cost on a tiny batch before smooth/mesh-based pilot scaling"
+            evidence += " Direct solver was required, so pilot scalability risk is recorded."
+    else:
+        decision = "E_imported_solid_forward_validation_fail"
+        next_step = "continue imported-solid solver robustness"
+        evidence = "NPZ/schema validation failed or no full-source forward smoke is available."
+    rows = [
+        {"decision_key": decision, "selected": True, "evidence": evidence, "next_step": next_step},
+        {
+            "decision_key": "high_layer_fallback",
+            "selected": False,
+            "evidence": "20.67 high_layer_approx_12 is a comparator only and was not used as 20.70 success.",
+            "next_step": "not used",
+        },
+    ]
+    write_csv(matrix, rows, ["decision_key", "selected", "evidence", "next_step"])
+    lines = [
+        "20.70 imported-solid solver route decision summary",
+        "",
+        f"selected_decision: {decision}",
+        f"next_step: {next_step}",
+        f"validation_pass: {validation_pass}",
+        f"selected_solver_protocol: {protocol}",
+        f"direct_solver_used: {direct}",
+        f"pilot_scalability_risk: {risk}",
+        "",
+        "Evidence:",
+        f"- {evidence}",
+        "- Full-source means Jscale=1.0; lower source-scale probes remain diagnostic only.",
+        "- high_layer_approx_12 was not used as fallback success.",
+    ]
+    summary.parent.mkdir(parents=True, exist_ok=True)
+    summary.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
 def validate(args: argparse.Namespace) -> int:
-    check_no_overwrite([args.summary, args.metrics], args.overwrite)
+    check_no_overwrite([args.summary, args.metrics, args.route_summary, args.route_matrix], args.overwrite)
     required = [
         "delta_b",
         "b_defect",
@@ -111,6 +175,13 @@ def validate(args: argparse.Namespace) -> int:
         "mesh_source",
         "top_cap_plane",
         "depth_sign_convention",
+        "selected_solver_protocol",
+        "mesh_auto_size",
+        "domain_material_audit_pass",
+        "solver_probe_pass",
+        "full_source_jscale",
+        "direct_solver_used",
+        "pilot_scalability_risk",
         "metadata",
     ]
     metrics: list[dict[str, Any]] = []
@@ -134,6 +205,13 @@ def validate(args: argparse.Namespace) -> int:
         mesh_source = scalar_str(npz["mesh_source"])
         top_cap = scalar_str(npz["top_cap_plane"])
         depth_sign = scalar_str(npz["depth_sign_convention"])
+        selected_solver_protocol = scalar_str(npz["selected_solver_protocol"])
+        mesh_auto_size = scalar_int(npz["mesh_auto_size"])
+        domain_material_audit_pass = scalar_bool(npz["domain_material_audit_pass"])
+        solver_probe_pass = scalar_bool(npz["solver_probe_pass"])
+        full_source_jscale = scalar_float(npz["full_source_jscale"])
+        direct_solver_used = scalar_bool(npz["direct_solver_used"])
+        pilot_scalability_risk = scalar_str(npz["pilot_scalability_risk"])
         for index, sample_id in enumerate(sample_ids):
             delta = delta_b[index]
             defect = b_defect[index]
@@ -169,6 +247,11 @@ def validate(args: argparse.Namespace) -> int:
                 and imported_pass
                 and mesh_units == "m"
                 and mesh_source == "triangulated_depth_grid"
+                and selected_solver_protocol in {"default", "direct_solver", "ramp_continuation"}
+                and mesh_auto_size in {4, 5, 6}
+                and domain_material_audit_pass
+                and solver_probe_pass
+                and abs(full_source_jscale - 1.0) <= 1.0e-12
                 and finite
                 and delta_error <= 1.0e-12
                 and norm > 0.0
@@ -189,6 +272,13 @@ def validate(args: argparse.Namespace) -> int:
                     "mesh_source": mesh_source,
                     "top_cap_plane": top_cap,
                     "depth_sign_convention": depth_sign,
+                    "selected_solver_protocol": selected_solver_protocol,
+                    "mesh_auto_size": mesh_auto_size,
+                    "domain_material_audit_pass": domain_material_audit_pass,
+                    "solver_probe_pass": solver_probe_pass,
+                    "full_source_jscale": full_source_jscale,
+                    "direct_solver_used": direct_solver_used,
+                    "pilot_scalability_risk": pilot_scalability_risk,
                     "projected_mask_shape": arr_shape(mask),
                     "projected_mask_area_px": int(mask.sum()),
                     "profile_depth_grid_shape": arr_shape(depth_grid),
@@ -204,13 +294,14 @@ def validate(args: argparse.Namespace) -> int:
                     "depth_max_m": depth_max,
                     "param_D_m": param_d,
                     "profile_depth_max_error_vs_param_D": abs(depth_max - param_d),
-                    "notes": "projected_mask_2d is comparator only; imported watertight solid is the geometry route under validation",
+                    "notes": "projected_mask_2d is comparator only; imported watertight solid full-source solve is the route under validation",
                 }
             )
     write_csv(args.metrics, metrics, METRIC_FIELDS)
     pass_count = sum(1 for row in metrics if bool(row["schema_pass"]))
+    write_route_decision(args.route_summary, args.route_matrix, metrics, pass_count)
     lines = [
-        "20.69 imported watertight forward smoke validation summary",
+        "20.70 imported watertight forward smoke validation summary",
         "",
         f"sample_count: {len(metrics)}",
         f"schema_pass_count: {pass_count}",
@@ -218,12 +309,16 @@ def validate(args: argparse.Namespace) -> int:
         f"imported_watertight_solid_pass: {metrics[0]['imported_watertight_solid_pass'] if metrics else False}",
         f"mesh_units: {metrics[0]['mesh_units'] if metrics else ''}",
         f"mesh_source: {metrics[0]['mesh_source'] if metrics else ''}",
+        f"selected_solver_protocol: {metrics[0]['selected_solver_protocol'] if metrics else 'none'}",
+        f"full_source_jscale: {metrics[0]['full_source_jscale'] if metrics else 'none'}",
+        f"direct_solver_used: {metrics[0]['direct_solver_used'] if metrics else False}",
+        f"pilot_scalability_risk: {metrics[0]['pilot_scalability_risk'] if metrics else ''}",
         "axis_names: [Bx, By, Bz]",
         "",
         "Validation result:",
     ]
     if pass_count == len(metrics) and metrics:
-        lines.append("- PASS. The imported watertight solid forward smoke is schema-ready for this one-sample feasibility gate.")
+        lines.append("- PASS. The imported watertight solid full-source forward smoke is schema-ready for this one-sample feasibility gate.")
     else:
         lines.append("- FAIL. Do not expand samples or train.")
     lines.extend(
@@ -235,7 +330,7 @@ def validate(args: argparse.Namespace) -> int:
     args.summary.parent.mkdir(parents=True, exist_ok=True)
     args.summary.write_text("\n".join(lines) + "\n", encoding="utf-8")
     if pass_count != len(metrics) or not metrics:
-        raise RuntimeError("20.69 imported watertight forward smoke validation failed")
+        raise RuntimeError("20.70 imported watertight forward smoke validation failed")
     return 0
 
 
