@@ -222,3 +222,12 @@ Priewald 2013 对当前阶段更重要的启发不是复现完整 FEM、解析 J
 本轮使用已有 pilot_v9 original samples 和 20.56 perturbation pack 构建 profile-forward dataset，没有运行 COMSOL，也没有生成新数据。`PFS3_profile_station_sequence` 的 waveform fit 可接受（val/test NRMSE `0.3841 / 0.3995`），说明 profile-native 表示可被 forward surrogate 消化；但 validation residual ordering accuracy 只有 `0.6607`，mismatch_rate 为 `0.3393`，未达到 refinement gate。因此第 20.59 不执行 profile-forward refinement retry。
 
 路线判断：profile-compatible surrogate 相比旧 rect-like bridge 有边际价值，但当前 perturbation coverage 太小，不足以支撑连续优化。下一步若继续 forward-guided profile refinement，应先扩展 profile perturbation data；否则保留 20.58 的 no-forward profile basis 作为更稳的 representation 证据，并暂停对当前 forward residual objective 的小调。该阶段仍是 POC，不更新任何 baseline。
+## 2026-05-23 路线同步：20.64 multi-direction excitation profile oracle ordering feasibility
+
+第 20.64 在 20.63 same-direction multi-axis 失败后，进一步验证真实改变 COMSOL excitation / magnetization direction 是否能让 profile perturbation oracle residual 更稳定排序 profile quality。本轮仍是 feasibility POC：不训练 forward surrogate，不训练 inverse model，不做 profile refinement，不更新 baseline。实验固定 `sensor_z_m=0.008`、scan lines 为 `[-0.001, 0.0, 0.001]`，使用 12 base / 96 profile rows，并导出 `[mf.Bx, mf.By, mf.Bz]` 三轴响应。
+
+COMSOL direction probe 证明方向改变是真实的：`direction_0` 使用默认 +Y `Je=["0","1e6[A/m^2]","0"]`，`direction_45` 使用 equal XY，`direction_90` 使用 +X `Je=["1e6[A/m^2]","0","0"]`；`direction_90` 相对 `direction_0` 的 no-defect / defect field response NRMSE 为 `1.6479 / 1.7981`，并且 dominant axis 从 `Bx` 转到 `By`。因此 20.64 没有通过旋转数组、信号或 mask 伪造 multi-direction。
+
+路线判断仍然是负面的。same-pack test baseline `direction_0` Bz-only ordering 为 `0.4545`，`direction_90` Bz-only 提升到 `0.5273`，multi-direction Bz train-std normalized 为 `0.5636`，说明改变 excitation direction 带来边际正信号；但 multi-direction all-axis normalized ordering 只有 `0.3455`，mismatch_rate 为 `0.6545`，residual-error correlation 为 `-0.8028`，未达到 `>0.65` 和 `+0.10` 的主 gate。Claude Code review 通过且无 must-fix，结论是不建议训练 multi-direction profile surrogate。
+
+因此 profile-forward route 的当前瓶颈不是再加 same-direction field components、multi-height Bz 或直接训练 surrogate，而是当前 2D top-view profile + 现有 observation configuration 对 profile quality 的可辨识性仍不足。下一步若继续 geometry/forward 路线，应转向 **true 3D profile / Piao-style route**；20.64 不改变 `CURRENT_BASELINE`，也不创建 COMSOL baseline 文档。

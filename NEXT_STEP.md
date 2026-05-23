@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-05-23 更新：第 20.64 后的下一步
+
+第 20.64 已完成 multi-direction excitation profile perturbation oracle ordering feasibility POC。本轮只做 oracle residual audit，不训练 surrogate、不做 refinement、不更新 baseline。COMSOL pack 覆盖 12 base samples / 96 profile rows / 3 directions / 3 axes；`direction_0` 复用同 geometry 的 20.63 default-direction rows，`direction_45` 和 `direction_90` 使用真实 COMSOL forward，并通过 `ExternalCurrentDensity.Je` 设置真实改变 excitation / magnetization direction。direction probe 显示 `direction_90` 相对 `direction_0` 的 no-defect / defect response NRMSE 为 `1.6479 / 1.7981`，因此不是数组旋转或信号伪造。
+
+结果没有通过 gate。same-pack test 中，`direction_0` Bz-only ordering = `0.4545`，`direction_90` Bz-only = `0.5273`，multi-direction Bz train-std normalized = `0.5636`，说明 Bz-only multi-direction 有边际正信号；但 all-axis normalized ordering 只有 `0.3455`，mismatch_rate = `0.6545`，residual-error correlation = `-0.8028`，明显劣于 same-pack default-direction Bz。Claude Code review 通过且无 must-fix，同时指出 Bz-only 正信号仍不稳定，test base 太少，不能支撑 surrogate 训练。
+
+当前下一步唯一优先级：**true 3D profile / Piao-style route**。不要进入 20.64 的 multi-direction surrogate training，也不要回到 profile-forward refinement；第 20.64 只说明改变 excitation direction 比同方向 multi-axis / multi-height 更有一点信号，但仍未证明 richer direction observation 可以稳定缓解 profile residual non-identifiability。仍不更新 `CURRENT_BASELINE.md`，不创建或修改 COMSOL baseline 文档。
+
 ## 2026-05-23 更新：第 20.63 后的下一步
 
 第 20.63 已完成 multi-axis MFL profile perturbation oracle ordering feasibility POC。本轮只做 oracle residual audit，不训练 surrogate、不做 refinement、不更新 baseline。multi-axis pack 覆盖 24 base samples、192 profile rows、3 个 field axes `[Bx, By, Bz]`，共 576 个 axis observations；所有行包括 `true_reference` 均由真实 COMSOL forward 生成，未复用旧 Bz-only 数组。实际 COMSOL expressions 为 `[mf.Bx, mf.By, mf.Bz]`，expression probe 通过，`delta_B = B_defect - B_no_defect` 三轴校验通过。

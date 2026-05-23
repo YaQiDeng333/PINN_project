@@ -1,0 +1,10 @@
+COMSOL multi-direction profile route decision summary
+
+recommendation: C. true 3D profile / Piao-style route
+reason: decision is based on same-pack direction_0 Bz baseline vs multi-direction normalized residual.
+
+Decision matrix:
+- A. train multi-direction profile-compatible surrogate; selected=False; evidence=test_multi_all=0.345455; delta_all_vs_samepack_direction0_bz=-0.109091; test_corr=-0.802782
+- B. expand/tune multi-direction pack; selected=False; evidence=test_bz_delta=0.109091; val_bz_delta=-0.017857; test_bz_corr=-0.736965; gate_pass=False
+- C. true 3D profile / Piao-style route; selected=True; evidence=same-pack gate failed; test_multi_all=0.345455; test_multi_bz=0.563636
+- D. pause geometry-forward route; selected=False; evidence=fallback if true 3D/Piao-style is out of scope; multi_all_mismatch=0.654545

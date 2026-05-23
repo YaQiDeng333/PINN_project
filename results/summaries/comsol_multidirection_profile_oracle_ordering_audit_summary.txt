@@ -1,0 +1,53 @@
+COMSOL multi-direction profile oracle ordering audit summary
+
+Stage 20.64 only audits COMSOL oracle residual ordering. No surrogate training, inverse training, or profile refinement was run.
+
+pack: C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\prepared\comsol_rect_rot_multidirection_profile_perturbation_forward_pack_v1.npz
+metadata: {"axis_expressions": ["mf.Bx", "mf.By", "mf.Bz"], "axis_names": ["Bx", "By", "Bz"], "direction0_policy": "reuse exact 20.63 default-direction rows", "direction_angles_deg": [0.0, 45.0, 90.0], "direction_names": ["direction_0", "direction_45", "direction_90"], "direction_probe": {"active_directions": ["direction_0", "direction_45", "direction_90"], "axis_expressions": ["mf.Bx", "mf.By", "mf.Bz"], "axis_names": ["Bx", "By", "Bz"], "direction90_response_differs_from_direction0": true, "directions": {"direction_0": {"defect_dominant_axis": "Bx", "defect_rms_by_axis": {"Bx": 0.0008129515518063063, "By": 4.880806899272267e-05, "Bz": 0.000328666436937742}, "finite_defect": true, "finite_no_defect": true, "je": ["0", "1e6[A/m^2]", "0"], "no_defect_dominant_axis": "Bx", "no_defect_rms_by_axis": {"Bx": 0.0010349120633460743, "By": 6.297544813680235e-05, "Bz": 0.00029119129353956277}}, "direction_45": {"defect_dominant_axis": "By", "defect_rms_by_axis": {"Bx": 0.0005761331718385315, "By": 0.0006850741458852851, "Bz": 0.0002292729152453187}, "finite_defect": true, "finite_no_defect": true, "je": ["7.071067811865475e5[A/m^2]", "7.071067811865475e5[A/m^2]", "0"], "no_defect_dominant_axis": "Bx", "no_defect_rms_by_axis": {"Bx": 0.0007287456838429283, "By": 0.000702122600653527, "Bz": 0.00021333414136504505}, "nrmse_vs_direction0_defect": 1.0089627587722738, "nrmse_vs_direction0_no_defect": 0.8684598440178815}, "direction_90": {"defect_dominant_axis": "By", "defect_rms_by_axis": {"Bx": 3.7123626876842086e-05, "By": 0.0009873865462825605, "Bz": 5.794529547555341e-05}, "finite_defect": true, "finite_no_defect": true, "je": ["1e6[A/m^2]", "0", "0"], "no_defect_dominant_axis": "By", "no_defect_rms_by_axis": {"Bx": 3.349045158055523e-05, "By": 0.0010032752544128602, "Bz": 6.457364664414786e-05}, "nrmse_vs_direction0_defect": 1.798070591846423, "nrmse_vs_direction0_no_defect": 1.6479415590003417}}, "optional_failures": {}}, "no_refinement": true, "no_surrogate_training": true, "non_default_direction_policy": "real COMSOL forward with changed ExternalCurrentDensity.Je", "plan_csv": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\metrics\\comsol_rect_rot_multidirection_profile_perturbation_plan.csv", "sensor_z_m": 0.008, "source_je_by_direction": {"direction_0": ["0", "1e6[A/m^2]", "0"], "direction_45": ["7.071067811865475e5[A/m^2]", "7.071067811865475e5[A/m^2]", "0"], "direction_90": ["1e6[A/m^2]", "0", "0"]}, "source_pack": "C:\\Users\\19166\\Desktop\\PINN_project\\data\\comsol_mfl\\prepared\\comsol_rect_rot_multiaxis_profile_perturbation_forward_pack_v1.npz", "stage": "20.64_multidirection_profile_perturbation_forward_pack"}
+profile_rows: 96
+direction_count: 3
+direction_names: ['direction_0', 'direction_45', 'direction_90']
+axis_count: 3
+axis_names: ['Bx', 'By', 'Bz']
+split_distribution: {'train': 64, 'val': 16, 'test': 16}
+source_defect_type_distribution: {'rectangular_notch': 48, 'rotated_rect': 48}
+variant_distribution: {'true_reference': 12, 'profile_extracted_reference': 12, 'half_width_shrink_local': 12, 'half_width_expand_local': 12, 'smooth_global_width_scale': 12, 'centerline_offset_small': 12, 'roughness_noise': 12, 'mixed_profile_perturbation': 12}
+
+Same-pack test comparison:
+- direction_0_Bz_only_ordering: 0.454545
+- direction_90_Bz_only_ordering: 0.527273
+- multi_direction_Bz_trainstd_normalized_ordering: 0.563636
+- multi_direction_all_axis_trainstd_normalized_ordering: 0.345455
+- multi_direction_Bz_delta_vs_samepack_direction0_Bz: 0.109091
+- multi_direction_all_axis_delta_vs_samepack_direction0_Bz: -0.109091
+- multi_direction_all_axis_mismatch_rate: 0.654545
+- multi_direction_all_axis_residual_error_correlation: -0.802782
+
+Historical references only:
+- 20.61_single_height_bz_test: 0.503000
+- 20.62_multi_height_bz_test: 0.454500
+- 20.63_same_direction_multiaxis_test: 0.450500
+
+Train-only direction-axis normalization scales:
+- direction_0:Bx: 0.000282873448358
+- direction_0:By: 8.51612342894e-05
+- direction_0:Bz: 0.000346319749541
+- direction_45:Bx: 0.000208545245618
+- direction_45:By: 7.36991386915e-05
+- direction_45:Bz: 0.000246155344167
+- direction_90:Bx: 5.38880413437e-05
+- direction_90:By: 6.5618596936e-05
+- direction_90:Bz: 3.92519932505e-05
+
+Answers:
+1. Does orthogonal excitation improve ordering? True.
+2. Does direction_45 help if available? See CSV rows for direction_45 methods.
+3. Does multi-direction Bz improve over default Bz? True; delta=0.109091.
+4. Does multi-direction all-axis improve over default Bz? False; delta=-0.109091.
+5. Does multi-direction all-axis reduce mismatch? False.
+6. Does multi-direction make surrogate/refinement worth training next? False.
+7. Diagnosis: use same-pack direction_0 as the baseline; historical 20.61-20.63 values are not used for the gate.
+
+Success criteria:
+- test multi-direction normalized ordering > 0.65; improvement over same-pack direction_0 Bz >= +0.10; test residual-error correlation > 0.20; mismatch decreases; rect and rotated groups both improve.
+gate_passed: False
