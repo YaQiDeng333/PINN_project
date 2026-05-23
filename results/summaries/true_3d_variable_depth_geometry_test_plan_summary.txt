@@ -1,0 +1,19 @@
+20.67 true 3D variable-depth geometry test plan summary
+
+target_samples: 3
+minimum_sample: medium_round
+sample_ids: ['medium_round', 'deep_round', 'medium_boxy']
+stage_a_validation_pass_count: 3
+sensor_z_m: 0.008
+axis_names: [Bx, By, Bz]
+baseline_20_66_depth_levels: 5
+high_layer_fallback_depth_levels: [12, 16]
+smooth_probe_policy: limited; no unbounded smooth-route debugging
+exact_piao_rbc: False
+
+Gate result: PASS
+
+Boundary:
+- This plan does not claim smooth variable-depth success.
+- 12/16-layer fallback must be reported as high_layer_pass, not variable_depth_pass.
+- projected_mask_2d remains a 2D comparator; 3D labels remain RBC params plus depth grid/map metadata.

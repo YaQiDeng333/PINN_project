@@ -131,3 +131,17 @@ forward profile refinement 已执行受控 sweep，但 validation 选择 `lambda
 本轮构建 original profile-forward dataset（rect/rot N=400，split=268/66/66）和 perturb profile-forward dataset（20.56 partial pack N=96，split=64/16/16），并训练 3 个 profile-compatible surrogate。validation 选中 `PFS3_profile_station_sequence`，其 waveform val/test NRMSE 为 `0.3841 / 0.3995`，但 validation ordering accuracy 仅 `0.6607`，mismatch_rate 为 `0.3393`，未通过 usable-surrogate gate。因此 profile-forward refinement retry 被跳过。
 
 当前下一步唯一优先级：**扩展 profile perturbation data**。如果扩展后的 validation ordering / mismatch gate 仍不通过，则不再继续 forward-guided profile refinement 小调，改回 no-forward profile basis 或等待 richer observations / multi-axis data。当前仍不更新 `CURRENT_BASELINE.md`，不创建或修改 COMSOL baseline 文档。
+
+---
+
+## 第 20.67 后下一步
+
+20.67 的结论是 `high_layer_pass`：`medium_round` 的 12-layer high-layer approximation 通过了 geometry-only gate、Bx/By/Bz one-sample forward 和 NPZ/schema validation，并且明确区别于 20.66 的 5-layer stepped-depth smoke。
+
+但本轮没有证明 smooth variable-depth true 3D geometry 可行：limited smooth / loft / imported closed-surface probe 没有形成 verified closed defect body，最终不是 `variable_depth_pass`，也不是 `near_smooth_pass`。因此下一步不能直接进入 60-sample true 3D RBC pilot，除非人工确认接受 high-layer approximation 作为 pilot approximation。
+
+唯一推荐下一步：
+- 如果接受 high-layer approximation：进入小规模 true 3D RBC pilot plan/generation，但所有文件和结论必须标注 `high_layer_approximation`，不得写成 smooth RBC。
+- 如果不接受 high-layer approximation：继续修 smooth / closed-surface COMSOL geometry builder，不扩样、不训练。
+
+仍然不更新 `CURRENT_BASELINE.md`；dense mask baseline 只作为 comparator。

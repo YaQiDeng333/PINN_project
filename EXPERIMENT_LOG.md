@@ -2498,3 +2498,17 @@ Stage C schema validation 6/6 通过。NPZ 中保存了 `delta_b` / `b_defect` /
 Claude Code review 完成且无 must-fix。review 认可本轮没有把 constant-depth extrusion 伪装成 true 3D，也认可 Bx/By/Bz、depth map、projected mask 和 RBC params schema 一致；建议项是 COMSOL inventory 中的 delta error 计算偏定义式，后续可增强为更独立的求解漂移检查，但不构成本轮 blocker。
 
 路线结论：20.66 技术链路在 stepped-depth smoke 层级通过，说明 true 3D / Piao-style 路线具备继续验证价值；但 smooth true variable-depth RBC solid 仍未通过。下一步唯一建议不是直接声称 smooth 3D pilot ready，而是先决策：继续攻 smooth variable-depth COMSOL geometry，还是明确接受 stepped-depth 作为 20.67 pilot approximation。dense mask baseline 仍只作为 comparator。
+
+---
+
+## 第 20.67 步：smooth / near-smooth variable-depth true 3D geometry feasibility
+
+本轮只验证 COMSOL geometry feasibility，没有训练模型、没有做 refinement、没有更新 `CURRENT_BASELINE.md`，也没有提交 data / NPZ / `.mph` / raw CSV / checkpoint / preview PNG / notes。
+
+Stage A 从 20.66 的 RBC-style smoke plan 选择 `medium_round`、`deep_round`、`medium_boxy` 作为 target geometry test samples，其中 `medium_round` 是唯一必跑 forward sample。三者的 pure-Python depth/profile validation 均通过，生成了 12-layer / 16-layer high-layer fallback contours；该计划明确保留 `exact_piao_rbc=False`，仍是 RBC-style engineering approximation。
+
+Stage B 的 smooth / loft / imported closed-surface probe 只做有限检查。当前 COMSOL/MCP 路径没有形成 verified closed smooth defect body；`Loft` 创建失败，`ParametricSurface` / `Import` 只能说明 feature 可创建，不能形成已验证可 Boolean subtract 的 closed defect body。因此按计划回退到 high-layer fallback。`medium_round` 的 `high_layer_approx_12` geometry-only gate 通过：12 个 depth levels，区别于 20.66 的 5-layer stepped-depth smoke；Boolean subtract 和 mesh precheck 成功；没有把 constant-depth extrusion 算作成功。
+
+Stage C 仅对 `medium_round` 执行 one-sample no-defect / defect forward solve，导出 `[mf.Bx, mf.By, mf.Bz]` @ `sensor_z_m=0.008`，`delta_b = b_defect - b_no_defect` 校验通过，NPZ/schema validation 通过。最终状态是 `high_layer_pass`，不是 `variable_depth_pass`，也不是 `near_smooth_pass`。
+
+Claude Code review 已完成，无明确 must-fix。review 接受当前结论：20.67 证明 12-layer high-layer approximation 可以跑通 geometry + Bx/By/Bz forward + schema validation，但没有证明 smooth variable-depth geometry 技术可行。下一步不能直接声称 smooth true 3D RBC pilot ready；若要扩样，需要人工确认是否接受 high-layer approximation 作为 pilot approximation，否则应继续修 smooth/closed-surface geometry builder。

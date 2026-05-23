@@ -1,0 +1,27 @@
+20.67 smooth / near-smooth variable-depth true 3D geometry preflight summary
+
+Decision: proceed with 20.67 as bounded geometry feasibility only.
+
+Subagent core conclusions:
+- Method/literature: 20.67 is the necessary next check after 20.66 because 20.66 passed only at stepped-depth smoke level. This is not a full Piao 2019 reproduction.
+- COMSOL geometry capability: current MFL scripts support real 3D volume solve, Boolean Difference, WorkPlane Polygon Extrude, no-defect/defect pair solves, and mf.Bx/mf.By/mf.Bz export. No verified smooth RBC variable-depth solid builder exists yet.
+- Geometry implementation design: run only a limited smooth/loft/imported closed-surface probe. If it cannot form a closed defect body, Boolean subtract, or mesh precheck, record the reason and fall back to high-layer nested contours.
+- Experiment design: target 3 samples from 20.66 (medium_round, deep_round, medium_boxy), minimum 1 sample (medium_round). Geometry-only must pass before any forward solve.
+- Safety/git: do not submit data, NPZ, .mph, raw CSV, checkpoints, preview PNG, notes, baseline docs, MODEL_STRUCTURE_PLAN.md deletion, scripts/visualize_current_baseline.py, or existing COMSOL dirty items.
+- Implementation feasibility: reuse 20.66 RBC depth labels and Bx/By/Bz forward infrastructure; distinguish 12/16-layer high-layer fallback from the 20.66 5-layer stepped approximation.
+
+Required status vocabulary:
+- variable_depth_pass: smooth continuous variable-depth closed solid succeeds and one-sample forward/schema validation passes.
+- near_smooth_pass: loft/import/interpolated near-smooth approximation succeeds but is not exact smooth.
+- high_layer_pass: 12/16-layer high-layer nested contour approximation succeeds; this is not smooth and not exact Piao RBC.
+- failed: only constant-depth, no variable-depth evidence, no Bx/By/Bz, delta check failure, or schema failure.
+
+Hard blockers:
+- no method can construct variable-depth, near-smooth, or high-layer 3D defect solid;
+- only constant-depth extrusion builds;
+- geometry depth variation cannot be verified;
+- Bx/By/Bz export fails;
+- no-defect/defect pair or delta_b check fails;
+- forbidden artifacts would need to be staged.
+
+Proceed rule: Stage B geometry-only must pass before Stage C forward. Stage C starts with medium_round only.

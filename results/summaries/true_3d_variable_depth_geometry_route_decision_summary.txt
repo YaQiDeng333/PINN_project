@@ -1,0 +1,12 @@
+20.67 true 3D variable-depth geometry route decision summary
+
+selected_status: high_layer_pass
+
+Recommendation: C. Ask for human confirmation before accepting high-layer approximation and expanding samples.
+
+Answers:
+1. Did smooth variable-depth pass? False
+2. Did near-smooth pass? False
+3. Is high-layer stepped approximation materially beyond 20.66? True
+4. Is it acceptable for pilot without human confirmation? False
+5. Should next step be pilot generation or geometry improvement? pilot only after status-specific confirmation; high_layer_pass requires explicit human acceptance.
