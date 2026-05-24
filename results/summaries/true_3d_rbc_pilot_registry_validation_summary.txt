@@ -1,0 +1,8 @@
+20.72 COMSOL data registry validation summary
+
+manifest_count: 3
+check_count: 15
+pass_count: 15
+validation_pass: True
+
+Boundary: registry validates metadata governance only; no data/NPZ files are committed.

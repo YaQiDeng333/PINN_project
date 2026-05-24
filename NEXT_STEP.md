@@ -1,5 +1,11 @@
 # NEXT_STEP
 
+## 2026-05-24 更新：第 20.72 后的下一步
+
+第 20.72 已把 20.71 的 partial pilot 补齐为 assembled true 3D RBC-style pilot pack candidate：assembled dataset_id 为 `comsol_true_3d_rbc_imported_watertight_pilot_v1_assembled`，N=56，split = train/val/test 36/10/10，curvature coverage 包含 sharp、round、boxy、`LD_dominant`、`WD_dominant`，NPZ/schema validation、registry validation 和 Claude Code review 均通过。
+
+下一步唯一建议：进入 **true 3D training gate**，但这仍是 pilot training，不是 baseline replacement。训练/评估脚本必须通过 `COMSOL_DATA_REGISTRY.md` 和 `results/manifests/comsol_true_3d_rbc_imported_watertight_pilot_v1_assembled.manifest.json` 显式读取 dataset_id，禁止 latest/newest 自动扫描；`CURRENT_BASELINE.md` 不更新，dense mask baseline 继续只作为 comparator。
+
 ## 2026-05-24 更新：第 20.71 后的下一步
 
 第 20.71 已生成 true 3D RBC-style imported-watertight pilot pack，但状态是 `partial_pilot_generated`。当前有效样本为 30，split = train/val/test 20/5/5；所有成功样本使用 `imported_watertight_mesh_solid`、20.70 material/domain fix、default solver、`mesh_auto_size=5`、`Jscale=1.0`，真实导出 `[mf.Bx, mf.By, mf.Bz] @ sensor_z_m=0.008`，`delta_b` 和 NPZ/schema validation 均通过。

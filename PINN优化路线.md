@@ -1,5 +1,13 @@
 # PINN 优化路线
 
+## 2026-05-24 路线同步：20.72 true 3D RBC assembled pilot pack
+
+20.72 的路线意义是：true 3D / Piao-style 主线已经从 partial pilot pack 推进到 assembled pilot pack candidate。当前 pack 仍是 RBC-style / Piao-inspired engineering approximation，`exact_piao_rbc=False`，不声称完整复现 Piao 2019，也不建立或替换 baseline。
+
+assembled pack 的技术链路保持为：RBC-style params → depth grid → watertight mesh → imported watertight COMSOL solid → 20.70 material/domain fix → full-source Bx/By/Bz @ 0.008 → `delta_b` check → assembled NPZ/schema validation。最终 assembled N=56，split 为 36/10/10，五类 curvature template 全部覆盖：sharp=11、round=11、boxy=12、LD_dominant=11、WD_dominant=11。`train_ready_candidate=True` 只表示可以进入 explicit training gate，`baseline_ready=False` 仍然固定。
+
+路线判断更新为：下一步可以做 true 3D training gate，但必须通过 registry / manifest 显式加载 `comsol_true_3d_rbc_imported_watertight_pilot_v1_assembled`，禁止 latest/newest 自动扫描，禁止自动替换 `CURRENT_BASELINE.md`。dense mask baseline 继续只作为 comparator；后续训练若不能稳定超过当前 baseline，也不能把该 pilot pack 或模型写成新 baseline。
+
 ## 2026-05-24 路线同步：20.71 true 3D RBC pilot pack metadata
 
 20.71 的路线意义是：true 3D / Piao-style 主线已经从 one-sample imported-solid smoke 推进到可注册、可审计的 small pilot pack，但还没有达到训练入口。当前 pack 是 RBC-style / Piao-inspired engineering approximation，`exact_piao_rbc=False`，不声称完整复现 Piao 2019，也不建立 baseline。

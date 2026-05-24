@@ -37,6 +37,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--plan-csv", type=Path, default=DEFAULT_PLAN)
     parser.add_argument("--summary", type=Path, default=DEFAULT_SUMMARY)
     parser.add_argument("--metrics", type=Path, default=DEFAULT_METRICS)
+    parser.add_argument("--stage-label", default="20.71 true 3D RBC pilot")
     parser.add_argument("--max-samples", type=int, default=60)
     parser.add_argument("--overwrite", action="store_true")
     return parser.parse_args()
@@ -67,7 +68,7 @@ def bool_value(row: dict[str, Any], key: str) -> bool:
     return str(row.get(key, "")).strip().lower() == "true"
 
 
-def write_summary(path: Path, rows: list[dict[str, Any]], failures: list[str], planned_count: int) -> None:
+def write_summary(path: Path, rows: list[dict[str, Any]], failures: list[str], planned_count: int, stage_label: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     pass_rows = [row for row in rows if bool_value(row, "mesh_validation_pass")]
     split_counts = Counter(row.get("split", "") for row in pass_rows)
@@ -75,7 +76,7 @@ def write_summary(path: Path, rows: list[dict[str, Any]], failures: list[str], p
     curvature_counts = Counter(row.get("curvature_template", "") for row in pass_rows)
     status = "full_mesh_pass" if len(pass_rows) >= FULL_SUCCESS else "partial_mesh_pass" if len(pass_rows) >= MIN_SUCCESS else "failed"
     lines = [
-        "20.71 true 3D RBC pilot watertight mesh summary",
+        f"{stage_label} watertight mesh summary",
         "",
         f"planned_count: {planned_count}",
         f"mesh_pass_count: {len(pass_rows)}",
@@ -147,7 +148,7 @@ def run(args: argparse.Namespace) -> int:
             print(f"MESH_FAIL {failure}")
     fields = list(dict.fromkeys(meshlib.METRIC_FIELDS + ["dataset_id", "split", "depth_bin", "size_bin", "aspect_bin", "curvature_template", "geometry_method"]))
     write_csv(args.metrics, metrics, fields)
-    write_summary(args.summary, metrics, failures, len(plan_rows))
+    write_summary(args.summary, metrics, failures, len(plan_rows), args.stage_label)
     pass_count = sum(1 for row in metrics if bool_value(row, "mesh_validation_pass"))
     if pass_count < MIN_SUCCESS:
         raise RuntimeError(f"mesh stage failed: pass_count={pass_count} < {MIN_SUCCESS}")

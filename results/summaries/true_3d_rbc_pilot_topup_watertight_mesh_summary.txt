@@ -1,0 +1,21 @@
+20.72 true 3D RBC pilot top-up watertight mesh summary
+
+planned_count: 33
+mesh_pass_count: 33
+mesh_fail_count: 0
+mesh_stage_status: partial_mesh_pass
+split_counts_pass: {'val': 5, 'test': 5, 'train': 23}
+depth_bin_counts_pass: {'shallow': 8, 'medium': 11, 'deep': 14}
+curvature_template_counts_pass: {'LD_dominant': 13, 'WD_dominant': 13, 'boxy': 5, 'sharp': 1, 'round': 1}
+mesh_units: m
+top_cap_plane: z=0
+depth_sign_convention: bottom surface z=-depth
+mesh_source: triangulated_depth_grid
+
+Gate:
+- full threshold: >= 54
+- minimum partial threshold: >= 30
+- high-layer fallback is not used by this stage.
+
+Failures:
+- none

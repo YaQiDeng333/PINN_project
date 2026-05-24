@@ -11,8 +11,8 @@
   ],
   "baseline_ready": false,
   "comsol_commit": "9bd888c172f036b31e6293f51eeca16c7276eb9c",
-  "dataset_id": "comsol_true_3d_rbc_imported_watertight_pilot_v1_partial_20_71",
-  "dataset_role": "partial_source",
+  "dataset_id": "comsol_true_3d_rbc_imported_watertight_pilot_v1_topup_20_72",
+  "dataset_role": "topup_source",
   "exact_piao_rbc": false,
   "forbidden_use": [
     "automatic_mainline_training",
@@ -24,15 +24,15 @@
   "generated_at": "2026-05-24T16:54:44",
   "geometry_method": "imported_watertight_mesh_solid",
   "latest_newest_discovery_allowed": false,
-  "manifest_path": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\manifests\\comsol_true_3d_rbc_imported_watertight_pilot_v1.manifest.json",
+  "manifest_path": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\manifests\\comsol_true_3d_rbc_imported_watertight_pilot_v1_topup.manifest.json",
   "merge_policy": "sample_id_dedupe_strict",
-  "n_samples": 30,
-  "npz_path": "C:\\Users\\19166\\Desktop\\PINN_project\\data\\comsol_mfl\\prepared\\experimental\\true_3d_rbc_pilot\\comsol_true_3d_rbc_imported_watertight_pilot_v1.npz",
-  "npz_sha256": "28a1343910a953000aa7105c5d1b78bf6cf9168acae21c342325883da293e303",
+  "n_samples": 26,
+  "npz_path": "C:\\Users\\19166\\Desktop\\PINN_project\\data\\comsol_mfl\\prepared\\experimental\\true_3d_rbc_pilot\\comsol_true_3d_rbc_imported_watertight_pilot_v1_topup.npz",
+  "npz_sha256": "153e94abedb14d2aa9697414711d6e152fd683cea5ae77a2627c18575ececd26",
   "pinn_commit": "b0074ebfab6b4a3cff6bf1b99cb0a75ec1e9e88d",
   "rbc_style_approximation": true,
   "route": "true_3d_piao_style",
-  "sample_ids_sha256": "589fc57f23f7e4e944c47211ffce53b62ac7d7964d90959449c3404cf3f0a0b6",
+  "sample_ids_sha256": "8d44ca6ea307a70b7c4e34d00b723c38dc8e104b9c22439582a6eadb7a0e425f",
   "scan_line_y": [
     -0.001,
     0.0,
@@ -41,14 +41,18 @@
   "schema_version": "true3d_profile_v1_piao_rbc",
   "sensor_x_count": 201,
   "sensor_z_m": 0.008,
-  "source_dataset_ids": [],
-  "source_manifest_paths": [],
+  "source_dataset_ids": [
+    "comsol_true_3d_rbc_imported_watertight_pilot_v1_partial_20_71"
+  ],
+  "source_manifest_paths": [
+    "C:\\Users\\19166\\Desktop\\PINN_project\\results\\manifests\\comsol_true_3d_rbc_imported_watertight_pilot_v1.manifest.json"
+  ],
   "split_counts": {
     "test": 5,
-    "train": 20,
+    "train": 16,
     "val": 5
   },
   "stage": "20.72",
-  "status": "partial_pilot_generated",
+  "status": "topup_generated",
   "train_ready_candidate": false
 }

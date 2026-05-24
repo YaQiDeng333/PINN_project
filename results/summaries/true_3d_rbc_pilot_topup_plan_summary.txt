@@ -1,0 +1,16 @@
+20.72 true 3D RBC pilot top-up plan summary
+
+topup_planned_rows: 33
+topup_split_counts: {'val': 5, 'test': 5, 'train': 23}
+topup_curvature_counts: {'LD_dominant': 13, 'WD_dominant': 13, 'boxy': 5, 'sharp': 1, 'round': 1}
+topup_depth_counts: {'shallow': 8, 'medium': 11, 'deep': 14}
+topup_size_counts: {'small_compact': 7, 'medium_balanced': 10, 'large_wide': 7, 'elongated': 9}
+replacement_rows: rbc_topup_repl_012_sharp, rbc_topup_repl_024_round
+
+Strategy:
+- 24 rows cover all missing LD_dominant and WD_dominant original plan rows.
+- 4 rows cover the not-attempted deep boxy cells.
+- 2 rows are replacement-id bounded retries for the bounded-timeout sharp/round rows; profile/depth labels are preserved.
+- 3 train safety replacements use newly generated profile/depth labels to protect the assembled minimum split gate.
+- exact_piao_rbc remains False; rbc_style_approximation remains True.
+- No high-layer fallback is introduced.

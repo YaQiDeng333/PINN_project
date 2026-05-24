@@ -1,0 +1,13 @@
+20.72 true 3D RBC pilot assembled validation summary
+
+dataset_id: comsol_true_3d_rbc_imported_watertight_pilot_v1_assembled
+status: pilot_generated
+n_samples: 56
+split_counts: {'val': 10, 'test': 10, 'train': 36}
+curvature_counts: {'sharp': 11, 'round': 11, 'boxy': 12, 'LD_dominant': 11, 'WD_dominant': 11}
+validation_pass: True
+train_ready_candidate: True
+baseline_ready: False
+npz_sha256: d9b84ca3086dccb484abbae32b7b4f84da50c342f955775144a7e1cd7fc4b784
+
+Boundary: assembled NPZ is generated data and is not committed; CURRENT_BASELINE is not updated.

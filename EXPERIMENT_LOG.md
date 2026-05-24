@@ -1,5 +1,15 @@
 # 实验工作日志
 
+## 2026-05-24 更新：第 20.72 true 3D RBC pilot top-up generation and assembled pack validation
+
+第 20.72 在不覆盖 20.71 partial NPZ 的前提下完成 top-up generation 和 assembled pack validation；本轮不训练 surrogate / inverse model、不做 refinement、不建立 baseline、不更新 `CURRENT_BASELINE.md`，也不提交 data / NPZ / temp STL / `.mph` / raw CSV。Subagent preflight 已完成，Agent F 因平台 agent 上限未能 spawn，主控用只读检查补齐 feasibility 结论并记录在 preflight summary 中。
+
+Stage A-C 先审计 20.71 partial pack：原始 source pack 为 30 pass、2 fail、28 not_attempted，split 为 20/5/5，缺失 `LD_dominant` 和 `WD_dominant`。本轮设计 33-row top-up plan，重点补齐 LD/WD curvature families，并为 deep-elongated timeout 样本设置 bounded replacement。Top-up watertight mesh validation 为 33/33 pass，全部仍是 `imported_watertight_mesh_solid` 路线，不使用 high-layer fallback。
+
+Stage D 的 COMSOL top-up 使用 20.70 protocol：`selected_solver_protocol=default`、`mesh_auto_size=5`、`material_fix_applied=True`、`full_source_jscale=1.0`、`no_defect_reused=True`。Top-up 结果为 26 pass、5 documented failures、2 not_attempted，成功 split 为 16/5/5；失败集中在 mesh/domain 边界和 deep-elongated bounded retry，没有把失败样本静默写入 assembled pack。所有成功样本真实导出 `[mf.Bx, mf.By, mf.Bz] @ sensor_z_m=0.008`，`delta_b = b_defect - b_no_defect` 校验通过。
+
+Stage E-F 将 20.71 partial source 与 20.72 top-up source 组装为 `comsol_true_3d_rbc_imported_watertight_pilot_v1_assembled`：assembled N=56，split 为 train/val/test = 36/10/10，curvature coverage 为 sharp=11、round=11、boxy=12、LD_dominant=11、WD_dominant=11。NPZ/schema validation 通过，`train_ready_candidate=True`，`baseline_ready=False`；registry / manifest 已更新为 partial_source、topup_source、assembled 三层身份，并显式禁止 latest/newest auto-discovery、baseline update 和 current baseline replacement。Claude Code review 通过，无 must-fix；下一步唯一建议是进入 true 3D training gate，但仍必须通过 explicit dataset_id + manifest 读取，不能把该 pack 写成 baseline。
+
 ## 2026-05-24 更新：第 20.71 smooth/mesh-based true 3D RBC pilot pack generation
 
 第 20.71 生成了第一个 smooth/mesh-based true 3D RBC-style imported-watertight pilot pack，但结果必须写成 `partial_pilot_generated`，不是 train-ready，也不是 baseline。本轮不训练 surrogate / inverse model、不做 refinement、不更新 `CURRENT_BASELINE.md`，不创建或修改 COMSOL baseline 文档，也不提交 data / NPZ / temp STL / `.mph` / raw CSV。

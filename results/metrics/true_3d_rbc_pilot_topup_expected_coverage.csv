@@ -1,0 +1,16 @@
+group_key,group_value,existing_success,topup_planned,assembled_expected,target
+split,train,20,23,43,40
+split,val,5,5,10,10
+split,test,5,5,10,10
+curvature_template,sharp,11,1,12,12
+curvature_template,round,11,1,12,12
+curvature_template,boxy,8,5,13,12
+curvature_template,LD_dominant,0,13,13,12
+curvature_template,WD_dominant,0,13,13,12
+depth_bin,shallow,12,8,20,20
+depth_bin,medium,12,11,23,20
+depth_bin,deep,6,14,20,20
+size_bin,small_compact,8,7,15,15
+size_bin,medium_balanced,8,10,18,15
+size_bin,large_wide,8,7,15,15
+size_bin,elongated,6,9,15,15
