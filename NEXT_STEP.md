@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-05-24 更新：第 20.71 后的下一步
+
+第 20.71 已生成 true 3D RBC-style imported-watertight pilot pack，但状态是 `partial_pilot_generated`。当前有效样本为 30，split = train/val/test 20/5/5；所有成功样本使用 `imported_watertight_mesh_solid`、20.70 material/domain fix、default solver、`mesh_auto_size=5`、`Jscale=1.0`，真实导出 `[mf.Bx, mf.By, mf.Bz] @ sensor_z_m=0.008`，`delta_b` 和 NPZ/schema validation 均通过。
+
+当前不能进入 training gate：inventory 虽已完整覆盖 60 行，但只有 30 pass、2 fail、28 not_attempted；`LD_dominant` 和 `WD_dominant` 两个 curvature family 尚无成功样本。Registry / manifest 已建立，`allowed_use=schema_validation, explicit_pilot_training_gate`，`forbidden_use=automatic_mainline_training, baseline_update, current_baseline_replacement`；该 pack 不是 baseline，`CURRENT_BASELINE.md` 不更新。
+
+下一步唯一建议：做 20.71 top-up generation，优先补齐 `LD_dominant` / `WD_dominant` not_attempted 样本，并复查 `deep_elongated` timeout 样本。top-up 通过后再重新验证 manifest / registry / split / curvature coverage，才讨论 explicit true 3D training gate。
+
 ## 2026-05-24 更新：第 20.70 后的下一步
 
 第 20.70 已把 20.69 的 imported watertight solid 路线从 geometry gate pass 推进到 full-source forward smoke pass。原始 blocker 不是 Python mesh 或 Boolean subtract，而是 imported solid 后的 domain/material selection：COMSOL 未暴露稳定 cavity domain selection，且原始 air selection 与 steel selection 重叠。采用最小 selection/material fix 后，`material_domain_fixed` 在 `mesh_auto_size=5`、default solver、`Jscale=1.0` 下通过 defect stationary solve。

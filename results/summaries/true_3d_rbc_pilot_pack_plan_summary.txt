@@ -1,0 +1,27 @@
+20.71 true 3D RBC pilot pack plan summary
+
+dataset_id: comsol_true_3d_rbc_imported_watertight_pilot_v1
+route: true_3d_piao_style
+geometry_method: imported_watertight_mesh_solid
+sample_count: 60
+profile_validation_pass_count: 60
+split_counts: {'val': 10, 'test': 10, 'train': 40}
+depth_bin_counts: {'shallow': 20, 'medium': 20, 'deep': 20}
+curvature_template_counts: {'sharp': 12, 'round': 12, 'boxy': 12, 'LD_dominant': 12, 'WD_dominant': 12}
+L_m_range: 0.010000 to 0.030000
+W_m_range: 0.006000 to 0.020000
+D_m_range: 0.001000 to 0.006000
+angle_rad: 0.0 for all rows
+sensor_z_m: 0.008
+scan_line_y_m: [-0.001, 0.0, 0.001]
+axis_names: [Bx, By, Bz]
+axis_expressions: [mf.Bx, mf.By, mf.Bz]
+exact_piao_rbc: False
+rbc_style_approximation: True
+allowed_use: schema_validation, explicit_pilot_training_gate
+forbidden_use: automatic_mainline_training, baseline_update, current_baseline_replacement
+
+Gate result:
+PASS
+
+Boundary: this is a pilot pack plan, not a baseline and not an exact Piao 2019 reproduction.

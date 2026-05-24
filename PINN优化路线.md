@@ -1,5 +1,13 @@
 # PINN 优化路线
 
+## 2026-05-24 路线同步：20.71 true 3D RBC pilot pack metadata
+
+20.71 的路线意义是：true 3D / Piao-style 主线已经从 one-sample imported-solid smoke 推进到可注册、可审计的 small pilot pack，但还没有达到训练入口。当前 pack 是 RBC-style / Piao-inspired engineering approximation，`exact_piao_rbc=False`，不声称完整复现 Piao 2019，也不建立 baseline。
+
+技术链路已跑通到 30 个样本：RBC-style params → depth grid → watertight mesh → imported watertight COMSOL solid → 20.70 material/domain fix → full-source Bx/By/Bz @ 0.008 → `delta_b` check → NPZ/schema validation。30 个成功样本 split 为 20/5/5，registry/manifest 已禁止 latest/newest 自动扫描和 baseline replacement；dense mask baseline 继续只作为 comparator。
+
+路线判断：当前必须先 top-up，而不是训练。inventory 已完整记录 60 行，但状态为 30 pass、2 fail、28 not_attempted，且 `LD_dominant` / `WD_dominant` 两个 curvature family 缺失。下一步应补齐 missing families 和 deep-elongated timeout 样本；只有 top-up 后 curvature coverage、split 和 manifest 全部重新验证通过，才进入 explicit true 3D training gate。
+
 ## 2026-05-24 路线同步：20.70 imported watertight solid solver robustness
 
 20.70 的路线意义是：true 3D / Piao-style 主线第一次跑通了 imported watertight mesh solid 的 full-source COMSOL forward smoke。20.69 已经证明 Python watertight mesh、COMSOL import / repair / form solid / Boolean subtract / mesh precheck 可行；20.70 进一步证明，失败点可由 domain/material selection 最小修复解决，而不是必须回退 high-layer approximation。

@@ -1,5 +1,15 @@
 # 实验工作日志
 
+## 2026-05-24 更新：第 20.71 smooth/mesh-based true 3D RBC pilot pack generation
+
+第 20.71 生成了第一个 smooth/mesh-based true 3D RBC-style imported-watertight pilot pack，但结果必须写成 `partial_pilot_generated`，不是 train-ready，也不是 baseline。本轮不训练 surrogate / inverse model、不做 refinement、不更新 `CURRENT_BASELINE.md`，不创建或修改 COMSOL baseline 文档，也不提交 data / NPZ / temp STL / `.mph` / raw CSV。
+
+Stage A-B 生成 60-sample RBC-style plan 和 watertight mesh：split 计划为 train/val/test = 40/10/10，参数覆盖 `L_m=0.010-0.030`、`W_m=0.006-0.020`、`D_m=0.001-0.006`、`wLD/wWD/wLW=0.55-1.20`，`angle_rad=0`；60/60 profile validation 通过，60/60 watertight mesh validation 通过。全部样本均标记 `exact_piao_rbc=False`、`rbc_style_approximation=True`，不声称完整复现 Piao 2019。
+
+Stage C-D 使用 20.70 imported watertight mesh solid protocol 生成 partial pack：`geometry_method=imported_watertight_mesh_solid`、`selected_solver_protocol=default`、`mesh_auto_size=5`、`material_fix_applied=True`、`full_source_jscale=1.0`，没有 high-layer fallback。COMSOL 成功样本数为 30，split 为 20/5/5；inventory 完整覆盖 60 行，其中 30 pass、2 fail、28 not_attempted。成功样本真实导出 `[mf.Bx, mf.By, mf.Bz] @ sensor_z_m=0.008`，`delta_b = b_defect - b_no_defect` 校验通过，NPZ/schema validation 30/30 通过。
+
+Registry / manifest 已建立：`dataset_id=comsol_true_3d_rbc_imported_watertight_pilot_v1`，`status=partial_pilot_generated`，`allowed_use=schema_validation, explicit_pilot_training_gate`，`forbidden_use=automatic_mainline_training, baseline_update, current_baseline_replacement`。route decision 明确 `train_ready=False`、`baseline_ready=False`；缺失 curvature family 为 `LD_dominant` 和 `WD_dominant`，下一步唯一建议是 top-up generation 后再评估 explicit training gate。Claude Code review 经一轮 must-fix 修复后通过，无剩余 must-fix。
+
 ## 2026-05-24 更新：第 20.70 imported watertight solid solver robustness diagnostic
 
 第 20.70 只诊断 20.69 之后的 imported watertight mesh solid defect model stationary solve blocker；本轮不重新生成 Python watertight mesh、不修改 Boolean subtract、不回退 high-layer、不扩样、不训练 surrogate / inverse model、不做 refinement，也不更新 `CURRENT_BASELINE.md` 或任何 COMSOL baseline 文档。

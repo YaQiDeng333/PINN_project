@@ -1,0 +1,92 @@
+{
+  "allowed_use": [
+    "schema_validation",
+    "explicit_pilot_training_gate"
+  ],
+  "axes": [
+    "Bx",
+    "By",
+    "Bz"
+  ],
+  "baseline_ready": false,
+  "comsol_branch": "main",
+  "comsol_commit": "928c82e875c5cee766cbd5e834ed8e30e7e0e514",
+  "comsol_git_status_short": [
+    "M src/tools/physics.py",
+    " M src/tools/results.py",
+    " M src/tools/study.py",
+    "?? scripts/generate_mfl_rectangular_sweep.py",
+    "?? scripts/generate_mfl_true_3d_rbc_pilot_pack.py"
+  ],
+  "comsol_inventory_csv": "C:\\Users\\19166\\Desktop\\COMSOL_Multiphysics_MCP\\results\\inventory_true_3d_rbc_pilot_pack_v1.csv",
+  "dataset_id": "comsol_true_3d_rbc_imported_watertight_pilot_v1",
+  "exact_piao_rbc": false,
+  "expected_curvature_templates": [
+    "LD_dominant",
+    "WD_dominant",
+    "boxy",
+    "round",
+    "sharp"
+  ],
+  "forbidden_use": [
+    "automatic_mainline_training",
+    "baseline_update",
+    "current_baseline_replacement"
+  ],
+  "generated_at": "2026-05-24T09:24:48",
+  "generator_script": "COMSOL_Multiphysics_MCP/scripts/generate_mfl_true_3d_rbc_pilot_pack.py",
+  "geometry_method": "imported_watertight_mesh_solid",
+  "inventory_status_counts": {
+    "fail": 2,
+    "not_attempted": 28,
+    "pass": 30
+  },
+  "manifest_path": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\manifests\\comsol_true_3d_rbc_imported_watertight_pilot_v1.manifest.json",
+  "mesh_metrics_csv": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\metrics\\true_3d_rbc_pilot_watertight_mesh_metrics.csv",
+  "missing_curvature_templates": [
+    "LD_dominant",
+    "WD_dominant"
+  ],
+  "n_samples": 30,
+  "notes": "Generated data remains under data/ and must not be committed. This is a partial pilot pack; missing curvature templates and not-attempted inventory rows require top-up before any training gate.",
+  "npz_path": "C:\\Users\\19166\\Desktop\\PINN_project\\data\\comsol_mfl\\prepared\\experimental\\true_3d_rbc_pilot\\comsol_true_3d_rbc_imported_watertight_pilot_v1.npz",
+  "npz_sha256": "28a1343910a953000aa7105c5d1b78bf6cf9168acae21c342325883da293e303",
+  "observed_curvature_templates": [
+    "boxy",
+    "round",
+    "sharp"
+  ],
+  "pinn_branch": "main",
+  "pinn_commit": "de9e1080751d4efd01e75d4eb6f7fdacb60d877f",
+  "pinn_git_status_short": [
+    "?? COMSOL_DATA_REGISTRY.md",
+    "?? scripts/design_true_3d_rbc_pilot_pack_plan.py",
+    "?? scripts/generate_true_3d_rbc_pilot_watertight_meshes.py",
+    "?? scripts/validate_true_3d_rbc_pilot_pack.py",
+    "?? scripts/visualize_current_baseline.py"
+  ],
+  "plan_csv": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\metrics\\true_3d_rbc_pilot_pack_plan.csv",
+  "rbc_style_approximation": true,
+  "route": "true_3d_piao_style",
+  "sample_ids_sha256": "589fc57f23f7e4e944c47211ffce53b62ac7d7964d90959449c3404cf3f0a0b6",
+  "scan_line_y": [
+    -0.001,
+    0.0,
+    0.001
+  ],
+  "schema_pass_count": 30,
+  "schema_version": "true3d_profile_v1_piao_rbc",
+  "sensor_x_count": 201,
+  "sensor_z_m": 0.008,
+  "split_counts": {
+    "test": 5,
+    "train": 20,
+    "val": 5
+  },
+  "stage": "20.71",
+  "status": "partial_pilot_generated",
+  "train_ready": false,
+  "validation_metrics_path": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\metrics\\true_3d_rbc_pilot_pack_validation_metrics.csv",
+  "validation_script": "PINN_project/scripts/validate_true_3d_rbc_pilot_pack.py",
+  "validation_summary_path": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\summaries\\true_3d_rbc_pilot_pack_validation_summary.txt"
+}

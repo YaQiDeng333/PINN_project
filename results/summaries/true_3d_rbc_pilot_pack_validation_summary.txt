@@ -1,0 +1,25 @@
+20.71 true 3D RBC pilot pack validation summary
+
+dataset_id: comsol_true_3d_rbc_imported_watertight_pilot_v1
+status: partial_pilot_generated
+sample_count: 30
+schema_pass_count: 30
+split_counts: {'val': 5, 'test': 5, 'train': 20}
+inventory_status_counts: {'pass': 30, 'fail': 2, 'not_attempted': 28}
+observed_curvature_templates: ['boxy', 'round', 'sharp']
+missing_curvature_templates: ['LD_dominant', 'WD_dominant']
+geometry_method: imported_watertight_mesh_solid
+exact_piao_rbc: False
+rbc_style_approximation: True
+axis_names: [Bx, By, Bz]
+selected_solver_protocol: default
+mesh_auto_size: 5
+material_fix_applied: True
+full_source_jscale: 1.0
+no_defect_reused: True
+npz_sha256: 28a1343910a953000aa7105c5d1b78bf6cf9168acae21c342325883da293e303
+
+Validation result:
+PASS
+
+Boundary: this validation authorizes at most an explicit pilot training gate; it does not update CURRENT_BASELINE.
