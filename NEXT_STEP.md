@@ -1,5 +1,11 @@
 # NEXT_STEP
 
+## 2026-05-25 更新：第 20.74 后的下一步
+
+第 20.74 已把 true 3D RBC imported-watertight 数据集从 v1 assembled N=56 扩展到 `comsol_true_3d_rbc_imported_watertight_pilot_v2_120`。实际 assembled N=112，split=train/val/test 76/18/18，curvature coverage 为 sharp=22、round=23、boxy=23、LD_dominant=24、WD_dominant=20；NPZ/schema validation、registry validation、manifest 和 Claude Code review 均通过。状态是 `pilot_generated`、`train_ready_candidate=True`、`baseline_ready=False`，不是 baseline。
+
+下一步唯一建议：进入 **true 3D training gate on v2_120**。训练/评估必须通过 `dataset_id=comsol_true_3d_rbc_imported_watertight_pilot_v2_120`、`COMSOL_DATA_REGISTRY.md` 和 `results/manifests/comsol_true_3d_rbc_imported_watertight_pilot_v2_120.manifest.json` 显式加载，禁止 latest/newest NPZ 自动扫描；不更新 `CURRENT_BASELINE.md`，dense mask baseline 继续只作为 comparator。如果 v2_120 训练后 WD_dominant、deep/elongated 或 curvature 参数仍不稳，再做第二波 targeted top-up。
+
 ## 2026-05-24 更新：第 20.72 后的下一步
 
 第 20.72 已把 20.71 的 partial pilot 补齐为 assembled true 3D RBC-style pilot pack candidate：assembled dataset_id 为 `comsol_true_3d_rbc_imported_watertight_pilot_v1_assembled`，N=56，split = train/val/test 36/10/10，curvature coverage 包含 sharp、round、boxy、`LD_dominant`、`WD_dominant`，NPZ/schema validation、registry validation 和 Claude Code review 均通过。

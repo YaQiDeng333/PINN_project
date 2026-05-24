@@ -70,3 +70,57 @@ This registry records generated COMSOL dataset identities and allowed usage. It 
 - source_dataset_ids: comsol_true_3d_rbc_imported_watertight_pilot_v1_partial_20_71, comsol_true_3d_rbc_imported_watertight_pilot_v1_topup_20_72
 - npz_sha256: d9b84ca3086dccb484abbae32b7b4f84da50c342f955775144a7e1cd7fc4b784
 - notes: Metadata only. Generated NPZ/data files are not committed and must be loaded only by explicit dataset_id + manifest.
+
+## comsol_true_3d_rbc_imported_watertight_pilot_v2_topup_20_74
+
+- dataset_role: topup_source
+- status: topup_generated
+- route: true_3d_piao_style
+- stage: 20.74
+- schema_version: true3d_profile_v1_piao_rbc
+- geometry_method: imported_watertight_mesh_solid
+- exact_piao_rbc: false
+- rbc_style_approximation: true
+- path: `C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\prepared\experimental\true_3d_rbc_pilot\comsol_true_3d_rbc_imported_watertight_pilot_v2_topup_20_74.npz`
+- manifest_path: `C:\Users\19166\Desktop\PINN_project\results\manifests\comsol_true_3d_rbc_imported_watertight_pilot_v2_topup_20_74.manifest.json`
+- n_samples: 56
+- split_counts: {'train': 40, 'val': 8, 'test': 8}
+- curvature_counts: {'sharp': 11, 'round': 12, 'boxy': 11, 'LD_dominant': 13, 'WD_dominant': 9}
+- train_ready_candidate: false
+- baseline_ready: false
+- auto_discovery_allowed: false
+- latest_newest_discovery_allowed: false
+- allowed_use: schema_validation, assembly_input
+- forbidden_use: automatic_mainline_training, baseline_update, current_baseline_replacement, latest_newest_auto_discovery, direct_training_without_manifest_gate
+- source_dataset_ids: comsol_true_3d_rbc_imported_watertight_pilot_v1_assembled
+- generator_script: `scripts/generate_mfl_true_3d_rbc_dataset_120_topup_pack.py`
+- validation_script: `scripts/validate_true_3d_rbc_dataset_120_pack.py`
+- npz_sha256: 29436c4aec8f7ae6968d02ce6a125de5ee02fcd0a75314b9f2879dd4d4bbdf5d
+- notes: Metadata only. Generated NPZ/data files are not committed and must be loaded only by explicit dataset_id + manifest.
+
+## comsol_true_3d_rbc_imported_watertight_pilot_v2_120
+
+- dataset_role: assembled
+- status: pilot_generated
+- route: true_3d_piao_style
+- stage: 20.74
+- schema_version: true3d_profile_v1_piao_rbc
+- geometry_method: imported_watertight_mesh_solid
+- exact_piao_rbc: false
+- rbc_style_approximation: true
+- path: `C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\prepared\experimental\true_3d_rbc_pilot\comsol_true_3d_rbc_imported_watertight_pilot_v2_120.npz`
+- manifest_path: `C:\Users\19166\Desktop\PINN_project\results\manifests\comsol_true_3d_rbc_imported_watertight_pilot_v2_120.manifest.json`
+- n_samples: 112
+- split_counts: {'val': 18, 'test': 18, 'train': 76}
+- curvature_counts: {'sharp': 22, 'round': 23, 'boxy': 23, 'LD_dominant': 24, 'WD_dominant': 20}
+- train_ready_candidate: true
+- baseline_ready: false
+- auto_discovery_allowed: false
+- latest_newest_discovery_allowed: false
+- allowed_use: schema_validation, explicit_pilot_training_gate
+- forbidden_use: automatic_mainline_training, baseline_update, current_baseline_replacement, latest_newest_auto_discovery, direct_training_without_manifest_gate
+- source_dataset_ids: comsol_true_3d_rbc_imported_watertight_pilot_v1_assembled, comsol_true_3d_rbc_imported_watertight_pilot_v2_topup_20_74
+- generator_script: `scripts/generate_mfl_true_3d_rbc_dataset_120_topup_pack.py`
+- validation_script: `scripts/validate_true_3d_rbc_dataset_120_pack.py`
+- npz_sha256: a79b56955ac4df4ed3f36388f4019f08d7ef92671ef330c6c3a6cb85fe5a4a49
+- notes: Metadata only. Generated NPZ/data files are not committed and must be loaded only by explicit dataset_id + manifest.

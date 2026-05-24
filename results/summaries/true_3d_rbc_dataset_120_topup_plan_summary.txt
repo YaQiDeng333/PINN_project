@@ -1,0 +1,20 @@
+20.74 true 3D RBC v2_120 top-up plan summary
+
+topup_dataset_id: comsol_true_3d_rbc_imported_watertight_pilot_v2_topup_20_74
+assembled_dataset_id: comsol_true_3d_rbc_imported_watertight_pilot_v2_120
+planned_rows: 80
+planned_split_counts: {'train': 56, 'val': 12, 'test': 12}
+first_64_curvature_counts: {'sharp': 13, 'round': 13, 'boxy': 12, 'LD_dominant': 13, 'WD_dominant': 13}
+first_64_depth_counts: {'shallow': 20, 'medium': 20, 'deep': 24}
+buffer_or_risk_rows: 28
+target_success_rows: 64
+target_success_split: train=44, val=10, test=10
+exact_piao_rbc: False
+rbc_style_approximation: True
+rotation: disabled; angle_rad=0 for all rows
+
+Strategy:
+- The plan prioritizes source coverage cells with fewer than two successful samples.
+- Low-risk rows are placed before high-risk deep elongated / WD rows.
+- Rows 65-80 are buffer rows for bounded replacement during COMSOL generation.
+- No high-layer fallback or lower-source solve is permitted.

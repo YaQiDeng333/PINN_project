@@ -1,0 +1,3 @@
+decision_option,selected,condition,observed,next_step
+A_true_3d_training_gate_on_v2_120,True,"N>=108, split>=72/18/18, each curvature>=20, schema+registry pass","N=112, split={'val': 18, 'test': 18, 'train': 76}, curvature={'sharp': 22, 'round': 23, 'boxy': 23, 'LD_dominant': 24, 'WD_dominant': 20}, registry=True",true 3D training gate on v2_120
+B_second_topup_generation,False,assembled pack remains below train-ready candidate threshold,"N=112, split={'val': 18, 'test': 18, 'train': 76}, curvature={'sharp': 22, 'round': 23, 'boxy': 23, 'LD_dominant': 24, 'WD_dominant': 20}",second top-up generation
