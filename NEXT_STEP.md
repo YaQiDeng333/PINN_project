@@ -183,3 +183,10 @@ forward profile refinement 已执行受控 sweep，但 validation 选择 `lambda
 - 如果不接受 high-layer approximation：继续修 smooth / closed-surface COMSOL geometry builder，不扩样、不训练。
 
 仍然不更新 `CURRENT_BASELINE.md`；dense mask baseline 只作为 comparator。
+## 2026-05-24 更新：第 20.73 后的下一步
+
+第 20.73 已完成 true 3D RBC pilot training gate。它不是 baseline，也不更新 `CURRENT_BASELINE.md`；所有训练/评估都通过 `dataset_id=comsol_true_3d_rbc_imported_watertight_pilot_v1_assembled`、`COMSOL_DATA_REGISTRY.md` 和 manifest 显式加载，没有 latest/newest NPZ 自动扫描，也没有运行 COMSOL 或生成新数据。
+
+训练 gate 的核心结论是：模型能拟合 train，但 N=56 的泛化证据不足。小型 Conv1D 在完整训练轨迹中可把 train normalized MAE 降到 `0.0012`，说明链路能学习训练样本；但 validation 选择的 checkpoint 在 test 上 normalized MAE 为 `0.7601`，只优于 mean baseline `0.8598`，没有超过 Piao-inspired feature baseline `0.7564`。当前可学习信号主要在 `L_m`、`W_m`，`D_m` 边缘，`wLD/wWD/wLW` 三个 curvature 参数仍不可稳定辨识。
+
+唯一下一步建议：扩展 true 3D RBC dataset 到 120/240 量级，并把 validation set 扩到至少 20-30 个样本，再重新跑同一套 registry/manifest-gated training gate。不要先调大模型、不要更新 baseline、不要回到 dense mask 主线；dense mask baseline 继续只作 comparator。

@@ -1,0 +1,17 @@
+20.73 true 3D RBC feature baseline summary
+
+Scope: Piao-inspired feature regression sanity only; this is not full Piao 2019 NLS + LS-SVM reproduction.
+dataset_id: comsol_true_3d_rbc_imported_watertight_pilot_v1_assembled
+input: delta_b only, shape=[56, 3, 3, 201], flattened_feature_channels=9
+feature_count: 135
+models: mean_train_target, ridge_alpha_100, svr_rbf_C10
+selected_model_by_validation: svr_rbf_C10
+selected_val_normalized_mae: 0.669665
+mean_test_normalized_mae: 0.859768
+selected_test_normalized_mae: 0.756362
+selected_test_LWD_mae_mm: L=3.098799, W=3.360223, D=0.948006
+selected_test_curvature_mae: 0.205021
+selected_test_projected_mask: IoU=0.678464, Dice=0.800268
+ridge_selected: ridge_alpha_100, val_normalized_mae=0.722074
+svr_status: svr_rbf_C10, val_normalized_mae=0.6696648001670837
+Data boundary: no COMSOL run, no data generation, no NPZ modification, no baseline update.

@@ -1,0 +1,13 @@
+20.73 true 3D RBC training gate preflight summary
+
+dataset_id_exists: True
+registry_manifest_gate_pass: True
+train_ready_candidate: True
+can_enter_training_gate: True
+input_fields: delta_b -> 9 channels x 201 from Bx/By/Bz x 3 scan lines
+output_labels: rbc_params [L_m,W_m,D_m,wLD,wWD,wLW]; projected_mask_2d/profile_depth_grid_m for metrics
+allowed_submit: explicit training scripts, summaries, metrics, Markdown route updates
+forbidden_submit: data/, NPZ, checkpoint, preview PNG, notes, baseline docs, CURRENT_BASELINE.md
+stop_conditions: registry/manifest gate fail; schema fail; train/test leakage; no train fit; val/test collapse; forbidden artifacts staged
+
+Subagent preflight: Agents A-E completed read-only with GO. Agent A noted manifest stage remains 20.72 because the assembled data pack was produced in 20.72; this does not block 20.73 explicit training gate.

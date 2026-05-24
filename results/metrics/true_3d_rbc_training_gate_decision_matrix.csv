@@ -1,0 +1,8 @@
+question,answer,evidence,decision
+Can the model fit train samples?,True,min_train_normalized_mae=0.001157; seed=2026,small_data_generalization_limited
+Does validation/test beat mean baseline?,True,neural_test=0.760134; mean_test=0.859768,small_data_generalization_limited
+Does neural beat feature baseline?,False,neural_test=0.760134; feature_test=0.756362,small_data_generalization_limited
+Which params are learnable?,"L_m, W_m",learnable threshold: selected test normalized MAE < 0.75,small_data_generalization_limited
+Which params are not learnable?,"D_m, wLD, wWD, wLW",threshold is provisional for training gate only,small_data_generalization_limited
+Is N=56 enough?,N=56 is not enough; expand to 120/240 before architecture changes.,split=36/10/10; selected_seed=2026,small_data_generalization_limited
+Next step,A_expand_true_3d_RBC_dataset,"This is a training gate, not a baseline update.",small_data_generalization_limited

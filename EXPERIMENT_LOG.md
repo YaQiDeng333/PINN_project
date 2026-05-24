@@ -2563,3 +2563,12 @@ Stage C 在 COMSOL 侧先跑 known prism sanity probe，再跑 RBC mesh import p
 Stage D 只在 Stage C 通过后执行 one-sample forward smoke。no-defect model 求解成功，但 defect model 的 stationary solver 在 imported watertight geometry 上不收敛，错误为线性迭代发散 / no solution returned。由于 `b_defect` 未生成，本轮没有 `delta_b`，没有生成 `true_3d_imported_watertight_forward_smoke_v1.npz`，也没有运行 Stage E NPZ/schema validator。
 
 Route decision 为 `C_import_boolean_pass_forward_not_run_or_failed`。20.69 证明 imported watertight mesh solid 的 geometry path 技术上前进了一步，明显优于 20.68 的 imported mesh failure 和 high-layer-only 状态；但全链路尚未 forward-ready，更不能 pilot-ready。Claude Code review 通过，无 must-fix；review 同意当前 route decision：下一步应修 COMSOL imported solid 的 solve / mesh-quality / solver robustness，再考虑 smooth/mesh-based pilot generation。
+## 第 20.73 步：true 3D RBC pilot training gate
+
+本轮只执行 training gate，不运行 COMSOL、不生成或修改 NPZ、不训练 baseline、不更新 `CURRENT_BASELINE.md`。数据入口固定为 `dataset_id=comsol_true_3d_rbc_imported_watertight_pilot_v1_assembled`，通过 `COMSOL_DATA_REGISTRY.md` 和 `results/manifests/comsol_true_3d_rbc_imported_watertight_pilot_v1_assembled.manifest.json` 显式解析，禁止 latest/newest NPZ 自动扫描。
+
+输入 gate 通过：assembled pack 为 `pilot_generated`、`train_ready_candidate=True`、`baseline_ready=False`，`delta_b` shape 为 `(56, 3, 3, 201)`，Conv1D 输入为 `(56, 9, 201)`，split 为 train/val/test = `36/10/10`，`delta_b = b_defect - b_no_defect` 原始精度校验误差为 `0.0`。feature sanity 使用 Piao-inspired 手工信号特征，不声称复现 Piao 2019 NLS + LS-SVM；validation 选择 `svr_rbf_C10`，test normalized MAE 为 `0.7564`，L/W/D MAE 为 `3.10/3.36/0.95 mm`，projected mask IoU/Dice 为 `0.6785/0.8003`。
+
+neural gate 使用小型 Conv1D，只输入 Bx/By/Bz 的 `delta_b`，输出 6 个 train-normalized RBC-style 参数。3 个 seed 均完成，validation 选择 seed `2026`、best epoch `3`；完整训练轨迹可把 train normalized MAE 拟合到 `0.0012`，但 selected checkpoint 的 val/test normalized MAE 为 `0.6886/0.7601`，只明显优于 mean baseline `0.8598`，没有超过 feature baseline `0.7564`。test L/W/D MAE 为 `2.55/2.80/1.22 mm`，curvature 平均 MAE 为 `0.2095`，projected mask IoU/Dice 为 `0.7285/0.8347`，profile depth RMSE 为 `0.000606 m`。
+
+路线判断：20.73 是 `small_data_generalization_limited`，不是 baseline。当前证据说明 `L_m`、`W_m` 有可学习信号，`D_m` 边缘不足，`wLD/wWD/wLW` 三个 curvature 参数尚不可辨识；N=56 不足以支撑 baseline 或模型结构结论。下一步应优先扩展 true 3D RBC 数据到 120/240 量级，并增加 validation 样本，再判断 curvature 是否需要更强输入观测或 exact Piao/NLS-style feature pipeline。

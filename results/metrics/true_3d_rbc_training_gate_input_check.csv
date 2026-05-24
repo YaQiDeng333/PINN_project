@@ -1,0 +1,22 @@
+check_name,pass,observed,notes
+dataset_id,True,comsol_true_3d_rbc_imported_watertight_pilot_v1_assembled,
+route,True,manifest=true_3d_piao_style; registry=true_3d_piao_style,
+status,True,manifest=pilot_generated; registry=pilot_generated,
+train_ready_candidate,True,True,
+baseline_ready_false,True,False,
+explicit_training_allowed,True,"['explicit_pilot_training_gate', 'schema_validation']",
+baseline_forbidden,True,"['automatic_mainline_training', 'baseline_update', 'current_baseline_replacement', 'direct_training_without_manifest_gate', 'latest_newest_auto_discovery']",
+latest_newest_forbidden,True,False,
+auto_discovery_forbidden,True,False,
+npz_exists,True,C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\prepared\experimental\true_3d_rbc_pilot\comsol_true_3d_rbc_imported_watertight_pilot_v1_assembled.npz,
+npz_sha256,True,d9b84ca3086dccb484abbae32b7b4f84da50c342f955775144a7e1cd7fc4b784,
+manifest_stage_source,True,20.72,20.73 consumes the 20.72 assembled pack; this is expected.
+sample_count,True,56,
+split_counts,True,"{'train': 36, 'val': 10, 'test': 10}",
+delta_b_shape,True,"[56, 3, 3, 201]",flattened to 9x201 for Conv1D
+axis_names,True,"['Bx', 'By', 'Bz']",
+delta_b_finite,True,finite,
+rbc_params_finite,True,finite,
+projected_mask_nonempty,True,43168,
+delta_check,True,0.0,
+train_only_normalization_prepared,True,"{'x_mean_shape': [1, 9, 1], 'y_mean_shape': [1, 6]}",
