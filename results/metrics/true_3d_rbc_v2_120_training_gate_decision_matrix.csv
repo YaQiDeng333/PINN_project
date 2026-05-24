@@ -1,0 +1,11 @@
+question,answer,evidence,decision
+Can the model fit train samples?,True,min_train_normalized_mae=0.004415; seed=42,v2_120_promising_but_not_baseline
+Does validation/test beat mean baseline?,True,neural_test=0.703907; mean_test=0.880306,v2_120_promising_but_not_baseline
+Does neural beat feature baseline?,True,neural_test=0.703907; feature_test=0.767659,v2_120_promising_but_not_baseline
+Did N=112 improve over N=56?,True,v2_neural_test=0.703907; v1_neural_test=0.760134,v2_120_promising_but_not_baseline
+Did D_m improve?,True,v2_D_mae_mm=1.106391; v1_D_mae_mm=1.222542,v2_120_promising_but_not_baseline
+Did curvature improve?,True,v2_curvature_mae=0.190509; v1_curvature_mae=0.209515,v2_120_promising_but_not_baseline
+Which params are learnable?,"L_m, W_m, D_m",learnable threshold: selected test normalized MAE < 0.75,v2_120_promising_but_not_baseline
+Which params are not learnable?,"wLD, wWD, wLW",threshold is provisional for training gate only,v2_120_promising_but_not_baseline
+Is N=112 enough?,"N=112 gives a positive training-gate signal, but it remains too small for baseline claims.","split={'train': 76, 'val': 18, 'test': 18}; selected_seed=42",v2_120_promising_but_not_baseline
+Next step,A_expand_true_3d_RBC_dataset_to_240,"This is a training gate, not a baseline update.",v2_120_promising_but_not_baseline

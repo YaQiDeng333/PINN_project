@@ -1,0 +1,11 @@
+metric,v1_56,v2_120,delta,improved,notes
+neural_test_normalized_mae,0.7601341009140015,0.7039067248503367,-0.05622737606366479,True,selected validation checkpoint; lower is better
+feature_test_normalized_mae,0.7563624113798142,0.7676585896147622,0.011296178234947996,False,feature baseline selected by validation; lower is better
+mean_test_normalized_mae,0.8597676753997803,0.8803059591187371,0.02053828371895683,False,train-target mean predictor; lower is better
+L_mae_mm,2.5528618067502977,2.5059156152937145,-0.046946191456583186,True,neural selected seed test split
+W_mae_mm,2.7978910177946092,2.5905945292777486,-0.20729648851686067,True,neural selected seed test split
+D_mae_mm,1.2225422695279122,1.1063910097711616,-0.11615125975675067,True,D_m boundary learnability proxy
+curvature_mae,0.20951480120420457,0.190509342485004,-0.019005458719200563,True,mean absolute error over wLD/wWD/wLW
+projected_mask_iou,0.7284699674621912,0.7297137249301504,0.001243757467959239,True,higher is better
+projected_mask_dice,0.8346844049238961,0.8364032800295091,0.0017188751056130824,True,higher is better
+profile_depth_rmse_m,0.0006060505606001243,0.0005479155903837333,-5.8134970216391e-05,True,lower is better

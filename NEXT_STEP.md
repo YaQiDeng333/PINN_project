@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-05-25 更新：第 20.75 后的下一步
+
+第 20.75 已完成 `comsol_true_3d_rbc_imported_watertight_pilot_v2_120` 的 true 3D RBC training gate。本轮只用 registry + manifest 显式加载数据，不运行 COMSOL、不生成或修改 NPZ、不训练正式 baseline、不更新 `CURRENT_BASELINE.md`。v2_120 的输入为 `delta_b=(112,3,3,201)`，Conv1D 输入为 `(112,9,201)`，split=train/val/test 76/18/18。
+
+结果是 promising but not baseline：feature sanity validation 选择 `svr_rbf_C10`，test normalized MAE 为 `0.7677`；neural gate 三个 seed 全部完成，validation 选择 seed `42`，test normalized MAE 为 `0.7039`，优于 mean baseline `0.8803` 和 feature baseline `0.7677`。相对 20.73 N=56，neural test MAE 从 `0.7601` 降到 `0.7039`，L/W/D MAE 改善到 `2.51/2.59/1.11 mm`，curvature MAE 从 `0.2095` 降到 `0.1905`，projected mask Dice 从 `0.8347` 到 `0.8364`。但 `wLD/wWD/wLW` 仍不稳定，N=112 仍不足以写成 baseline。
+
+下一步唯一建议：扩展 true 3D RBC dataset 到 240，再用同一套 `dataset_id + manifest + registry` gate 重跑 training gate。不要先更新 baseline，也不要把 v2_120 自动接入 mainline training；dense mask baseline 继续只作为 comparator。
+
 ## 2026-05-25 更新：第 20.74 后的下一步
 
 第 20.74 已把 true 3D RBC imported-watertight 数据集从 v1 assembled N=56 扩展到 `comsol_true_3d_rbc_imported_watertight_pilot_v2_120`。实际 assembled N=112，split=train/val/test 76/18/18，curvature coverage 为 sharp=22、round=23、boxy=23、LD_dominant=24、WD_dominant=20；NPZ/schema validation、registry validation、manifest 和 Claude Code review 均通过。状态是 `pilot_generated`、`train_ready_candidate=True`、`baseline_ready=False`，不是 baseline。

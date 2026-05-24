@@ -1,0 +1,28 @@
+true_3d_rbc_v2_120_training_gate neural training gate summary
+
+dataset_id: comsol_true_3d_rbc_imported_watertight_pilot_v2_120
+input: delta_b only, shape=[112, 3, 3, 201] -> Conv1D channels=[112, 9, 201]
+model: small Conv1D encoder + MLP head, output 6 train-normalized RBC params
+seeds: [42, 123, 2026]
+selected_seed_by_validation: 42
+selected_best_epoch: 2
+selected_best_val_metric: 0.925815
+selection_note: selected_best_val_metric is the validation selection score, not the raw validation MAE; raw val_normalized_mae is 0.694892.
+best_train_fit_over_all_epochs: seed=42, normalized_mae=0.004415
+train_normalized_mae: 0.732252
+val_normalized_mae: 0.694892
+test_normalized_mae: 0.703907
+test_LWD_mae_mm: L=2.505916, W=2.590595, D=1.106391
+test_curvature_mae: 0.190509
+test_projected_mask: IoU=0.729714, Dice=0.836403
+test_profile_depth_rmse_m: 0.000547916
+can_fit_train: True
+beats_mean_baseline_test: True
+beats_feature_baseline_test: True
+improved_over_20_73_neural_test_mae: True
+D_m_improved_vs_20_73: True
+curvature_improved_vs_20_73: True
+projected_mask_dice_stable_vs_20_73: True
+learnable_params_provisional: L_m, W_m, D_m
+not_learnable_params_provisional: wLD, wWD, wLW
+Boundary: no COMSOL run, no data generation, no NPZ modification, no checkpoint committed, no baseline update.

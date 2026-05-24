@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""20.73 Piao-inspired feature-regression sanity for the true-3D RBC pilot.
+"""Piao-inspired feature-regression sanity for true-3D RBC pilot datasets.
 
 This is not a Piao 2019 reproduction. It uses simple Bx/By/Bz signal features
 from delta_b only and keeps all dataset access behind the explicit
@@ -26,6 +26,7 @@ from load_true_3d_rbc_pilot_dataset import (
     normalize_y,
     split_indices,
     train_normalization,
+    run_name_for_dataset,
     write_csv,
 )
 
@@ -242,7 +243,7 @@ def run(args: argparse.Namespace) -> int:
     args.summary.write_text(
         "\n".join(
             [
-                "20.73 true 3D RBC feature baseline summary",
+                f"{args.run_name} feature baseline summary",
                 "",
                 "Scope: Piao-inspired feature regression sanity only; this is not full Piao 2019 NLS + LS-SVM reproduction.",
                 f"dataset_id: {dataset.dataset_id}",
@@ -270,11 +271,22 @@ def run(args: argparse.Namespace) -> int:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dataset-id", default=DATASET_ID)
-    parser.add_argument("--summary", type=Path, default=SUMMARY_PATH)
-    parser.add_argument("--metrics", type=Path, default=METRICS_PATH)
-    parser.add_argument("--group-summary", type=Path, default=GROUP_PATH)
+    parser.add_argument("--run-name")
+    parser.add_argument("--summary", type=Path)
+    parser.add_argument("--metrics", type=Path)
+    parser.add_argument("--group-summary", type=Path)
     parser.add_argument("--overwrite", action="store_true")
-    return parser.parse_args()
+    args = parser.parse_args()
+    run_name = args.run_name or run_name_for_dataset(args.dataset_id)
+    args.run_name = run_name
+    base_name = run_name.removesuffix("_training_gate")
+    if args.summary is None:
+        args.summary = SUMMARY_PATH if run_name == "true_3d_rbc_training_gate" else ROOT / f"results/summaries/{base_name}_feature_baseline_summary.txt"
+    if args.metrics is None:
+        args.metrics = METRICS_PATH if run_name == "true_3d_rbc_training_gate" else ROOT / f"results/metrics/{base_name}_feature_baseline_metrics.csv"
+    if args.group_summary is None:
+        args.group_summary = GROUP_PATH if run_name == "true_3d_rbc_training_gate" else ROOT / f"results/metrics/{base_name}_feature_baseline_group_summary.csv"
+    return args
 
 
 if __name__ == "__main__":

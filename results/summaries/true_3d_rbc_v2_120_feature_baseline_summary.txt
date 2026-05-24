@@ -1,0 +1,18 @@
+true_3d_rbc_v2_120_training_gate feature baseline summary
+
+Scope: Piao-inspired feature regression sanity only; this is not full Piao 2019 NLS + LS-SVM reproduction.
+dataset_id: comsol_true_3d_rbc_imported_watertight_pilot_v2_120
+input: delta_b only, shape=[112, 3, 3, 201], flattened_feature_channels=9
+feature_count: 135
+models: mean_train_target, ridge_alpha_100, svr_rbf_C10
+selected_model_by_validation: svr_rbf_C10
+selection_note: model selection is validation-only; ridge has a better test normalized MAE in diagnostics but was not selected because its validation MAE was worse.
+selected_val_normalized_mae: 0.703319
+mean_test_normalized_mae: 0.880306
+selected_test_normalized_mae: 0.767659
+selected_test_LWD_mae_mm: L=3.301712, W=3.370316, D=0.988666
+selected_test_curvature_mae: 0.202930
+selected_test_projected_mask: IoU=0.641651, Dice=0.771715
+ridge_selected: ridge_alpha_100, val_normalized_mae=0.756252
+svr_status: svr_rbf_C10, val_normalized_mae=0.7033193111419678
+Data boundary: no COMSOL run, no data generation, no NPZ modification, no baseline update.

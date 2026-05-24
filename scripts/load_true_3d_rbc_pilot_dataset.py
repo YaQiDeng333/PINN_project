@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Explicit registry/manifest loader for the 20.73 true-3D RBC training gate.
+"""Explicit registry/manifest loader for true-3D RBC training gates.
 
 This module intentionally has no latest/newest NPZ fallback. Callers must pass
 the dataset_id and the loader resolves the NPZ only through COMSOL_DATA_REGISTRY
@@ -23,8 +23,12 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
 DATASET_ID = "comsol_true_3d_rbc_imported_watertight_pilot_v1_assembled"
+V2_120_DATASET_ID = "comsol_true_3d_rbc_imported_watertight_pilot_v2_120"
+RUN_NAME_BY_DATASET_ID = {
+    DATASET_ID: "true_3d_rbc_training_gate",
+    V2_120_DATASET_ID: "true_3d_rbc_v2_120_training_gate",
+}
 REGISTRY_PATH = ROOT / "COMSOL_DATA_REGISTRY.md"
-MANIFEST_PATH = ROOT / "results/manifests/comsol_true_3d_rbc_imported_watertight_pilot_v1_assembled.manifest.json"
 SUMMARY_PATH = ROOT / "results/summaries/true_3d_rbc_training_gate_input_summary.txt"
 PREFLIGHT_SUMMARY_PATH = ROOT / "results/summaries/true_3d_rbc_training_gate_preflight_summary.txt"
 INPUT_CHECK_PATH = ROOT / "results/metrics/true_3d_rbc_training_gate_input_check.csv"
@@ -75,11 +79,29 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Load and validate the explicit true-3D RBC pilot dataset.")
     parser.add_argument("--dataset-id", required=True)
     parser.add_argument("--registry", type=Path, default=REGISTRY_PATH)
-    parser.add_argument("--summary", type=Path, default=SUMMARY_PATH)
-    parser.add_argument("--preflight-summary", type=Path, default=PREFLIGHT_SUMMARY_PATH)
-    parser.add_argument("--input-check", type=Path, default=INPUT_CHECK_PATH)
+    parser.add_argument("--run-name")
+    parser.add_argument("--summary", type=Path)
+    parser.add_argument("--preflight-summary", type=Path)
+    parser.add_argument("--input-check", type=Path)
     parser.add_argument("--overwrite", action="store_true")
-    return parser.parse_args()
+    args = parser.parse_args()
+    apply_default_output_paths(args)
+    return args
+
+
+def run_name_for_dataset(dataset_id: str) -> str:
+    return RUN_NAME_BY_DATASET_ID.get(dataset_id, re.sub(r"[^A-Za-z0-9_]+", "_", dataset_id).strip("_"))
+
+
+def apply_default_output_paths(args: argparse.Namespace) -> None:
+    run_name = args.run_name or run_name_for_dataset(args.dataset_id)
+    args.run_name = run_name
+    if args.summary is None:
+        args.summary = ROOT / f"results/summaries/{run_name}_input_summary.txt"
+    if args.preflight_summary is None:
+        args.preflight_summary = ROOT / f"results/summaries/{run_name}_preflight_summary.txt"
+    if args.input_check is None:
+        args.input_check = ROOT / f"results/metrics/{run_name}_input_check.csv"
 
 
 def write_csv(path: Path, rows: list[dict[str, Any]], fields: list[str]) -> None:
@@ -135,21 +157,23 @@ def parse_registry(path: Path) -> dict[str, dict[str, str]]:
 
 
 def resolve_dataset(dataset_id: str, registry_path: Path = REGISTRY_PATH) -> tuple[dict[str, str], dict[str, Any], Path]:
-    if dataset_id != DATASET_ID:
-        raise RuntimeError(f"20.73 requires explicit dataset_id {DATASET_ID}, got {dataset_id}")
     registry = parse_registry(registry_path)
     if dataset_id not in registry:
         raise RuntimeError(f"dataset_id not found in registry: {dataset_id}")
     entry = registry[dataset_id]
     manifest_path = Path(entry.get("manifest_path", ""))
-    if manifest_path != MANIFEST_PATH:
-        raise RuntimeError(f"manifest path mismatch: {manifest_path} != {MANIFEST_PATH}")
+    if not manifest_path.exists():
+        raise FileNotFoundError(f"manifest_path from registry does not exist: {manifest_path}")
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    if manifest.get("dataset_id") != dataset_id:
+        raise RuntimeError(f"manifest dataset_id mismatch: {manifest.get('dataset_id')} != {dataset_id}")
+    if Path(str(manifest.get("manifest_path", manifest_path))) != manifest_path:
+        raise RuntimeError(f"manifest self path mismatch: {manifest.get('manifest_path')} != {manifest_path}")
     npz_path = Path(manifest["npz_path"])
     return entry, manifest, npz_path
 
 
-def gate_manifest(entry: dict[str, str], manifest: dict[str, Any], npz_path: Path) -> list[dict[str, Any]]:
+def gate_manifest(entry: dict[str, str], manifest: dict[str, Any], npz_path: Path, dataset_id: str | None = None) -> list[dict[str, Any]]:
     checks: list[dict[str, Any]] = []
 
     def add(name: str, passed: bool, observed: Any, notes: str = "") -> None:
@@ -159,11 +183,15 @@ def gate_manifest(entry: dict[str, str], manifest: dict[str, Any], npz_path: Pat
     forbidden = set(manifest.get("forbidden_use", []))
     entry_allowed = set(parse_list_value(entry.get("allowed_use", "")))
     entry_forbidden = set(parse_list_value(entry.get("forbidden_use", "")))
-    add("dataset_id", manifest.get("dataset_id") == DATASET_ID, manifest.get("dataset_id"))
+    expected_dataset_id = dataset_id or str(manifest.get("dataset_id", ""))
+    add("dataset_id", manifest.get("dataset_id") == expected_dataset_id, manifest.get("dataset_id"))
     add("route", manifest.get("route") == ROUTE and entry.get("route") == ROUTE, f"manifest={manifest.get('route')}; registry={entry.get('route')}")
     add("status", manifest.get("status") == "pilot_generated" and entry.get("status") == "pilot_generated", f"manifest={manifest.get('status')}; registry={entry.get('status')}")
     add("train_ready_candidate", bool(manifest.get("train_ready_candidate")) and parse_bool(entry.get("train_ready_candidate", "false")), manifest.get("train_ready_candidate"))
     add("baseline_ready_false", (not bool(manifest.get("baseline_ready"))) and (not parse_bool(entry.get("baseline_ready", "true"))), manifest.get("baseline_ready"))
+    add("geometry_method", manifest.get("geometry_method") == "imported_watertight_mesh_solid" and entry.get("geometry_method") == "imported_watertight_mesh_solid", f"manifest={manifest.get('geometry_method')}; registry={entry.get('geometry_method')}")
+    add("exact_piao_rbc_false", (not bool(manifest.get("exact_piao_rbc"))) and (not parse_bool(entry.get("exact_piao_rbc", "true"))), manifest.get("exact_piao_rbc"))
+    add("rbc_style_approximation_true", bool(manifest.get("rbc_style_approximation")) and parse_bool(entry.get("rbc_style_approximation", "false")), manifest.get("rbc_style_approximation"))
     add("explicit_training_allowed", "explicit_pilot_training_gate" in allowed and "explicit_pilot_training_gate" in entry_allowed, sorted(allowed))
     add("baseline_forbidden", {"baseline_update", "current_baseline_replacement"}.issubset(forbidden) and {"baseline_update", "current_baseline_replacement"}.issubset(entry_forbidden), sorted(forbidden))
     add("latest_newest_forbidden", "latest_newest_auto_discovery" in forbidden and not bool(manifest.get("latest_newest_discovery_allowed")), manifest.get("latest_newest_discovery_allowed"))
@@ -171,13 +199,13 @@ def gate_manifest(entry: dict[str, str], manifest: dict[str, Any], npz_path: Pat
     add("npz_exists", npz_path.exists(), str(npz_path))
     if npz_path.exists():
         add("npz_sha256", sha256_file(npz_path) == manifest.get("npz_sha256"), manifest.get("npz_sha256"))
-    add("manifest_stage_source", manifest.get("stage") == "20.72", manifest.get("stage"), "20.73 consumes the 20.72 assembled pack; this is expected.")
+    add("manifest_stage_recorded", bool(manifest.get("stage")), manifest.get("stage"), "Training gates consume already-generated packs; stage records the data generation stage.")
     return checks
 
 
 def load_dataset(dataset_id: str = DATASET_ID, registry_path: Path = REGISTRY_PATH) -> True3DRBCDataset:
     entry, manifest, npz_path = resolve_dataset(dataset_id, registry_path)
-    gate_checks = gate_manifest(entry, manifest, npz_path)
+    gate_checks = gate_manifest(entry, manifest, npz_path, dataset_id)
     failed = [row for row in gate_checks if not row["pass"]]
     if failed:
         raise RuntimeError("dataset registry/manifest gate failed: " + json.dumps(failed, ensure_ascii=False))
@@ -436,21 +464,28 @@ def aggregate_prediction_rows(rows: list[dict[str, Any]], model_name: str, split
 def run_cli(args: argparse.Namespace) -> int:
     check_no_overwrite([args.summary, args.preflight_summary, args.input_check], args.overwrite)
     entry, manifest, npz_path = resolve_dataset(args.dataset_id, args.registry)
-    checks = gate_manifest(entry, manifest, npz_path)
+    checks = gate_manifest(entry, manifest, npz_path, args.dataset_id)
     dataset = load_dataset(args.dataset_id, args.registry)
     stats = train_normalization(dataset)
     splits = split_indices(dataset)
     with np.load(npz_path, allow_pickle=True) as npz:
         delta_error = float(np.max(np.abs(npz["delta_b"] - (npz["b_defect"] - npz["b_no_defect"]))))
+    expected_n = int(manifest.get("n_samples", len(dataset.sample_ids)))
+    expected_split = {str(k): int(v) for k, v in dict(manifest.get("split_counts", {})).items()}
+    observed_split = {k: len(v) for k, v in splits.items()}
+    expected_shape = (expected_n, 3, 3, 201)
     checks.extend(
         [
-            {"check_name": "sample_count", "pass": len(dataset.sample_ids) == 56, "observed": len(dataset.sample_ids), "notes": ""},
-            {"check_name": "split_counts", "pass": {k: len(v) for k, v in splits.items()} == {"train": 36, "val": 10, "test": 10}, "observed": {k: len(v) for k, v in splits.items()}, "notes": ""},
-            {"check_name": "delta_b_shape", "pass": dataset.delta_b.shape == (56, 3, 3, 201), "observed": list(dataset.delta_b.shape), "notes": "flattened to 9x201 for Conv1D"},
+            {"check_name": "sample_count", "pass": len(dataset.sample_ids) == expected_n, "observed": len(dataset.sample_ids), "notes": f"manifest_n_samples={expected_n}"},
+            {"check_name": "split_counts", "pass": observed_split == expected_split, "observed": observed_split, "notes": f"manifest_split_counts={expected_split}"},
+            {"check_name": "delta_b_shape", "pass": dataset.delta_b.shape == expected_shape, "observed": list(dataset.delta_b.shape), "notes": "flattened to 9x201 for Conv1D"},
             {"check_name": "axis_names", "pass": dataset.axis_names == ["Bx", "By", "Bz"], "observed": dataset.axis_names, "notes": ""},
             {"check_name": "delta_b_finite", "pass": bool(np.isfinite(dataset.delta_b).all()), "observed": "finite", "notes": ""},
             {"check_name": "rbc_params_finite", "pass": bool(np.isfinite(dataset.rbc_params).all()), "observed": "finite", "notes": ""},
             {"check_name": "projected_mask_nonempty", "pass": bool((dataset.projected_mask_2d.sum(axis=(1, 2)) > 0).all()), "observed": int(dataset.projected_mask_2d.sum()), "notes": ""},
+            {"check_name": "profile_depth_grid_present", "pass": bool(dataset.profile_depth_grid_m.size), "observed": list(dataset.profile_depth_grid_m.shape), "notes": ""},
+            {"check_name": "curvature_template_present", "pass": len(dataset.curvature_template) == expected_n, "observed": len(dataset.curvature_template), "notes": ""},
+            {"check_name": "depth_bin_present", "pass": len(dataset.depth_bin) == expected_n, "observed": len(dataset.depth_bin), "notes": ""},
             {"check_name": "delta_check", "pass": delta_error <= 1.0e-12, "observed": delta_error, "notes": ""},
             {"check_name": "train_only_normalization_prepared", "pass": True, "observed": {"x_mean_shape": list(stats["x_mean"].shape), "y_mean_shape": list(stats["y_mean"].shape)}, "notes": ""},
         ]
@@ -461,19 +496,21 @@ def run_cli(args: argparse.Namespace) -> int:
     args.preflight_summary.write_text(
         "\n".join(
             [
-                "20.73 true 3D RBC training gate preflight summary",
+                f"{args.run_name} preflight summary",
                 "",
-                f"dataset_id_exists: {manifest.get('dataset_id') == DATASET_ID}",
+                f"dataset_id: {dataset.dataset_id}",
+                f"dataset_id_exists: {manifest.get('dataset_id') == args.dataset_id}",
                 f"registry_manifest_gate_pass: {not failed}",
                 f"train_ready_candidate: {manifest.get('train_ready_candidate')}",
                 "can_enter_training_gate: True" if not failed else "can_enter_training_gate: False",
                 "input_fields: delta_b -> 9 channels x 201 from Bx/By/Bz x 3 scan lines",
-                "output_labels: rbc_params [L_m,W_m,D_m,wLD,wWD,wLW]; projected_mask_2d/profile_depth_grid_m for metrics",
+                "output_labels: rbc_params [L_m,W_m,D_m,wLD,wWD,wLW]; projected_mask_2d/profile_depth_grid_m for metrics; curvature_template/depth_bin only for grouping",
+                "comparison_protocol: replay 20.73 mean/feature/neural protocol on this dataset and compare distribution-level metrics, not paired samples",
                 "allowed_submit: explicit training scripts, summaries, metrics, Markdown route updates",
                 "forbidden_submit: data/, NPZ, checkpoint, preview PNG, notes, baseline docs, CURRENT_BASELINE.md",
                 "stop_conditions: registry/manifest gate fail; schema fail; train/test leakage; no train fit; val/test collapse; forbidden artifacts staged",
                 "",
-                "Subagent preflight: Agents A-E completed read-only with GO. Agent A noted manifest stage remains 20.72 because the assembled data pack was produced in 20.72; this does not block 20.73 explicit training gate.",
+                "Subagent preflight: Agents A-E completed read-only. A registry/manifest GO; B schema GO; C protocol replay on v2_120; D safety boundary excludes data/NPZ/checkpoints/previews/notes/baseline docs and scripts/visualize_current_baseline.py; E parameterize existing scripts, no new loader family required.",
             ]
         )
         + "\n",
@@ -483,7 +520,7 @@ def run_cli(args: argparse.Namespace) -> int:
     args.summary.write_text(
         "\n".join(
             [
-                "20.73 true 3D RBC training gate input summary",
+                f"{args.run_name} input summary",
                 "",
                 f"dataset_id: {dataset.dataset_id}",
                 f"npz_path: {dataset.npz_path}",

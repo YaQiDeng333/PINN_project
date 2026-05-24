@@ -1,0 +1,28 @@
+check_name,pass,observed,notes
+dataset_id,True,comsol_true_3d_rbc_imported_watertight_pilot_v2_120,
+route,True,manifest=true_3d_piao_style; registry=true_3d_piao_style,
+status,True,manifest=pilot_generated; registry=pilot_generated,
+train_ready_candidate,True,True,
+baseline_ready_false,True,False,
+geometry_method,True,manifest=imported_watertight_mesh_solid; registry=imported_watertight_mesh_solid,
+exact_piao_rbc_false,True,False,
+rbc_style_approximation_true,True,True,
+explicit_training_allowed,True,"['explicit_pilot_training_gate', 'schema_validation']",
+baseline_forbidden,True,"['automatic_mainline_training', 'baseline_update', 'current_baseline_replacement', 'direct_training_without_manifest_gate', 'latest_newest_auto_discovery']",
+latest_newest_forbidden,True,False,
+auto_discovery_forbidden,True,False,
+npz_exists,True,C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\prepared\experimental\true_3d_rbc_pilot\comsol_true_3d_rbc_imported_watertight_pilot_v2_120.npz,
+npz_sha256,True,a79b56955ac4df4ed3f36388f4019f08d7ef92671ef330c6c3a6cb85fe5a4a49,
+manifest_stage_recorded,True,20.74,Training gates consume already-generated packs; stage records the data generation stage.
+sample_count,True,112,manifest_n_samples=112
+split_counts,True,"{'train': 76, 'val': 18, 'test': 18}","manifest_split_counts={'test': 18, 'train': 76, 'val': 18}"
+delta_b_shape,True,"[112, 3, 3, 201]",flattened to 9x201 for Conv1D
+axis_names,True,"['Bx', 'By', 'Bz']",
+delta_b_finite,True,finite,
+rbc_params_finite,True,finite,
+projected_mask_nonempty,True,85612,
+profile_depth_grid_present,True,"[112, 33, 17]",
+curvature_template_present,True,112,
+depth_bin_present,True,112,
+delta_check,True,0.0,
+train_only_normalization_prepared,True,"{'x_mean_shape': [1, 9, 1], 'y_mean_shape': [1, 6]}",

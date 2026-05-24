@@ -1,0 +1,26 @@
+Codex review agent result for stage 20.75 true 3D RBC training gate on v2_120.
+
+Review mode: Codex-created read-only review agent, per user instruction to use own agents for review unless explicitly changed.
+
+Must-fix:
+- 20.75 stage documentation was missing before close-out. EXPERIMENT_LOG.md, NEXT_STEP.md, and PINN优化路线.md must be updated with the 20.75 result and route decision.
+
+Suggested fixes:
+- Clarify in the neural summary that selected_best_val_metric=0.925815 is the validation selection score, not raw val_normalized_mae=0.694892.
+- Clarify in the feature baseline summary that model selection is validation-only; a model may have better test diagnostics but is not selected if validation is worse.
+
+Acceptable:
+- The core training gate protocol is acceptable.
+- The dataset is loaded through COMSOL_DATA_REGISTRY.md plus manifest with explicit dataset_id=comsol_true_3d_rbc_imported_watertight_pilot_v2_120.
+- No latest/newest NPZ scanning was used.
+- No COMSOL call, NPZ generation/modification, checkpoint/preview PNG/notes/baseline docs/CURRENT_BASELINE submission was found.
+- Feature and neural inputs use delta_b from Bx/By/Bz only; rbc_params, projected_mask, split, curvature_template, and depth_bin are supervision or grouping labels, not model inputs.
+- Train-only normalization, validation-only selection, and test-final evaluation are in place.
+- The Piao-inspired feature baseline is correctly framed as sanity, not full Piao 2019 reproduction.
+
+Review decision:
+- Accept after the required documentation update and the two summary clarifications above.
+- The route should move to expanding the true 3D RBC dataset to 240 rather than declaring a baseline or prioritizing model architecture changes.
+
+Reason:
+- v2_120 improves over 20.73 N=56: neural test normalized MAE 0.760134 -> 0.703907, D MAE 1.2225 -> 1.1064 mm, curvature MAE 0.2095 -> 0.1905, projected-mask Dice remains stable/improves. Validation/test each have only 18 samples and wLD/wWD/wLW remain unstable, so the result is promising but not baseline-ready.

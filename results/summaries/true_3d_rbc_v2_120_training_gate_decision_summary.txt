@@ -1,0 +1,15 @@
+true_3d_rbc_v2_120_training_gate decision summary
+
+overall_decision: v2_120_promising_but_not_baseline
+can_fit_train: True
+beats_mean_baseline_test: True
+beats_feature_baseline_test: True
+improved_over_20_73_neural_test_mae: True
+D_m_improved_vs_20_73: True
+curvature_improved_vs_20_73: True
+learnable_params_provisional: L_m, W_m, D_m
+not_learnable_params_provisional: wLD, wWD, wLW
+n112_sufficiency: N=112 gives a positive training-gate signal, but it remains too small for baseline claims.
+next_step: A_expand_true_3d_RBC_dataset_to_240
+
+No baseline update is allowed from this gate. Any training/evaluation must continue through explicit dataset_id + manifest + registry loading.

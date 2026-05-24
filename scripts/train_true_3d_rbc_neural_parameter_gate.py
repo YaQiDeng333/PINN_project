@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""20.73 neural Bx/By/Bz -> RBC parameter training gate.
+"""Neural Bx/By/Bz -> RBC parameter training gate.
 
 The model consumes only delta_b channels. Labels and metadata are used only for
 supervision, validation selection, and metrics. Dataset loading is gated by the
@@ -32,6 +32,7 @@ from load_true_3d_rbc_pilot_dataset import (
     load_dataset,
     normalize_x,
     normalize_y,
+    run_name_for_dataset,
     split_indices,
     train_normalization,
     write_csv,
@@ -47,6 +48,9 @@ GROUP_PATH = ROOT / "results/metrics/true_3d_rbc_neural_training_gate_group_summ
 PROFILE_PATH = ROOT / "results/metrics/true_3d_rbc_neural_training_gate_profile_metrics.csv"
 DECISION_MATRIX_PATH = ROOT / "results/metrics/true_3d_rbc_training_gate_decision_matrix.csv"
 FEATURE_METRICS_PATH = ROOT / "results/metrics/true_3d_rbc_feature_baseline_metrics.csv"
+V1_SEED_SUMMARY_PATH = ROOT / "results/metrics/true_3d_rbc_neural_training_gate_seed_summary.csv"
+V1_FEATURE_METRICS_PATH = ROOT / "results/metrics/true_3d_rbc_feature_baseline_metrics.csv"
+COMPARISON_PATH = ROOT / "results/metrics/true_3d_rbc_v2_120_vs_v1_56_comparison.csv"
 
 PARAM_WEIGHTS = torch.tensor([1.0, 1.0, 1.0, 0.5, 0.5, 0.5], dtype=torch.float32)
 
@@ -154,6 +158,7 @@ PROFILE_FIELDS = [
 ]
 
 DECISION_FIELDS = ["question", "answer", "evidence", "decision"]
+COMPARISON_FIELDS = ["metric", "v1_56", "v2_120", "delta", "improved", "notes"]
 
 
 class RBCConvRegressor(nn.Module):
@@ -408,12 +413,48 @@ def read_feature_baseline_scores(path: Path) -> dict[str, float]:
     return scores
 
 
+def read_selected_v1_neural_summary(path: Path) -> dict[str, float]:
+    out: dict[str, float] = {}
+    if not path.exists():
+        return out
+    with path.open("r", encoding="utf-8", newline="") as f:
+        for row in csv.DictReader(f):
+            if str(row.get("selected_seed")).lower() != "true":
+                continue
+            for key in (
+                "test_normalized_param_mae",
+                "test_L_mae_mm",
+                "test_W_mae_mm",
+                "test_D_mae_mm",
+                "test_curvature_mae",
+                "test_projected_mask_iou",
+                "test_projected_mask_dice",
+                "test_profile_depth_rmse_m",
+            ):
+                out[key] = float(row.get(key) or "nan")
+            break
+    return out
+
+
+def comparison_row(metric: str, v1: float, v2: float, lower_is_better: bool, notes: str = "") -> dict[str, Any]:
+    delta = v2 - v1 if not (math.isnan(v1) or math.isnan(v2)) else math.nan
+    if math.isnan(delta):
+        improved = ""
+    elif lower_is_better:
+        improved = delta < 0.0
+    else:
+        improved = delta > 0.0
+    return {"metric": metric, "v1_56": v1, "v2_120": v2, "delta": delta, "improved": improved, "notes": notes}
+
+
 def get_seed_split_aggregate(profile_rows: list[dict[str, Any]], split_name: str) -> dict[str, Any]:
     return aggregate_prediction_rows(profile_rows, "conv1d_rbc_param_gate", split_name)
 
 
 def run(args: argparse.Namespace) -> int:
     output_paths = [args.summary, args.seed_summary, args.metrics, args.epoch_log, args.group_summary, args.profile_metrics, args.decision_summary, args.decision_matrix]
+    if args.comparison_output is not None:
+        output_paths.append(args.comparison_output)
     check_no_overwrite(output_paths, args.overwrite)
     dataset = load_dataset(args.dataset_id)
     stats = train_normalization(dataset)
@@ -505,30 +546,64 @@ def run(args: argparse.Namespace) -> int:
     min_train_fit = min(float(row["min_train_normalized_param_mae"]) for row in all_seed_summary)
     min_train_seed = [row for row in all_seed_summary if float(row["min_train_normalized_param_mae"]) == min_train_fit][0]["seed"]
     can_fit_train = bool(min_train_fit < 0.20)
-    if can_fit_train and beats_mean and beats_feature and selected_test_profile["projected_mask_dice_mean"] >= 0.70:
+    v1_neural = read_selected_v1_neural_summary(args.v1_neural_seed_summary)
+    v1_feature_scores = read_feature_baseline_scores(args.v1_feature_metrics)
+    current_n = len(dataset.sample_ids)
+    split_counts = {name: len(idx) for name, idx in splits.items()}
+    v1_neural_test = float(v1_neural.get("test_normalized_param_mae", math.nan))
+    v1_d_mae = float(v1_neural.get("test_D_mae_mm", math.nan))
+    v1_curv_mae = float(v1_neural.get("test_curvature_mae", math.nan))
+    v1_dice = float(v1_neural.get("test_projected_mask_dice", math.nan))
+    improved_over_v1 = (not math.isnan(v1_neural_test)) and selected_test_profile["normalized_param_mae_mean_mean"] < v1_neural_test
+    d_improved = (not math.isnan(v1_d_mae)) and selected_test_profile["D_mae_mm_mean"] < v1_d_mae
+    curvature_improved = (not math.isnan(v1_curv_mae)) and selected_test_profile["curvature_mae_mean_mean"] < v1_curv_mae
+    dice_stable = math.isnan(v1_dice) or selected_test_profile["projected_mask_dice_mean"] >= (v1_dice - 0.02)
+    if can_fit_train and beats_mean and beats_feature and improved_over_v1 and selected_test_profile["projected_mask_dice_mean"] >= 0.80:
+        next_step = "A_expand_true_3d_RBC_dataset_to_240"
+        overall = "v2_120_promising_but_not_baseline"
+        enough = f"N={current_n} gives a positive training-gate signal, but it remains too small for baseline claims."
+    elif can_fit_train and beats_mean and (improved_over_v1 or d_improved or curvature_improved) and dice_stable:
         next_step = "A_expand_true_3d_RBC_dataset"
-        overall = "promising_training_gate"
-        enough = "N=56 is enough for first learnability evidence, but not enough for baseline or final conclusions."
+        overall = "v2_120_partially_improved"
+        enough = f"N={current_n} improves at least part of the N=56 signal, but curvature/depth generalization should be checked before architecture changes."
     elif can_fit_train and not beats_feature:
         next_step = "A_expand_true_3d_RBC_dataset"
-        overall = "small_data_generalization_limited"
-        enough = "N=56 is not enough; expand to 120/240 before architecture changes."
+        overall = "v2_120_generalization_limited"
+        enough = f"N={current_n} is still not enough to beat the feature comparator; expand or target weak bins before model changes."
     elif not can_fit_train:
         next_step = "C_improve_model_or_schema"
         overall = "train_fit_blocker"
-        enough = "N=56 does not yet show train fit with this small Conv1D."
+        enough = f"N={current_n} does not yet show train fit with this small Conv1D."
     else:
         next_step = "A_expand_true_3d_RBC_dataset"
         overall = "partial_promising"
-        enough = "N=56 is only a pilot; expand before baseline claims."
+        enough = f"N={current_n} is still only a pilot; expand before baseline claims."
+
+    comparison_rows = [
+        comparison_row("neural_test_normalized_mae", v1_neural_test, selected_test_profile["normalized_param_mae_mean_mean"], True, "selected validation checkpoint; lower is better"),
+        comparison_row("feature_test_normalized_mae", v1_feature_scores["feature_test"], feature_scores["feature_test"], True, "feature baseline selected by validation; lower is better"),
+        comparison_row("mean_test_normalized_mae", v1_feature_scores["mean_test"], feature_scores["mean_test"], True, "train-target mean predictor; lower is better"),
+        comparison_row("L_mae_mm", float(v1_neural.get("test_L_mae_mm", math.nan)), selected_test_profile["L_mae_mm_mean"], True, "neural selected seed test split"),
+        comparison_row("W_mae_mm", float(v1_neural.get("test_W_mae_mm", math.nan)), selected_test_profile["W_mae_mm_mean"], True, "neural selected seed test split"),
+        comparison_row("D_mae_mm", v1_d_mae, selected_test_profile["D_mae_mm_mean"], True, "D_m boundary learnability proxy"),
+        comparison_row("curvature_mae", v1_curv_mae, selected_test_profile["curvature_mae_mean_mean"], True, "mean absolute error over wLD/wWD/wLW"),
+        comparison_row("projected_mask_iou", float(v1_neural.get("test_projected_mask_iou", math.nan)), selected_test_profile["projected_mask_iou_mean"], False, "higher is better"),
+        comparison_row("projected_mask_dice", v1_dice, selected_test_profile["projected_mask_dice_mean"], False, "higher is better"),
+        comparison_row("profile_depth_rmse_m", float(v1_neural.get("test_profile_depth_rmse_m", math.nan)), selected_test_profile["profile_depth_rmse_m_mean"], True, "lower is better"),
+    ]
+    if args.comparison_output is not None:
+        write_csv(args.comparison_output, comparison_rows, COMPARISON_FIELDS)
 
     decision_rows = [
         {"question": "Can the model fit train samples?", "answer": str(can_fit_train), "evidence": f"min_train_normalized_mae={min_train_fit:.6f}; seed={min_train_seed}", "decision": overall},
         {"question": "Does validation/test beat mean baseline?", "answer": str(beats_mean), "evidence": f"neural_test={selected_test_profile['normalized_param_mae_mean_mean']:.6f}; mean_test={feature_scores['mean_test']:.6f}", "decision": overall},
         {"question": "Does neural beat feature baseline?", "answer": str(beats_feature), "evidence": f"neural_test={selected_test_profile['normalized_param_mae_mean_mean']:.6f}; feature_test={feature_scores['feature_test']:.6f}", "decision": overall},
+        {"question": "Did N=112 improve over N=56?", "answer": str(improved_over_v1), "evidence": f"v2_neural_test={selected_test_profile['normalized_param_mae_mean_mean']:.6f}; v1_neural_test={v1_neural_test:.6f}", "decision": overall},
+        {"question": "Did D_m improve?", "answer": str(d_improved), "evidence": f"v2_D_mae_mm={selected_test_profile['D_mae_mm_mean']:.6f}; v1_D_mae_mm={v1_d_mae:.6f}", "decision": overall},
+        {"question": "Did curvature improve?", "answer": str(curvature_improved), "evidence": f"v2_curvature_mae={selected_test_profile['curvature_mae_mean_mean']:.6f}; v1_curvature_mae={v1_curv_mae:.6f}", "decision": overall},
         {"question": "Which params are learnable?", "answer": ", ".join(learnable) if learnable else "none", "evidence": "learnable threshold: selected test normalized MAE < 0.75", "decision": overall},
         {"question": "Which params are not learnable?", "answer": ", ".join(not_learnable) if not_learnable else "none", "evidence": "threshold is provisional for training gate only", "decision": overall},
-        {"question": "Is N=56 enough?", "answer": enough, "evidence": f"split=36/10/10; selected_seed={selected_seed}", "decision": overall},
+        {"question": f"Is N={current_n} enough?", "answer": enough, "evidence": f"split={split_counts}; selected_seed={selected_seed}", "decision": overall},
         {"question": "Next step", "answer": next_step, "evidence": "This is a training gate, not a baseline update.", "decision": overall},
     ]
     write_csv(args.decision_matrix, decision_rows, DECISION_FIELDS)
@@ -537,7 +612,7 @@ def run(args: argparse.Namespace) -> int:
     args.summary.write_text(
         "\n".join(
             [
-                "20.73 true 3D RBC neural training gate summary",
+                f"{args.run_name} neural training gate summary",
                 "",
                 f"dataset_id: {dataset.dataset_id}",
                 f"input: delta_b only, shape={list(dataset.delta_b.shape)} -> Conv1D channels={list(dataset.x_channels.shape)}",
@@ -557,6 +632,10 @@ def run(args: argparse.Namespace) -> int:
                 f"can_fit_train: {can_fit_train}",
                 f"beats_mean_baseline_test: {beats_mean}",
                 f"beats_feature_baseline_test: {beats_feature}",
+                f"improved_over_20_73_neural_test_mae: {improved_over_v1}",
+                f"D_m_improved_vs_20_73: {d_improved}",
+                f"curvature_improved_vs_20_73: {curvature_improved}",
+                f"projected_mask_dice_stable_vs_20_73: {dice_stable}",
                 f"learnable_params_provisional: {', '.join(learnable) if learnable else 'none'}",
                 f"not_learnable_params_provisional: {', '.join(not_learnable) if not_learnable else 'none'}",
                 "Boundary: no COMSOL run, no data generation, no NPZ modification, no checkpoint committed, no baseline update.",
@@ -569,15 +648,18 @@ def run(args: argparse.Namespace) -> int:
     args.decision_summary.write_text(
         "\n".join(
             [
-                "20.73 true 3D RBC training gate decision summary",
+                f"{args.run_name} decision summary",
                 "",
                 f"overall_decision: {overall}",
                 f"can_fit_train: {can_fit_train}",
                 f"beats_mean_baseline_test: {beats_mean}",
                 f"beats_feature_baseline_test: {beats_feature}",
+                f"improved_over_20_73_neural_test_mae: {improved_over_v1}",
+                f"D_m_improved_vs_20_73: {d_improved}",
+                f"curvature_improved_vs_20_73: {curvature_improved}",
                 f"learnable_params_provisional: {', '.join(learnable) if learnable else 'none'}",
                 f"not_learnable_params_provisional: {', '.join(not_learnable) if not_learnable else 'none'}",
-                f"n56_sufficiency: {enough}",
+                f"n{current_n}_sufficiency: {enough}",
                 f"next_step: {next_step}",
                 "",
                 "No baseline update is allowed from this gate. Any training/evaluation must continue through explicit dataset_id + manifest + registry loading.",
@@ -592,22 +674,51 @@ def run(args: argparse.Namespace) -> int:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dataset-id", default=DATASET_ID)
+    parser.add_argument("--run-name")
     parser.add_argument("--seeds", nargs="+", type=int, default=[42, 123, 2026])
     parser.add_argument("--epochs", type=int, default=300)
     parser.add_argument("--batch-size", type=int, default=8)
     parser.add_argument("--lr", type=float, default=3.0e-3)
     parser.add_argument("--weight-decay", type=float, default=1.0e-4)
-    parser.add_argument("--summary", type=Path, default=SUMMARY_PATH)
-    parser.add_argument("--seed-summary", type=Path, default=SEED_SUMMARY_PATH)
-    parser.add_argument("--metrics", type=Path, default=METRICS_PATH)
-    parser.add_argument("--epoch-log", type=Path, default=EPOCH_LOG_PATH)
-    parser.add_argument("--group-summary", type=Path, default=GROUP_PATH)
-    parser.add_argument("--profile-metrics", type=Path, default=PROFILE_PATH)
-    parser.add_argument("--decision-summary", type=Path, default=DECISION_SUMMARY_PATH)
-    parser.add_argument("--decision-matrix", type=Path, default=DECISION_MATRIX_PATH)
-    parser.add_argument("--feature-metrics", type=Path, default=FEATURE_METRICS_PATH)
+    parser.add_argument("--summary", type=Path)
+    parser.add_argument("--seed-summary", type=Path)
+    parser.add_argument("--metrics", type=Path)
+    parser.add_argument("--epoch-log", type=Path)
+    parser.add_argument("--group-summary", type=Path)
+    parser.add_argument("--profile-metrics", type=Path)
+    parser.add_argument("--decision-summary", type=Path)
+    parser.add_argument("--decision-matrix", type=Path)
+    parser.add_argument("--feature-metrics", type=Path)
+    parser.add_argument("--comparison-output", type=Path)
+    parser.add_argument("--v1-neural-seed-summary", type=Path, default=V1_SEED_SUMMARY_PATH)
+    parser.add_argument("--v1-feature-metrics", type=Path, default=V1_FEATURE_METRICS_PATH)
     parser.add_argument("--overwrite", action="store_true")
-    return parser.parse_args()
+    args = parser.parse_args()
+    run_name = args.run_name or run_name_for_dataset(args.dataset_id)
+    args.run_name = run_name
+    legacy = run_name == "true_3d_rbc_training_gate"
+    base_name = run_name.removesuffix("_training_gate")
+    if args.summary is None:
+        args.summary = SUMMARY_PATH if legacy else ROOT / f"results/summaries/{base_name}_neural_training_gate_summary.txt"
+    if args.seed_summary is None:
+        args.seed_summary = SEED_SUMMARY_PATH if legacy else ROOT / f"results/metrics/{base_name}_neural_training_gate_seed_summary.csv"
+    if args.metrics is None:
+        args.metrics = METRICS_PATH if legacy else ROOT / f"results/metrics/{base_name}_neural_training_gate_metrics.csv"
+    if args.epoch_log is None:
+        args.epoch_log = EPOCH_LOG_PATH if legacy else ROOT / f"results/metrics/{base_name}_neural_training_gate_epoch_log.csv"
+    if args.group_summary is None:
+        args.group_summary = GROUP_PATH if legacy else ROOT / f"results/metrics/{base_name}_neural_training_gate_group_summary.csv"
+    if args.profile_metrics is None:
+        args.profile_metrics = PROFILE_PATH if legacy else ROOT / f"results/metrics/{base_name}_neural_training_gate_profile_metrics.csv"
+    if args.decision_summary is None:
+        args.decision_summary = DECISION_SUMMARY_PATH if legacy else ROOT / f"results/summaries/{run_name}_decision_summary.txt"
+    if args.decision_matrix is None:
+        args.decision_matrix = DECISION_MATRIX_PATH if legacy else ROOT / f"results/metrics/{run_name}_decision_matrix.csv"
+    if args.feature_metrics is None:
+        args.feature_metrics = FEATURE_METRICS_PATH if legacy else ROOT / f"results/metrics/{base_name}_feature_baseline_metrics.csv"
+    if args.comparison_output is None and not legacy:
+        args.comparison_output = COMPARISON_PATH if base_name == "true_3d_rbc_v2_120" else ROOT / f"results/metrics/{base_name}_vs_v1_56_comparison.csv"
+    return args
 
 
 if __name__ == "__main__":
