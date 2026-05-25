@@ -1,5 +1,15 @@
 # 实验工作日志
 
+## 2026-05-25 更新：第 20.77 true 3D RBC training gate on v3_240
+
+第 20.77 在 `comsol_true_3d_rbc_imported_watertight_pilot_v3_240` 上完成第三轮 true 3D RBC training gate。本轮只在 PINN_project 执行，不运行 COMSOL、不生成或修改 NPZ、不建立 baseline、不更新 `CURRENT_BASELINE.md`。数据加载严格通过 `COMSOL_DATA_REGISTRY.md` 和 `results/manifests/comsol_true_3d_rbc_imported_watertight_pilot_v3_240.manifest.json` 的显式 `dataset_id` gate，禁止 latest/newest NPZ 自动扫描；input gate 确认 `delta_b=(240,3,3,201)`，Conv1D 输入为 `(240,9,201)`，split 为 train/val/test = 162/39/39。
+
+Piao-inspired feature sanity comparator 只使用 Bx/By/Bz-derived features，不声称完整复现 Piao 2019。validation 选择 `svr_rbf_C10`，test normalized MAE 为 `0.715395`，L/W/D MAE 为 `2.703/2.486/0.980 mm`，curvature MAE 为 `0.195046`，projected mask IoU/Dice 为 `0.702335/0.815450`。该 comparator 只作为 sanity baseline，不作为正式 baseline。
+
+Neural gate 使用 small Conv1D + MLP，输入只含 `delta_b`，labels / split / template / depth_bin / aspect_bin 仅用于 supervision、selection 或 grouping metrics。三个 seeds `42/123/2026` 全部完成，validation 选择 seed `42`；best train fit 为 seed `123` 的 normalized MAE `0.010562`，说明模型可拟合训练集。selected test normalized MAE 为 `0.678014`，优于 mean baseline `0.912677` 和 feature baseline `0.715395`；L/W/D MAE 为 `1.892/2.186/0.800 mm`，projected mask IoU/Dice 为 `0.750650/0.847727`，profile depth RMSE 为 `0.000388 m`。
+
+相对第 20.75 N=112，N=240 的 neural test normalized MAE 从 `0.703907` 改善到 `0.678014`，D_m MAE 从 `1.106 mm` 改善到 `0.800 mm`，mask Dice 从 `0.8364` 改善到 `0.8477`；相对第 20.73 N=56 也整体改善。当前可学习参数仍是 `L_m/W_m/D_m`，`wLD/wWD/wLW` 仍不稳定，curvature MAE 相对 N=112 从 `0.190509` 退到 `0.201076`。route decision 为 `v3_240_promising_benchmark_candidate`：下一步可以进入 formal true 3D RBC benchmark candidate / model refinement，但不能自动替换 baseline。
+
 ## 2026-05-24 更新：第 20.72 true 3D RBC pilot top-up generation and assembled pack validation
 
 第 20.72 在不覆盖 20.71 partial NPZ 的前提下完成 top-up generation 和 assembled pack validation；本轮不训练 surrogate / inverse model、不做 refinement、不建立 baseline、不更新 `CURRENT_BASELINE.md`，也不提交 data / NPZ / temp STL / `.mph` / raw CSV。Subagent preflight 已完成，Agent F 因平台 agent 上限未能 spawn，主控用只读检查补齐 feasibility 结论并记录在 preflight summary 中。

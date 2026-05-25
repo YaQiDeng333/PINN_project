@@ -1,5 +1,13 @@
 # PINN 优化路线
 
+## 2026-05-25 路线同步：20.77 true 3D RBC v3_240 training gate
+
+20.77 的路线意义是：true 3D / Piao-style 主线从 small pilot training signal 推进到 formal benchmark candidate 前的正向证据。v3_240 仍是 RBC-style / Piao-inspired engineering approximation，`exact_piao_rbc=False`，不是完整 Piao 2019 复现；本轮只验证 Bx/By/Bz 是否能学习 RBC-style 3D profile parameters、projected mask 和 depth/profile metrics，不建立 baseline。
+
+技术链路固定为：registry/manifest explicit dataset_id gate → `delta_b` Bx/By/Bz input `(240,3,3,201)` → Conv1D channels `(240,9,201)` → train-only normalization → validation-only selection → test-final metrics。N=240 相对 N=112 的核心改善是 neural test normalized MAE `0.7039 → 0.6780`，D_m MAE `1.106 mm → 0.800 mm`，projected mask Dice `0.8364 → 0.8477`，profile depth RMSE `0.000548 m → 0.000388 m`。神经模型也继续优于 Piao-inspired feature comparator：`0.6780` vs `0.7154`。
+
+路线判断更新为：`L_m/W_m/D_m` 可学习，`wLD/wWD/wLW` 仍是主要不稳定项；N=240 足以进入 formal true 3D RBC benchmark candidate / model refinement，但不足以自动替换 baseline。dense mask baseline 继续只作为 comparator，`CURRENT_BASELINE.md` 不更新；后续重点应从“继续盲目扩样”转向 curvature learnability：更强 sequence encoder、curvature-aware objective、targeted curvature sampling 或更接近 Piao 的 feature / NLS 方案。
+
 ## 2026-05-24 路线同步：20.72 true 3D RBC assembled pilot pack
 
 20.72 的路线意义是：true 3D / Piao-style 主线已经从 partial pilot pack 推进到 assembled pilot pack candidate。当前 pack 仍是 RBC-style / Piao-inspired engineering approximation，`exact_piao_rbc=False`，不声称完整复现 Piao 2019，也不建立或替换 baseline。

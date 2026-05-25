@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-05-25 更新：第 20.77 后的下一步
+
+第 20.77 已完成 `comsol_true_3d_rbc_imported_watertight_pilot_v3_240` 的 true 3D RBC training gate。本轮通过 `dataset_id + COMSOL_DATA_REGISTRY.md + manifest` 显式加载 v3_240，没有 latest/newest NPZ 自动扫描，没有运行 COMSOL，没有生成或修改数据，也没有更新 `CURRENT_BASELINE.md`。输入为 `delta_b=(240,3,3,201)`，Conv1D 输入为 `(240,9,201)`，split=train/val/test 162/39/39。
+
+结果是 **promising benchmark candidate, not baseline**：feature sanity comparator selected `svr_rbf_C10`，test normalized MAE 为 `0.7154`；neural gate 三个 seed 完成，validation 选择 seed `42`，test normalized MAE 为 `0.6780`，优于 mean baseline `0.9127` 和 feature comparator `0.7154`。相对第 20.75 N=112，L/W/D MAE 改善为 `1.89/2.19/0.80 mm`，D_m 从 `1.106 mm` 改善到 `0.800 mm`，projected mask Dice 从 `0.8364` 到 `0.8477`，profile depth RMSE 从 `0.000548 m` 到 `0.000388 m`。但 curvature 参数 `wLD/wWD/wLW` 仍不可稳定学习，curvature MAE 相对 N=112 从 `0.1905` 退到 `0.2011`。
+
+下一步唯一建议：进入 **formal true 3D RBC benchmark candidate / model refinement**，但继续把 dense mask baseline 只作为 comparator，不做 baseline replacement。下一阶段应固定 registry/manifest gate，优先处理 curvature learnability：可以比较更强的 Conv1D/Transformer-style sequence encoder、curvature-aware loss 或 Piao-inspired NLS/LS-SVM 特征；不要直接把 v3_240 模型写入 `CURRENT_BASELINE.md`。
+
 ## 2026-05-25 更新：第 20.75 后的下一步
 
 第 20.75 已完成 `comsol_true_3d_rbc_imported_watertight_pilot_v2_120` 的 true 3D RBC training gate。本轮只用 registry + manifest 显式加载数据，不运行 COMSOL、不生成或修改 NPZ、不训练正式 baseline、不更新 `CURRENT_BASELINE.md`。v2_120 的输入为 `delta_b=(112,3,3,201)`，Conv1D 输入为 `(112,9,201)`，split=train/val/test 76/18/18。

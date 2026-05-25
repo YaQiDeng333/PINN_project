@@ -24,9 +24,11 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 DATASET_ID = "comsol_true_3d_rbc_imported_watertight_pilot_v1_assembled"
 V2_120_DATASET_ID = "comsol_true_3d_rbc_imported_watertight_pilot_v2_120"
+V3_240_DATASET_ID = "comsol_true_3d_rbc_imported_watertight_pilot_v3_240"
 RUN_NAME_BY_DATASET_ID = {
     DATASET_ID: "true_3d_rbc_training_gate",
     V2_120_DATASET_ID: "true_3d_rbc_v2_120_training_gate",
+    V3_240_DATASET_ID: "true_3d_rbc_v3_240_training_gate",
 }
 REGISTRY_PATH = ROOT / "COMSOL_DATA_REGISTRY.md"
 SUMMARY_PATH = ROOT / "results/summaries/true_3d_rbc_training_gate_input_summary.txt"
@@ -510,7 +512,7 @@ def run_cli(args: argparse.Namespace) -> int:
                 "forbidden_submit: data/, NPZ, checkpoint, preview PNG, notes, baseline docs, CURRENT_BASELINE.md",
                 "stop_conditions: registry/manifest gate fail; schema fail; train/test leakage; no train fit; val/test collapse; forbidden artifacts staged",
                 "",
-                "Subagent preflight: Agents A-E completed read-only. A registry/manifest GO; B schema GO; C protocol replay on v2_120; D safety boundary excludes data/NPZ/checkpoints/previews/notes/baseline docs and scripts/visualize_current_baseline.py; E parameterize existing scripts, no new loader family required.",
+                "Subagent preflight: Agents A-E completed read-only. A registry/manifest GO; B schema GO; C replay the mean/feature/neural gate for this explicit dataset_id; D safety boundary excludes data/NPZ/checkpoints/previews/notes/baseline docs and scripts/visualize_current_baseline.py; E parameterize existing scripts, no new loader family required.",
             ]
         )
         + "\n",
