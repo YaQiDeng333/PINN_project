@@ -1,0 +1,11 @@
+question,answer,evidence,decision
+Did profile_depth_rmse improve?,False,current=0.000409718; ref20.77=0.000387737,B_keep_20_77_profile_and_20_81_visual_candidates
+Did profile_depth_rmse improve by 5pct?,False,threshold=0.000368350,B_keep_20_77_profile_and_20_81_visual_candidates
+Did Er-like profile error improve?,no comparable 20.77 persisted Er-like reference,current=0.283775; 20.83 defines this metric,B_keep_20_77_profile_and_20_81_visual_candidates
+Did projected mask remain stable?,True,Dice=0.868042; ref20.77=0.847727,B_keep_20_77_profile_and_20_81_visual_candidates
+Did L/W/D remain stable?,True,L/W/D=2.183/1.860/0.848 mm,B_keep_20_77_profile_and_20_81_visual_candidates
+Does wMAE decide pass/fail?,False,aux curvature=0.205617; w=0.207468/0.216334/0.193048,B_keep_20_77_profile_and_20_81_visual_candidates
+Best for parameter sizing,20.77/20.81 mixed,20.83 did not improve profile RMSE and L/D are not strictly better than 20.77.,B_keep_20_77_profile_and_20_81_visual_candidates
+Best for profile reconstruction,20.77 neural reference,20.77 profile_rmse=0.000387737; current=0.000409718,B_keep_20_77_profile_and_20_81_visual_candidates
+Best for projected mask,20.81 feature-fusion or 20.83 screen,20.81 Dice=0.866573; current Dice=0.868042,B_keep_20_77_profile_and_20_81_visual_candidates
+Next step,B. keep 20.77/20.81 candidate,No baseline update; profile-primary R1 did not meet upgrade gate.,B_keep_20_77_profile_and_20_81_visual_candidates

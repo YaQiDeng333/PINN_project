@@ -1,5 +1,15 @@
 # NEXT_STEP
 
+## 2026-05-26 after Stage 20.83
+
+Next step: **B. keep 20.77/20.81 candidate**.
+
+Stage 20.83 tested `R1_six_params_profile_primary_loss` on `comsol_true_3d_rbc_imported_watertight_pilot_v3_240`. The result is a negative training-gate result: the selected profile-primary candidate improved projected mask Dice (`0.868042`) but did not improve the primary 3D profile metric (`profile_depth_rmse_m=0.000409718` vs 20.77 `0.000387737`). Multi-seed was correctly skipped because the candidate screen gate failed.
+
+Keep 20.77 as the profile reconstruction reference and 20.81 as the visual/mask comparator. Do not update baseline docs or `CURRENT_BASELINE.md`.
+
+Immediate boundary for the next stage: no COMSOL or data expansion is justified by 20.83 alone. If continuing the true 3D route, the next useful work is a cleaner profile-native representation experiment, not another small loss-weight tweak.
+
 ## 2026-05-25 更新：第 20.82 后的下一步
 
 第 20.82 已完成 true 3D RBC curvature label / output representation audit。本轮没有运行 COMSOL，没有生成或修改 data / NPZ，没有重新训练模型，没有建立 baseline，也没有修改 `CURRENT_BASELINE.md`。审计边界很明确：20.77 / 20.81 有逐样本 profile/error artifacts；20.80 只有 aggregate/group/failure-case artifacts；当前没有 raw `pred_params` 或 predicted profile arrays，因此不做 prediction reconstruction。

@@ -386,3 +386,15 @@ feature-fusion 的设计边界是：20.77 neural encoder 继续负责 raw `delta
 
 下一步主线应转向 curvature label / output representation redefinition：先判断 `wLD/wWD/wLW` 这组 RBC-style curvature 参数在当前 Bx/By/Bz、projected mask 和 depth/profile grid 口径下是否是合适的监督目标；必要时改成更直接的 profile/depth basis、curvature field、depth-grid auxiliary target 或重新定义的 shape factors。curvature-targeted data top-up 和 exact Piao feature reproduction 应排在这个审计之后，而不是先继续 head/loss 小修。
 
+# 2026-05-26 Stage 20.83 route note
+
+20.83 tested the R1 route: keep the six RBC-style parameters as outputs, but train with profile-primary loss. The experiment did not pass the upgrade gate. It improved projected mask Dice but worsened the primary 3D profile reconstruction metric relative to 20.77.
+
+Current route state:
+- `wLD / wWD / wLW` remain auxiliary diagnostics, not headline pass/fail metrics.
+- `profile_depth_rmse_m` / Er-like profile reconstruction are the right main metrics for the true 3D RBC-style branch.
+- 20.77 remains the stronger profile reconstruction reference.
+- 20.81 remains useful as a visual/mask comparator.
+- 20.83 is a negative result and must not be written as a baseline or `CURRENT_BASELINE` replacement.
+
+Next route direction should avoid another narrow weight tweak on the same six-param loss. If the route continues, prefer a profile-native output representation experiment, while retaining `exact_piao_rbc=False` and `rbc_style_approximation=True`.

@@ -1,0 +1,29 @@
+true_3d_rbc_v3_240 profile-primary candidate screen summary
+
+dataset_id: comsol_true_3d_rbc_imported_watertight_pilot_v3_240
+seed: 42
+scope: R1 six-params profile-primary loss candidate screen; no COMSOL, no data generation, no NPZ modification, no baseline.
+model_input: delta_b only, reshaped to 9x201; no rbc_params/profile/mask/split/template/bin/sample_id as input.
+target_usage: rbc_params/profile_depth_grid/projected_mask are supervision or metrics only.
+candidate_selection: validation-only; test is emitted only for the validation-selected candidate.
+candidates: P1_profile_primary_w0p5, P2_profile_primary_dim_guard_w1p0, P3_profile_primary_w2p0
+reference_20_77_val_profile_depth_rmse_m: 0.000516277
+reference_20_77_val_dimension_mae_norm: 0.548782
+reference_20_77_val_projected_mask_dice: 0.831555
+reference_20_77_test_profile_depth_rmse_m: 0.000387737
+selected_candidate: P2_profile_primary_dim_guard_w1p0
+selected_val_selection_score: 0.421589
+selected_val_profile_depth_rmse_m: 0.000525839
+selected_val_er_like_profile_error: 0.323669
+selected_val_dimension_mae_norm: 0.530155
+selected_val_projected_mask_dice: 0.847375
+eligible_for_multiseed: False
+
+selected_test_total_mae: 0.689411
+selected_test_LWD_mae_mm: 2.182535/1.860190/0.847726
+selected_test_wLD_wWD_wLW_aux: 0.207468/0.216334/0.193048
+selected_test_profile_depth_rmse_m: 0.000409718
+selected_test_er_like_profile_error: 0.283775
+selected_test_projected_mask_iou_dice: 0.778090/0.868042
+selected_test_profile_rmse_delta_vs_20_77: 0.000021980
+stage_C_gate: run selected multi-seed only if eligible_for_multiseed is True.

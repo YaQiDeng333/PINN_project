@@ -1,0 +1,22 @@
+true_3d_rbc_v3_240 profile-primary audit summary
+
+source_kind: candidate_screen_only
+selected_candidate: P2_profile_primary_dim_guard_w1p0
+selected_seed: 42
+selected_candidate_multi_seed_completed: False
+test_total_mae: 0.689411
+test_dimension_mae_norm: 0.440622
+test_LWD_mae_mm: 2.182535/1.860190/0.847726
+test_wLD_wWD_wLW_aux: 0.207468/0.216334/0.193048
+test_curvature_aux_mae: 0.205617
+test_profile_depth_rmse_m: 0.000409718
+test_er_like_profile_error: 0.283775
+test_max_depth_error_m: 0.000857613
+test_volume_proxy_rel_error: 0.376596
+test_projected_mask_iou_dice: 0.778090/0.868042
+profile_improved_vs_20_77: False
+profile_improved_5pct_vs_20_77: False
+dice_stable_vs_20_77: True
+LWD_material_regression: False
+wMAE_role: auxiliary diagnostic only.
+result: R1 candidate screen improved projected mask Dice but did not improve profile_depth_rmse_m; Stage C multi-seed was intentionally skipped.

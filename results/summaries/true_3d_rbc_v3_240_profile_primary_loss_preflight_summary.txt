@@ -1,0 +1,54 @@
+true_3d_rbc_v3_240 profile-primary loss preflight summary
+
+stage: 20.83
+task_type: R1_SIX_PARAMS_PROFILE_PRIMARY_LOSS_TRAINING_GATE_ON_TRUE_3D_RBC_V3_240
+dataset_id: comsol_true_3d_rbc_imported_watertight_pilot_v3_240
+
+subagent_preflight_completed: true
+subagent_mode: read-only
+
+Agent A registry/data governance:
+- GO.
+- COMSOL_DATA_REGISTRY.md and v3_240 manifest agree.
+- status=pilot_generated, train_ready_candidate=true, baseline_ready=false.
+- allowed_use includes explicit_pilot_training_gate.
+- forbidden_use includes automatic_mainline_training, baseline_update, current_baseline_replacement, latest_newest_auto_discovery, direct_training_without_manifest_gate.
+- latest/newest NPZ discovery is blocked.
+
+Agent B profile generator/label:
+- GO.
+- v3_240 NPZ includes profile_depth_grid_m, profile_depth_map_xy_m, projected_mask_2d, rbc_params, profile_pose, and group metadata.
+- Existing NumPy RBC-style generator reconstructs stored profile labels and projected masks to numerical tolerance.
+- Torch differentiable generator is feasible by mirroring the current RBC-style approximation.
+- exact_piao_rbc remains false; this is not exact Piao reproduction.
+
+Agent C metrics/reference:
+- GO.
+- 20.77 neural is the profile-depth reference: test profile_depth_rmse_m=0.000387737264, Dice=0.847727, total MAE=0.678014.
+- 20.81 feature-fusion is the total/Dice comparator: total MAE=0.667888, Dice=0.866573, profile_depth_rmse_m=0.000445297.
+- 20.80 feature-only is the curvature comparator: curvature MAE=0.190304, profile_depth_rmse_m=0.000449640.
+- No consistently persisted Er-like metric exists, so 20.83 defines and reports a new Er-like profile error while keeping profile_depth_rmse_m as the primary comparable metric.
+
+Agent D experiment design:
+- GO.
+- Use the 20.77 delta_b-only Conv1D family as the minimal R1 fork.
+- Train bounded profile-primary candidates with profile_depth_grid loss as main loss, L/W/D guardrail loss, and wLD/wWD/wLW as small auxiliary loss only.
+- Candidate and seed selection must be validation-only; test is final-only.
+- Projected mask Dice remains QA/guardrail, not the main profile objective.
+
+Agent E safety/git:
+- GO.
+- Current worktree had no tracked dirty changes before implementation.
+- Results are ignored by .gitignore and must be staged by exact whitelist paths with git add -f.
+- Do not stage data/, NPZ, checkpoints, preview PNGs, notes, __pycache__, .mph/raw CSV/temp STL, CURRENT_BASELINE.md, COMSOL baseline docs, COMSOL_DATA_REGISTRY.md, manifests, or scripts/visualize_current_baseline.py.
+
+registry_manifest_gate: pass
+profile_depth_labels_sufficient: true
+differentiable_profile_generator_feasible: true
+training_required_for_20_83: true
+recommended_candidates: P1_profile_primary_w0p5, P2_profile_primary_dim_guard_w1p0, P3_profile_primary_w2p0
+allowed_submit: 20.83 scripts, allowed summaries/metrics, EXPERIMENT_LOG.md, NEXT_STEP.md, PINN优化路线.md
+forbidden_submit: data/, NPZ, checkpoint, preview PNG, notes/, __pycache__, .mph, raw CSV, generated data, temp STL, baseline docs, CURRENT_BASELINE.md
+stop_conditions: registry/manifest gate failure; profile label missing; differentiable generator mismatch; profile-primary loss instability; no validation-selected profile improvement; forbidden artifacts staged
+
+decision: continue to Stage A-D serial execution.

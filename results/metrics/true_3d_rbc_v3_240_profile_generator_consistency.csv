@@ -1,0 +1,9 @@
+check_name,pass,observed,notes
+numpy_depth_grid_max_abs_error,True,9.313225746154785e-10,true params -> stored profile_depth_grid_m
+numpy_depth_grid_mean_rmse,True,2.2635007757010328e-10,RBC-style generator replay
+numpy_er_like_mean,True,2.2499814607129306e-07,self-consistency only
+numpy_depth_map_max_abs_error,True,9.64064383879304e-10,true params -> stored profile_depth_map_xy_m
+numpy_projected_mask_pixel_mismatch,True,0,total_pixels=1966080
+torch_depth_grid_max_abs_error_vs_numpy,True,9.313225746154785e-10,torch differentiable generator parity
+torch_depth_map_max_abs_error_vs_numpy,True,5.846231942996383e-09,torch differentiable map parity
+exact_piao_rbc_false,True,False,"RBC-style approximation, not exact Piao reproduction"
