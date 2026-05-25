@@ -1,0 +1,23 @@
+20.82 Piao RBC evaluation alignment summary
+
+scope: label/output-representation audit only; no COMSOL, no data generation, no NPZ modification, no training, no baseline update.
+method_claim: Piao-style / Piao-inspired alignment audit; not exact Piao reproduction.
+exact_piao_rbc: false
+rbc_style_approximation: true
+
+source_status:
+- exists=True read_as_text=False size_bytes=16812950 path=C:\Users\19166\Desktop\PINN_literature\Fast reconstruction of 3-D defect profile from MFL signals using key physics-based parameters and SVM.pdf
+- exists=True read_as_text=True size_bytes=12724 path=C:\Users\19166\Desktop\PINN_project\results\summaries\piao2019_fullpaper_alignment_summary.txt
+- exists=True read_as_text=True size_bytes=3608 path=C:\Users\19166\Desktop\PINN_project\results\summaries\true_3d_piao_style_route_alignment_summary.txt
+- exists=True read_as_text=True size_bytes=5152 path=C:\Users\19166\Desktop\PINN_project\results\metrics\piao2019_method_mapping_matrix.csv
+- exists=True read_as_text=True size_bytes=2413 path=C:\Users\19166\Desktop\PINN_project\results\summaries\true_3d_rbc_v3_240_piao_nls_curvature_diagnostic_summary.txt
+- exists=True read_as_text=True size_bytes=834 path=C:\Users\19166\Desktop\PINN_project\results\summaries\true_3d_rbc_v3_240_feature_fusion_decision_summary.txt
+
+answer_1_RBC_six_params_generate_profile: yes; L/W/D/wLD/wWD/wLW are geometry/profile parameters used to form a 3-D defect profile.
+answer_2_Piao_reports_w_params_as_headline_metric: no evidence in available summaries that isolated wLD/wWD/wLW MAE is the final headline metric.
+answer_3_profile_reconstruction_error_alignment: profile-level reconstruction error is the closer Piao-style primary metric.
+answer_4_current_w_param_MAE_is_over_strict: yes as a primary metric; keep it as an auxiliary diagnostic.
+answer_5_recommended_primary_metrics: profile_depth_rmse_m, Er-like depth/profile reconstruction error, volume/depth descriptors; projected mask IoU/Dice remains footprint QA.
+answer_6_keep_wMAE_auxiliary: yes.
+
+boundary: this audit does not update CURRENT_BASELINE and does not claim exact Piao reproduction.

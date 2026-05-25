@@ -1,0 +1,9 @@
+question,answer,evidence,decision
+Continue optimizing isolated wLD/wWD/wLW as primary metric?,False,abs corr curvature-vs-profile RMSE on 20.77 test=0.358243; contradiction_count=3,No; keep wMAE as diagnostic only.
+Promote profile-level metrics to primary?,True,Piao-style target is reconstructed 3-D profile; projected mask and raw wMAE can disagree.,Yes; use profile_depth_rmse_m / Er-like profile error as main branch metric.
+Keep wMAE auxiliary?,True,wLD remains a useful failure signal even when profile/Dice improves.,Yes; report wLD/wWD/wLW in all future profile experiments.
+Is projected mask enough?,False,20.81 Dice better than 20.77=True; profile RMSE worse than 20.77=True,No; keep it as 2-D footprint QA.
+Recommended output representation?,A_six_params_profile_primary_loss,R1 preserves six-param RBC output while making profile reconstruction the primary loss/metric.,Next training stage should use six params + profile-primary loss.
+Need new data?,False,"v3_240 already has rbc_params, profile_depth_grid_m, profile_depth_map_xy_m, projected_mask_2d.",No new COMSOL/data before the next representation experiment.
+Need new training stage?,True,20.82 is only an audit; changing loss/output requires future training.,"Yes, in a later stage such as 20.83."
+Can this be called baseline?,False,No training/benchmark rerun in 20.82 and baseline_ready remains false.,No baseline replacement; do not update CURRENT_BASELINE.

@@ -1,0 +1,17 @@
+20.82 alternative output representation design
+
+scope: design only; no training, no COMSOL, no new data, no NPZ modification, no baseline update.
+recommended_next_representation: R1_six_params_profile_primary_loss
+profile_metric_role: primary true-3D branch metric
+wMAE_role: auxiliary diagnostic
+projected_mask_role: 2-D footprint QA, not sufficient for 3-D profile quality
+
+priority_order:
+1. R1 six params + profile-primary loss
+2. R2 template + residual curvature output
+3. R3 depth/profile basis coefficients
+4. R4 surface descriptors as diagnostic
+5. R5 hybrid multitask after simpler experiments
+
+current_v3_240_support: all listed representations can be designed from existing labels; none require new COMSOL data for the first experiment.
+baseline_boundary: none of these representations is a baseline replacement until a future training/benchmark stage passes.

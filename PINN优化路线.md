@@ -1,5 +1,12 @@
 # PINN 优化路线
 
+## 2026-05-25 路线同步：20.82 true 3D RBC curvature output representation audit
+
+20.82 的路线意义是把 true 3D / Piao-style 分支的评价口径从“逐项硬拧 `wLD/wWD/wLW`”调整为“六参数生成的 3D profile 是否准确”。这不是 baseline replacement，也不改变 v3_complex `CURRENT_BASELINE.md`；它只改变 true 3D RBC branch 后续训练和评价的主次关系。
+
+审计证据显示，raw curvature MAE 与 profile quality 不同步：20.77 test 的 curvature-vs-profile depth RMSE correlation 只有 `0.358243`；20.81 feature-fusion 的 projected mask Dice 更好，但 profile depth RMSE 更差；20.80 feature-only curvature 更好，但只有 aggregate/group artifacts，不能替代 per-sample profile evidence。因此 projected mask IoU/Dice 只能继续作为 2D footprint QA，`wLD/wWD/wLW` 只能作为 auxiliary diagnostics，不能单独决定 true 3D profile route 是否成功。
+
+路线判断更新为：下一步优先做 `R1_six_params_profile_primary_loss`，即仍保持 Piao-style six-parameter output，但把 profile-depth reconstruction loss / metric 升为主目标；`R2 template + residual`、`R3 depth/profile basis`、`R5 hybrid multitask` 作为后续备选。`exact_piao_rbc=False` 和 `rbc_style_approximation=True` 继续成立，dense mask baseline 继续只作为 comparator。
 ## 2026-05-25 路线同步：20.80 Piao/NLS-inspired feature diagnostic
 
 20.80 的路线意义是：curvature 问题不是简单 neural head/loss 能修好，但 Bx/By/Bz 信号里确实存在一部分 physical curvature cue。固定 v3_240 dataset 上，validation 选中的不是 F4 NLS proxy，而是 `F0_F1_F2_basic_physical + svr_rbf_C10_eps0.03`；它把 test curvature MAE 从 20.77 neural 的 `0.201076` 降到 `0.190304`，并优于 20.77 feature baseline 的 `0.195046`。但 total MAE `0.695724`、L/W/D `2.595/2.361/0.966 mm` 和 projected mask Dice `0.826272` 都不如 20.77 neural，因此不能替代 20.77 benchmark candidate，更不能写成 baseline。
@@ -378,3 +385,4 @@ feature-fusion 的设计边界是：20.77 neural encoder 继续负责 raw `delta
 但 curvature 风险没有被解决：curvature MAE 只从 `0.201076` 到 `0.194483`，未达到 `>=0.01` 实质改善门槛；`wLD` 从 `0.209439` 退化到 `0.217079`；同时 L/D 和 profile depth RMSE 存在 trade-off，且 curvature 仍弱于 20.80 feature-only 的 `0.190304`。因此路线判断更新为 `feature_fusion_total_not_curvature`：feature-fusion 可以作为 auxiliary representation evidence 保留，但不能升级 benchmark candidate，也不能替代 20.77 reference，更不能写入 baseline。
 
 下一步主线应转向 curvature label / output representation redefinition：先判断 `wLD/wWD/wLW` 这组 RBC-style curvature 参数在当前 Bx/By/Bz、projected mask 和 depth/profile grid 口径下是否是合适的监督目标；必要时改成更直接的 profile/depth basis、curvature field、depth-grid auxiliary target 或重新定义的 shape factors。curvature-targeted data top-up 和 exact Piao feature reproduction 应排在这个审计之后，而不是先继续 head/loss 小修。
+

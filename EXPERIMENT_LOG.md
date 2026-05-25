@@ -1,5 +1,14 @@
 # 实验工作日志
 
+## 2026-05-25 更新：第 20.82 curvature label / output representation audit for true 3D RBC profile
+
+第 20.82 只做 `comsol_true_3d_rbc_imported_watertight_pilot_v3_240` 的 label / output representation audit；没有运行 COMSOL，没有生成或修改 data / NPZ，没有重新训练模型，没有建立 baseline，也没有修改 `CURRENT_BASELINE.md` 或任何 COMSOL baseline 文档。所有数据口径仍通过 registry / manifest / dataset_id 显式引用，禁止 latest/newest 自动扫描。
+
+Subagent preflight 和 review agent 均为只读。preflight 结论是：Piao-style `wLD/wWD/wLW` 更合理地理解为 RBC profile 生成参数，而不是最终逐项 headline metric；20.77 和 20.81 有逐样本 profile/error metrics，可做参数误差与 profile 指标关系审计；20.80 只有 aggregate/group/failure-case artifacts，不能和 20.77/20.81 的 per-sample artifacts 等价比较；现有 artifacts 没有 raw `pred_params` 或 predicted profile arrays，因此本轮不做 raw prediction reconstruction。
+
+Stage A-D 生成了 Piao evaluation alignment、profile-vs-parameter audit、alternative representation design 和 route decision。关键结果：20.77 test 的 curvature-vs-profile RMSE correlation 只有 `0.358243`；20.81 fusion 的 projected mask Dice 从 `0.847727` 提高到 `0.866573`，但 profile depth RMSE 从 `0.000387737 m` 退到 `0.000445297 m`，说明 projected mask 好并不等于 true 3D profile 好。20.80 feature-only curvature 更好，但 aggregate Dice/profile RMSE 不如 20.77 neural，也不能作为逐样本 profile 证据。
+
+结论是：true 3D / Piao-style branch 应把 `profile_depth_rmse_m` / Er-like profile reconstruction error 升为主评价；`wLD/wWD/wLW` 不删除，但降级为 auxiliary diagnostics；projected mask IoU/Dice 只作为 2D footprint QA。推荐下一步是 `R1_six_params_profile_primary_loss`：仍输出六参数，但训练和 validation 以 profile-level loss / metric 为主，wMAE 只做诊断。review agent 通过，无 must-fix；两条建议已处理：修正 `all` 聚合行，并补充 20.80 aggregate-only caveat。
 ## 2026-05-25 更新：第 20.80 Piao / NLS-inspired feature diagnostic for true 3D RBC curvature
 
 第 20.80 只在固定 `dataset_id=comsol_true_3d_rbc_imported_watertight_pilot_v3_240` 上做 Piao/NLS-inspired feature diagnostic；没有运行 COMSOL，没有生成或修改 NPZ，没有训练 neural model，没有建立 baseline，也没有更新 `CURRENT_BASELINE.md`。数据仍通过 `COMSOL_DATA_REGISTRY.md` + manifest 的显式 dataset_id gate 加载，禁止 latest/newest NPZ 自动扫描。本轮不是完整 Piao 2019 复现，也不是 LS-SVM 复现；preflight 中 Piao PDF 正文抽取不稳定，因此只使用已有 fullpaper alignment summary 和当前项目结果定义可执行特征。
@@ -2653,3 +2662,4 @@ Stage D multi-seed 只复跑 validation-selected `H3_curv_fusion_F0F1F2_w1p0`，
 Route decision 为 `feature_fusion_total_not_curvature`。feature-fusion 对整体参数 MAE 和 projected mask 有价值，但没有实质解决 curvature 风险；不能升级 formal benchmark candidate，也不能写成 baseline。下一步唯一建议是 `D_redefine_curvature_labels_output_representation`，优先复查 `wLD/wWD/wLW` 的输出定义、可辨识性和 label representation，再决定是否做 curvature-targeted data top-up 或 exact Piao feature reproduction。
 
 Review agent 已完成只读复核，无 must-fix。review 建议把 audit/decision 中的 “Did fusion improve curvature?” 改成 “Did fusion reach >=0.01 substantive curvature improvement?”，该建议已采纳并重跑 audit。所有新增结果均为 scripts/results/Markdown；未提交 data、NPZ、checkpoint、preview PNG、notes、COMSOL artifacts 或 baseline docs。
+

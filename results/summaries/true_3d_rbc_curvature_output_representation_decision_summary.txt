@@ -1,0 +1,26 @@
+20.82 curvature output representation decision summary
+
+decision: A_six_params_profile_primary_loss
+secondary_candidate: R2_template_plus_residual
+next_step: A_six_params_plus_profile_primary_loss
+baseline_ready: false
+CURRENT_BASELINE_update: false
+COMSOL_run: false
+training_run: false
+data_or_NPZ_modified: false
+
+available_representations: R0_current_raw_six_params, R1_six_params_profile_primary_loss, R2_template_plus_residual, R3_depth_profile_basis_coefficients, R4_surface_descriptors, R5_hybrid_multitask
+20.77_test_abs_corr_curvature_vs_profile_rmse: 0.358243
+20.77_test_contradiction_count_high_w_or_high_dice: 3
+20.81_dice_better_than_20.77: True
+20.81_profile_rmse_worse_than_20.77: True
+20.80_artifact_boundary: aggregate_only; it is useful as a method-level reference but is not equivalent to 20.77/20.81 per-sample profile artifacts.
+
+answers:
+1. Continue isolated wLD/wWD/wLW optimization as primary: no.
+2. Set profile-level metrics as primary: yes.
+3. Keep wMAE as auxiliary diagnostic: yes.
+4. Unique next recommendation: A_six_params_plus_profile_primary_loss.
+5. Next step needs training: yes, but not in 20.82.
+6. Next step needs new data: no.
+7. Baseline status: not baseline; CURRENT_BASELINE unchanged.

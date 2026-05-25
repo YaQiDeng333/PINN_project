@@ -1,5 +1,12 @@
 # NEXT_STEP
 
+## 2026-05-25 更新：第 20.82 后的下一步
+
+第 20.82 已完成 true 3D RBC curvature label / output representation audit。本轮没有运行 COMSOL，没有生成或修改 data / NPZ，没有重新训练模型，没有建立 baseline，也没有修改 `CURRENT_BASELINE.md`。审计边界很明确：20.77 / 20.81 有逐样本 profile/error artifacts；20.80 只有 aggregate/group/failure-case artifacts；当前没有 raw `pred_params` 或 predicted profile arrays，因此不做 prediction reconstruction。
+
+核心判断是：不要继续把 `wLD/wWD/wLW` 逐项 MAE 当作 true 3D branch 的主评价。它们仍是有用的 curvature diagnostic，但 Piao-style 路线真正要评价的是六参数生成的 3D profile 是否准确。20.77 test 的 curvature-vs-profile RMSE correlation 只有 `0.358243`；20.81 虽然 Dice 更高，但 profile depth RMSE 更差，说明 projected mask 也不能替代 3D profile 指标。
+
+下一步唯一建议：**20.83 做 `R1_six_params_profile_primary_loss`**。继续输出 `L/W/D/wLD/wWD/wLW`，但把 validation / loss 主目标改成 profile-level reconstruction，例如 `profile_depth_rmse_m` 或 Er-like depth/profile error；`wLD/wWD/wLW` 降为 auxiliary diagnostics；不需要新 COMSOL 数据，不需要扩到 480，不做 baseline replacement。
 ## 2026-05-25 更新：第 20.81 后的下一步
 
 第 20.81 已完成 `comsol_true_3d_rbc_imported_watertight_pilot_v3_240` 上的 feature-fusion neural model diagnostic。本轮没有运行 COMSOL，没有生成或修改 NPZ/data，没有创建 baseline，也没有更新 `CURRENT_BASELINE.md`；所有输入仍通过 registry/manifest 显式 dataset_id 加载，禁止 latest/newest 自动扫描。
@@ -249,3 +256,4 @@ forward profile refinement 已执行受控 sweep，但 validation 选择 `lambda
 第 20.76 已把 true 3D RBC imported-watertight dataset 从 v2_120 扩展到 `comsol_true_3d_rbc_imported_watertight_pilot_v3_240`。本轮没有训练、没有 baseline、没有更新 `CURRENT_BASELINE.md`；v2_120 source pack 未覆盖，v3 top-up 和 assembled NPZ 仍是 generated data，不提交。
 
 当前 v3_240 状态是 `pilot_generated` 且 `train_ready_candidate=True`：N=240，split=162/39/39，curvature coverage=sharp 48 / round 49 / boxy 47 / LD_dominant 46 / WD_dominant 50，schema/registry/manifest validation 全部通过，baseline_ready=False。下一步唯一建议是执行 true 3D training gate on v3_240，必须通过 `dataset_id=comsol_true_3d_rbc_imported_watertight_pilot_v3_240` + manifest + `COMSOL_DATA_REGISTRY.md` 显式加载，禁止 latest/newest NPZ 自动扫描；重点检查 `D_m` 和 `wLD/wWD/wLW` 是否相对 v2_120 进一步稳定。
+
