@@ -1,0 +1,30 @@
+section,metric,value,notes
+identity,dataset_id,comsol_true_3d_rbc_imported_watertight_pilot_v3_240,explicit registry/manifest identity
+identity,route,true_3d_piao_style,
+identity,status,pilot_generated,
+identity,train_ready_candidate,True,
+identity,baseline_ready,False,must remain false
+identity,geometry_method,imported_watertight_mesh_solid,
+identity,exact_piao_rbc,False,not an exact Piao RBC reproduction
+identity,rbc_style_approximation,True,
+data,n_samples,240,
+data,split_counts,"{""test"": 39, ""train"": 162, ""val"": 39}",
+input,input_shape_delta_b,"[240, 3, 3, 201]",Bx/By/Bz x 3 scan lines x 201
+input,conv1d_shape,"[240, 9, 201]",flattened axes and scan lines
+feature,selected_model,svr_rbf_C10,Piao-inspired feature sanity only
+feature,test_normalized_mae,0.7153952435041085,
+feature,test_LWD_mae_mm,2.7033732659541645/2.486409778587329/0.9795067076308605,L/W/D
+feature,test_curvature_mae,0.19504618346213531,
+feature,test_mask_iou_dice,0.7023349188720109/0.815450420558869,
+neural,selected_seed,42,validation selected
+neural,train_val_test_normalized_mae,0.6461113923125796/0.7486944236816504/0.6780143536818333,
+neural,test_LWD_mae_mm,1.891891360282898/2.1857595443725586/0.8002312183380127,L/W/D
+neural,test_curvature_mae,0.20107580721378326,mean wLD/wWD/wLW absolute error
+neural,test_mask_iou_dice,0.7506502455785019/0.8477271366767738,
+neural,test_profile_depth_rmse_m,0.0003877372636895579,
+comparison,v3_vs_v2_neural_test_mae_delta,-0.025892371168503403,improved=True
+comparison,v3_vs_v1_neural_test_mae_delta,-0.0821197472321682,improved=True
+comparison,v3_vs_v2_D_mae_mm_delta,-0.3061596621464715,improved=True
+comparison,v3_vs_v2_curvature_mae_delta,0.01056646367805636,improved=False
+decision,overall_decision,v3_240_promising_benchmark_candidate,"candidate, not baseline"
+decision,prior_20_77_next_step,A_formal_true_3D_RBC_benchmark_candidate,20.77 gate recommendation before 20.78 curvature audit

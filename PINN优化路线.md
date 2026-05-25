@@ -1,5 +1,13 @@
 # PINN 优化路线
 
+## 2026-05-25 路线同步：20.78 formal true 3D RBC benchmark candidate audit
+
+20.78 的路线意义是：true 3D / Piao-style 主线正式进入 benchmark candidate 阶段，但仍不是 baseline replacement。v3_240 的证据链已经足够说明 Bx/By/Bz 输入能学习 RBC-style 主几何参数：neural test normalized MAE `0.678014`，优于 feature comparator `0.715395`；L/W/D MAE 为 `1.892/2.186/0.800 mm`，D_m、projected mask Dice 和 profile depth RMSE 都较 N=112 改善。
+
+真正的风险边界也更清楚了：curvature 不是随 N=240 自然解决的问题。`wLD/wWD/wLW` 仍不稳定，boxy / sharp 模板明显最差；且存在 projected mask 很好但 curvature 很差的样本，说明 2D footprint / mask 指标不足以代表 true 3D RBC profile quality。当前仍是 `exact_piao_rbc=False`、`rbc_style_approximation=True`，因此不能写成完整 Piao 2019，也不能更新 `CURRENT_BASELINE.md`。
+
+路线判断更新为：下一步优先 model refinement，而不是盲目扩到 480。具体方向是 curvature-aware model/head/loss、stronger Bx/By/Bz sequence encoder，以及 exact Piao / NLS-inspired feature diagnostic；curvature-targeted sampling 可作为第二阶段补强。dense mask baseline 继续只作为 comparator。
+
 ## 2026-05-25 路线同步：20.77 true 3D RBC v3_240 training gate
 
 20.77 的路线意义是：true 3D / Piao-style 主线从 small pilot training signal 推进到 formal benchmark candidate 前的正向证据。v3_240 仍是 RBC-style / Piao-inspired engineering approximation，`exact_piao_rbc=False`，不是完整 Piao 2019 复现；本轮只验证 Bx/By/Bz 是否能学习 RBC-style 3D profile parameters、projected mask 和 depth/profile metrics，不建立 baseline。

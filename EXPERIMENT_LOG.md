@@ -1,5 +1,15 @@
 # 实验工作日志
 
+## 2026-05-25 更新：第 20.78 formal true 3D RBC benchmark candidate audit on v3_240
+
+第 20.78 在第 20.77 training gate 通过后，只做 formal benchmark candidate audit：不运行 COMSOL、不生成或修改 NPZ、不重新训练模型、不做 architecture search、不建立 baseline，也不更新 `CURRENT_BASELINE.md`。Subagent preflight 全部为 GO：registry / manifest gate 通过，20.77 / 20.75 / 20.73 指标完整且一致，现有材料足够支撑固定口径审计。
+
+Benchmark candidate summary 固定为 `comsol_true_3d_rbc_imported_watertight_pilot_v3_240`：`status=pilot_generated`、`train_ready_candidate=True`、`baseline_ready=False`、`geometry_method=imported_watertight_mesh_solid`、`exact_piao_rbc=False`、`rbc_style_approximation=True`。核心证据仍是 20.77 的 test 指标：neural selected seed `42`，test normalized MAE `0.678014`，优于 mean baseline `0.912677` 和 feature comparator `0.715395`；L/W/D MAE 为 `1.892/2.186/0.800 mm`，projected mask IoU/Dice 为 `0.750650/0.847727`，profile depth RMSE 为 `0.000387737 m`。
+
+Curvature / failure audit 显示风险不是全局平均失败，而是集中在 boxy / sharp 形状和曲率表示：test split 中 `wLD/wWD/wLW` absolute error 为 `0.209439/0.204469/0.189319`，其中 `wLD` 最差；`boxy` curvature MAE `0.296838`、`sharp` `0.2817`，而 `round` 只有 `0.094515`。D_m 已随 N=240 明显改善，但 curvature 没有随之改善；典型样本 `rbc_v3topup_123_test_boxy_medium_wide` 的 projected mask Dice 达到 `0.956750`、D error 只有 `0.131 mm`，curvature error 仍为 `0.364948`，说明 2D projected mask 指标不足以评价 true 3D RBC curvature。
+
+Route decision 是 `promising_but_curvature_risk`：v3_240 可以称为 formal true 3D RBC benchmark candidate，但不能称为 baseline，也不能替换 `CURRENT_BASELINE.md`。下一步唯一建议从“继续盲目扩样到 480”改为 **model refinement**，重点做 curvature-aware head / loss、stronger sequence encoder，以及 exact Piao / NLS-inspired feature diagnostic；curvature-targeted data top-up 作为后续第二选择。
+
 ## 2026-05-25 更新：第 20.77 true 3D RBC training gate on v3_240
 
 第 20.77 在 `comsol_true_3d_rbc_imported_watertight_pilot_v3_240` 上完成第三轮 true 3D RBC training gate。本轮只在 PINN_project 执行，不运行 COMSOL、不生成或修改 NPZ、不建立 baseline、不更新 `CURRENT_BASELINE.md`。数据加载严格通过 `COMSOL_DATA_REGISTRY.md` 和 `results/manifests/comsol_true_3d_rbc_imported_watertight_pilot_v3_240.manifest.json` 的显式 `dataset_id` gate，禁止 latest/newest NPZ 自动扫描；input gate 确认 `delta_b=(240,3,3,201)`，Conv1D 输入为 `(240,9,201)`，split 为 train/val/test = 162/39/39。

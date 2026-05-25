@@ -1,0 +1,44 @@
+true_3d_rbc_v3_240 benchmark candidate decision summary
+
+decision_category: promising_but_curvature_risk
+formal_benchmark_candidate: True
+baseline_replacement: False
+neural_beats_feature: 0.678014 < 0.715395
+improved_vs_N112_neural_mae: delta=-0.025892
+D_m_improved_vs_N112: delta_mm=-0.306160
+curvature_improved_vs_N112: False; delta=0.010566
+exact_piao_rbc: False
+rbc_style_approximation: True
+
+answer_1_formal_candidate: yes, with curvature risk.
+answer_2_baseline: no; baseline_ready remains false and CURRENT_BASELINE must not change.
+answer_3_formal_multi_seed_rerun: useful for formal packaging, but not the first technical fix.
+answer_4_model_refinement: yes; prioritize curvature-aware model/head/loss and stronger sequence encoder.
+answer_5_curvature_targeted_data: useful after model/feature diagnostics, especially boxy/sharp.
+answer_6_exact_piao_features: yes; NLS/LS-SVM-inspired features are a strong next diagnostic because feature curvature is slightly better than neural.
+answer_7_expand_to_480: not first; N=240 expansion did not fix curvature.
+recommended_unique_next_step: B_model_refinement
+
+curvature_risk_reference:
+true_3d_rbc_v3_240 curvature failure audit summary
+
+scope: existing 20.77 v3_240 selected-seed test metrics only; no retraining and no NPZ access.
+test_sample_count: 39
+per_param_curvature_errors: wLD=0.209439, wWD=0.204469, wLW=0.189319
+worst_curvature_param: wLD; normalized_mae=0.904966
+worst_curvature_template: boxy; curvature_mae=0.296838
+best_curvature_template: round; curvature_mae=0.094515
+worst_depth_bin_by_curvature: deep; curvature_mae=0.215565
+worst_aspect_bin_by_curvature: compact; curvature_mae=0.228875
+curvature_vs_D_m_error_corr: 0.217905
+curvature_vs_mask_dice_corr: -0.081215
+curvature_vs_profile_depth_rmse_corr: 0.358243
+
+curvature_failure_shape: not global; concentrated in boxy/sharp templates and weaker for round/LD_dominant/WD_dominant.
+D_m_link: D_m improves at v3_240, but curvature does not, so depth learnability alone does not resolve RBC curvature.
+mask_metric_limit: projected mask can be good while curvature remains wrong; 2D footprint metrics are insufficient for 3D profile curvature.
+clean_high_dice_failure_case: rbc_v3topup_123_test_boxy_medium_wide; Dice=0.956750; D_mae_mm=0.130784; curvature_mae=0.364948
+next_step_preference: model refinement and exact Piao/NLS-inspired feature pipeline first; curvature-targeted sampling second; blind expansion to 480 is not first choice.
+known_gap: existing 20.77 metrics lack per-sample signal amplitude features, so signal-amplitude correlation is not audited here.
+
+Boundary: this is a benchmark candidate audit, not baseline replacement.

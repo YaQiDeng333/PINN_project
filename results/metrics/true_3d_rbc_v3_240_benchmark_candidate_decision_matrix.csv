@@ -1,0 +1,9 @@
+question,answer,evidence,decision
+Can this be called a formal benchmark candidate?,True,neural_test=0.678014; feature_test=0.715395; v2_delta=-0.025892,promising_but_curvature_risk
+Can this be called a baseline?,False,baseline_ready=False; CURRENT_BASELINE not updated,promising_but_curvature_risk
+Should the next step be formal multi-seed benchmark rerun?,Possible but not first,20.77 already used three seeds; curvature risk remains.,promising_but_curvature_risk
+Should model refinement come first?,True,L/W/D learned but wLD/wWD/wLW remain unstable; model/feature representation is the main risk.,promising_but_curvature_risk
+Should curvature-targeted data come first?,Second choice,"boxy/sharp are weak, but N=240 expansion alone did not improve curvature vs N=112.",promising_but_curvature_risk
+Should exact Piao NLS/LS-SVM feature pipeline be implemented?,Strong candidate,exact_piao_rbc=False; rbc_style_approximation=True; feature curvature is slightly better than neural.,promising_but_curvature_risk
+Should the next step be expand to 480?,Not first,Blind expansion improved L/W/D and D_m but not curvature.,promising_but_curvature_risk
+Recommended unique next step,B_model_refinement,Start benchmark-candidate model refinement with curvature-risk controls; do not replace baseline.,promising_but_curvature_risk

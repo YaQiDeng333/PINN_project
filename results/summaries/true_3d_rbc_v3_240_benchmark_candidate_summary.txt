@@ -1,0 +1,26 @@
+true_3d_rbc_v3_240 benchmark candidate summary
+
+dataset_id: comsol_true_3d_rbc_imported_watertight_pilot_v3_240
+registry_manifest_status: pass; status=pilot_generated; train_ready_candidate=True; baseline_ready=False
+route: true_3d_piao_style
+geometry_method: imported_watertight_mesh_solid
+exact_piao_rbc: False
+rbc_style_approximation: True
+input_shape: delta_b=(240,3,3,201), Conv1D=(240,9,201)
+split: {'test': 39, 'train': 162, 'val': 39}
+
+feature_baseline: selected=svr_rbf_C10; test_normalized_mae=0.715395; L/W/D_mae_mm=2.703/2.486/0.980; curvature_mae=0.195046; IoU/Dice=0.702335/0.815450
+neural_selected: seed=42; train/val/test_normalized_mae=0.646111/0.748694/0.678014; L/W/D_mae_mm=1.892/2.186/0.800; curvature_mae=0.201076
+projected_mask_depth: IoU/Dice=0.750650/0.847727; profile_depth_rmse_m=0.000387737
+
+mean_baseline_comparison: neural_test=0.678014 vs mean_test=0.912677; neural_beats_mean=True
+feature_comparison: neural_test=0.678014 vs feature_test=0.715395; neural_beats_feature=True
+N_trend: N56=0.760134 -> N112=0.703907 -> N240=0.678014
+D_m_improvement_vs_N112: 1.106 mm -> 0.800 mm
+curvature_risk_vs_N112: 0.190509 -> 0.201076; not improved
+learnable_params: L_m, W_m, D_m
+unstable_params: wLD, wWD, wLW
+
+benchmark_candidate_recommendation: formal benchmark candidate with curvature risk
+baseline_ready_status: false
+boundary: no COMSOL run, no data generation, no NPZ modification, no retraining, no baseline update.

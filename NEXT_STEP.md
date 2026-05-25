@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-05-25 更新：第 20.78 后的下一步
+
+第 20.78 已完成 formal true 3D RBC benchmark candidate audit。本轮没有运行 COMSOL、没有生成或修改 NPZ、没有重新训练模型，也没有更新 `CURRENT_BASELINE.md`。审计结论是：`comsol_true_3d_rbc_imported_watertight_pilot_v3_240` 可以进入 **formal benchmark candidate**，但必须带 curvature risk，且明确不是 baseline。
+
+核心分界点是 curvature：v3_240 的 neural test normalized MAE `0.678014` 优于 feature comparator `0.715395`，L/W/D MAE 为 `1.892/2.186/0.800 mm`，D_m、projected mask Dice 和 profile depth RMSE 都较 N=112 改善；但 `wLD/wWD/wLW` 仍不稳定，boxy / sharp 最差，且出现 Dice `0.956750` 但 curvature error `0.364948` 的样本，说明 2D projected mask 已不足以评价 true 3D profile curvature。
+
+下一步唯一建议：进入 **model refinement for formal benchmark candidate**，先做 curvature-aware model/head/loss、stronger Bx/By/Bz sequence encoder，以及 exact Piao / NLS-inspired feature diagnostic。curvature-targeted data top-up 是第二选择；不要把第一步直接设成扩到 480，也不要做 baseline replacement。
+
 ## 2026-05-25 更新：第 20.77 后的下一步
 
 第 20.77 已完成 `comsol_true_3d_rbc_imported_watertight_pilot_v3_240` 的 true 3D RBC training gate。本轮通过 `dataset_id + COMSOL_DATA_REGISTRY.md + manifest` 显式加载 v3_240，没有 latest/newest NPZ 自动扫描，没有运行 COMSOL，没有生成或修改数据，也没有更新 `CURRENT_BASELINE.md`。输入为 `delta_b=(240,3,3,201)`，Conv1D 输入为 `(240,9,201)`，split=train/val/test 162/39/39。
