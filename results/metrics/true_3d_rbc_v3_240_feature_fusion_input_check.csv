@@ -1,0 +1,12 @@
+check_name,pass,observed,notes
+sample_count,True,240,
+split_counts,True,"{'train': 162, 'val': 39, 'test': 39}",
+sample_id_order,True,matched,
+split_order,True,matched,
+feature_allowlist,True,642,
+no_label_columns,True,checked,
+no_metadata_columns,True,checked,
+F4_nls_quality_recorded,True,1.0,
+F4_nls_success_rate,True,1.0,
+FS_basic_physical_usable,True,checked,
+feature_matrix_finite_after_train_scaling,True,checked,

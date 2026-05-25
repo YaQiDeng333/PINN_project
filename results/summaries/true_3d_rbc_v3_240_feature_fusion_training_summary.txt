@@ -1,0 +1,21 @@
+true_3d_rbc_v3_240 feature-fusion training summary
+
+dataset_id: comsol_true_3d_rbc_imported_watertight_pilot_v3_240
+selected_candidate: H3_curv_fusion_F0F1F2_w1p0
+selected_feature_set: FS_basic_physical
+selected_feature_count: 441
+curvature_weight: 1.0
+seeds: [42, 123, 2026]
+selected_seed: 2026
+model_selection: validation-only seed selection; test final only for selected seed.
+selected_test_total_mae: 0.667888
+selected_test_LWD_mae_mm: 2.030387/1.806630/0.956618
+selected_test_curvature_mae: 0.194483
+selected_test_wLD_wWD_wLW: 0.217079/0.202304/0.164068
+selected_test_projected_mask_iou_dice: 0.774541/0.866573
+selected_test_profile_depth_rmse_m: 0.000445297
+vs_20_77_total_delta: -0.010126
+vs_20_77_curvature_delta: -0.006592
+vs_20_77_dice_delta: 0.018845
+promising_feature_fusion: False
+boundary: no checkpoint is written; no COMSOL, no new data, no NPZ modification, no baseline update.

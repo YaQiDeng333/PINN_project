@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-05-25 更新：第 20.81 后的下一步
+
+第 20.81 已完成 `comsol_true_3d_rbc_imported_watertight_pilot_v3_240` 上的 feature-fusion neural model diagnostic。本轮没有运行 COMSOL，没有生成或修改 NPZ/data，没有创建 baseline，也没有更新 `CURRENT_BASELINE.md`；所有输入仍通过 registry/manifest 显式 dataset_id 加载，禁止 latest/newest 自动扫描。
+
+核心判断是：feature-fusion 改善了整体拟合和 projected mask，但没有解决 curvature 风险。validation-only selection 选中 `H3_curv_fusion_F0F1F2_w1p0`，multi-seed 后 selected seed `2026` 的 test total MAE 为 `0.667888`，优于 20.77 neural 的 `0.678014`；projected mask Dice 为 `0.866573`，也优于 20.77 的 `0.847727`。但是 curvature MAE 只是从 `0.201076` 降到 `0.194483`，改善 `0.006592`，未达到本轮 `>=0.01` 实质改善门槛；wLD 从 `0.209439` 退到 `0.217079`，且 curvature 仍弱于 20.80 feature-only 的 `0.190304`。
+
+下一步唯一建议：**redefine curvature labels / output representation**。真正的分界点不是再往 neural head 里塞更多 feature，而是 `wLD/wWD/wLW` 这组三维 profile curvature label 是否以当前形式可辨识、可学习、可评价。下一轮应先审计 curvature 参数定义、替代输出表示、profile/depth loss 口径和与 projected mask 的脱钩关系；不要直接 formal benchmark rerun，不要 baseline replacement，也不要先扩到 480。
+
 ## 2026-05-25 更新：第 20.80 后的下一步
 
 第 20.80 已完成 `comsol_true_3d_rbc_imported_watertight_pilot_v3_240` 上的 Piao/NLS-inspired feature diagnostic。本轮没有运行 COMSOL，没有生成或修改 NPZ，没有训练 neural model，没有创建 baseline，也没有更新 `CURRENT_BASELINE.md`；所有输入仍通过 registry/manifest 显式 dataset_id 加载，禁止 latest/newest NPZ 自动扫描。

@@ -1,0 +1,19 @@
+true_3d_rbc_v3_240 feature-fusion decision summary
+
+decision: feature_fusion_total_not_curvature
+next_step: D_redefine_curvature_labels_output_representation
+baseline_ready: false
+CURRENT_BASELINE_update: false
+COMSOL_run: false
+data_or_NPZ_modified: false
+
+Answer 1 - Did fusion improve total MAE: True
+Answer 2 - Did fusion improve L/W/D: False
+Answer 3 - Did fusion reach >=0.01 substantive curvature improvement: False
+Answer 4 - Did wLD improve: False
+Answer 5 - Did wWD/wLW preserve 20.80 gains: False
+Answer 6 - Did projected mask remain stable: True
+Answer 7 - Which feature set helped most: FS_basic_physical
+Answer 8 - Is fusion better than 20.77 neural: False
+Answer 9 - Is fusion better than 20.80 feature-only: False
+Answer 10 - Recommended next step: D_redefine_curvature_labels_output_representation

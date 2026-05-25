@@ -369,3 +369,12 @@ v3_240 的核心结果是：source v2_120 N=112 保持不变，20.76 top-up plan
 结果没有支持升级模型：validation-only selection 选中 `C1_split_heads`，但 selected test normalized MAE 从 20.77 的 `0.678014` 退化到 `0.753387`，curvature MAE 从 `0.201076` 退化到 `0.211584`，projected mask Dice 从 `0.847727` 降到 `0.834597`，且 L_m / D_m 也退化。`wLD` 仍是最弱 curvature 参数。`C2` 的 test 指标较好但没有被 validation 选中，不能作为模型选择依据。
 
 路线判断：v3_240 仍保留为第 20.77 的 formal benchmark candidate；第 20.79 refined model 不进入 candidate upgrade，不写 baseline。下一步优先 exact Piao / NLS-inspired feature pipeline，用更贴近三轴 MFL 物理特征的 comparator 诊断 curvature identifiability；curvature-targeted data top-up 是第二选择。dense mask baseline 继续只作为 comparator。
+## 2026-05-25 路线同步：第 20.81 feature-fusion neural model
+
+20.81 继续 true 3D / Piao-style RBC 主线，但仍是 model refinement，不是 baseline。输入固定为 `comsol_true_3d_rbc_imported_watertight_pilot_v3_240`，通过 registry + manifest 显式加载；没有运行 COMSOL，没有生成或修改 NPZ，没有更新 `CURRENT_BASELINE.md`。`exact_piao_rbc=False` 和 `rbc_style_approximation=True` 继续保留，dense mask baseline 仍只作为 comparator。
+
+feature-fusion 的设计边界是：20.77 neural encoder 继续负责 raw `delta_b` 中的 L/W/D 和 mask/profile 表达；20.80 的 Piao/NLS-inspired physical features 只作为 curvature 辅助输入。候选筛选后选中 `H3_curv_fusion_F0F1F2_w1p0`，multi-seed validation selection 选中 seed `2026`。结果显示 total MAE 从 20.77 的 `0.678014` 改善到 `0.667888`，projected mask Dice 从 `0.847727` 改善到 `0.866573`，说明 physical feature fusion 对整体拟合和 mask 有帮助。
+
+但 curvature 风险没有被解决：curvature MAE 只从 `0.201076` 到 `0.194483`，未达到 `>=0.01` 实质改善门槛；`wLD` 从 `0.209439` 退化到 `0.217079`；同时 L/D 和 profile depth RMSE 存在 trade-off，且 curvature 仍弱于 20.80 feature-only 的 `0.190304`。因此路线判断更新为 `feature_fusion_total_not_curvature`：feature-fusion 可以作为 auxiliary representation evidence 保留，但不能升级 benchmark candidate，也不能替代 20.77 reference，更不能写入 baseline。
+
+下一步主线应转向 curvature label / output representation redefinition：先判断 `wLD/wWD/wLW` 这组 RBC-style curvature 参数在当前 Bx/By/Bz、projected mask 和 depth/profile grid 口径下是否是合适的监督目标；必要时改成更直接的 profile/depth basis、curvature field、depth-grid auxiliary target 或重新定义的 shape factors。curvature-targeted data top-up 和 exact Piao feature reproduction 应排在这个审计之后，而不是先继续 head/loss 小修。

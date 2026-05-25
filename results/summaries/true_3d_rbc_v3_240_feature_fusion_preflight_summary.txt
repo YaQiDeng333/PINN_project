@@ -1,0 +1,43 @@
+true_3d_rbc_v3_240 feature-fusion preflight summary
+
+stage: 20.81
+task_type: FEATURE_FUSION_NEURAL_MODEL_FOR_TRUE_3D_RBC_CURVATURE_ON_V3_240
+dataset_id: comsol_true_3d_rbc_imported_watertight_pilot_v3_240
+preflight_mode: Codex subagents, read-only
+subagent_support: supported
+direct_continue: yes
+
+1. registry / manifest pass:
+GO. COMSOL_DATA_REGISTRY.md and results/manifests/comsol_true_3d_rbc_imported_watertight_pilot_v3_240.manifest.json agree on status=pilot_generated, train_ready_candidate=true, baseline_ready=false, route=true_3d_piao_style, geometry_method=imported_watertight_mesh_solid, exact_piao_rbc=false, rbc_style_approximation=true. allowed_use includes explicit_pilot_training_gate. forbidden_use includes automatic_mainline_training, baseline_update, current_baseline_replacement, latest_newest_auto_discovery, and direct_training_without_manifest_gate.
+
+2. 20.80 features usable:
+GO. results/metrics/true_3d_rbc_v3_240_piao_nls_features.csv has 240 rows, split 162/39/39, 644 columns total: sample_id, split, and 642 finite numeric feature columns. Model input may use only F0__/F1__/F2__/F3__/F4__/F5__ columns. F0=135, F1=216, F2=90, F3=51, F4=108 with fit_success_rate=1.0, F5=42. The 20.80 validation-selected feature-only set was F0_F1_F2_basic_physical with 441 features.
+
+3. feature leakage risk:
+Manageable if strict allowlist is used. sample_id and split must be used only for joining and split indices, not model input. Dataset metadata columns such as curvature_template, depth_bin, aspect_bin, size_bin, source_dataset_id, source_npz_path, source_index, and dataset_id are forbidden as model input. Labels and supervision fields rbc_params, L_m, W_m, D_m, wLD, wWD, wLW, projected_mask_2d, profile_depth_grid_m, profile_depth_map_xy_m, profile_pose, geometry_params_json, and depth_levels_m are forbidden as input features. Feature imputer and scaler must be fit on train only.
+
+4. reference metrics complete:
+GO. 20.77 neural reference, 20.80 feature-only diagnostic, and 20.79 failed refinement are present. Canonical references:
+- 20.77 neural seed 42: total=0.678014, L/W/D=1.891892/2.185760/0.800231 mm, curvature=0.201076, wLD/wWD/wLW=0.209439/0.204469/0.189319, IoU/Dice=0.750650/0.847727, depth_rmse=0.000387737 m.
+- 20.80 feature-only: total=0.695724, L/W/D=2.594562/2.360901/0.966398 mm, curvature=0.190304, wLD/wWD/wLW=0.209649/0.194797/0.166465, IoU/Dice=0.714534/0.826272, depth_rmse=0.000449640 m.
+- 20.79 failed refinement: total=0.753387, L/W/D=2.660231/2.135249/1.111548 mm, curvature=0.211584, wLD/wWD/wLW=0.232094/0.217639/0.185019, IoU/Dice=0.728240/0.834597, depth_rmse=0.000555089 m.
+Note: 20.79 curvature_refined_metrics.csv has a minor mismatch; use 20.79 seed_summary/profile/vs_reference as canonical.
+
+5. recommended fusion candidates:
+Use bounded seed=42 candidate screen with report-only references:
+- H1_curv_fusion_F1F2_w0p5: 20.77 Conv1D encoder; dimension head neural-only; curvature head gets neural latent plus F1/F2 feature bottleneck; curvature loss weight 0.5.
+- H2_curv_fusion_F0F1F2_w0p5: same, with F0/F1/F2 features.
+- H3_curv_fusion_F0F1F2_w1p0: same as H2, curvature loss weight 1.0.
+Avoid 20.79-style shared feature fusion because it regressed total MAE, dimensions, and mask Dice.
+
+6. need neural training:
+Yes, bounded model-refinement training only. No COMSOL, no new data, no NPZ modification, no checkpoint submission, no baseline.
+
+7. allowed submit:
+Stage 20.81 scripts, summaries, metrics, and Markdown route/log updates if produced: EXPERIMENT_LOG.md, NEXT_STEP.md, PINN优化路线.md.
+
+8. forbidden submit:
+data/, NPZ, checkpoint, preview PNG, .mph, raw CSV, generated data, temp STL/mesh, notes/, baseline docs, CURRENT_BASELINE.md, COMSOL baseline docs, COMSOL_DATA_REGISTRY.md, scripts/visualize_current_baseline.py, MODEL_STRUCTURE_PLAN.md deletion, COMSOL dirty items.
+
+9. stop conditions:
+Stop if registry/manifest gate fails, 20.80 feature CSV is missing or mismatched, feature leakage columns enter model input, train-only scaling/imputation is not enforced, no candidate runs successfully, no fusion candidate improves validation curvature without unacceptable L/W/D or Dice regression, review agent reports unresolved must-fix after allowed loops, or forbidden artifacts are staged.

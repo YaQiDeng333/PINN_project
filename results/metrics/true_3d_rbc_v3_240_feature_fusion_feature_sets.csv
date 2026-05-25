@@ -1,0 +1,6 @@
+feature_set,prefixes,feature_count,train_finite_after_scaling,val_finite_after_scaling,test_finite_after_scaling,train_nan_before_impute,all_nan_before_impute,usable,notes
+FS_basic_physical,"F0__,F1__,F2__",441,True,True,True,0,0,True,imputer/scaler fit on train split only
+FS_basic_cross_axis,"F0__,F1__,F2__,F3__",492,True,True,True,0,0,True,imputer/scaler fit on train split only
+FS_nls_optional,"F0__,F1__,F2__,F3__,F4__",600,True,True,True,0,0,True,imputer/scaler fit on train split only
+FS_curvature_focused,"F0__,F1__,F2__,F3__,F5__",534,True,True,True,0,0,True,imputer/scaler fit on train split only
+FS_F1F2_curvature_only,"F1__,F2__",306,True,True,True,0,0,True,imputer/scaler fit on train split only
