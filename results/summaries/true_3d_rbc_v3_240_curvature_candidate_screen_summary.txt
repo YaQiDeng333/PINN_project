@@ -1,0 +1,20 @@
+true_3d_rbc_v3_240 curvature candidate screen summary
+
+dataset_id: comsol_true_3d_rbc_imported_watertight_pilot_v3_240
+seed: 42
+input: delta_b only; optional C3 features are derived only from delta_b and train-scaled.
+candidate_selection: validation-only; test metrics are report-only.
+selected_candidate: C1_split_heads
+selected_val_selection_score: 0.933301
+selected_test_normalized_mae: 0.753387
+selected_test_LWD_mae_mm: 2.660/2.135/1.112
+selected_test_curvature_mae: 0.211584
+selected_test_wLD_wWD_wLW: 0.232094/0.217639/0.185019
+selected_test_mask_iou_dice: 0.728240/0.834597
+selected_test_profile_depth_rmse_m: 0.000555089
+
+reference_test_normalized_mae: 0.678014
+reference_test_curvature_mae: 0.201076
+curvature_delta_vs_reference: 0.010508
+dice_delta_vs_reference: -0.013130
+boundary: no COMSOL, no data generation, no NPZ modification, no checkpoint written.

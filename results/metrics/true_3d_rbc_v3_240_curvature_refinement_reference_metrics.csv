@@ -1,0 +1,18 @@
+section,metric,value,notes
+identity,dataset_id,comsol_true_3d_rbc_imported_watertight_pilot_v3_240,explicit registry/manifest dataset
+identity,status,pilot_generated,
+identity,train_ready_candidate,True,
+identity,baseline_ready,False,must remain false
+identity,exact_piao_rbc,False,RBC-style approximation only
+data,n_samples,240,
+data,split_counts,"{""test"": 39, ""train"": 162, ""val"": 39}",
+reference,selected_seed,42,20.77 validation-selected seed
+reference,train_val_test_normalized_mae,0.6461113923125796/0.7486944236816504/0.6780143536818333,
+reference,L_W_D_mae_mm,1.891891360282898/2.1857595443725586/0.8002312183380127,
+reference,curvature_mae,0.20107580721378326,
+reference,wLD_wWD_wLW_mae,0.2094394713640213/0.20446909964084625/0.18931882083415985,
+reference,mask_iou_dice,0.7506502455785019/0.8477271366767738,
+reference,profile_depth_rmse_m,0.0003877372636895579,
+feature,feature_test_normalized_mae,0.7153952435041085,Piao-inspired feature sanity only
+feature,feature_curvature_mae,0.19504618346213531,
+benchmark,candidate_decision,v3_240_promising_benchmark_candidate,20.78 audit

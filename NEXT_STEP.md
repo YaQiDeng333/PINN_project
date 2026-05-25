@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-05-25 更新：第 20.79 后的下一步
+
+第 20.79 已完成 `comsol_true_3d_rbc_imported_watertight_pilot_v3_240` 上的 curvature-aware model refinement。本轮没有运行 COMSOL，没有生成或修改 NPZ，没有更新 `CURRENT_BASELINE.md`，也没有把 refined model 写成 baseline。
+
+核心判断是：`C1_split_heads` 被 validation-only selection 选中，但 test 指标相对 20.77 reference 退化。20.77 reference test normalized MAE 为 `0.678014`、curvature MAE 为 `0.201076`、projected mask Dice 为 `0.847727`；20.79 selected refined model test normalized MAE 为 `0.753387`、curvature MAE 为 `0.211584`、projected mask Dice 为 `0.834597`。`wLW` 和 `W_m` 有轻微改善，但 `L_m`、`D_m`、`wLD`、`wWD` 和 profile depth RMSE 退化，因此不能升级 benchmark candidate。
+
+下一步唯一建议：保留第 20.77 的 v3_240 benchmark candidate，不采用 20.79 refined model；优先做 **exact Piao / NLS-inspired feature pipeline** 作为 curvature 诊断和 comparator，其次再考虑 curvature-targeted data top-up。不要把本轮结果写成 baseline replacement。
+
 ## 2026-05-25 更新：第 20.78 后的下一步
 
 第 20.78 已完成 formal true 3D RBC benchmark candidate audit。本轮没有运行 COMSOL、没有生成或修改 NPZ、没有重新训练模型，也没有更新 `CURRENT_BASELINE.md`。审计结论是：`comsol_true_3d_rbc_imported_watertight_pilot_v3_240` 可以进入 **formal benchmark candidate**，但必须带 curvature risk，且明确不是 baseline。

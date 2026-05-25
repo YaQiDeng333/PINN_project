@@ -1,0 +1,40 @@
+true_3d_rbc_v3_240 curvature refinement reference summary
+
+dataset_id: comsol_true_3d_rbc_imported_watertight_pilot_v3_240
+status: pilot_generated
+train_ready_candidate: True
+baseline_ready: False
+input_shape: delta_b=(240,3,3,201), Conv1D=(240,9,201)
+split: {'test': 39, 'train': 162, 'val': 39}
+selected_20_77_seed: 42
+20_77_neural_train_val_test_mae: 0.6461113923125796/0.7486944236816504/0.6780143536818333
+20_77_LWD_mae_mm: 1.891891360282898/2.1857595443725586/0.8002312183380127
+20_77_curvature_mae: 0.20107580721378326
+20_77_wLD_wWD_wLW_mae: 0.2094394713640213/0.20446909964084625/0.18931882083415985
+20_77_mask_iou_dice: 0.7506502455785019/0.8477271366767738
+20_77_profile_depth_rmse_m: 0.0003877372636895579
+feature_baseline_test_mae: 0.7153952435041085
+
+curvature_failure_audit:
+true_3d_rbc_v3_240 curvature failure audit summary
+
+scope: existing 20.77 v3_240 selected-seed test metrics only; no retraining and no NPZ access.
+test_sample_count: 39
+per_param_curvature_errors: wLD=0.209439, wWD=0.204469, wLW=0.189319
+worst_curvature_param: wLD; normalized_mae=0.904966
+worst_curvature_template: boxy; curvature_mae=0.296838
+best_curvature_template: round; curvature_mae=0.094515
+worst_depth_bin_by_curvature: deep; curvature_mae=0.215565
+worst_aspect_bin_by_curvature: compact; curvature_mae=0.228875
+curvature_vs_D_m_error_corr: 0.217905
+curvature_vs_mask_dice_corr: -0.081215
+curvature_vs_profile_depth_rmse_corr: 0.358243
+
+curvature_failure_shape: not global; concentrated in boxy/sharp templates and weaker for round/LD_dominant/WD_dominant.
+D_m_link: D_m improves at v3_240, but curvature does not, so depth learnability alone does not resolve RBC curvature.
+mask_metric_limit: projected mask can be good while curvature remains wrong; 2D footprint metrics are insufficient for 3D profile curvature.
+clean_high_dice_failure_case: rbc_v3topup_123_test_boxy_medium_wide; Dice=0.956750; D_mae_mm=0.130784; curvature_mae=0.364948
+next_step_preference: model refinement and exact Piao/NLS-inspired feature pipeline first; curvature-targeted sampling second; blind expansion to 480 is not first choice.
+known_gap: existing 20.77 metrics lack per-sample signal amplitude features, so signal-amplitude correlation is not audited here.
+
+boundary: fixed reference only; no COMSOL, no new data, no NPZ modification, no retraining.

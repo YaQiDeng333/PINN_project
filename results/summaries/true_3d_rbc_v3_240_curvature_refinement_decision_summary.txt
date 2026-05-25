@@ -1,0 +1,23 @@
+true_3d_rbc_v3_240 curvature refinement decision summary
+
+decision_category: E_severe_regression_revert_to_20_77_candidate
+recommended_next_step: revert to 20.77 benchmark candidate
+
+selected_variant: C1_split_heads
+selected_seed_by_validation: 42
+test_normalized_mae: 0.7533873075093979
+test_LWD_mae_mm: 2.660231047715896/2.135249491303395/1.1115478296310475
+test_curvature_mae: 0.21158406477517042
+test_wLD_wWD_wLW: 0.2320939057912582/0.21763882270226112/0.18501947017816398
+test_projected_mask_iou_dice: 0.7282398476842469/0.8345969696140306
+
+answers:
+1. Did curvature improve? no.
+2. Did L/W/D remain stable? no; L_m and D_m regressed.
+3. Did projected mask remain stable? borderline; Dice remains above 0.83 but drops versus 20.77.
+4. Is refined model better than 20.77? no.
+5. Is refined model better than feature baseline? no for selected validation model.
+6. Is this enough for benchmark candidate upgrade? no.
+7. What is the next step? revert to 20.77 benchmark candidate and pursue exact Piao feature pipeline or targeted curvature data.
+
+baseline_update: false

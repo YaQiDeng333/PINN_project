@@ -1,5 +1,15 @@
 # 实验工作日志
 
+## 2026-05-25 更新：第 20.79 curvature-aware true 3D RBC model refinement on v3_240
+
+第 20.79 只在固定 `dataset_id=comsol_true_3d_rbc_imported_watertight_pilot_v3_240` 上做 curvature-aware model refinement；没有运行 COMSOL，没有生成新数据，没有修改 NPZ，没有创建或更新 baseline，也没有修改 `CURRENT_BASELINE.md`。所有训练和评估继续通过 `COMSOL_DATA_REGISTRY.md` + manifest 显式加载 dataset_id，禁止 latest/newest NPZ 自动扫描。
+
+本轮先固定 20.77 / 20.78 reference metrics，然后做 seed=42 candidate screen。Validation-only selection 选中 `C1_split_heads`，随后对该 candidate 运行 seeds `42/123/2026`。Selected seed 仍为 `42`，test normalized MAE 为 `0.753387`，L/W/D MAE 为 `2.660/2.135/1.112 mm`，curvature MAE 为 `0.211584`，wLD/wWD/wLW 为 `0.232094/0.217639/0.185019`，projected mask IoU/Dice 为 `0.728240/0.834597`，profile depth RMSE 为 `0.000555089 m`。
+
+与第 20.77 reference 相比，curvature MAE 从 `0.201076` 退化到 `0.211584`，total normalized MAE 从 `0.678014` 退化到 `0.753387`，L_m、D_m、wLD、wWD、mask Dice 和 depth RMSE 均退化；只有 W_m 和 wLW 有轻微改善。`C2_split_heads_curv_weight_1p5` 在 test 上看起来更好，但 validation score 未选中，因此不能用 test 反选。Review agent 只读复核通过，无 must-fix，同意本轮不升级 refined model。
+
+路线结论：第 20.79 的价值是诊断性负结果，说明简单 split-head / curvature-weighted 小改没有解决 curvature identifiability。当前应保留第 20.77 v3_240 benchmark candidate，不把 20.79 refined model 写成 baseline 或 candidate upgrade；下一步优先 exact Piao / NLS-inspired feature pipeline，其次 curvature-targeted data top-up。
+
 ## 2026-05-25 更新：第 20.78 formal true 3D RBC benchmark candidate audit on v3_240
 
 第 20.78 在第 20.77 training gate 通过后，只做 formal benchmark candidate audit：不运行 COMSOL、不生成或修改 NPZ、不重新训练模型、不做 architecture search、不建立 baseline，也不更新 `CURRENT_BASELINE.md`。Subagent preflight 全部为 GO：registry / manifest gate 通过，20.77 / 20.75 / 20.73 指标完整且一致，现有材料足够支撑固定口径审计。
