@@ -204,3 +204,8 @@ forward profile refinement 已执行受控 sweep，但 validation 选择 `lambda
 训练 gate 的核心结论是：模型能拟合 train，但 N=56 的泛化证据不足。小型 Conv1D 在完整训练轨迹中可把 train normalized MAE 降到 `0.0012`，说明链路能学习训练样本；但 validation 选择的 checkpoint 在 test 上 normalized MAE 为 `0.7601`，只优于 mean baseline `0.8598`，没有超过 Piao-inspired feature baseline `0.7564`。当前可学习信号主要在 `L_m`、`W_m`，`D_m` 边缘，`wLD/wWD/wLW` 三个 curvature 参数仍不可稳定辨识。
 
 唯一下一步建议：扩展 true 3D RBC dataset 到 120/240 量级，并把 validation set 扩到至少 20-30 个样本，再重新跑同一套 registry/manifest-gated training gate。不要先调大模型、不要更新 baseline、不要回到 dense mask 主线；dense mask baseline 继续只作 comparator。
+## 2026-05-25 更新：第 20.76 后的下一步
+
+第 20.76 已把 true 3D RBC imported-watertight dataset 从 v2_120 扩展到 `comsol_true_3d_rbc_imported_watertight_pilot_v3_240`。本轮没有训练、没有 baseline、没有更新 `CURRENT_BASELINE.md`；v2_120 source pack 未覆盖，v3 top-up 和 assembled NPZ 仍是 generated data，不提交。
+
+当前 v3_240 状态是 `pilot_generated` 且 `train_ready_candidate=True`：N=240，split=162/39/39，curvature coverage=sharp 48 / round 49 / boxy 47 / LD_dominant 46 / WD_dominant 50，schema/registry/manifest validation 全部通过，baseline_ready=False。下一步唯一建议是执行 true 3D training gate on v3_240，必须通过 `dataset_id=comsol_true_3d_rbc_imported_watertight_pilot_v3_240` + manifest + `COMSOL_DATA_REGISTRY.md` 显式加载，禁止 latest/newest NPZ 自动扫描；重点检查 `D_m` 和 `wLD/wWD/wLW` 是否相对 v2_120 进一步稳定。

@@ -1,0 +1,45 @@
+20.76 true 3D RBC dataset expansion to v3_240 preflight summary
+
+Decision: GO.
+
+Subagent conclusions:
+- Agent A Method / Route: GO. Expanding to v3_240 follows the true 3D / Piao-style imported-watertight route. This stage is data expansion only, not training, not baseline, and not exact Piao reproduction. Keep exact_piao_rbc=False and rbc_style_approximation=True.
+- Agent B Data / Coverage: GO. v2_120 is usable but still thin in WD_dominant, sharp, narrow, medium/deep, and curvature numeric diversity. The top-up should target WD +28, sharp +26, round +25, boxy +25, LD +24, plus deep +45, medium +44, shallow +39.
+- Agent C COMSOL Generation: GO with chunk/resume. The 20.70 imported_watertight_mesh_solid material/domain/solver protocol remains the correct route. Run chunked, record failures honestly, do not reduce Jscale, and do not fallback to high-layer.
+- Agent D Registry / Manifest: GO. Add dataset ids comsol_true_3d_rbc_imported_watertight_pilot_v3_topup_20_76 and comsol_true_3d_rbc_imported_watertight_pilot_v3_240 with manifests and explicit allowed/forbidden uses.
+- Agent E Safety / Git: GO with strict whitelist. Do not stage data, NPZ, temp STL, .mph, raw CSV, checkpoint, preview PNG, notes, baseline docs, scripts/visualize_current_baseline.py, MODEL_STRUCTURE_PLAN.md deletion, or existing COMSOL dirty items.
+- Agent F Implementation: GO. Use thin v3_240 wrappers around the 20.74 workflow instead of rewriting shared generation logic.
+
+Known source pack:
+- source dataset_id=comsol_true_3d_rbc_imported_watertight_pilot_v2_120
+- source N=112
+- source split=train 76 / val 18 / test 18
+- source coverage=sharp 22 / round 23 / boxy 23 / LD_dominant 24 / WD_dominant 20
+- source status=pilot_generated
+- source train_ready_candidate=True
+- source baseline_ready=False
+
+20.76 target:
+- planned top-up N=160
+- target top-up success N=128
+- target assembled N=240
+- target assembled split=train 160 / val 40 / test 40
+- minimum assembled N=216
+- minimum assembled split=train 144 / val 36 / test 36
+- train_ready_candidate requires every curvature_template count >=43, schema validation pass, registry validation pass, and baseline_ready=False.
+
+Dirty boundary:
+- PINN unrelated dirty item to exclude: scripts/visualize_current_baseline.py
+- COMSOL unrelated dirty items to exclude: src/tools/physics.py, src/tools/results.py, src/tools/study.py, scripts/generate_mfl_rectangular_sweep.py
+
+Allowed commits are metadata/scripts/results only. Generated data and model artifacts are never committed.
+
+Hard blockers:
+- source v2_120 cannot be resolved via COMSOL_DATA_REGISTRY.md + manifest
+- top-up plan cannot reach target/minimum coverage
+- mesh pass count below 128
+- COMSOL top-up success below 104
+- assembled validation, manifest, or registry validation fails
+- any data/NPZ/temp STL/.mph/raw CSV/checkpoint/preview PNG/notes is staged
+
+Continue execution: yes.

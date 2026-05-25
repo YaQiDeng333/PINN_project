@@ -1,0 +1,17 @@
+20.76 true 3D RBC v3_240 assembled summary
+
+dataset_id: comsol_true_3d_rbc_imported_watertight_pilot_v3_240
+source_dataset_id: comsol_true_3d_rbc_imported_watertight_pilot_v2_120
+topup_dataset_id: comsol_true_3d_rbc_imported_watertight_pilot_v3_topup_20_76
+assembled_npz: C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\prepared\experimental\true_3d_rbc_pilot\comsol_true_3d_rbc_imported_watertight_pilot_v3_240.npz
+n_samples: 240
+split_counts: {'val': 39, 'test': 39, 'train': 162}
+curvature_counts: {'sharp': 48, 'round': 49, 'boxy': 47, 'LD_dominant': 46, 'WD_dominant': 50}
+depth_counts: {'shallow': 86, 'medium': 79, 'deep': 75}
+aspect_counts: {'compact': 64, 'balanced': 64, 'wide': 64, 'narrow': 48}
+schema_validation_pass_precheck: True
+status: pilot_generated
+train_ready_candidate_precheck: True
+baseline_ready: False
+
+Boundary: assembled NPZ is generated data and must not be committed.

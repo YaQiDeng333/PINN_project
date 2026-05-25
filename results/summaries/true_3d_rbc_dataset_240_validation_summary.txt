@@ -1,0 +1,14 @@
+20.76 true 3D RBC v3_240 validation summary
+
+dataset_id: comsol_true_3d_rbc_imported_watertight_pilot_v3_240
+status: pilot_generated
+n_samples: 240
+split_counts: {'val': 39, 'test': 39, 'train': 162}
+curvature_counts: {'sharp': 48, 'round': 49, 'boxy': 47, 'LD_dominant': 46, 'WD_dominant': 50}
+depth_counts: {'shallow': 86, 'medium': 79, 'deep': 75}
+schema_validation_pass: True
+train_ready_candidate: True
+baseline_ready: False
+npz_sha256: 6cfd6c4dd32c474dbe4843ac520f541123a54a8f0082a94d3e28d0c8cd196817
+
+Boundary: generated data is not committed; loading must use dataset_id + manifest.
