@@ -1,5 +1,15 @@
 # 实验工作日志
 
+## 2026-05-25 更新：第 20.80 Piao / NLS-inspired feature diagnostic for true 3D RBC curvature
+
+第 20.80 只在固定 `dataset_id=comsol_true_3d_rbc_imported_watertight_pilot_v3_240` 上做 Piao/NLS-inspired feature diagnostic；没有运行 COMSOL，没有生成或修改 NPZ，没有训练 neural model，没有建立 baseline，也没有更新 `CURRENT_BASELINE.md`。数据仍通过 `COMSOL_DATA_REGISTRY.md` + manifest 的显式 dataset_id gate 加载，禁止 latest/newest NPZ 自动扫描。本轮不是完整 Piao 2019 复现，也不是 LS-SVM 复现；preflight 中 Piao PDF 正文抽取不稳定，因此只使用已有 fullpaper alignment summary 和当前项目结果定义可执行特征。
+
+Stage A-B 生成并提取了 F0-F5 特征：F0 复用 20.77 的 135 维 hand-crafted control，F1 增加 peak / width / lobe / flatness / sharpness，F2 增加 gradient / zero-crossing / left-right asymmetry，F3 增加 Bx/By/Bz cross-axis 和 vector magnitude，F4 做 bounded gaussian / derivative-of-gaussian NLS proxy，F5 做 curvature-focused ratio 派生量。最终特征数为 642，全部 finite；F4 NLS proxy fit_success_rate=1.0，但它只是 proxy，不是 exact Piao two-stage 18-feature extraction。
+
+Stage C 的 feature regression 使用 train-only imputation/scaling，validation-only feature/model selection，test final only。validation 选中 `F0_F1_F2_basic_physical + svr_rbf_C10_eps0.03`，不是包含 F4 的 NLS feature set。test normalized MAE 为 `0.695724`，L/W/D MAE 为 `2.595/2.361/0.966 mm`，curvature MAE 为 `0.190304`，wLD/wWD/wLW 为 `0.209649/0.194797/0.166465`，projected mask IoU/Dice 为 `0.714534/0.826272`，profile depth RMSE 为 `0.000449640 m`。
+
+与 20.77 neural reference 相比，本轮 curvature 从 `0.201076` 改善到 `0.190304`，wWD / wLW 改善，但 wLD 基本没有改善；同时 total MAE、L/W/D 和 Dice 均弱于 20.77 neural。与 20.77 feature baseline 相比，total MAE、curvature、wLD、wLW、Dice 和 depth RMSE 有改善，wWD 基本持平略差。结论是：F0+F1+F2 physical features 对 curvature 有实质但有限的帮助，F4 NLS proxy 可稳定提取但不是本轮收益来源。Review agent 只读复核通过，无 must-fix；建议已采纳，收紧归因并保证候选阶段不计算 test。下一步唯一建议是 feature-fusion / hybrid：保留 20.77 neural path 负责 L/W/D 与 mask/profile，引入 F1/F2 这类稳定物理特征辅助 curvature；仍不做 baseline replacement。
+
 ## 2026-05-25 更新：第 20.79 curvature-aware true 3D RBC model refinement on v3_240
 
 第 20.79 只在固定 `dataset_id=comsol_true_3d_rbc_imported_watertight_pilot_v3_240` 上做 curvature-aware model refinement；没有运行 COMSOL，没有生成新数据，没有修改 NPZ，没有创建或更新 baseline，也没有修改 `CURRENT_BASELINE.md`。所有训练和评估继续通过 `COMSOL_DATA_REGISTRY.md` + manifest 显式加载 dataset_id，禁止 latest/newest NPZ 自动扫描。

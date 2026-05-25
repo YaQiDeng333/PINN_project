@@ -1,0 +1,63 @@
+true_3d_rbc_v3_240 Piao/NLS feature diagnostic preflight summary
+
+stage: 20.80
+task_type: PIAO_NLS_INSPIRED_FEATURE_DIAGNOSTIC_FOR_TRUE_3D_RBC_CURVATURE
+dataset_id: comsol_true_3d_rbc_imported_watertight_pilot_v3_240
+
+Subagent preflight status:
+- Agent A Piao Method: GO for Piao/NLS-inspired diagnostic comparator only. The local PDF text was not reliably extractable during preflight, so this stage must rely on the existing Piao fullpaper alignment summary and must not claim exact Piao 2019 reproduction.
+- Agent B Data Registry / Schema: GO. Registry, manifest, NPZ schema, split 162/39/39, delta_b shape (240,3,3,201), axis_names [Bx, By, Bz], and explicit dataset_id loader gate passed.
+- Agent C Feature Engineering: GO. Recommended F0 control, F1 peak/width/energy, F2 gradient/asymmetry, F3 cross-axis/vector magnitude, F4 bounded NLS proxy, F5 curvature-focused derived ratios.
+- Agent D Experiment Design: GO for diagnostic. Use train-only imputation/scaling, validation-only model/feature selection, test-final-only evaluation, and no nonselected test ranking.
+- Agent E Safety / Git: GO with strict whitelist. Existing dirty item scripts/visualize_current_baseline.py is unrelated and must not be staged. Forbidden artifacts remain data/, NPZ, checkpoints, preview PNG, .mph, raw CSV, temp STL, notes, __pycache__, and baseline docs.
+
+1. Piao PDF / summary readable:
+- PDF text extraction was not reliable in this preflight.
+- Existing piao2019_fullpaper_alignment_summary.txt and 20.77-20.79 summaries are readable and sufficient for an inspired diagnostic.
+
+2. Exact Piao or Piao-inspired:
+- This stage is Piao-inspired / NLS-inspired only.
+- exact_piao_rbc remains false; rbc_style_approximation remains true.
+- Ridge, SVR, KernelRidge, and RandomForest are engineering substitutes, not LS-SVM reproduction.
+
+3. Dataset / registry / manifest:
+- dataset_id exists and must be loaded through COMSOL_DATA_REGISTRY.md plus manifest.
+- allowed_use includes explicit_pilot_training_gate.
+- forbidden_use includes automatic_mainline_training, baseline_update, current_baseline_replacement, latest_newest_auto_discovery, direct_training_without_manifest_gate.
+- No latest/newest NPZ scan is allowed.
+
+4. Recommended feature sets:
+- F0_existing_handcrafted: existing 20.77 hand-crafted feature baseline control.
+- F1_peak_shape: peak, lobe, width, area, flatness, sharpness.
+- F2_gradient_asymmetry: gradients, zero crossings, left/right asymmetry.
+- F3_cross_axis: Bx/By/Bz ratios, offsets, correlations, vector magnitude.
+- F4_nls_curve_fit: bounded gaussian and derivative-of-gaussian NLS proxy if scipy is available.
+- F5_curvature_focused: width/sigma/lobe/center-outer ratios for wLD/wWD/wLW.
+
+5. Recommended models:
+- Ridge.
+- SVR RBF.
+- KernelRidge RBF.
+- RandomForestRegressor if sklearn is available.
+- No neural model in this stage.
+
+6. Need neural training:
+- No.
+
+7. Allowed submit:
+- Stage 20.80 scripts under scripts/.
+- Stage 20.80 summaries and metrics under results/summaries and results/metrics.
+- EXPERIMENT_LOG.md, NEXT_STEP.md, PINN优化路线.md after read-only review passes.
+
+8. Forbidden submit:
+- data/, NPZ, checkpoint, preview PNG, notes, __pycache__, .mph, raw CSV, generated data, temp STL/mesh, baseline docs, CURRENT_BASELINE.md, scripts/visualize_current_baseline.py.
+
+9. Stop conditions:
+- Registry/manifest/dataset_id/allowed_use gate fails.
+- Feature extraction cannot produce any feature group beyond F0.
+- Feature regression uses labels/metadata as input.
+- Scaling/imputation uses val/test statistics.
+- Nonselected candidates are ranked by test performance.
+- Baseline docs or forbidden artifacts are staged.
+
+go_no_go: GO for Stage A-D diagnostic execution.

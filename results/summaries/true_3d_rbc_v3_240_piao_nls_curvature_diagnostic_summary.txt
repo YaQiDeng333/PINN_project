@@ -1,0 +1,36 @@
+true_3d_rbc_v3_240 Piao/NLS curvature diagnostic summary
+
+dataset_id: comsol_true_3d_rbc_imported_watertight_pilot_v3_240
+scope: Piao/NLS-inspired feature diagnostic only; no COMSOL, no data generation, no NPZ modification, no neural training, no baseline update.
+method_claim: Piao-inspired / NLS-inspired; not exact Piao reproduction and not LS-SVM reproduction.
+selected_feature_set: F0_F1_F2_basic_physical
+selected_model: svr_rbf_C10_eps0.03
+test_total_mae: 0.6957241464883853
+test_LWD_mae_mm: 2.5945624946019588/2.3609011820875683/0.9663975906486695
+test_curvature_mae: 0.1903038014872716
+test_wLD_wWD_wLW: 0.2096490095823239/0.1947971781094869/0.1664652182505681
+test_projected_mask_iou_dice: 0.7145338928326161/0.8262715758785393
+test_profile_depth_rmse_m: 0.0004496398864713951
+nls_fit_success_rate: 1.0
+selected_group_note: F4 NLS proxy was stable but not selected; the observed gain is attributable to F0+F1+F2 physical peak/width/gradient features.
+
+reference_comparison:
+- 20.77 neural: total=0.6780143536818333, curvature=0.20107580721378326, Dice=0.8477271366767738
+- 20.77 feature baseline: total=0.7153952435041085, curvature=0.19504618346213531, Dice=0.815450420558869
+- 20.79 refined model: total=0.7533873075093979, curvature=0.21158406477517042, Dice=0.8345969696140306
+
+answers:
+- Did Piao/NLS-inspired features improve wLD?: False (0.2096490095823239)
+- Did Piao/NLS-inspired features improve wWD?: True (0.1947971781094869)
+- Did Piao/NLS-inspired features improve wLW?: True (0.1664652182505681)
+- Which feature groups matter?: F0_F1_F2_basic_physical (selected by validation; beyond_F0=True)
+- Are NLS fits stable enough?: True (1.0)
+- Does curvature improve vs 20.77 neural by 0.01?: True (-0.010772005726511658)
+- Does curvature improve vs 20.77 feature baseline?: True (-0.0047423819748637075)
+- Does projected mask collapse?: False (0.8262715758785393)
+- Hybrid neural+feature promising?: True (feature_set=F0_F1_F2_basic_physical, total=0.6957241464883853, curvature=0.1903038014872716)
+- Recommended next step: feature-fusion neural model using F0+F1+F2 physical features for curvature; keep 20.77 neural path for L/W/D (A_feature_fusion_neural_model)
+
+decision_category: A_feature_fusion_neural_model
+next_step: feature-fusion neural model using F0+F1+F2 physical features for curvature; keep 20.77 neural path for L/W/D
+baseline_update: false

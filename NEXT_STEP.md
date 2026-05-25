@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-05-25 更新：第 20.80 后的下一步
+
+第 20.80 已完成 `comsol_true_3d_rbc_imported_watertight_pilot_v3_240` 上的 Piao/NLS-inspired feature diagnostic。本轮没有运行 COMSOL，没有生成或修改 NPZ，没有训练 neural model，没有创建 baseline，也没有更新 `CURRENT_BASELINE.md`；所有输入仍通过 registry/manifest 显式 dataset_id 加载，禁止 latest/newest NPZ 自动扫描。
+
+核心判断是：F0+F1+F2 physical features 对 curvature 有真实但有限的帮助。validation 选中 `F0_F1_F2_basic_physical + svr_rbf_C10_eps0.03`，test total MAE 为 `0.695724`，curvature MAE 为 `0.190304`，wLD/wWD/wLW 为 `0.209649/0.194797/0.166465`，projected mask Dice 为 `0.826272`。它优于 20.77 feature baseline 的 total `0.715395` / curvature `0.195046`，也比 20.79 refined model 更好；但仍弱于 20.77 neural 的 total `0.678014` 和 Dice `0.847727`，且 wLD 没有改善。F4 NLS proxy 提取稳定，但没有被 validation 选中，不能把本轮写成 exact Piao/NLS 成功。
+
+下一步唯一建议：做 **feature-fusion / hybrid neural model**，保留 20.77 neural path 负责 L/W/D 与 mask/profile，把 F1/F2 这类稳定物理特征作为 curvature 辅助输入或辅助 head；不要做 baseline replacement，不要声称完整 Piao 复现，也不要直接扩到 480。
+
 ## 2026-05-25 更新：第 20.79 后的下一步
 
 第 20.79 已完成 `comsol_true_3d_rbc_imported_watertight_pilot_v3_240` 上的 curvature-aware model refinement。本轮没有运行 COMSOL，没有生成或修改 NPZ，没有更新 `CURRENT_BASELINE.md`，也没有把 refined model 写成 baseline。

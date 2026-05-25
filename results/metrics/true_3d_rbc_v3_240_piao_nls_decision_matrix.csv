@@ -1,0 +1,11 @@
+question,answer,evidence,decision
+Did Piao/NLS-inspired features improve wLD?,False,0.2096490095823239,A_feature_fusion_neural_model
+Did Piao/NLS-inspired features improve wWD?,True,0.1947971781094869,A_feature_fusion_neural_model
+Did Piao/NLS-inspired features improve wLW?,True,0.1664652182505681,A_feature_fusion_neural_model
+Which feature groups matter?,F0_F1_F2_basic_physical,selected by validation; beyond_F0=True,A_feature_fusion_neural_model
+Are NLS fits stable enough?,True,1.0,A_feature_fusion_neural_model
+Does curvature improve vs 20.77 neural by 0.01?,True,-0.010772005726511658,A_feature_fusion_neural_model
+Does curvature improve vs 20.77 feature baseline?,True,-0.0047423819748637075,A_feature_fusion_neural_model
+Does projected mask collapse?,False,0.8262715758785393,A_feature_fusion_neural_model
+Hybrid neural+feature promising?,True,"feature_set=F0_F1_F2_basic_physical, total=0.6957241464883853, curvature=0.1903038014872716",A_feature_fusion_neural_model
+Recommended next step,feature-fusion neural model using F0+F1+F2 physical features for curvature; keep 20.77 neural path for L/W/D,A_feature_fusion_neural_model,A_feature_fusion_neural_model

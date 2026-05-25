@@ -1,0 +1,22 @@
+true_3d_rbc_v3_240 Piao/NLS feature regression summary
+
+dataset_id: comsol_true_3d_rbc_imported_watertight_pilot_v3_240
+scope: Piao/NLS-inspired feature regressor diagnostic; no neural training, no COMSOL, no data generation, no baseline update.
+model_selection: validation-only feature_set/model/hyperparameter selection; test final only for selected candidate.
+feature_sets_tested: F0_existing_only, F0_F1_F2_basic_physical, F0_F1_F2_F3_cross_axis, F0_F1_F2_F3_F4_nls, F0_F1_F2_F3_F4_F5_curvature_focused, curvature_focused_without_F0
+candidate_train_val_rows: 204
+selected_feature_set: F0_F1_F2_basic_physical
+selected_model: svr_rbf_C10_eps0.03
+selected_feature_count: 441
+selected_validation_score: 1.185901
+selected_test_total_mae: 0.695724
+selected_test_LWD_mae_mm: 2.594562/2.360901/0.966398
+selected_test_curvature_mae: 0.190304
+selected_test_wLD_wWD_wLW: 0.209649/0.194797/0.166465
+selected_test_projected_mask_iou_dice: 0.714534/0.826272
+selected_test_profile_depth_rmse_m: 0.000449640
+vs_20_77_neural_curvature_improved_by_0p01: True
+vs_20_77_feature_curvature_improved: True
+feature_set_beyond_F0_responsible: True
+diagnostic_useful_for_curvature: True
+interpretation: F0+F1+F2 physical features helped curvature in this diagnostic; F4 NLS proxy was extracted successfully but was not part of the validation-selected feature set.

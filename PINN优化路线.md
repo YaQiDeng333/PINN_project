@@ -1,5 +1,13 @@
 # PINN 优化路线
 
+## 2026-05-25 路线同步：20.80 Piao/NLS-inspired feature diagnostic
+
+20.80 的路线意义是：curvature 问题不是简单 neural head/loss 能修好，但 Bx/By/Bz 信号里确实存在一部分 physical curvature cue。固定 v3_240 dataset 上，validation 选中的不是 F4 NLS proxy，而是 `F0_F1_F2_basic_physical + svr_rbf_C10_eps0.03`；它把 test curvature MAE 从 20.77 neural 的 `0.201076` 降到 `0.190304`，并优于 20.77 feature baseline 的 `0.195046`。但 total MAE `0.695724`、L/W/D `2.595/2.361/0.966 mm` 和 projected mask Dice `0.826272` 都不如 20.77 neural，因此不能替代 20.77 benchmark candidate，更不能写成 baseline。
+
+本轮也明确了 claim 边界：`exact_piao_rbc=False`、`rbc_style_approximation=True` 继续成立；F4 bounded gaussian / derivative-of-gaussian NLS proxy 可以稳定提取，fit_success_rate=1.0，但它没有被 validation 选择为最优 feature set，所以不能声称 exact Piao/NLS/LS-SVM route 已通过。真正可复用的信号来自 F1/F2 的 peak / width / lobe / gradient / asymmetry 类特征，说明下一步应做 feature-fusion / hybrid，而不是继续拆 neural head 或盲目扩样。
+
+路线判断更新为：保留 20.77 v3_240 neural benchmark candidate 作为当前 true 3D / Piao-style 主线候选；下一步优先把 F1/F2 physical features 融入 neural model 的 curvature branch，同时保持 L/W/D 与 mask/profile 的 20.77 neural 表现。dense mask baseline 继续只作为 comparator，`CURRENT_BASELINE.md` 不更新。
+
 ## 2026-05-25 路线同步：20.78 formal true 3D RBC benchmark candidate audit
 
 20.78 的路线意义是：true 3D / Piao-style 主线正式进入 benchmark candidate 阶段，但仍不是 baseline replacement。v3_240 的证据链已经足够说明 Bx/By/Bz 输入能学习 RBC-style 主几何参数：neural test normalized MAE `0.678014`，优于 feature comparator `0.715395`；L/W/D MAE 为 `1.892/2.186/0.800 mm`，D_m、projected mask Dice 和 profile depth RMSE 都较 N=112 改善。

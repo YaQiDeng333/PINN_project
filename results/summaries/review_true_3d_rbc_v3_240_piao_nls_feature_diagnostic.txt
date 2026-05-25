@@ -1,0 +1,34 @@
+review_true_3d_rbc_v3_240_piao_nls_feature_diagnostic
+
+Review agent: independent read-only Codex subagent.
+
+必须修复:
+- 无。
+
+建议修复:
+- 收紧归因：最终选中的是 F0_F1_F2_basic_physical，不应暗示 F4 NLS proxy 是主要贡献。
+- 候选阶段避免内部 test evaluation；只在 validation 选定后做 test final。
+
+主控处理:
+- 已将 summary / decision 表述收紧为 F0+F1+F2 physical features 帮助 curvature；F4 NLS proxy 稳定提取但未被选中。
+- 已修改候选循环，仅对 train/val 做候选评估；选定后才计算 test final metrics。
+
+可以接受:
+- registry + manifest + 显式 dataset_id 加载成立。
+- 未见 latest/newest NPZ 扫描。
+- 未见 COMSOL、NPZ/data 生成、neural training、baseline 创建或 baseline docs 修改。
+- 特征输入来自 delta_b / BxByBz；metadata 只用于校验、分组和 validation 选择。
+
+是否认为 Piao/NLS-inspired features 对 curvature 有实质帮助:
+- 有，但幅度有限，且不是 F4 NLS 本身的强证据。
+- curvature MAE 从 20.77 neural 的 0.201076 到 0.190304。
+- wWD / wLW 改善，wLD 未改善。
+- total MAE 和 projected mask Dice 比 20.77 neural 变差。
+
+下一步更建议:
+- 保留 20.77 作为 benchmark candidate。
+- 做 feature-fusion / hybrid：neural 主干负责 L/W/D 和 mask/profile，F1/F2 这类稳定物理特征辅助 curvature。
+- 暂不 baseline replacement，也不声称 exact Piao/NLS route 成功。
+
+简短原因:
+- 这轮诊断边界总体诚实，curvature 信号是真实但局部；最大风险是归因措辞过强，已修正。
