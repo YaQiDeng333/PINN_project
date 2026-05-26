@@ -1,4 +1,0 @@
-gate,status,samples,hard_case_type,polygon_mask_iou_mean,polygon_mask_iou_min,presence_acc,present_type_acc,center_x_bin_acc,center_y_bin_acc,decoded_vertex_mae,local_vertex_mae_grid,pred_area_mean,target_area_mean,out_of_grid_vertex_count,signed_area_flip_count,zero_iou_count,reason
-one_sample_overfit,failed,"0",x_bin_wrong_like,0.974226804,0.974226804,1.0,1.0,1.0,1.0,0.000005918,0.009718776,194.0,189.0,0,0,0,"IoU below required >=0.99"
-five_sample_overfit,skipped,"0,11,15,22,27",all_hard_case_types,,,,,,,,,,,,,,,"Skipped because one_sample_overfit failed"
-train30_quick_gate,skipped,S299_matched_split_train30,matched_split,,,,,,,,,,,,,,,"Skipped because one_sample_overfit failed"

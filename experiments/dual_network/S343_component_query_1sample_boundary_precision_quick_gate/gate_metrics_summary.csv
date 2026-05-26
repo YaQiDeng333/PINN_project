@@ -1,4 +1,0 @@
-run,status,lambda_decoded_center_aux,lambda_area_aux,polygon_mask_iou,pred_area,target_area,area_diff,false_positive_pixels,false_negative_pixels,symmetric_diff_pixels,presence_acc,present_type_acc,center_x_bin_acc,center_y_bin_acc,decoded_vertex_mae,local_vertex_mae_grid,out_of_grid_vertex_count,signed_area_flip_count,notes
-current_reference,reference,0.0,0.0,0.974226804,194,189,5,5,0,5,1.0,1.0,1.0,1.0,0.000005918,0.009718776,0,0,S330/S338 reproduction
-center_aux_half,failed,0.025,0.0,0.989528796,191,189,2,2,0,2,1.0,1.0,1.0,1.0,0.000004240,0.010852545,0,0,Closest run but still below hard IoU 0.99
-center_aux_half_plus_tiny_area,failed,0.025,0.001,0.979166667,191,189,2,3,1,4,1.0,1.0,1.0,1.0,0.000008721,0.016985863,0,0,Tiny area aux worsened IoU and symmetric diff

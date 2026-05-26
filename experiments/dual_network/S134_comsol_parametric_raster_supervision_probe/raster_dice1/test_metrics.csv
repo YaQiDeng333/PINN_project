@@ -1,2 +1,0 @@
-split,presence_accuracy,type_accuracy_present,continuous_mae_mean,center_mae,axis_mae,rotation_mae,depth_mae,param_mask_iou,param_mask_dice,encoder_type,head_mode,component_matching_mode,lambda_raster_bce,lambda_raster_dice,raster_softness_cells,raster_target_source
-test,1.0,0.6833333333333333,1.1791707277297974,0.002634418895468116,0.000583700486458838,7.068330764770508,0.0002579565916676074,0.4385081038374389,0.5855034373043794,mlp,shared,fixed,0.0,1.0,1.0,masks

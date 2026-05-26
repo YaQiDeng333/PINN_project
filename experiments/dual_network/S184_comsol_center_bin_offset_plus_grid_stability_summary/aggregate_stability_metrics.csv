@@ -1,5 +1,0 @@
-run_id,seed_label,source,val_iou,test_iou,val_center_grid_mae,test_center_grid_mae,val_x_bin_acc,test_x_bin_acc,val_y_bin_acc,test_y_bin_acc,val_presence,test_presence,val_type_acc,test_type_acc,val_axis_mae,test_axis_mae,val_rotation_mae,test_rotation_mae
-S170_center_grid_range,range,S169/S170,0.446966-0.485716,0.498874-0.505590,worst=6.732050,worst=5.546025,NA,NA,NA,NA,1.0,1.0,NA,NA,NA,NA,NA,NA
-center_bin_offset_plus_grid_seed1,1,S179,0.542935,0.581320,3.362513,2.721649,0.783333,0.833333,0.883333,0.950000,1.000000,1.000000,0.633333,0.650000,0.000594,0.000502,8.201941,7.078501
-center_bin_offset_plus_grid_seed2,2,S183,0.484303,0.575504,6.282760,2.929023,0.716667,0.833333,0.800000,0.916667,1.000000,1.000000,0.616667,0.583333,0.000585,0.000568,8.346560,7.979585
-center_bin_offset_plus_grid_seed3,3,S183,0.492127,0.578738,6.026593,2.804331,0.800000,0.850000,0.833333,0.900000,1.000000,1.000000,0.650000,0.666667,0.000593,0.000583,8.074749,8.185495

@@ -1,2 +1,0 @@
-split_or_dataset,samples,avg_oracle_iou,min_oracle_iou,max_oracle_iou,avg_oracle_dice,avg_target_area,avg_raster_area,avg_abs_area_diff
-train,100,0.7229966941311134,0.555104800540906,0.8992740471869328,0.8365437593424875,1071.17,1069.19,13.38

@@ -1,2 +1,0 @@
-run_dir,mu_threshold,mask_temperature,history_rows,hard_area_zero,soft_hard_mismatch,no_threshold_crossing,soft_collapse,foreground_collapse,final_mean_mu,final_min_mu,final_max_mu,final_mean_soft_defect,final_pred_area_soft_mean,final_true_area_mean,final_area_loss
-experiments\dual_network\S101_comsol_v2_collapse_suppression_probe\foreground_floor,500.0,50.0,13,True,True,True,False,False,627.3062744140625,627.2391357421875,630.624755859375,0.07268819212913513,297.7308349609375,211.44000244140625,0.0

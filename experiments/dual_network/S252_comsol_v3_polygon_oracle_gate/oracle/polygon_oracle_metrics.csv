@@ -1,4 +1,0 @@
-sample_index,polygon_iou,polygon_dice,target_area,raster_area,area_diff
-0,1.0,1.0,72,72,0
-1,1.0,1.0,97,97,0
-2,1.0,1.0,49,49,0

@@ -1,2 +1,0 @@
-split,presence_accuracy,type_accuracy_present,continuous_mae_mean,center_mae,axis_mae,rotation_mae,depth_mae,param_mask_iou,param_mask_dice,encoder_type,head_mode,component_matching_mode
-val,1.0,0.5833333333333334,1.57455575466156,0.007987944409251213,0.0006343962159007788,9.429713249206543,0.0003775569493882358,0.1787237647014405,0.27318198950388056,mlp,shared,permutation_min

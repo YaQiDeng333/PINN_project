@@ -1,2 +1,0 @@
-label,sample_index,component_slot,max_abs_dx_cells,max_abs_dy_cells,mean_l2_cells,max_l2_cells,pred_area_grid,true_area_grid,area_grid_diff,area_grid_ratio,pred_width_cells,true_width_cells,pred_height_cells,true_height_cells,max_edge_diff_cells,mean_edge_diff_cells
-longer_overfit,0,0,0.0034054974855221246,0.00585504762411224,0.004862571643087545,0.005863518528876474,194.19268296940976,194.09134017082164,0.10134279858812079,1.0005221397229724,31.027362490684446,31.027696090438127,6.476682476178165,6.471344330056816,0.010241038520409695,0.004896525422136699

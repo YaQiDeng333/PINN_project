@@ -1,2 +1,0 @@
-split,presence_accuracy,type_accuracy_present,continuous_mae_mean,center_mae,axis_mae,rotation_mae,depth_mae,param_mask_iou,param_mask_dice,encoder_type,head_mode
-test,1.0,0.6333333333333333,1.4206618070602417,0.001909040380269289,0.000480099581182003,8.518945693969727,0.000248206895776093,0.3153287994785949,0.45480269422373637,cnn1d,component_specific

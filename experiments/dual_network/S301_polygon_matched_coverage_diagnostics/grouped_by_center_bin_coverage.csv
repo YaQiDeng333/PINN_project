@@ -1,6 +1,0 @@
-split,all_bins_exactly_covered,all_bins_within_distance1,sample_count,polygon_iou_mean,polygon_iou_min,zero_iou_count,x_bin_acc_mean,y_bin_acc_mean,presence_correct_rate,present_type_correct_rate
-test,False,True,8,0.0,0.0,8,0.6875,0.0,0.875,0.75
-test,True,True,2,0.3618421052631579,0.0,1,0.5,0.5,0.5,1.0
-train,True,True,30,0.9955975439231561,0.9696969696969697,0,1.0,1.0,1.0,1.0
-val,False,True,8,0.033950617283950615,0.0,7,0.375,0.1875,0.875,0.75
-val,True,True,2,0.05042016806722689,0.0,1,0.0,0.5,1.0,0.5

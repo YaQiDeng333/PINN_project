@@ -30,6 +30,26 @@ data/*.npz
 data/*.npy
 *.npz
 *.npy
+*.png
+*.pt
+*.pth
+*.ckpt
+
+# Local COMSOL/raw export artifacts
+comsol_*_exports/
+experiments/dual_network/
+signals_multiheight.csv
+*.stdout.txt
+*.stderr.txt
+*.pid
+*.class
+*.class.recovery
+*.class.status
+*.mph
+
+# Local handoff and one-off smoke files
+copy-output*.md
+smoke_test_*.py
 
 # Local editor and OS metadata
 .vscode/

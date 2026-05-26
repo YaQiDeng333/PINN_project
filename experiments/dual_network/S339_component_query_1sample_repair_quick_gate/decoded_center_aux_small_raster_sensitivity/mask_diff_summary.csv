@@ -1,2 +1,0 @@
-sample_index,variant,intersection,union,false_positive_pixels,false_negative_pixels,symmetric_diff_pixels,pred_area,target_area,area_diff,iou,dice
-0,pred_polygon,186,189,0,3,3,186,189,-3,0.9841269841269841,0.992

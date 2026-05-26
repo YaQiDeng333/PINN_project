@@ -1,2 +1,0 @@
-split_or_dataset,samples,avg_oracle_iou,min_oracle_iou,max_oracle_iou,avg_oracle_dice,avg_target_area,avg_raster_area,avg_abs_area_diff
-test,10,1.0,1.0,1.0,1.0,204.0,204.0,0.0

@@ -1,2 +1,0 @@
-sample_index,polygon_mask_iou,polygon_dice,target_area,pred_area,true_component_count,pred_component_count,out_of_grid_vertex_count
-0,0.9639175257731959,0.9816272965879265,189,192,1,1,0
