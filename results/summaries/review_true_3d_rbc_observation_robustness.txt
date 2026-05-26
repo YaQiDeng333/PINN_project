@@ -1,0 +1,32 @@
+20.88 true 3D RBC observation perturbation robustness review
+
+Review mode:
+- Independent read-only review agent.
+- No file modifications performed by review agent.
+
+Checklist:
+1. COMSOL not run by 20.88: pass.
+2. Training not run: pass.
+3. data / NPZ not generated or modified: pass.
+4. Dataset referenced through COMSOL_DATA_REGISTRY.md + v3_240 manifest: pass.
+5. latest/newest NPZ scan avoided: pass.
+6. Baseline artifact gate correctly checked: pass.
+7. Clean per-sample metrics correctly rejected as insufficient for perturbed-delta_b evaluation: pass.
+8. CURRENT_BASELINE and baseline docs unchanged: pass.
+9. Route decision to stop at preflight is reasonable: pass.
+
+Must-fix:
+- None.
+
+Suggestions handled by main controller:
+- Preflight now states that 20.88 did not invoke COMSOL and that pre-existing comsolmphserver processes from 2026-05-20 were not started or used by this stage.
+- The unblocker wording now prioritizes a separate artifact recovery/export stage, avoiding any interpretation that retraining belongs inside 20.88.
+
+Can accept:
+- Yes.
+
+Stop decision:
+- Approved.
+
+Reason:
+- 20.88 requires frozen-model forward evaluation under perturbed delta_b. Without a local selected-seed checkpoint or sufficient prediction artifact, continuing would require retraining or would produce a false robustness audit from clean metrics alone.

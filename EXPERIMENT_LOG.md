@@ -1,5 +1,13 @@
 # 实验工作日志
 
+## 2026-05-26 更新：第 20.88 observation perturbation robustness audit preflight blocker
+
+第 20.88 按规则进入 true 3D RBC observation perturbation robustness audit，但在 Stage A preflight 停止，没有执行扰动评估。本轮没有运行 COMSOL、没有训练、没有生成或修改 data / NPZ、没有修改 `CURRENT_BASELINE.md`，也没有实现 Stage B/C 扰动脚本。数据 gate 通过：`dataset_id=comsol_true_3d_rbc_imported_watertight_pilot_v3_240` 通过 `COMSOL_DATA_REGISTRY.md` + manifest 显式解析，`delta_b` shape 为 `(240,3,3,201)`，Conv1D view 为 `(240,9,201)`，split 为 `162/39/39`，Bx/By/Bz 轴和标签字段完整。
+
+停止原因是 baseline artifact blocker。20.88 需要 frozen 20.77/20.85 selected seed=42 checkpoint 或足够的 prediction artifact 来对扰动后的 `delta_b` 重新前向；本地只找到 clean seed/profile metrics 和 per-sample profile error rows，没有 true 3D RBC seed=42 checkpoint，也没有 raw `pred_params` / 可重放预测 artifact。Clean metrics 只能说明干净输入上的结果，不能评估 perturbed `delta_b`，因此不能用它们伪造 robustness audit；根据用户硬规则，本轮不允许用重训补 artifact。
+
+独立只读 review agent 同意停止，无 must-fix。Preflight 已补充说明：20.88 没有发起 COMSOL；本机存在 2026-05-20 启动的旧 `comsolmphserver` 进程，但不属于本阶段证据、也未被本阶段使用。下一步唯一建议改为单独的 artifact recovery/export stage：优先恢复 20.77/20.85 seed=42 checkpoint；若无法恢复，再在另一个明确批准的 artifact-export 阶段按固定 20.85 protocol 重新导出 checkpoint / prediction artifact，然后再回到 20.88 做 observation perturbation audit。
+
 ## 2026-05-26 更新：第 20.87 true 3D RBC robustness and defect-type expansion design
 
 第 20.87 只完成 robustness / defect-type expansion 方案设计，没有运行 COMSOL，没有训练，没有生成或修改 data / NPZ，也没有修改 `CURRENT_BASELINE.md`、`COMSOL_DATA_REGISTRY.md` 或 manifest。当前 baseline 继续保持第 20.86 的 true 3D RBC profile-depth baseline：`dataset_id=comsol_true_3d_rbc_imported_watertight_pilot_v3_240`，输入为 Bx/By/Bz `delta_b`，输出为六个 RBC-style 参数并生成 3D profile/depth 与 projected mask。

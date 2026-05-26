@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-05-26 after Stage 20.88 preflight blocker
+
+Next step: **recover or export the frozen 20.77/20.85 baseline model artifact before robustness evaluation**.
+
+20.88 stopped at preflight. Registry/manifest/schema checks passed for `comsol_true_3d_rbc_imported_watertight_pilot_v3_240`, but the required frozen-model artifact was not available locally: no selected seed=42 true 3D RBC checkpoint and no sufficient raw prediction artifact that can rerun the model on perturbed `delta_b`.
+
+Do not treat the clean per-sample metrics as a robustness result. The next step is a separate artifact recovery/export stage: first try to recover the 20.77/20.85 selected checkpoint; if that is impossible, explicitly approve a fixed 20.85 artifact-export rerun that saves a checkpoint/prediction artifact. Only after that should 20.88 observation perturbation robustness be rerun. Do not train inside 20.88.
+
 ## 2026-05-26 after Stage 20.87
 
 Next step: **20.88 observation perturbation robustness audit on the current true 3D RBC baseline**.

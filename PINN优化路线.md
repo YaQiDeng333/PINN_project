@@ -1,5 +1,11 @@
 # PINN 优化路线
 
+## 2026-05-26 路线同步：20.88 observation robustness preflight blocker
+
+20.88 没有进入 observation perturbation robustness 评估，而是在 preflight 停止。原因不是 dataset/schema 问题：v3_240 registry / manifest gate 通过，输入 shape、split、Bx/By/Bz 轴和 profile/mask label 均可用；真正 blocker 是 frozen model artifact 缺失。当前仓库只有 20.77/20.85 的 clean metrics 和 per-sample profile error rows，没有能对扰动 `delta_b` 重新前向的 seed=42 checkpoint 或 raw prediction artifact。
+
+路线判断因此暂时前移一格：在评估 noise、gain、zero drift、reference subtraction error、channel dropout、jitter 之前，必须先做 artifact recovery/export。优先恢复 20.77/20.85 selected checkpoint；无法恢复时，再单独批准固定 20.85 protocol 的 artifact-export rerun。该 rerun 不能被写成 20.88 的一部分，因为 20.88 明确禁止训练。恢复 artifact 后，再回到 20.88 做 frozen-model observation perturbation audit。
+
 ## 2026-05-26 路线同步：20.87 true 3D RBC robustness expansion design
 
 20.87 将第 20.86 的 true 3D RBC profile-depth baseline 后续路线拆成“先仿真鲁棒性、再缺陷类型扩展、最后再考虑真实实验对齐”的阶段计划。本轮不运行 COMSOL、不生成新数据、不训练、不修改 `CURRENT_BASELINE.md`；当前 baseline 仍是 `comsol_true_3d_rbc_imported_watertight_pilot_v3_240` 上的 Bx/By/Bz `delta_b -> six RBC-style params -> 3D profile/depth/projected mask`。
