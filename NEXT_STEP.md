@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-05-26 after Stage 20.88 observation perturbation robustness audit
+
+Next step: **gain/amplitude calibration or augmentation planning, while preparing the 20.89 liftoff/sensor-offset COMSOL diagnostic pack**.
+
+Stage 20.88 reused the recovered 20.88a frozen artifact and perturbed only in-memory v3_240 `delta_b`; no COMSOL, no training, no data/NPZ changes, and no `CURRENT_BASELINE.md` update. Clean replay matched the baseline, and noise <=10% was stable: noise 10% profile degradation `4.095415%`, Dice drop `-0.000252`. no-defect reference error and sensor_x jitter were also low-risk in this observation-space diagnostic.
+
+The blocker is amplitude/channel sensitivity, not random noise. Global gain 0.8x degraded profile RMSE by `123.845240%`; `channel_attenuation_Bx_50pct` degraded profile RMSE by `141.577253%`; `channel_dropout_Bx_missing` caused Dice drop `0.163825`. Do not claim broad robustness yet. The next implementation step should either design gain normalization / amplitude calibration / augmentation for 20.92, or proceed with 20.89 small COMSOL liftoff/sensor-offset pack as the next physics diagnostic. Real-data alignment should stay behind these two gates.
+
 ## 2026-05-26 after Stage 20.88a
 
 Next step: **return to 20.88 observation perturbation robustness audit using the recovered frozen baseline artifact**.

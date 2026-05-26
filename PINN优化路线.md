@@ -1,5 +1,13 @@
 # PINN 优化路线
 
+## 2026-05-26 路线同步：20.88 observation perturbation robustness audit
+
+20.88 用 20.88a 恢复的 frozen baseline artifact 完成了 observation-space robustness audit。路线边界保持不变：不运行 COMSOL，不训练，不生成或修改 data / NPZ，不改 `CURRENT_BASELINE.md`；本轮只回答“当前 true 3D RBC baseline 对已有 `delta_b` 观测扰动是否稳”。
+
+结果把下一阶段风险切得更清楚：随机噪声不是首要瓶颈，noise 10% 仍是 green，profile RMSE degradation `4.095415%`，Dice drop `-0.000252`；reference subtraction error 和 sensor_x jitter 也没有触发 fail。真正敏感的是幅值标定和通道依赖，global gain 0.8x 造成 `123.845240%` profile RMSE degradation，Bx 50% attenuation 造成 `141.577253%` degradation，Bx missing 造成 Dice drop `0.163825`。这说明当前 baseline 更依赖绝对幅值和 Bx 通道完整性，不能写成 broad robust。
+
+路线更新为：20.89 仍应做 liftoff / sensor-offset COMSOL diagnostic pack，因为 observation-space gain/jitter 不能替代真实传感器几何变化；同时 20.92 之前需要考虑 gain normalization、amplitude calibration 或 augmentation gate。真实实验数据继续后置；如果不先处理幅值标定和 COMSOL liftoff/sensor-offset，直接 real-data alignment 风险过高。
+
 ## 2026-05-26 路线同步：20.88a baseline inference artifact recovery
 
 20.88a 解决了 20.88 preflight 暴露的 frozen artifact blocker。当前 true 3D RBC baseline 仍保持为 20.86 transition 后的 profile-depth baseline；本轮没有改 `CURRENT_BASELINE.md`，也没有生成新数据、修改 NPZ、运行 COMSOL 或改变模型路线。

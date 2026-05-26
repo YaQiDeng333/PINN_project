@@ -1,71 +1,19 @@
 20.88 true 3D RBC observation perturbation robustness preflight summary
 
-Scope:
-- stage: 20.88 observation perturbation robustness audit
-- dataset_id: comsol_true_3d_rbc_imported_watertight_pilot_v3_240
-- COMSOL_run: false
-- COMSOL_invoked_by_20_88: false
-- note: pre-existing comsolmphserver processes were present from 2026-05-20 10:39:45 and 2026-05-20 10:40:03; they were not started or used by this 20.88 preflight.
-- training_run: false
-- new_data_or_NPZ_generated: false
-- NPZ_modified: false
-- CURRENT_BASELINE_modified: false
-- latest_newest_NPZ_scan: false
-
-Registry / manifest gate:
-- loader: scripts/load_true_3d_rbc_pilot_dataset.py
-- path resolution: COMSOL_DATA_REGISTRY.md + results/manifests/comsol_true_3d_rbc_imported_watertight_pilot_v3_240.manifest.json
-- gate_pass: true
-- npz_path: C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\prepared\experimental\true_3d_rbc_pilot\comsol_true_3d_rbc_imported_watertight_pilot_v3_240.npz
-- status: pilot_generated
-- train_ready_candidate: true
-- exact_piao_rbc: false
-- rbc_style_approximation: true
-
-Schema gate:
-- delta_b shape: (240, 3, 3, 201)
-- Conv1D view: (240, 9, 201)
-- split: train/val/test = 162/39/39
-- axis_names: Bx, By, Bz
-- sensor_z_m: 0.008
-- delta_b finite: true
-- rbc_params finite: true
-- labels and profile/mask fields are available for metrics only, not model input.
-
-Clean baseline reference:
-- model family: 20.77/20.85 small Conv1D encoder + MLP six-parameter head
-- selected seed: 42
-- clean test profile_depth_rmse_m: 0.000387737
-- clean Er-like profile error: 0.340544
-- clean L/W/D MAE mm: 1.892 / 2.186 / 0.800
-- clean projected mask IoU/Dice: 0.750650 / 0.847727
-- clean wMAE auxiliary: 0.201076
-- reference metric files present:
-  - results/metrics/true_3d_rbc_formal_benchmark_20_77_seed_summary.csv
-  - results/metrics/true_3d_rbc_formal_benchmark_20_77_metrics.csv
-  - results/metrics/true_3d_rbc_formal_benchmark_20_77_profile_metrics.csv
-  - results/summaries/true_3d_rbc_formal_benchmark_20_77_summary.txt
-
-Baseline artifact gate:
-- Required for 20.88: either a local 20.77/20.85 selected-seed checkpoint that can run forward passes on perturbed delta_b, or a persisted prediction artifact containing enough model output state to recompute predictions under perturbed inputs.
-- local selected-seed checkpoint found: false
-- searched checkpoint patterns: checkpoints/**/*true*/*rbc*/*v3_240*, checkpoints/**/*20_77*, checkpoints/**/*formal*, and all local *.pt/*.pth/*.ckpt files with true_3d/RBC/v3_240/formal names.
-- clean per-sample profile metrics found: true
-- clean per-sample metrics are insufficient for perturbation robustness because they do not contain the trained model weights and do not allow re-running the model on perturbed delta_b.
-- raw pred_params artifact found: false
-- prediction artifact sufficient for perturbation evaluation: false
-
-Preflight decision:
-- stage_gate: blocker
-- blocker: baseline model artifact unavailable.
-- action_taken: stop after preflight; do not implement or run perturbation evaluation; do not retrain to recreate checkpoint.
-- reason: the user rule explicitly says to stop if the checkpoint / prediction artifact is unavailable, and 20.88 cannot be evaluated from clean metrics alone.
-
-Next required unblocker:
-- Run a separate approved artifact recovery/export stage before 20.88 robustness evaluation.
-- Preferred unblocker: recover the 20.77/20.85 selected seed=42 checkpoint.
-- Fallback unblocker: if recovery is impossible, rerun the fixed 20.85 protocol only in that separate approved artifact-export stage, saving a checkpoint/prediction artifact for future frozen-model robustness evaluation.
-- Do not call any rerun part of 20.88, because 20.88 forbids retraining.
-
-Forbidden artifacts:
-- data/, *.npz, checkpoints, *.pt, *.pth, preview PNG/JPG, results/previews/, notes/, __pycache__/, COMSOL .mph, raw COMSOL CSV/generated raw data, baseline docs, CURRENT_BASELINE.md, scripts/visualize_current_baseline.py.
+dataset_id: comsol_true_3d_rbc_imported_watertight_pilot_v3_240
+registry_manifest_gate_pass: true
+npz_path_resolved_from_manifest: C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\prepared\experimental\true_3d_rbc_pilot\comsol_true_3d_rbc_imported_watertight_pilot_v3_240.npz
+artifact_manifest: C:\Users\19166\Desktop\PINN_project\results\manifests\true_3d_rbc_baseline_inference_artifact_manifest.json
+checkpoint_path: C:\Users\19166\Desktop\PINN_project\checkpoints\true_3d_rbc_baseline_artifacts\true_3d_rbc_v3_240_seed42_20_77_baseline.pt
+prediction_artifact_path: C:\Users\19166\Desktop\PINN_project\checkpoints\true_3d_rbc_baseline_artifacts\true_3d_rbc_v3_240_seed42_20_77_predictions.npz
+baseline_artifact_available: true
+artifact_sha256_verified: true
+input_shape: delta_b=[240, 3, 3, 201], conv1d=[240, 9, 201]
+split_counts: {'train': 162, 'val': 39, 'test': 39}
+artifact_seed: 42
+latest_newest_npz_scan: false
+COMSOL_run: false
+training_run: false
+data_or_NPZ_written: false
+CURRENT_BASELINE_update: false
+stage_gate: pass

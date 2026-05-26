@@ -1,5 +1,15 @@
 # 实验工作日志
 
+## 2026-05-26 更新：第 20.88 true 3D RBC observation perturbation robustness audit
+
+第 20.88 已在固定 `dataset_id=comsol_true_3d_rbc_imported_watertight_pilot_v3_240` 上完成 observation perturbation robustness audit。本轮复用第 20.88a 的 artifact manifest 和 ignored checkpoint，只对内存中的 `delta_b` / BxByBz 做扰动后前向推理；没有运行 COMSOL，没有训练，没有生成或修改 data / NPZ，没有更新 `CURRENT_BASELINE.md`。
+
+clean replay 与 baseline 对齐：profile RMSE `0.000387737259305327 m`，projected mask Dice `0.8477271366767738`。扰动测试共 31 组，test status 为 green=17、warning=3、fail=11。小噪声表现稳定：noise 10% 的 profile RMSE degradation 为 `4.095415%`，Dice drop 为 `-0.000252`；noise 20% 为 warning，profile degradation `18.302278%`，Dice drop `0.005418`。no-defect reference error 和 sensor_x jitter 也不是当前首要风险，最差 reference error 反而为 `-1.127847%` profile degradation，最差 jitter 只有 `0.731484%`。
+
+主要风险集中在幅值和通道依赖：global gain 0.8x 的 profile degradation 为 `123.845240%`；combined_light / combined_hard 分别为 `37.202858%` / `60.816996%`；Bx 通道最敏感，`channel_attenuation_Bx_50pct` profile degradation 为 `141.577253%`，`channel_dropout_Bx_missing` profile degradation 为 `82.667222%` 且 Dice drop `0.163825`。因此本轮结论不是“整体 robust”，而是“小噪声、reference error、jitter 相对稳定；gain scaling、combined perturbation 和 Bx channel failure 敏感”。wMAE 继续只作为 auxiliary diagnostic。
+
+只读 review agent 通过，唯一 must-fix 是旧 review summary 仍写 preflight blocker；已替换为当前 20.88 review 结论。review 建议也已处理：脚本强制使用 `results/manifests/true_3d_rbc_baseline_inference_artifact_manifest.json`，并从 artifact manifest 的 clean test metrics 读取 baseline 值。下一步建议是先记录 gain/amplitude calibration 或 augmentation 方案，同时继续准备第 20.89 liftoff / sensor-offset COMSOL diagnostic pack；不要把当前结果写成真实物理鲁棒性或真实实验验证。
+
 ## 2026-05-26 更新：第 20.88a true 3D RBC baseline inference artifact recovery
 
 第 20.88a 已完成 frozen baseline artifact recovery/export。本轮只按固定 `dataset_id=comsol_true_3d_rbc_imported_watertight_pilot_v3_240` 和 seed `42` 复现 20.77/20.85 small Conv1D encoder + MLP six-parameter head；没有运行 COMSOL，没有生成或修改 data / NPZ，没有更新 `CURRENT_BASELINE.md`，也没有调参、换模型或用 test 反选。

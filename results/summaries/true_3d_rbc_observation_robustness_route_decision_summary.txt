@@ -1,0 +1,21 @@
+20.88 true 3D RBC observation robustness route decision summary
+
+COMSOL_run: false
+training_run: false
+data_or_NPZ_written: false
+CURRENT_BASELINE_update: false
+test_status_counts: green=17, warning=3, fail=11
+clean_replay: profile_rmse=0.000387737259305327, dice=0.8477271366767738
+noise_10pct: profile_degradation_pct=4.095415, dice_drop=-0.000252, band=green
+noise_20pct: profile_degradation_pct=18.302278, dice_drop=0.005418, band=warning
+combined_light: profile_degradation_pct=37.202858, dice_drop=-0.003928, band=fail
+combined_hard: profile_degradation_pct=60.816996, dice_drop=0.005731, band=fail
+gain_scaling_worst: gain_scaling_0.8x (123.845240% profile degradation)
+most_sensitive_profile: channel_attenuation_Bx_50pct (141.577253% profile degradation)
+most_sensitive_dice: channel_dropout_Bx_missing (0.163825 Dice drop)
+channel_dependency: worst_missing=channel_dropout_Bx_missing, Bx_missing=82.667222%, By_missing=4.839320%, Bz_missing=32.487495%
+reference_error_worst: no_defect_reference_error_2pct_peak (-1.127847% profile degradation)
+jitter_worst: sensor_x_resampling_jitter_+2sample (0.731484% profile degradation)
+route_decision: noise_jitter_reference_robust_but_gain_channel_sensitive
+next_step: add gain/amplitude calibration or augmentation before broad robustness claims; keep 20.89 COMSOL liftoff/sensor-offset pack as the next physics diagnostic
+Boundary: wMAE remains auxiliary; robustness claims are limited to observation-space perturbations of existing delta_b.

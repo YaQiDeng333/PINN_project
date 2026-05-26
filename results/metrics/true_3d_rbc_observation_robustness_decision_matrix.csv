@@ -1,0 +1,10 @@
+question,answer,evidence,decision
+Does clean replay match the baseline artifact?,yes,"profile_rmse=0.000387737259305327, dice=0.8477271366767738",artifact usable
+Is additive noise <=10% acceptable?,yes,"noise5 profile_deg=0.389%, noise10 profile_deg=4.095%, noise10 dice_drop=-0.000252",robust
+Is global gain scaling a robustness risk?,yes,"worst_gain=gain_scaling_0.8x, profile_deg=123.845%, dice_drop=0.098425",gain calibration or amplitude augmentation needed
+Does noise 20% or combined_hard collapse?,no,"noise20 band=warning, hard profile_deg=60.817%, hard dice=0.841996",diagnostic stress only
+Which channel is most critical under missing-channel diagnostics?,Bx,"Bx_missing=82.667%, By_missing=4.839%, Bz_missing=32.487%","channel dropout is diagnostic, not pass/fail"
+Is no-defect reference subtraction error a priority risk?,no,"worst_reference=no_defect_reference_error_2pct_peak, profile_deg=-1.128%, dice_drop=0.004072",monitor
+Is sensor_x resampling jitter a priority risk?,no,"worst_jitter=sensor_x_resampling_jitter_+2sample, profile_deg=0.731%, dice_drop=0.014140",monitor
+Is augmentation needed before 20.89?,consider after investigating failed perturbations,"status_counts={'green': 17, 'warning': 3, 'fail': 11}, combined_light_band=fail, combined_hard_band=fail",noise_jitter_reference_robust_but_gain_channel_sensitive
+Should the route continue to COMSOL liftoff/sensor-offset diagnostic pack?,yes,observation perturbations do not replace liftoff/scan offset/source/material physics variation,add gain/amplitude calibration or augmentation before broad robustness claims; keep 20.89 COMSOL liftoff/sensor-offset pack as the next physics diagnostic
