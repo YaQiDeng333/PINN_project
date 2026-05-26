@@ -1,5 +1,17 @@
 # NEXT_STEP
 
+## 2026-05-26 after Stage 20.84
+
+Next step: **A. keep 20.77 as profile/depth benchmark candidate for formal rerun**.
+
+Stage 20.84 consolidated the existing 20.77 / 20.81 / 20.83 candidates without retraining, COMSOL, new data, NPZ changes, or baseline updates. The role split is now fixed:
+
+- 20.77 remains the profile/depth main candidate: `profile_depth_rmse_m=0.000387737`, projected mask Dice `0.847727`.
+- 20.81 remains the non-negative projected-mask / visual reference: Dice `0.866573`, but profile RMSE `0.000445297` is worse than 20.77.
+- 20.83 remains negative evidence for the current R1 profile-primary loss path: Dice `0.868042` is numerically high, but profile RMSE `0.000409718` is worse than 20.77, so it cannot replace the profile/depth candidate.
+
+The prediction gallery audit supports the same split: best-profile samples are genuinely low profile-error cases, but worst-profile and high-Dice/high-profile-error samples show that 2D projected mask quality is not enough to judge the 3D profile. Do not continue small tweaks to the current 20.83 profile-primary loss. If the route continues, run a formal benchmark rerun around 20.77 as the profile/depth candidate and keep 20.81 only as the visual/mask comparator. Do not update `CURRENT_BASELINE.md`.
+
 ## 2026-05-26 after Stage 20.83
 
 Next step: **B. keep 20.77/20.81 candidate**.

@@ -2674,3 +2674,15 @@ Review agent 已完成只读复核，无 must-fix。review 建议把 audit/decis
 - comparison: 20.83 improved projected mask Dice over 20.77 (`0.868042` vs `0.847727`) but did not improve the primary profile metric (`0.000409718` vs 20.77 `0.000387737`).
 - route decision: negative gate. Keep 20.77 as profile reference and 20.81 as visual/mask comparator; do not upgrade R1 and do not update `CURRENT_BASELINE.md`.
 - review: independent review agent passed after one must-fix loop. The must-fix was validation selection purity; candidate selection now uses validation reference Dice, not test Dice.
+
+# 2026-05-26 Stage 20.84 true 3D RBC candidate consolidation / visual audit
+
+- scope: existing-results audit only. No training, no COMSOL, no new data, no NPZ modification, no preview PNG regeneration, and no baseline update.
+- inputs: existing 20.77 neural metrics, 20.81 feature-fusion metrics, 20.83 profile-primary metrics, and the existing 20.83 prediction gallery CSV/PNG paths under ignored `results/previews/`.
+- candidate roles:
+  - 20.77 neural reference is the profile/depth main candidate with `profile_depth_rmse_m=0.000387737` and projected mask Dice `0.847727`.
+  - 20.81 feature-fusion is the non-negative projected-mask / visual reference with Dice `0.866573`, but its profile RMSE is `0.000445297`, worse than 20.77.
+  - 20.83 profile-primary loss is negative evidence for the current R1 setup: Dice `0.868042` is numerically highest, but profile RMSE `0.000409718` is worse than 20.77, so it cannot replace 20.77/20.81.
+- gallery audit: best-profile examples are low profile-error by persisted CSV metrics and visual inspection; worst-profile examples, especially the deep/wide boxy case, retain a plausible 2D footprint but substantially underestimate 3D depth. High-Dice/high-profile-error cases confirm that projected mask quality cannot replace 3D profile metrics.
+- route decision: keep 20.77 as the profile/depth benchmark candidate for formal rerun; keep 20.81 as visual/mask comparator; do not continue small loss-weight tweaks on the current 20.83 profile-primary path.
+- review: independent read-only review agent passed. It suggested tightening the wording around Dice because 20.83 has the numerically highest Dice but is a negative profile-depth gate; the summaries were updated accordingly.

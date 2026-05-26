@@ -1,0 +1,19 @@
+20.84 true 3D RBC candidate consolidation summary
+
+training_run: false
+COMSOL_run: false
+new_data_generated: false
+NPZ_modified: false
+baseline_ready: false
+CURRENT_BASELINE_update: false
+
+candidate_roles:
+- 20.77 neural reference: profile/depth main candidate; profile_depth_rmse_m=0.0003877372636895579; Dice=0.8477271366767738.
+- 20.81 feature-fusion: projected-mask/visual reference candidate; profile_depth_rmse_m=0.00044529733223988354; Dice=0.8665725224434271.
+- 20.83 profile-primary loss: negative gate; profile_depth_rmse_m=0.00040971767567754845; Dice=0.868041567724276.
+
+core_judgment:
+20.77 remains the profile/depth main candidate because it has the best profile_depth_rmse_m.
+20.81 remains the non-negative visual/mask reference because it improves projected footprint quality without becoming the profile-depth winner.
+20.83 is negative evidence for the current R1 profile-primary loss setup: it improves projected mask Dice but worsens profile RMSE, so it cannot replace 20.77 or 20.81.
+wLD/wWD/wLW errors remain auxiliary diagnostics; they are not the main replacement criterion in this consolidation.

@@ -1,0 +1,7 @@
+decision_option,selected,answer,evidence,status
+A_keep_20_77_as_profile_depth_benchmark_candidate,true,recommended,20.77 profile_depth_rmse_m=0.0003877372636895579 is lower than 20.81=0.00044529733223988354 and 20.83=0.00040971767567754845.,primary_route
+B_use_20_81_as_projected_mask_visual_candidate,false,keep as reference role,"20.81 Dice=0.8665725224434271 is visual/mask strong, but profile RMSE remains worse than 20.77.",secondary_reference
+C_rerun_formal_benchmark,false,next procedural step after consolidation,"A formal rerun can use 20.77 as the profile/depth candidate and 20.81 as visual comparator, but 20.84 itself is not a rerun.",future_step
+D_redefine_output_as_depth_profile_basis,false,research follow-up if improving representation,20.83 profile-primary loss is negative; a profile-native basis is more plausible than more small profile-primary loss tweaks.,research_followup
+E_collect_targeted_data,false,not needed for this consolidation,No new data is required to close candidate roles.,not_current
+F_pause_true_3d_route,false,not recommended,20.77 remains a valid profile/depth benchmark candidate and 20.81 remains useful for visual/mask reference.,not_current

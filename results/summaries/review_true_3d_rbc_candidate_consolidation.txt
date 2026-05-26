@@ -1,0 +1,13 @@
+﻿- 必须修复：无。
+
+- 建议修复：已处理。Review 指出 20.83 的 Dice=0.8680415677 略高于 20.81 的 Dice=0.8665725224，因此 20.84 文档不应把 20.81 写成绝对 Dice 最高候选。主控已收紧为：20.81 是非 negative 候选中的 projected-mask / visual reference；20.83 虽然 Dice 数值最高，但属于 profile-depth negative gate，不能替代 20.77/20.81。
+
+- 可以接受：可以接受。静态检查未发现训练、COMSOL、NPZ 写入、preview PNG 生成或 baseline 替换逻辑；CURRENT_BASELINE.md 未修改。
+
+- 是否同意 20.77/20.81/20.83 角色收口：同意。20.77 是 profile/depth 主候选；20.81 是非 negative projected-mask / visual 参考候选；20.83 是 profile-primary loss negative gate。
+
+- 是否同意 20.83 negative gate：同意。20.83 的 Dice 提升，但 profile_depth_rmse_m=0.0004097177 劣于 20.77 的 0.0003877373，不能替代 profile/depth 主候选。
+
+- 下一步更建议什么：基于 20.77 做 formal benchmark rerun，同时保留 20.81 作为 mask/visual comparator；不要继续小修当前 20.83 profile-primary loss 路径。
+
+- 简短原因：这轮审计正确区分了 3D profile 质量和 2D projected mask 质量；gallery audit 支持“高 Dice 不等于好 3D depth/profile”。路线决策没有把 candidate 写成 baseline，也没有触碰 forbidden artifacts。

@@ -398,3 +398,11 @@ Current route state:
 - 20.83 is a negative result and must not be written as a baseline or `CURRENT_BASELINE` replacement.
 
 Next route direction should avoid another narrow weight tweak on the same six-param loss. If the route continues, prefer a profile-native output representation experiment, while retaining `exact_piao_rbc=False` and `rbc_style_approximation=True`.
+
+# 2026-05-26 Stage 20.84 route consolidation
+
+Stage 20.84 closed the current true 3D RBC candidate ambiguity without new training or data generation. The branch should now treat 20.77 as the profile/depth benchmark candidate, 20.81 as the non-negative projected-mask / visual comparator, and 20.83 as negative evidence for the current R1 profile-primary loss design.
+
+The important route correction is that projected mask Dice and 3D profile quality must remain separate. 20.83 has the numerically highest Dice among the three compared candidates, but its profile RMSE is worse than 20.77; therefore it is not a replacement. 20.81 is retained as the visual comparator because it is not a negative profile-depth gate and has strong projected-mask behavior.
+
+Next route direction: use 20.77 for a formal benchmark rerun if consolidating the current candidate, or move to a more profile-native output representation if improving the method. Do not update `CURRENT_BASELINE.md`, do not write v3_240 as a baseline, and keep `exact_piao_rbc=False` / `rbc_style_approximation=True`.

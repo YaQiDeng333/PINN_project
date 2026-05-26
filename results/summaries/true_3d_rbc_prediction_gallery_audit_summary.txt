@@ -1,0 +1,20 @@
+20.84 true 3D RBC prediction gallery audit summary
+
+gallery_source: existing 20.83 profile-primary loss gallery CSV and PNG paths
+gallery_regenerated: false
+used_for_model_selection: false
+gallery_index_rows: 11
+gallery_sample_metric_rows: 11
+all_png_paths_exist: True
+all_pngs_under_ignored_results_previews: True
+
+CSV audit findings:
+- Best profile examples have mean profile_depth_rmse_m=0.000075613. They are profile-good by persisted metrics, even when Dice is not always the maximum.
+- Worst profile examples have mean profile_depth_rmse_m=0.001289010; this is the gallery evidence behind the 20.83 negative gate.
+- High-Dice but high-profile-error cases: 3. Projected mask Dice is therefore not enough as a 3-D profile metric.
+- Highest curvature-risk sample ids: rbc_v3topup_123_test_boxy_medium_wide, rbc_v3topup_126_test_boxy_deep_wide, rbc_pilot_032_medium_elongated_boxy. They show wLD/wWD/wLW instability remains an auxiliary diagnostic risk.
+
+visual inspection note:
+The script itself is CSV-only and does not parse PNG pixels. Main-agent visual inspection of representative PNGs agrees with the CSV audit: the best-profile example has very similar true/pred depth maps with small banded depth error, while the worst-profile deep-wide boxy example keeps a good 2-D footprint but substantially underestimates central depth.
+
+conclusion: the existing gallery supports the 20.83 negative gate: P2 can look visually/mask-strong in some examples, but profile RMSE still worsens versus 20.77.
