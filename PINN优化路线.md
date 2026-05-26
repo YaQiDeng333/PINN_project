@@ -1,5 +1,13 @@
 # PINN 优化路线
 
+## 2026-05-26 路线同步：20.87 true 3D RBC robustness expansion design
+
+20.87 将第 20.86 的 true 3D RBC profile-depth baseline 后续路线拆成“先仿真鲁棒性、再缺陷类型扩展、最后再考虑真实实验对齐”的阶段计划。本轮不运行 COMSOL、不生成新数据、不训练、不修改 `CURRENT_BASELINE.md`；当前 baseline 仍是 `comsol_true_3d_rbc_imported_watertight_pilot_v3_240` 上的 Bx/By/Bz `delta_b -> six RBC-style params -> 3D profile/depth/projected mask`。
+
+路线分层已经固定：Layer 1 是 observation-space perturbation，可在 20.88 用现有 v3_240 评估 frozen baseline，包括 noise、gain scaling、zero drift、no-defect reference error、channel dropout，以及只作诊断的 `sensor_x_resampling_jitter`。Layer 2 是 sensor/physics setting variation，可近似模拟但正式结论需要 20.89 COMSOL diagnostic pack，包括 liftoff、scan_line_y offset、Bx/By/Bz spatial misalignment、source strength 和 material/B-H proxy。Layer 3 是新几何或新标签问题，必须新 COMSOL 和 schema：surface shape extension、internal/buried defect、multi-defect、free-form profile。
+
+路线边界也同步固定：internal/buried defect 不是当前 surface-breaking RBC baseline 的 robustness 子问题，而是 20.91 的独立 feasibility/schema 分支，至少要先定义 `burial_depth`、`depth_to_surface` 和新的 profile/mask 语义。真实实验数据继续后置；若 20.88/20.89 的 clean simulation robustness 不通过，不应直接进入 real-data alignment。下一步唯一主线是 20.88 observation perturbation robustness audit。
+
 ## 2026-05-26 路线同步：20.86 true 3D RBC baseline transition
 
 20.86 完成主线 baseline transition：项目当前 baseline 从 v3_complex 2D mask / boundary prediction 切换为 true 3D RBC-style profile-depth reconstruction。旧 2D baseline 没有删除，而是降级为 archived comparator；它不再是当前 `CURRENT_BASELINE`。

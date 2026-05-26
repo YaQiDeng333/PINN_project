@@ -1,5 +1,15 @@
 # 实验工作日志
 
+## 2026-05-26 更新：第 20.87 true 3D RBC robustness and defect-type expansion design
+
+第 20.87 只完成 robustness / defect-type expansion 方案设计，没有运行 COMSOL，没有训练，没有生成或修改 data / NPZ，也没有修改 `CURRENT_BASELINE.md`、`COMSOL_DATA_REGISTRY.md` 或 manifest。当前 baseline 继续保持第 20.86 的 true 3D RBC profile-depth baseline：`dataset_id=comsol_true_3d_rbc_imported_watertight_pilot_v3_240`，输入为 Bx/By/Bz `delta_b`，输出为六个 RBC-style 参数并生成 3D profile/depth 与 projected mask。
+
+Subagent preflight 结论为 GO。Method agent 建议先围绕 profile-depth 主指标做仿真鲁棒性审计，不把 `wLD/wWD/wLW` 重新升为主指标；Data/schema agent 确认 v3_240 的 `(N,3,3,201)` 三轴输入、162/39/39 split 和六参数标签保持不变；COMSOL feasibility agent 将因素分为三层：Layer 1 可做 observation-space 后处理诊断，Layer 2 可近似但正式结论需要 COMSOL，Layer 3 必须新 COMSOL 和/或新标签；Experiment design agent 给出 20.88-20.92 阶段路线；Safety agent 确认本轮只允许提交设计脚本、summary/metrics 和三份路线文档。
+
+本轮新增 `scripts/design_true_3d_rbc_robustness_expansion_plan.py`，生成 factor matrix、stage table 和 acceptance matrix。Layer 1 的优先因素是 additive noise、amplitude scaling / sensor gain error、zero drift、no-defect reference error、channel dropout，以及仅作 20.88 诊断的 `sensor_x_resampling_jitter`。Layer 2 包括 liftoff、scan_line_y offset、Bx/By/Bz spatial misalignment、source strength variation、material/B-H proxy variation；这些因素需要 20.89 小规模 COMSOL diagnostic pack 才能做正式鲁棒性结论。Layer 3 包括 cuboid / ellipsoid / flat-bottom / RBC-like surface shape extension、internal/buried defect、multi-defect 和 arbitrary/free-form profile，必须新 COMSOL 数据和新标签定义。
+
+Acceptance gate 固定为 profile RMSE 主导：green 为 `<= +10%` degradation，warning 为 `+10% to +25%`，fail 为 `> +25%`；L/W/D MAE 的 green/warning/fail 分别为 `<= +15%`、`+15% to +30%`、`> +30%`；projected Dice drop 的 green/warning/fail 为 `<=0.02`、`0.02-0.05`、`>0.05`。Internal/buried defect 被明确放入 20.91 feasibility design，需先定义 `burial_depth` / `depth_to_surface` 与新的 profile/mask 语义，不能混入当前 surface RBC baseline。独立只读 review agent 通过，无 must-fix；三条建议已处理：`sensor_x` formal claim 改入 20.89，20.92 区分 observation robustness 和 shape augmentation，安全清单补充 `.mph`、raw CSV、`*.pt/*.pth` 和 preview 路径。下一步唯一建议是第 20.88 observation perturbation robustness audit。
+
 ## 2026-05-26 更新：第 20.86 true 3D RBC benchmark report + baseline transition
 
 第 20.86 完成 true 3D RBC benchmark report package，并将第 20.77 / 20.85 formal rerun 的 profile-depth candidate 升级为新的 `CURRENT_BASELINE`。本轮没有训练、没有运行 COMSOL、没有生成新数据、没有修改 NPZ，也没有提交 data / checkpoint / preview PNG / notes。此次是明确的 baseline transition：旧 v3_complex 2D mask-only / forward-consistency baseline 被降级为 archived comparator，不删除历史记录。

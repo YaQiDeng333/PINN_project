@@ -1,0 +1,17 @@
+20.87 true 3D RBC robustness expansion plan summary
+
+Boundary:
+- Design-only. No COMSOL, no training, no data/NPZ generation.
+- CURRENT_BASELINE remains unchanged.
+- Baseline is 20.86 true 3D RBC profile-depth, dataset_id=comsol_true_3d_rbc_imported_watertight_pilot_v3_240.
+- exact_piao_rbc=false; rbc_style_approximation=true.
+
+Recommended order:
+1. 20.88 observation perturbation robustness audit on existing v3_240 delta_b.
+2. 20.89 liftoff/sensor-offset COMSOL diagnostic pack for factors that cannot be trusted as post-processing.
+3. 20.90 surface shape-extension pilot with cuboid/ellipsoid/flat-bottom/RBC-like single defects.
+4. 20.91 internal defect feasibility design with new burial labels; do not mix into current surface baseline.
+5. 20.92 observation robustness training/augmentation gate only after 20.88/20.89 evidence; shape augmentation remains conditional on separate 20.90 evidence.
+
+Core rule:
+- Profile_depth_rmse_m is the headline metric. Dice-only improvement is not a baseline upgrade.

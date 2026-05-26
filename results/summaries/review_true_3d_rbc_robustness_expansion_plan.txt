@@ -1,0 +1,33 @@
+20.87 true 3D RBC robustness expansion plan review
+
+Review mode:
+- Independent read-only review agent.
+- No file modifications performed by review agent.
+
+Checklist:
+1. COMSOL was not run: pass.
+2. No training was run: pass.
+3. No data/NPZ generation was requested or performed: pass.
+4. Layer 1 / Layer 2 / Layer 3 separation is technically sound: pass with suggestions applied.
+5. Internal/buried defects are separated from the current surface-breaking RBC baseline: pass.
+6. CURRENT_BASELINE.md remains unchanged: pass.
+7. Registry, manifest, and data files are not modified: pass.
+8. Route decision is reasonable: pass.
+
+Must-fix:
+- None.
+
+Suggestions handled by main controller:
+- Sensor_x resampling jitter is now documented as diagnostic-only in 20.88; formal spatial sampling claims require the 20.89 COMSOL/sensor-geometry diagnostic.
+- 20.92 wording now separates observation robustness training based on 20.88/20.89 evidence from shape augmentation, which is conditional on separate 20.90 evidence.
+- Safety wording now explicitly forbids COMSOL .mph, raw COMSOL CSV/generated raw data, *.pt/*.pth, and results/previews artifacts.
+
+Accepted route:
+- 20.88 should run first as an observation perturbation robustness audit on existing v3_240 delta_b only.
+- Formal conclusions for liftoff, scan_line_y offset, Bx/By/Bz spatial misalignment, source strength variation, material/B-H proxy variation, and sensor_x spatial sampling need new COMSOL/sensor-geometry diagnostics.
+- Shape extension and internal/buried defects need new COMSOL data and new labels; internal/buried defects must not be mixed into the current surface RBC baseline.
+
+Review conclusion:
+- Acceptable.
+- No must-fix loop required.
+- Next recommended stage: 20.88 observation perturbation robustness audit.

@@ -1,0 +1,52 @@
+20.87 true 3D RBC robustness and defect-type expansion preflight summary
+
+Scope:
+- Design-only stage.
+- COMSOL_run: false
+- training_run: false
+- data_or_NPZ_generated: false
+- CURRENT_BASELINE_modified: false
+
+Repository state:
+- repo_root: C:\Users\19166\Desktop\PINN_project
+- git_state_before_edits: clean, main...origin/main
+
+Agent A Method conclusion:
+- Keep 20.86 as the current surface-breaking true 3D RBC-style profile/depth baseline.
+- Do not claim exact Piao 2019 reproduction, real-data readiness, multi-defect readiness, or free-form defect readiness.
+- Main metric remains profile_depth_rmse_m / Er-like profile error; Dice is footprint QA; wLD/wWD/wLW are auxiliary diagnostics.
+- Robustness should first stress current weak spots: boxy/sharp, deep/compact, channel/liftoff/alignment assumptions, and high-Dice-but-wrong-profile cases.
+- Internal/buried defects must be a separate route because they change physics, labels, projected-mask meaning, and observability.
+
+Agent B Data/schema conclusion:
+- dataset_id: comsol_true_3d_rbc_imported_watertight_pilot_v3_240
+- status: pilot_generated
+- n_samples: 240
+- split: train/val/test = 162/39/39
+- input: delta_b = b_defect - b_no_defect, axes Bx/By/Bz, shape (N,3,3,201), Conv1D view (N,9,201)
+- labels: L_m, W_m, D_m, wLD, wWD, wLW
+- generated geometry: six params -> RBC-style 3D profile/depth grid -> projected mask
+- Do not change dataset identity, axes, shapes, label order, manifest/registry flags, split protocol, or baseline status.
+
+Agent C COMSOL feasibility conclusion:
+- Layer 1 post-processing factors can directly perturb delta_b: additive noise, gain scaling, zero drift, no-defect reference error, and channel dropout.
+- Sensor_x resampling jitter can be used in 20.88 as a diagnostic-only interpolation perturbation; any formal spatial sampling claim belongs to the 20.89 COMSOL/sensor-geometry diagnostic.
+- Layer 2 can be approximated for planning but needs COMSOL for formal claims: sensor_x jitter, liftoff variation, scan_line_y offset, spatial misalignment, source strength variation, and material/B-H proxy variation.
+- Layer 3 requires new COMSOL and/or new labels: internal/buried defects, cuboid/ellipsoid/flat-bottom/RBC-like shape extension, multi-defect, arbitrary/free-form profile.
+- Any Layer 2/3 COMSOL data must recompute b_no_defect and b_defect under the same setting and recheck delta_b = b_defect - b_no_defect.
+
+Agent D Experiment design conclusion:
+- 20.88 should audit observation perturbations on existing v3_240 only, with no COMSOL and no training.
+- 20.89 should use a small liftoff/sensor-offset COMSOL diagnostic pack, target 30 RBC base samples and about 210 rows if seven variants are used.
+- 20.90 should test shape/output representation branches under validation-only selection before any broad defect-type pack.
+- 20.91 internal defect should be design-only first, with a later 12-24 prototype smoke pack if label definitions are sound.
+- 20.92 robustness training/augmentation should happen only after 20.88-20.90 evidence.
+
+Agent E Safety conclusion:
+- Forbidden: data/, *.npz, COMSOL .mph, raw COMSOL CSV/generated raw data, checkpoints, *.pt, *.pth, results/previews/, preview PNG/JPG, notes/, __pycache__/, CURRENT_BASELINE.md, COMSOL_DATA_REGISTRY.md, manifest files, scripts/visualize_current_baseline.py.
+- Use explicit whitelist staging only; do not use git add ..
+- No blockers for 20.87 planning outputs.
+
+Preflight decision:
+- GO for design outputs only.
+- Stop if any implementation attempts to run COMSOL, train, read/write NPZ/data, modify CURRENT_BASELINE.md, or alter registry/manifest files.

@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-05-26 after Stage 20.87
+
+Next step: **20.88 observation perturbation robustness audit on the current true 3D RBC baseline**.
+
+Stage 20.87 was design-only: no COMSOL, no training, no data/NPZ generation, and no `CURRENT_BASELINE.md` change. The next actionable step is to perturb the existing v3_240 `delta_b` observations through explicit dataset_id / manifest loading and evaluate the frozen 20.86 baseline under observation-space stress only.
+
+20.88 should start with additive noise `0/5/10/15/20%`, amplitude scaling / sensor gain error, baseline zero drift, no-defect reference subtraction error, channel dropout, and `sensor_x_resampling_jitter` as a diagnostic-only interpolation perturbation. Formal spatial-sampling, liftoff, scan-line offset, Bx/By/Bz misalignment, source-strength, and material/B-H claims require the later 20.89 COMSOL diagnostic pack. Internal/buried defects stay out of the current surface RBC baseline and should wait for 20.91 label/schema design.
+
 ## 2026-05-26 after Stage 20.86
 
 Next step: **benchmark documentation and real-data alignment planning around the new true 3D RBC profile-depth baseline**.

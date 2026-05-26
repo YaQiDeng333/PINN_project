@@ -1,0 +1,9 @@
+metric,baseline_value,green_threshold,warning_threshold,fail_threshold,applies_to,decision
+profile_depth_rmse_m,0.000387737,<= baseline * 1.10 = 0.0004265 m for robustness; no-regression target <=0.000410 m,>+10% to +25% degradation,>+25% degradation or clean RMSE >0.000430 m,all robustness and expansion stages,"primary gate; if profile RMSE fails, do not upgrade even if Dice improves"
+L_m_MAE_mm,1.892,<= +15% = 2.176 mm; practical no-regression <=2.08 mm,+15% to +30%,>+30%,all stages using six-parameter output,dimension guard; profile-only branches with L fail cannot replace six-param baseline
+W_m_MAE_mm,2.186,<= +15% = 2.514 mm; practical no-regression <=2.40 mm,+15% to +30%,>+30%,all stages using six-parameter output,dimension guard
+D_m_MAE_mm,0.8,<= +15% = 0.920 mm; practical no-regression <=0.88 mm,+15% to +30%,>+30%,all stages using six-parameter output,depth guard; strong indicator for profile RMSE failures
+projected_mask_dice,0.847727,"drop <=0.02, Dice >=0.8277; practical no-regression >=0.835",drop 0.02 to 0.05,drop >0.05,2D footprint QA,secondary QA; high Dice cannot override profile RMSE failure
+perturbed_RMSE_improvement_vs_frozen_baseline,frozen 20.86 under same perturbation,>=10% improvement with clean no-regression,0-10% improvement or minor clean regression,no improvement or clean profile RMSE regression,20.92 robustness training,augmentation is useful only if clean baseline remains intact
+COMSOL_generation_success,N/A,>=95% for 20.89 diagnostic pack,90-95%,<90% or delta_b check failure,20.89 and Layer 3 generation,COMSOL/metadata blocker; do not train on unstable generated data
+label_schema_defined,surface RBC six params,all new labels and metrics defined before generation,"partial labels, no training",ambiguous internal/free-form labels,20.90/20.91/Layer 3,"new schema required before internal, multi-defect, or free-form branches"
