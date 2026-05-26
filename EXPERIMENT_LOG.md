@@ -1,5 +1,13 @@
 # 实验工作日志
 
+## 2026-05-26 更新：第 20.85 formal true 3D RBC benchmark rerun based on 20.77 candidate
+
+第 20.85 在固定 `dataset_id=comsol_true_3d_rbc_imported_watertight_pilot_v3_240` 上完成 formal benchmark rerun。本轮没有运行 COMSOL，没有生成或修改 data / NPZ，没有建立 baseline，也没有更新 `CURRENT_BASELINE.md`。数据加载继续通过 `COMSOL_DATA_REGISTRY.md` + manifest 的显式 dataset_id gate，禁止 latest/newest NPZ 自动扫描；模型输入仅为 `delta_b` / BxByBz，labels 只用于 supervision 和 metrics。
+
+Formal rerun 复用第 20.77 的 small Conv1D encoder + MLP six-parameter head、weighted SmoothL1 loss 和 validation-only selection protocol，运行 seeds `42/123/2026`，validation 选择 seed `42`。selected train/val/test normalized MAE 为 `0.646111/0.748694/0.678014`；test L/W/D MAE 为 `1.892/2.186/0.800 mm`；wMAE 仅作为 auxiliary diagnostic，test 为 `0.201076`；profile depth RMSE 为 `0.000387737 m`，Er-like profile error 为 `0.340544`，projected mask IoU/Dice 为 `0.750650/0.847727`。
+
+Audit 结论是 formal rerun 稳定复现 20.77 profile/depth 优势：profile RMSE 与 original 20.77 一致，优于 20.81 feature-fusion 的 `0.000445297 m` 和 20.83 profile-primary negative gate 的 `0.000409718 m`。20.81 仍只作为 projected-mask / visual comparator；20.83 仍是 profile-primary loss path 的 negative evidence。Review agent 只读复核通过，无 must-fix；本轮结果可称 true 3D RBC benchmark candidate，但仍不能称 baseline。
+
 ## 2026-05-25 更新：第 20.82 curvature label / output representation audit for true 3D RBC profile
 
 第 20.82 只做 `comsol_true_3d_rbc_imported_watertight_pilot_v3_240` 的 label / output representation audit；没有运行 COMSOL，没有生成或修改 data / NPZ，没有重新训练模型，没有建立 baseline，也没有修改 `CURRENT_BASELINE.md` 或任何 COMSOL baseline 文档。所有数据口径仍通过 registry / manifest / dataset_id 显式引用，禁止 latest/newest 自动扫描。

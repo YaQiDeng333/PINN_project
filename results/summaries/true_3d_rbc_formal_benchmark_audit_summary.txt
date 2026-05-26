@@ -1,0 +1,14 @@
+20.85 true 3D RBC formal benchmark audit summary
+
+formal_selected_seed: 42
+formal_test_profile_depth_rmse_m: 0.0003877372636895579
+original_20_77_profile_depth_rmse_m: 0.0003877372636895579
+20_81_profile_depth_rmse_m: 0.00044529733223988354
+20_83_profile_depth_rmse_m: 0.00040971767567754845
+formal_profile_stable_vs_original_20_77: True
+formal_beats_20_81_profile_rmse: True
+formal_test_dice: 0.8477271366767738
+best_projected_mask_candidate_excluding_negative_gate: 20.81_feature_fusion
+highest_raw_dice_including_negative_gate: 20.83_profile_primary_negative_gate (0.868041567724276)
+baseline_ready: false
+conclusion: formal rerun is evaluated as a benchmark candidate only; profile/depth remains the primary axis, Dice is a visual comparator.

@@ -1,5 +1,13 @@
 # PINN 优化路线
 
+## 2026-05-26 路线同步：20.85 formal true 3D RBC benchmark rerun
+
+20.85 的路线意义是把 20.77 从一次 training gate 结果收口为可复核的 formal benchmark candidate。该 rerun 固定 `dataset_id=comsol_true_3d_rbc_imported_watertight_pilot_v3_240`，通过 registry / manifest 显式加载，不运行 COMSOL，不生成新数据，不修改 NPZ，也不更新 `CURRENT_BASELINE.md`。
+
+结果稳定复现 20.77：selected seed `42`，test normalized MAE `0.678014`，L/W/D MAE `1.892/2.186/0.800 mm`，profile depth RMSE `0.000387737 m`，projected mask Dice `0.847727`。profile/depth 主指标仍优于 20.81 feature-fusion 和 20.83 profile-primary negative gate；20.81 只保留为 projected-mask / visual comparator，20.83 只保留为 negative evidence。
+
+路线判断更新为：true 3D / Piao-style branch 可以围绕 20.77/formal rerun 做 benchmark candidate 展示和报告整理，但不能写成 baseline replacement。`wLD/wWD/wLW` 继续作为 auxiliary diagnostics，profile/depth metric 继续作为当前 true 3D RBC branch 的主评价轴；dense mask baseline 仍只作为 comparator。
+
 ## 2026-05-25 路线同步：20.82 true 3D RBC curvature output representation audit
 
 20.82 的路线意义是把 true 3D / Piao-style 分支的评价口径从“逐项硬拧 `wLD/wWD/wLW`”调整为“六参数生成的 3D profile 是否准确”。这不是 baseline replacement，也不改变 v3_complex `CURRENT_BASELINE.md`；它只改变 true 3D RBC branch 后续训练和评价的主次关系。

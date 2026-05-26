@@ -1,0 +1,9 @@
+question,answer,evidence,decision
+Did formal rerun stably reproduce the 20.77 profile/depth advantage?,True,formal_profile_rmse=0.0003877372636895579; original_20.77=0.0003877372636895579; tolerance=20%,A_prepare_report_or_formal_presentation
+Does formal rerun beat the 20.81 visual comparator on profile RMSE?,True,formal=0.0003877372636895579; 20.81=0.00044529733223988354,A_prepare_report_or_formal_presentation
+Does formal rerun beat the 20.83 negative gate on profile RMSE?,True,formal=0.0003877372636895579; 20.83=0.00040971767567754845,A_prepare_report_or_formal_presentation
+Is projected mask quality acceptable?,True,formal_dice=0.8477271366767738; threshold=0.84,A_prepare_report_or_formal_presentation
+Are L/W/D dimensions still usable?,True,L/W/D=1.8918915996566796/2.1857599088778863/0.8002313476246901 mm,A_prepare_report_or_formal_presentation
+Can this be called a benchmark candidate?,True,"This is still a fixed-dataset candidate, not a production baseline.",A_prepare_report_or_formal_presentation
+Can this be called a baseline?,False,baseline_ready=false; CURRENT_BASELINE.md remains the v3_complex mask baseline.,A_prepare_report_or_formal_presentation
+Next step,prepare paper/report display around the formal 20.77-profile candidate,"No data generation, no COMSOL, no NPZ modification, no baseline update occurred in 20.85.",A_prepare_report_or_formal_presentation

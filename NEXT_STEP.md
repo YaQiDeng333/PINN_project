@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-05-26 after Stage 20.85
+
+Next step: **prepare paper/report display around the formal 20.77-profile benchmark candidate**.
+
+Stage 20.85 reran the 20.77 neural candidate on `comsol_true_3d_rbc_imported_watertight_pilot_v3_240` with the original architecture, loss, and validation-only selection protocol. Seeds `42/123/2026` completed; seed `42` was selected. The rerun exactly reproduced the 20.77 profile/depth result: test normalized MAE `0.678014`, L/W/D MAE `1.892/2.186/0.800 mm`, profile depth RMSE `0.000387737 m`, Er-like profile error `0.340544`, projected mask IoU/Dice `0.750650/0.847727`, and auxiliary wMAE `0.201076`.
+
+The role split remains fixed: 20.77/formal rerun is the profile/depth benchmark candidate; 20.81 remains the projected-mask / visual comparator because its Dice is higher but profile RMSE is worse; 20.83 remains negative evidence for the tested profile-primary loss. This is still not a baseline replacement, and `CURRENT_BASELINE.md` must remain unchanged.
+
 ## 2026-05-26 after Stage 20.84
 
 Next step: **A. keep 20.77 as profile/depth benchmark candidate for formal rerun**.

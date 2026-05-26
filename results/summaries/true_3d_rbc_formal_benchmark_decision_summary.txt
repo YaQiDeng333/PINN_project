@@ -1,0 +1,14 @@
+20.85 true 3D RBC formal benchmark route decision
+
+decision: A_prepare_report_or_formal_presentation
+benchmark_candidate: True
+baseline_ready: false
+profile_stable_vs_original_20_77: True
+beats_20_81_profile_rmse: True
+beats_20_83_profile_rmse: True
+projected_mask_dice_acceptable: True
+dimensions_reasonable: True
+next_step: prepare paper/report display around the formal 20.77-profile candidate
+
+20.77 remains the profile/depth candidate family. 20.81 remains the projected-mask visual comparator. 20.83 remains negative evidence for the tested profile-primary loss path.
+Do not update CURRENT_BASELINE.md from this result.
