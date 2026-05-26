@@ -1,0 +1,13 @@
+split,sample_index,hard_case_type,polygon_mask_iou,polygon_dice,target_area,pred_area,area_diff,true_component_count,pred_component_count,presence_correct,present_type_correct,present_vertex_mae_mean,present_vertex_mae_max
+val,1,x_bin_wrong_like,0.0,0.0,210,152,-58,1,1,True,False,0.005875361151993275,0.005875361151993275
+val,2,x_bin_wrong_like,0.0,0.0,217,149,-68,1,1,True,True,0.005777377635240555,0.005777377635240555
+val,7,geometry_or_type_interaction,0.0,0.0,105,235,130,2,1,False,False,0.01246908982284367,0.019281044602394104
+val,9,rare_y_bin_wrong,0.0,0.0,132,44,-88,1,1,True,True,0.004335728008300066,0.004335728008300066
+test,2,x_bin_wrong_like,0.0,0.0,204,328,124,1,1,True,True,0.0017430242151021957,0.0017430242151021957
+test,3,both_bins_wrong_like,0.0,0.0,160,22,-138,2,2,True,True,0.0014734824653714895,0.0022570216096937656
+test,5,bins_correct_center_or_offset_bad,0.0,0.0,61,193,132,1,1,True,True,0.003655933076515794,0.003655933076515794
+test,6,bins_correct_center_or_offset_bad,0.0,0.0,71,180,109,1,1,True,False,0.008391087874770164,0.008391087874770164
+test,7,geometry_or_type_interaction,0.0,0.0,109,186,77,2,1,False,True,0.011228575836867094,0.01879376545548439
+test,8,geometry_or_type_interaction,0.0,0.0,105,131,26,2,2,True,True,0.0025992138544097543,0.0026161603163927794
+val,3,both_bins_wrong_like,0.015625,0.03076923076923077,152,1798,1646,2,2,True,True,0.007103207986801863,0.007128491532057524
+test,9,rare_y_bin_wrong,0.015706806282722512,0.030927835051546393,140,54,-86,1,1,True,True,0.0015203878283500671,0.0015203878283500671

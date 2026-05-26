@@ -1,0 +1,2 @@
+split,presence_accuracy,type_accuracy_present,continuous_mae_mean,center_mae,axis_mae,rotation_mae,depth_mae,param_mask_iou,param_mask_dice,forward_signal_nrmse,forward_signal_corr,lambda_forward_consistency,forward_pretrain_steps,inverse_steps
+test,1.0,0.65,1.1850920915603638,0.0013273438671603799,0.0005595572292804718,7.106477737426758,0.0002996631374116987,0.39549800093043774,0.5487495155971291,0.5632791747842314,0.8318900553707044,0.1,3000,3000

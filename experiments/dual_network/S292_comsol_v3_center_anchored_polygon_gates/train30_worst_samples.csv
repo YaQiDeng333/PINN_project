@@ -1,0 +1,13 @@
+split,sample_index,hard_case_type,polygon_mask_iou,polygon_dice,target_area,pred_area,area_diff,out_of_grid_vertex_count,true_component_count,pred_component_count
+val,1,x_bin_wrong_like,0.0,0.0,210,57,-153,0,1,1
+val,2,x_bin_wrong_like,0.0,0.0,217,43,-174,0,1,1
+val,3,both_bins_wrong_like,0.0,0.0,152,45,-107,0,2,1
+val,4,both_bins_wrong_like,0.0,0.0,96,79,-17,0,1,1
+val,6,bins_correct_center_or_offset_bad,0.0,0.0,74,180,106,0,1,1
+val,7,geometry_or_type_interaction,0.0,0.0,105,163,58,0,2,1
+val,8,geometry_or_type_interaction,0.0,0.0,102,48,-54,0,2,2
+val,9,rare_y_bin_wrong,0.0,0.0,132,141,9,0,1,1
+test,2,x_bin_wrong_like,0.0,0.0,204,150,-54,0,1,1
+test,3,both_bins_wrong_like,0.0,0.0,160,80,-80,0,2,2
+test,4,both_bins_wrong_like,0.0,0.0,120,82,-38,0,1,1
+test,5,bins_correct_center_or_offset_bad,0.0,0.0,61,55,-6,0,1,1

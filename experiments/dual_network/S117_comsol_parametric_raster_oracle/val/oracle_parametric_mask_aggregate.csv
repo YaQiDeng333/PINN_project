@@ -1,0 +1,2 @@
+split_or_dataset,samples,avg_oracle_iou,min_oracle_iou,max_oracle_iou,avg_oracle_dice,avg_target_area,avg_raster_area,avg_abs_area_diff
+val,20,0.723288154081921,0.556390977443609,0.8992740471869328,0.8366408357904106,1076.75,1072.25,13.3

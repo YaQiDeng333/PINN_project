@@ -1,0 +1,6 @@
+label,sample_index,polygon_mask_iou,polygon_dice,oracle_iou,target_area,pred_area,area_diff_pixels,area_ratio,false_positive_pixels,false_negative_pixels,pixel_disagreement,target_polygon_area
+five_sample_overfit,0,0.9947368421052631,0.9973614775725593,1.0,189,190,1,1.0052910052910053,1,0,1,189
+five_sample_overfit,1,1.0,1.0,1.0,184,184,0,1.0,0,0,0,184
+five_sample_overfit,2,1.0,1.0,1.0,76,76,0,1.0,0,0,0,76
+five_sample_overfit,3,1.0,1.0,1.0,102,102,0,1.0,0,0,0,102
+five_sample_overfit,4,0.9854014598540146,0.9926470588235294,1.0,137,135,-2,0.9854014598540146,0,2,2,137

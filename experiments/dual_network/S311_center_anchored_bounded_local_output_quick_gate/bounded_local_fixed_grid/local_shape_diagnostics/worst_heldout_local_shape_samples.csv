@@ -1,0 +1,11 @@
+split,sample_index,hard_case_type,component_count,polygon_iou,zero_iou,target_area,pred_area,area_diff,all_x_bins_correct,all_y_bins_correct,all_bins_correct,mean_local_vertex_mae_grid,max_local_vertex_error_grid,true_rotated_component_count,true_multi_component_count,out_of_grid_vertex_count
+test,8,x_bin_wrong_like,1,0.0,1,217,75,-142,1,0,0,8.89101991057396,26.512024879455566,1,0,0
+val,7,x_bin_wrong_like,1,0.0,1,202,57,-145,1,0,0,8.288328617811203,23.895718574523926,1,0,0
+val,8,x_bin_wrong_like,1,0.0,1,224,35,-189,1,0,0,7.5252891454147175,20.006912231445312,0,0,0
+test,9,x_bin_wrong_like,1,0.0,1,245,55,-190,1,0,0,6.70685675740242,12.01259708404541,0,0,0
+val,9,x_bin_wrong_like,1,0.0,1,238,38,-200,0,0,0,6.090788245201111,11.000345706939697,0,0,0
+test,6,rare_y_bin_wrong,1,0.0,1,116,33,-83,1,0,0,5.373813551850617,15.709793090820312,1,0,0
+val,3,both_bins_wrong_like,2,0.0,1,152,43,-109,0,0,0,3.891350120306015,16.399360179901123,1,2,0
+test,0,bins_correct_center_or_offset_bad,1,0.0,1,61,116,55,0,0,0,2.5989229679107666,5.172452926635742,1,0,0
+test,5,geometry_or_type_interaction,2,0.0,1,105,33,-72,0,0,0,2.218243721872568,6.339078187942505,1,2,0
+val,4,geometry_or_type_interaction,2,0.0,1,102,57,-45,0,0,0,2.203618692146847,10.16884994506836,1,2,0

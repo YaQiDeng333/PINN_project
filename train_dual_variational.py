@@ -50,6 +50,8 @@ METRIC_COLUMNS = [
     "lambda_mask_bce_prior",
     "center_mode",
     "test_radius",
+    "hidden_dim",
+    "num_layers",
 ]
 
 
@@ -64,6 +66,8 @@ def parse_args():
     parser.add_argument("--outer-steps", type=int, default=30)
     parser.add_argument("--phi-steps", type=int, default=30)
     parser.add_argument("--mu-steps", type=int, default=30)
+    parser.add_argument("--hidden-dim", type=int, default=32)
+    parser.add_argument("--num-layers", type=int, default=2)
     parser.add_argument("--test-radius", type=float, default=5.0)
     parser.add_argument(
         "--center-mode",
@@ -337,8 +341,13 @@ def run_sample(dataset, sample_index, args, output_dir, device):
     )
     target_defect_fraction = torch.mean((mu_label < 500.0).float())
 
-    phi_net = PhiNet(hidden_dim=32, num_layers=2).to(device)
-    mu_net = MuNet(hidden_dim=32, num_layers=2, mu_min=1.0, mu_max=1000.0).to(device)
+    phi_net = PhiNet(hidden_dim=args.hidden_dim, num_layers=args.num_layers).to(device)
+    mu_net = MuNet(
+        hidden_dim=args.hidden_dim,
+        num_layers=args.num_layers,
+        mu_min=1.0,
+        mu_max=1000.0,
+    ).to(device)
     phi_optimizer = torch.optim.Adam(phi_net.parameters(), lr=1e-3)
     mu_optimizer = torch.optim.Adam(mu_net.parameters(), lr=1e-3)
 
@@ -353,6 +362,7 @@ def run_sample(dataset, sample_index, args, output_dir, device):
             "runner config | "
             f"sample={sample_index} | center_mode={args.center_mode} | "
             f"test_centers={centers.shape[0]} | test_radius={args.test_radius:.6e} | "
+            f"hidden_dim={args.hidden_dim} | num_layers={args.num_layers} | "
             f"lambda_area_prior={args.lambda_area_prior:.6e} | "
             f"lambda_mask_prior={args.lambda_mask_prior:.6e} | "
             f"lambda_mask_bce_prior={args.lambda_mask_bce_prior:.6e}",
@@ -465,6 +475,8 @@ def run_sample(dataset, sample_index, args, output_dir, device):
         "lambda_mask_bce_prior": args.lambda_mask_bce_prior,
         "center_mode": args.center_mode,
         "test_radius": args.test_radius,
+        "hidden_dim": args.hidden_dim,
+        "num_layers": args.num_layers,
     }
 
 
@@ -493,6 +505,10 @@ def main():
         raise ValueError("--area-prior-temperature must be positive")
     if args.mask_prior_temperature <= 0.0:
         raise ValueError("--mask-prior-temperature must be positive")
+    if args.hidden_dim <= 0:
+        raise ValueError("--hidden-dim must be positive")
+    if args.num_layers < 1:
+        raise ValueError("--num-layers must be at least 1")
 
     sample_indices = parse_sample_indices(args.sample_indices)
     output_dir = Path(args.output_dir)

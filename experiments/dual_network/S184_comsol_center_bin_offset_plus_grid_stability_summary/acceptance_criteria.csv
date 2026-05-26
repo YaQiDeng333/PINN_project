@@ -1,0 +1,11 @@
+criterion,threshold_or_expected,observed,passed
+all_val_iou_above_s170_min,every run val_iou > 0.446966,min=0.484303,true
+all_test_iou_above_s170_min,every run test_iou > 0.498874,min=0.575504,true
+median_test_iou_ge_0_55,median test_iou >= 0.55,median=0.578738,true
+at_least_2_of_3_test_iou_ge_0_56,at least 2 of 3 runs test_iou >= 0.56,3/3,true
+all_val_center_grid_mae_below_s170_worst,every run val_center_grid_mae < 6.732050,max=6.282760,true
+all_test_center_grid_mae_below_s170_worst,every run test_center_grid_mae < 5.546025,max=2.929023,true
+held_out_bin_accuracy_not_collapsed,val/test x/y bin accuracy about >= 0.70,min=0.716667,true
+presence_remains_one,all val/test presence_accuracy == 1.0,all=1.0,true
+tradeoffs_do_not_erase_iou_gains,type/axis/rotation tradeoffs do not erase mask IoU gains,all val/test IoU above S170 lower bound,true
+improvement_not_seed1_only,seed2 or seed3 remains close enough to S179 improvement,seed2/test=0.575504 seed3/test=0.578738,true

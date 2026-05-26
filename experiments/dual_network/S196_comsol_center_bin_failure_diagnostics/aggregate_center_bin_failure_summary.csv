@@ -1,0 +1,7 @@
+label,split,mask_iou,center_grid_error,x_wrong_rate,y_wrong_rate,both_bins_correct_rate,worst_samples_below_iou_050
+current_candidate_reference,val,0.546310931,3.250844724,0.200000000,0.083333333,0.733333333,7
+current_candidate_reference,test,0.586545548,2.572882864,0.133333333,0.033333333,0.833333333,2
+aux_center_bin_offset,val,0.516648452,3.958035670,0.233333333,0.133333333,0.650000000,9
+aux_center_bin_offset,test,0.567790291,2.961824374,0.150000000,0.150000000,0.716666667,5
+aux_center_bin_offset_xweighted,val,0.542723184,3.497268132,0.183333333,0.166666667,0.683333333,7
+aux_center_bin_offset_xweighted,test,0.580217347,2.721402170,0.150000000,0.133333333,0.733333333,5

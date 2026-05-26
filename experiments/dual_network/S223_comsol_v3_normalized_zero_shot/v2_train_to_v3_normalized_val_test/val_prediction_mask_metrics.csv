@@ -1,0 +1,11 @@
+split,sample_index,pred_mask_iou,pred_dice,oracle_mask_iou,oracle_gap,target_area,pred_area,area_diff,type_sequence_true,type_sequence_pred
+val,0,0.0,0.0,1.0,1.0,259,1071,812,rectangular_notch,rotated_rect|rotated_rect|rotated_rect
+val,1,0.0,0.0,1.0,1.0,312,1071,759,rectangular_notch,rotated_rect|rotated_rect|rotated_rect
+val,2,0.0,0.0,1.0,1.0,264,1071,807,rectangular_notch,rotated_rect|rotated_rect|rotated_rect
+val,3,0.023484848484848483,0.0458919319022946,1.0,0.9765151515151516,280,1071,791,rectangular_notch,rotated_rect|rotated_rect|rotated_rect
+val,4,0.0,0.0,1.0,1.0,288,1071,783,rectangular_notch,rotated_rect|rotated_rect|rotated_rect
+val,5,0.0,0.0,1.0,1.0,140,1071,931,rectangular_notch,rotated_rect|rotated_rect|rotated_rect
+val,6,0.0,0.0,1.0,1.0,115,1071,956,rectangular_notch,rotated_rect|rotated_rect|rotated_rect
+val,7,0.0,0.0,1.0,1.0,76,1071,995,rectangular_notch,rotated_rect|rotated_rect|rotated_rect
+val,8,0.0,0.0,1.0,1.0,84,1071,987,rectangular_notch,rotated_rect|rotated_rect|rotated_rect
+val,9,0.0,0.0,1.0,1.0,216,1071,855,rectangular_notch,rotated_rect|rotated_rect|rotated_rect

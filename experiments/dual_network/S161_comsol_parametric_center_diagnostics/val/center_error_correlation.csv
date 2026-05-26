@@ -1,0 +1,3 @@
+split,center_error_metric,mask_metric,pearson,spearman,samples
+val,center_l2_grid_mae,pred_mask_iou,-0.9265283964423144,-0.9022556390977443,20
+val,center_axis_relative_l2_mae,pred_mask_iou,-0.972800994743337,-0.9744360902255639,20

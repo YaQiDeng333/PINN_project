@@ -1,0 +1,11 @@
+sample_index,signal_normalization,signal_feature_mode,conditioning_mode,encoder_type,point_signal_mode,mask_head_mode,mask_source,defect_iou,defect_area_pred,defect_area_label,mu_mse,mu_mae
+0,per_sample_zscore,raw,concat,mlp,none,mu_threshold,mu_threshold,0.43210586881472957,2955,2023,82380.890625,212.1551513671875
+1,per_sample_zscore,raw,concat,mlp,none,mu_threshold,mu_threshold,0.46558704453441296,2955,1751,80197.078125,209.96913146972656
+2,per_sample_zscore,raw,concat,mlp,none,mu_threshold,mu_threshold,0.22622875516766192,2955,2384,98395.0703125,228.1853485107422
+3,per_sample_zscore,raw,concat,mlp,none,mu_threshold,mu_threshold,0.6088745224801646,2955,2520,75195.8828125,204.96292114257812
+4,per_sample_zscore,raw,concat,mlp,none,mu_threshold,mu_threshold,0.4294416243654822,2955,1269,78570.609375,208.34104919433594
+5,per_sample_zscore,raw,concat,mlp,none,mu_threshold,mu_threshold,0.1013157894736842,2955,1230,96750.234375,226.53884887695312
+6,per_sample_zscore,raw,concat,mlp,none,mu_threshold,mu_threshold,0.3636615811373093,2955,1961,85895.8125,215.67356872558594
+7,per_sample_zscore,raw,concat,mlp,none,mu_threshold,mu_threshold,0.35269360269360267,2955,1866,84224.59375,214.0006561279297
+8,per_sample_zscore,raw,concat,mlp,none,mu_threshold,mu_threshold,0.6047377326565144,2955,1787,73843.46875,203.60916137695312
+9,per_sample_zscore,raw,concat,mlp,none,mu_threshold,mu_threshold,0.4571497351949928,2955,3098,86659.1328125,216.43765258789062

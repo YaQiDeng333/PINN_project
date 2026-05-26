@@ -1,0 +1,6 @@
+subset_sample_index,source_sample_index,hard_case_type,defect_type,component_type_combination,rotation_angle,component_count
+0,0,x_bin_wrong_like,rotated_rect,rotated_rect,0.500000000000,
+1,11,both_bins_wrong_like,multi_defect,rotated_rect|rectangular_notch,-0.350000000000,
+2,15,bins_correct_center_or_offset_bad,rotated_rect,rotated_rect,-0.750000000000,
+3,22,geometry_or_type_interaction,multi_defect,rotated_rect|rectangular_notch,0.750000000000,
+4,27,rare_y_bin_wrong,rotated_rect,rotated_rect,-0.750000000000,

@@ -1,0 +1,2 @@
+label,sample_index,polygon_mask_iou,polygon_dice,oracle_iou,target_area,pred_area,area_diff_pixels,area_ratio,false_positive_pixels,false_negative_pixels,pixel_disagreement,target_polygon_area
+longer_overfit,0,1.0,1.0,1.0,189,189,0,1.0,0,0,0,189

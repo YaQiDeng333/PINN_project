@@ -1,0 +1,4 @@
+split,samples,mean_iou,min_iou,mean_dice,max_decode_abs_error,center_x_bins,center_y_bins,center_bin_size_cells
+train,30,1.000000,1.000000,1.000000,9.313225746e-10,25,13,8
+val,10,1.000000,1.000000,1.000000,2.328306437e-10,25,13,8
+test,10,1.000000,1.000000,1.000000,4.656612873e-10,25,13,8

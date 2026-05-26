@@ -1,0 +1,4 @@
+split,num_rows,avg_defect_iou,avg_defect_area_pred,avg_defect_area_label,avg_mu_mse,avg_mu_mae,hard_area_all_zero
+train,100,0.0,0.0,1071.17,153050.96296875,387.0879479980469,True
+val,20,0.0,0.0,1076.75,153123.2390625,387.1611022949219,True
+test,20,0.0,0.0,1070.0,153038.18359375,387.0758682250977,True

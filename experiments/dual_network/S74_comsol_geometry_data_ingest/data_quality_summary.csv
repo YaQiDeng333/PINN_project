@@ -1,0 +1,4 @@
+split,num_samples,num_channels,signal_len,has_mu_maps,has_masks,x_len,y_len,mean_label_area,min_label_area,max_label_area,any_nan_inf_signals,any_nan_inf_targets
+train,50,3,200,True,True,200,100,2344.179931640625,1074.0,4305.0,False,False
+val,10,3,200,True,True,200,100,1988.9000244140625,1230.0,3098.0,False,False
+test,10,3,200,True,True,200,100,2398.39990234375,1421.0,4198.0,False,False

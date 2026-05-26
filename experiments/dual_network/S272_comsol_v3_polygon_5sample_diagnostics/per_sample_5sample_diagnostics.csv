@@ -1,0 +1,6 @@
+sample_index,source_sample_index,hard_case_type,defect_type,component_type_combination,polygon_mask_iou,polygon_dice,target_area,pred_area,area_diff,true_component_count,pred_component_count,present_type_correct,present_vertex_mae_mean,present_vertex_mae_max
+0,0,x_bin_wrong_like,rotated_rect,rotated_rect,0.9947368421052631,0.9973614775725593,189,190,1,1,1,True,4.186586011201143e-06,4.186586011201143e-06
+1,11,both_bins_wrong_like,multi_defect,rotated_rect|rectangular_notch,1.0,1.0,184,184,0,2,2,True,5.049248557043029e-06,7.01208773534745e-06
+2,15,bins_correct_center_or_offset_bad,rotated_rect,rotated_rect,1.0,1.0,76,76,0,1,1,True,7.747068593744189e-06,7.747068593744189e-06
+3,22,geometry_or_type_interaction,multi_defect,rotated_rect|rectangular_notch,1.0,1.0,102,102,0,2,2,True,5.827645509270951e-06,5.976442480459809e-06
+4,27,rare_y_bin_wrong,rotated_rect,rotated_rect,0.9854014598540146,0.9926470588235294,137,135,-2,1,1,True,3.8289581425487995e-06,3.8289581425487995e-06

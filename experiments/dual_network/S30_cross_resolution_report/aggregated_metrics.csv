@@ -1,0 +1,7 @@
+stage,resolution,samples,config,avg_defect_iou,avg_defect_area_pred,avg_mu_mse,avg_mu_mae,note
+S19,20x10,50,baseline,1.101393641e-01,6.504000e+01,2.871279e+05,3.216540e+02,weak-form + area + Dice baseline; no BCE mask prior
+S19,20x10,50,bce,8.399347809e-01,9.120000e+00,1.935842e+04,6.434378e+01,BCE mask prior semi-supervised upper-bound configuration
+S24,40x20,50,baseline,1.426606458e-01,2.353600e+02,2.503184e+05,2.932973e+02,weak-form + area + Dice baseline; no BCE mask prior
+S24,40x20,50,temp25_lambda1,9.202999532e-01,3.340000e+01,3.598542e+04,1.498937e+02,"40x20 IoU-priority BCE candidate; mask temperature 25, BCE lambda 1"
+S28,80x40,50,baseline,1.051006226e-01,1.242440e+03,3.443720e+05,3.814918e+02,weak-form + area + Dice baseline; no BCE mask prior
+S28,80x40,50,temp25_lambda3,8.925112832e-01,1.328200e+02,4.572207e+04,1.832775e+02,"80x40 balanced BCE candidate; mask temperature 25, BCE lambda 3"

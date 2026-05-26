@@ -1,0 +1,2 @@
+samples,avg_threshold_area,avg_provided_mask_area,avg_abs_area_diff,avg_mask_iou,min_mask_iou,max_mask_iou,total_mismatch_count
+10,1988.9,1988.9,0.0,1.0,1.0,1.0,0

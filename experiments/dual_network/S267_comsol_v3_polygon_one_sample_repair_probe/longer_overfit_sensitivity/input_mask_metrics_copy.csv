@@ -1,0 +1,2 @@
+sample_index,polygon_mask_iou,polygon_dice,target_area,pred_area,true_component_count,pred_component_count
+0,1.0,1.0,189,189,1,1

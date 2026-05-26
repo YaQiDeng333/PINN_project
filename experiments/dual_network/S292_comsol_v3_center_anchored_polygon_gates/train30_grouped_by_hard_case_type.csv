@@ -1,0 +1,16 @@
+split,hard_case_type,sample_count,mean_iou,min_iou,zero_iou_count,mean_area_diff
+test,bins_correct_center_or_offset_bad,2,0.000000,0.000000,2,9.000000
+test,both_bins_wrong_like,2,0.000000,0.000000,2,-59.000000
+test,geometry_or_type_interaction,2,0.000000,0.000000,2,-23.000000
+test,rare_y_bin_wrong,1,0.000000,0.000000,1,-35.000000
+test,x_bin_wrong_like,3,0.281387,0.000000,1,-23.333333
+train,bins_correct_center_or_offset_bad,7,0.992302,0.967391,0,-0.142857
+train,both_bins_wrong_like,5,0.996319,0.981595,0,0.600000
+train,geometry_or_type_interaction,5,1.000000,1.000000,0,0.000000
+train,rare_y_bin_wrong,3,0.974117,0.956835,0,-2.000000
+train,x_bin_wrong_like,10,0.982821,0.857143,0,-2.800000
+val,bins_correct_center_or_offset_bad,2,0.263158,0.000000,1,35.000000
+val,both_bins_wrong_like,2,0.000000,0.000000,2,-62.000000
+val,geometry_or_type_interaction,2,0.000000,0.000000,2,2.000000
+val,rare_y_bin_wrong,1,0.000000,0.000000,1,9.000000
+val,x_bin_wrong_like,3,0.065903,0.000000,2,-128.333333

@@ -1,0 +1,2 @@
+label,sample_index,polygon_mask_iou,polygon_dice,oracle_iou,target_area,pred_area,area_diff_pixels,area_ratio,false_positive_pixels,false_negative_pixels,pixel_disagreement,target_polygon_area
+s262_one_sample,0,0.883177570093458,0.9379652605459057,1.0,189,214,25,1.1322751322751323,25,0,25,189

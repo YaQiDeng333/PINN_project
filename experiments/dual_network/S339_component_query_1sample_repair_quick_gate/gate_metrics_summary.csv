@@ -1,0 +1,5 @@
+run,status,lambda_decoded_center_aux,lambda_polygon_centroid_aux,polygon_mask_iou,pred_area,target_area,area_diff,presence_acc,present_type_acc,center_x_bin_acc,center_y_bin_acc,decoded_vertex_mae,local_vertex_mae_grid,out_of_grid_vertex_count,signed_area_flip_count,notes
+current_reference,reference,0.0,0.0,0.974226804,194,189,5,1.0,1.0,1.0,1.0,0.000005918,0.009718776,0,0,S338 exact S330 reproduction
+decoded_center_aux_small,failed,0.05,0.0,0.984126984,186,189,-3,1.0,1.0,1.0,1.0,0.000014558,0.034563392,0,0,Improved IoU but below 0.99 and below combo trigger threshold 0.985
+polygon_centroid_aux_small,failed,0.0,0.05,0.963917526,192,189,3,1.0,1.0,1.0,1.0,0.000009878,0.016605884,0,0,Worse than reference
+center_plus_centroid_aux_small,skipped,0.025,0.025,,,,,,,,,,,,,,Skipped because neither single aux run passed and no run reached the conditional 0.985 IoU trigger

@@ -1,0 +1,2 @@
+run_dir,mu_threshold,mask_temperature,history_rows,hard_area_zero,soft_hard_mismatch,no_threshold_crossing,soft_collapse,foreground_collapse,final_mean_mu,final_min_mu,final_max_mu,final_mean_soft_defect,final_pred_area_soft_mean,final_true_area_mean,final_area_loss
+experiments\dual_network\S101_comsol_v2_collapse_suppression_probe\area_ratio_mse,500.0,50.0,13,True,True,True,False,False,673.6925048828125,541.3739624023438,862.47998046875,0.08250425010919571,337.9373779296875,226.47999572753906,0.0007531550363637507

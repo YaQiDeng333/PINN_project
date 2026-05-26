@@ -1,0 +1,68 @@
+# COMSOL MFL physics feature summary
+
+- npz_path: `experiments/dual_network/S84_comsol_geometry_v2_data_ingest/converted/test_comsol_multiheight_v2.npz`
+- feature_mode: `peak_decay_width`
+- samples: `20`
+- feature_count: `58`
+- contains_nan_or_inf: `False`
+
+## Feature ranges
+
+- `ch0_mean`: min=-6.323650e-05, max=6.732908e-06, mean=-2.665164e-05
+- `ch0_std`: min=1.513078e-04, max=2.744416e-04, mean=2.032542e-04
+- `ch0_min`: min=-6.174910e-04, max=-3.816549e-04, mean=-4.789602e-04
+- `ch0_max`: min=2.793044e-04, max=5.219984e-04, mean=4.136013e-04
+- `ch0_peak_abs`: min=3.905016e-04, max=6.174910e-04, mean=4.841561e-04
+- `ch0_peak_to_peak`: min=7.689934e-04, max=1.112706e-03, mean=8.925615e-04
+- `ch0_argmax_x`: min=-4.000000e-02, max=1.587940e-02, mean=-3.095477e-02
+- `ch0_argmin_x`: min=-2.030151e-02, max=4.000000e-02, mean=3.041206e-02
+- `ch0_argmax_abs_x`: min=-4.000000e-02, max=4.000000e-02, mean=1.489447e-02
+- `ch0_energy`: min=2.289405e-08, max=7.551547e-08, mean=4.392252e-08
+- `ch0_abs_area`: min=1.156048e-04, max=2.433096e-04, mean=1.694381e-04
+- `ch0_signed_area`: min=-6.323650e-05, max=6.732908e-06, mean=-2.665164e-05
+- `ch0_positive_peak_count`: min=3.000000e+00, max=1.500000e+01, mean=8.550000e+00
+- `ch0_negative_peak_count`: min=7.000000e+00, max=2.000000e+01, mean=1.165000e+01
+- `ch0_half_abs_width`: min=1.005025e-02, max=3.497487e-02, mean=2.076382e-02
+- `ch0_center_of_abs_mass`: min=-3.975399e-03, max=6.448478e-03, mean=1.235097e-03
+- `ch0_left_right_abs_balance`: min=-1.614925e-01, max=1.457689e-01, mean=1.103991e-02
+- `ch1_mean`: min=-5.932689e-05, max=7.840255e-06, mean=-2.547616e-05
+- `ch1_std`: min=1.389012e-04, max=2.568241e-04, mean=1.906665e-04
+- `ch1_min`: min=-5.636913e-04, max=-3.587727e-04, mean=-4.554031e-04
+- `ch1_max`: min=2.839000e-04, max=4.718558e-04, mean=3.864885e-04
+- `ch1_peak_abs`: min=3.636411e-04, max=5.636913e-04, mean=4.589335e-04
+- `ch1_peak_to_peak`: min=7.224138e-04, max=1.013394e-03, mean=8.418916e-04
+- `ch1_argmax_x`: min=-4.000000e-02, max=1.949749e-02, mean=-2.592964e-02
+- `ch1_argmin_x`: min=-2.030151e-02, max=4.000000e-02, mean=2.757789e-02
+- `ch1_argmax_abs_x`: min=-4.000000e-02, max=4.000000e-02, mean=1.612060e-02
+- `ch1_energy`: min=1.929367e-08, max=6.620104e-08, mean=3.872953e-08
+- `ch1_abs_area`: min=1.055368e-04, max=2.265921e-04, mean=1.593024e-04
+- `ch1_signed_area`: min=-5.932689e-05, max=7.840255e-06, mean=-2.547616e-05
+- `ch1_positive_peak_count`: min=4.000000e+00, max=1.300000e+01, mean=8.200000e+00
+- `ch1_negative_peak_count`: min=7.000000e+00, max=2.000000e+01, mean=1.145000e+01
+- `ch1_half_abs_width`: min=9.648241e-03, max=3.417085e-02, mean=2.022110e-02
+- `ch1_center_of_abs_mass`: min=-3.532705e-03, max=7.149355e-03, mean=1.333238e-03
+- `ch1_left_right_abs_balance`: min=-1.532707e-01, max=1.503265e-01, mean=1.643224e-02
+- `ch2_mean`: min=-5.156439e-05, max=6.131012e-06, mean=-2.358880e-05
+- `ch2_std`: min=1.243909e-04, max=2.257787e-04, mean=1.692309e-04
+- `ch2_min`: min=-5.006826e-04, max=-3.130082e-04, mean=-4.071915e-04
+- `ch2_max`: min=2.199965e-04, max=4.560603e-04, mean=3.367281e-04
+- `ch2_peak_abs`: min=3.171404e-04, max=5.006826e-04, mean=4.103087e-04
+- `ch2_peak_to_peak`: min=5.912788e-04, max=9.055125e-04, mean=7.439195e-04
+- `ch2_argmax_x`: min=-4.000000e-02, max=1.949749e-02, mean=-3.077387e-02
+- `ch2_argmin_x`: min=-2.070352e-02, max=4.000000e-02, mean=2.725628e-02
+- `ch2_argmax_abs_x`: min=-4.000000e-02, max=4.000000e-02, mean=1.784924e-02
+- `ch2_energy`: min=1.547364e-08, max=5.223880e-08, mean=3.054195e-08
+- `ch2_abs_area`: min=9.636355e-05, max=1.990937e-04, mean=1.413748e-04
+- `ch2_signed_area`: min=-5.156439e-05, max=6.131012e-06, mean=-2.358880e-05
+- `ch2_positive_peak_count`: min=4.000000e+00, max=1.300000e+01, mean=8.200000e+00
+- `ch2_negative_peak_count`: min=6.000000e+00, max=1.900000e+01, mean=1.130000e+01
+- `ch2_half_abs_width`: min=1.045226e-02, max=3.537688e-02, mean=2.098492e-02
+- `ch2_center_of_abs_mass`: min=-3.967678e-03, max=7.603426e-03, mean=1.353985e-03
+- `ch2_left_right_abs_balance`: min=-1.677165e-01, max=1.502231e-01, mean=1.111867e-02
+- `peak_abs_ch1_over_ch0`: min=8.922067e-01, max=1.066511e+00, mean=9.479756e-01
+- `peak_abs_ch2_over_ch0`: min=6.820723e-01, max=1.048062e+00, mean=8.500682e-01
+- `energy_ch1_over_ch0`: min=5.865398e-01, max=7.819348e-01, mean=7.031458e-01
+- `energy_ch2_over_ch0`: min=4.642796e-01, max=6.252326e-01, mean=5.559246e-01
+- `corr_ch0_ch1`: min=9.568762e-01, max=9.941810e-01, mean=9.806083e-01
+- `corr_ch0_ch2`: min=9.185683e-01, max=9.869053e-01, mean=9.557551e-01
+- `corr_ch1_ch2`: min=9.409428e-01, max=9.909831e-01, mean=9.698678e-01

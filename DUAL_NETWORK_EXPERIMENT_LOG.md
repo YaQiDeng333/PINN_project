@@ -720,3 +720,4039 @@ Current judgment:
 - 不要声称纯 weak-form 无监督反演已经解决。
 - 当前最稳定结果来自 `BCE mask prior`，该项使用 `mu_label` mask 信息。
 - 后续推荐方向是半监督双网络结果整理，或重新设计 label-free 的局部化 / false-positive 抑制机制。
+
+## Step S30: Cross-resolution result report
+
+目的：
+- 整理 S19/S24/S28/S29 的跨分辨率结果，形成可展示的阶段性结果报告。
+
+产物：
+- `DUAL_NETWORK_RESULTS_REPORT.md`
+- `experiments/dual_network/S30_cross_resolution_report/aggregated_metrics.csv`
+- `experiments/dual_network/S30_cross_resolution_report/summary.md`
+- `defect_iou_by_resolution.png`、`defect_area_pred_by_resolution.png`、`mu_error_by_resolution.png`
+
+关键结果：
+
+| resolution | baseline avg IoU | BCE candidate avg IoU | baseline area | BCE candidate area |
+| --- | ---: | ---: | ---: | ---: |
+| 20x10 | 1.101394e-01 | 8.399348e-01 | 6.504000e+01 | 9.120000e+00 |
+| 40x20 | 1.426606e-01 | 9.203000e-01 | 2.353600e+02 | 3.340000e+01 |
+| 80x40 | 1.051006e-01 | 8.925113e-01 | 1.242440e+03 | 1.328200e+02 |
+
+当前判断：
+- BCE mask prior 在 20x10、40x20、80x40 三个分辨率下均稳定优于 baseline。
+- baseline 的主要问题仍是 `defect_area_pred` 过大和低 `mu` 区域扩散。
+- S29 显示 80x40 弱样本主要来自形状细节、边界/窄缺陷、centroid 偏移和局部几何误差。
+- 该结论仍是半监督 / 诊断上界；BCE 使用 `mu_label < 500`，不能表述为无监督 weak-form 成功。
+
+下一步建议：
+- 优先做结果整理、可视化分类和论文式支线结果表述，不建议继续盲目扫描 pure weak-form 参数。
+
+## Step S31: Cross-resolution report figures
+
+目的：
+- 为 S30 跨分辨率结果报告补充不依赖 matplotlib 的 SVG 图表。
+
+数据来源：
+- `experiments/dual_network/S30_cross_resolution_report/aggregated_metrics.csv`
+
+产物：
+- `experiments/dual_network/S31_report_figures/defect_iou_by_resolution.svg`
+- `experiments/dual_network/S31_report_figures/defect_area_pred_by_resolution.svg`
+- `experiments/dual_network/S31_report_figures/mu_error_by_resolution.svg`
+- `experiments/dual_network/S31_report_figures/summary.md`
+
+当前判断：
+- 图表进一步支持 BCE/default 配置在 20x10、40x20、80x40 各分辨率下均优于 baseline。
+- S31 生成了跨分辨率 SVG 图表，支线结果报告已具备可展示入口。
+- 这些图表只展示已有结果，不代表新实验。
+- 结论仍属于半监督 / 诊断上界，因为 BCE mask prior 使用 `mu_label < 500`；不能表述为无监督 weak-form 成功。
+
+## Step S34: 100x50 30-sample default validation
+
+目的：
+- 验证 80x40 综合默认候选 `temp25_lambda3` 在 100x50 中高分辨率下是否仍有效。
+
+配置：
+- 使用 `data_generator_v2.py` 生成 100x50 / 30 train samples。
+- 对比 `baseline` 与 `temp25_lambda3`。
+- 两组均使用 `outer_steps=30`、`phi_steps=30`、`mu_steps=30`、`center_mode=three`、`test_radius=5.0`。
+- `temp25_lambda3` 使用 `lambda_mask_bce_prior=3.0`、`mask_prior_temperature=25.0`。
+
+结果摘要：
+
+| run | avg defect_iou | avg defect_area_pred | avg mu_mse | avg mu_mae |
+| --- | ---: | ---: | ---: | ---: |
+| baseline | 1.036250e-01 | 1.954133e+03 | 3.448976e+05 | 3.715439e+02 |
+| temp25_lambda3 | 8.559784e-01 | 2.158667e+02 | 5.249868e+04 | 1.946848e+02 |
+
+当前判断：
+- `temp25_lambda3` 在 30/30 个 100x50 样本上 IoU 优于 baseline。
+- 100x50 下半监督 BCE 上界仍稳定有效，并提供向 200x100 默认分辨率推进的可行性迹象。
+- 结果仍是半监督 / 诊断上界，不是无监督 weak-form 成功。
+
+下一步建议：
+- 若继续提高分辨率，应优先关注训练时间、网络容量、loss 尺度和高分辨率 false-positive 控制，而不是继续盲目扫描 radius / centers。
+
+## Step S35: 200x100 default-resolution semi-supervised runner validation
+
+背景：
+- 上一轮 partial run 因运行时间停止，停止时未生成完整 `metrics.csv`。
+- 本轮 fullrun 不再以运行时间作为停止条件，并且没有把上一轮 partial baseline 结果合并进正式结果。
+
+配置：
+- 复用上一轮 S35 已生成的 200x100 / 30-sample `.npz`。
+- 对比 `baseline` 与 `temp25_lambda3`。
+- 两组均使用 `outer_steps=30`、`phi_steps=30`、`mu_steps=30`、`center_mode=three`、`test_radius=5.0`。
+- `temp25_lambda3` 使用 `lambda_mask_bce_prior=3.0`、`mask_prior_temperature=25.0`。
+
+结果摘要：
+
+| run | avg defect_iou | avg defect_area_pred | avg mu_mse | avg mu_mae |
+| --- | ---: | ---: | ---: | ---: |
+| baseline | 7.936600e-02 | 1.253147e+04 | 5.703064e+05 | 5.871568e+02 |
+| temp25_lambda3 | 4.285627e-01 | 3.226300e+03 | 1.482883e+05 | 2.686303e+02 |
+
+当前判断：
+- `temp25_lambda3` 在 30/30 个 200x100 样本上 IoU 优于 baseline。
+- 当前半监督双网络 runner 具备默认分辨率可行性迹象。
+- 但 200x100 的平均 IoU 低于 S34 100x50，并存在弱样本：sample 17 (0.113025), sample 1 (0.137976), sample 0 (0.143559), sample 20 (0.161420), sample 8 (0.176155), sample 3 (0.177995), sample 21 (0.191370), sample 13 (0.199616), sample 7 (0.223726), sample 28 (0.245141), sample 12 (0.247757), sample 22 (0.249067), sample 2 (0.258555), sample 4 (0.283814), sample 15 (0.326784), sample 11 (0.364842), sample 18 (0.373780), sample 25 (0.382104), sample 10 (0.390789), sample 23 (0.432677), sample 14 (0.597552), sample 29 (0.680120), sample 16 (0.691667)
+- 结果仍是半监督 / 诊断上界，不是无监督 weak-form 成功。
+
+下一步建议：
+- 如果继续推进默认分辨率，应优先分析弱样本，并考虑网络容量、训练步数、loss 尺度和高分辨率 false-positive / shape-detail 控制。
+## Step S36: 200x100 BCE adaptation probe
+
+目的：
+- 针对 S35 中 200x100 表现偏弱的问题，测试训练轮数、BCE 权重和 mask temperature 三个适配方向。
+
+配置：
+- 复用 `experiments/dual_network/S35_200x100_30sample_default_validation_fullrun/data/training_data_train.npz`。
+- 固定 30 个样本、200x100 grid、`test_radius=5.0`、`center_mode=three`、`lambda_area_prior=1.0`、`lambda_mask_prior=1.0`。
+- 对比 `temp25_lambda3_outer60`、`temp25_lambda5_outer60`、`temp20_lambda3_outer60`。
+
+结果摘要：
+
+| config | avg defect_iou | avg defect_area_pred | avg mu_mse | avg mu_mae |
+| --- | ---: | ---: | ---: | ---: |
+| S35 temp25_lambda3 | 4.285627e-01 | 3.226300e+03 | 1.482883e+05 | 2.686302e+02 |
+| temp25_lambda3_outer60 | 6.510969e-01 | 2.224633e+03 | 9.965301e+04 | 2.065693e+02 |
+| temp25_lambda5_outer60 | 7.331974e-01 | 1.689667e+03 | 7.166056e+04 | 1.822885e+02 |
+| temp20_lambda3_outer60 | 6.404690e-01 | 2.280667e+03 | 1.094382e+05 | 2.383299e+02 |
+
+当前判断：
+- 增加 outer steps 到 60 明显改善 200x100 结果，说明 S35 受训练轮数限制。
+- `temp25_lambda5_outer60` 是当前 200x100 更稳的综合候选，尤其在面积控制和连续 `mu` 误差上最好。
+- `temp20_lambda3_outer60` 未超过 `temp25_lambda3_outer60`，本轮不支持单独继续锐化 mask temperature。
+- 该结论仍是半监督 / 诊断上界，因为 BCE mask prior 使用 `mu_label < 500`，不能表述为无监督 weak-form 成功。
+
+下一步建议：
+- 若继续 200x100，优先以 `temp25_lambda5_outer60` 为候选做 fresh validation 或失败样本诊断。
+- 不建议继续盲目扫描 radius / centers / area prior。
+## Step S37: Fresh 200x100 candidate validation
+
+目的：
+- 使用新的 200x100 / 30-sample 数据验证 S36 的两个候选配置是否稳定。
+
+配置：
+- 使用 `data_generator_v2.py` 生成新的 200x100 / 30 train samples，输出到 `experiments/dual_network/S37_200x100_fresh_candidate_validation/data/`。
+- 对比 `baseline`、`temp25_lambda5_outer60` 和 `temp20_lambda3_outer60`。
+- 三组均使用 `outer_steps=60`、`phi_steps=30`、`mu_steps=30`、`test_radius=5.0`、`center_mode=three`、`lambda_area_prior=1.0`、`lambda_mask_prior=1.0`。
+
+结果摘要：
+
+| config | avg defect_iou | avg defect_area_pred | avg mu_mse | avg mu_mae |
+| --- | ---: | ---: | ---: | ---: |
+| baseline | 6.917387e-02 | 1.126520e+04 | 5.193798e+05 | 5.264594e+02 |
+| temp25_lambda5_outer60 | 8.093492e-01 | 1.127800e+03 | 6.106250e+04 | 1.837940e+02 |
+| temp20_lambda3_outer60 | 6.485412e-01 | 1.882233e+03 | 9.386268e+04 | 2.070304e+02 |
+
+当前判断：
+- S37 没有复现 `temp20_lambda3_outer60` 作为 IoU 最优候选；它的弱样本数量更多。
+- `temp25_lambda5_outer60` 在新的 200x100 数据上同时取得最高平均 IoU、最低 `defect_area_pred`、最低 `mu_mse` 和最低 `mu_mae`。
+- 当前 200x100 默认候选应选择 `temp25_lambda5_outer60`。
+- 该结果仍是半监督 / 诊断上界，因为 BCE mask prior 使用 `mu_label < 500`，不能表述为无监督 weak-form 成功。
+
+下一步建议：
+- 若继续 200x100，优先围绕 `temp25_lambda5_outer60` 做更大样本验证或失败样本诊断。
+- 不建议继续盲目扫描 radius / centers / area prior。
+## Step S38: 200x100 50-sample default candidate validation
+
+目的：
+- 用新的 200x100 / 50-sample 数据验证 S37 确定的默认候选 `temp25_lambda5_outer60` 是否稳定优于 baseline。
+
+配置：
+- 使用 `data_generator_v2.py` 生成新的 200x100 / 50 train samples，输出到 `experiments/dual_network/S38_200x100_50sample_default_validation/data/`。
+- 对比 `baseline` 与 `temp25_lambda5_outer60`。
+- 两组均使用 `outer_steps=60`、`phi_steps=30`、`mu_steps=30`、`test_radius=5.0`、`center_mode=three`、`lambda_area_prior=1.0`、`lambda_mask_prior=1.0`。
+- `temp25_lambda5_outer60` 使用 `lambda_mask_bce_prior=5.0`、`mask_prior_temperature=25.0`。
+
+结果摘要：
+
+| config | avg defect_iou | avg defect_area_pred | avg mu_mse | avg mu_mae |
+| --- | ---: | ---: | ---: | ---: |
+| baseline | 6.851125e-02 | 1.121512e+04 | 5.193801e+05 | 5.343024e+02 |
+| temp25_lambda5_outer60 | 7.783885e-01 | 1.197960e+03 | 6.309463e+04 | 1.870116e+02 |
+
+当前判断：
+- `temp25_lambda5_outer60` 在 50/50 个样本上 IoU 都优于 baseline。
+- 平均 IoU、`defect_area_pred`、`mu_mse` 和 `mu_mae` 均显著改善，因此 `temp25_lambda5_outer60` 可以作为当前 200x100 半监督 runner 默认候选。
+- 仍存在弱样本，尤其是 sample 40、12、34、21、36、0、9、10；其中 sample 40 的 false positive / 面积扩张最明显。
+- 该结果仍是半监督 / 诊断上界，因为 BCE mask prior 使用 `mu_label < 500`，不能表述为无监督 weak-form 成功。
+
+下一步建议：
+- 若继续 200x100，优先做弱样本可视化与 failure taxonomy，而不是继续盲目扫描 radius / centers / area prior。
+## Step S39: 200x100 100-sample default candidate validation
+
+目的：
+- 用新的 200x100 / 100-sample 数据验证 S38 默认候选 `temp25_lambda5_outer60` 是否在更大样本数下继续稳定优于 baseline。
+
+配置：
+- 使用 `data_generator_v2.py` 生成新的 200x100 / 100 train samples，输出到 `experiments/dual_network/S39_200x100_100sample_default_validation/data/`。
+- 对比 `baseline` 与 `temp25_lambda5_outer60`。
+- 两组均使用 `outer_steps=60`、`phi_steps=30`、`mu_steps=30`、`test_radius=5.0`、`center_mode=three`、`lambda_area_prior=1.0`、`lambda_mask_prior=1.0`。
+- `temp25_lambda5_outer60` 使用 `lambda_mask_bce_prior=5.0`、`mask_prior_temperature=25.0`。
+
+结果摘要：
+
+| config | avg defect_iou | avg defect_area_pred | avg mu_mse | avg mu_mae |
+| --- | ---: | ---: | ---: | ---: |
+| baseline | 7.472148e-02 | 1.095210e+04 | 5.040013e+05 | 5.185692e+02 |
+| temp25_lambda5_outer60 | 7.595984e-01 | 1.333170e+03 | 6.412482e+04 | 1.794309e+02 |
+
+当前判断：
+- `temp25_lambda5_outer60` 在 100/100 个样本上 IoU 都优于 baseline。
+- 平均 IoU、`defect_area_pred`、`mu_mse` 和 `mu_mae` 均显著改善，因此 `temp25_lambda5_outer60` 继续适合作为当前 200x100 半监督 runner 默认候选。
+- 仍存在弱样本，尤其是 sample 40、47、17、57、73、95、54、29、49、43、19、86；主要问题仍是 false positive / 面积扩张和局部形状误差。
+- 该结果仍是半监督 / 诊断上界，因为 BCE mask prior 使用 `mu_label < 500`，不能表述为无监督 weak-form 成功。
+
+下一步建议：
+- 若继续 200x100，优先做弱样本可视化与 failure taxonomy，而不是继续盲目扫描 radius / centers / area prior。
+
+
+## Step S40: 200x100 failure diagnostics
+
+Purpose:
+- Read the completed S39 200x100 / 100-sample results and organize representative success and weak samples without running new training.
+
+Configuration:
+- Source metrics: `experiments/dual_network/S39_200x100_100sample_default_validation/baseline/metrics.csv` and `temp25_lambda5_outer60/metrics.csv`.
+- Diagnostic candidate: `temp25_lambda5_outer60`.
+- Output: `experiments/dual_network/S40_200x100_failure_diagnostics/summary.md`, `diagnostics_rankings.csv`, and at most 20 representative PNG figures.
+
+Key findings:
+- `temp25_lambda5_outer60` avg `defect_iou=7.595984e-01` versus baseline avg `defect_iou=7.472148e-02`.
+- Top success samples by IoU: 5, 45, 81, 50, 77.
+- Weakest samples by IoU: 40, 47, 17, 57, 73, 95, 54, 29, 49, 43.
+- Largest area-error samples: 40, 54, 17, 57, 95, 47, 49, 41, 29, 73.
+- Largest centroid-offset samples: 17, 57, 29, 54, 47, 31, 43, 86, 41, 1.
+- Main weakness remains false positives / area overprediction, centroid shift, and local shape-detail mismatch.
+- The result remains a semi-supervised BCE mask-prior upper bound, not unsupervised weak-form success.
+
+Next-step recommendation:
+- Continue with failure-sample taxonomy and final report consolidation rather than blind radius / centers / area-prior scans.
+- If improving weak 200x100 samples, prioritize better false-positive suppression or structural changes.
+
+
+## Step S41: 200x100 false-positive suppression probe
+
+Purpose:
+- Test whether stronger area prior and/or stronger BCE prior can suppress the false-positive diffusion and high `defect_area_pred` seen in S39/S40 for the 200x100 default candidate.
+
+Configuration:
+- Data: `experiments/dual_network/S39_200x100_100sample_default_validation/data/training_data_train.npz` from S39.
+- Fixed samples: 0-99.
+- Shared runner settings: `outer_steps=60`, `phi_steps=30`, `mu_steps=30`, `test_radius=5.0`, `center_mode=three`, `lambda_mask_prior=1.0`, `area_prior_temperature=50.0`, `mask_prior_temperature=25.0`.
+- Tested configs: `area3_bce5`, `area5_bce5`, `area3_bce7`.
+
+Result summary:
+- S39 reference `temp25_lambda5_outer60`: avg `defect_iou=7.595984e-01`, avg `defect_area_pred=1.333170e+03`, avg `mu_mse=6.412482e+04`, avg `mu_mae=1.794309e+02`.
+- `area3_bce5`: avg `defect_iou=7.702518e-01`, avg `defect_area_pred=1.214550e+03`, avg `mu_mse=5.923641e+04`, avg `mu_mae=1.736971e+02`.
+- `area5_bce5`: avg `defect_iou=7.681272e-01`, avg `defect_area_pred=1.255380e+03`, avg `mu_mse=5.812382e+04`, avg `mu_mae=1.707160e+02`.
+- `area3_bce7`: avg `defect_iou=8.209086e-01`, avg `defect_area_pred=1.074100e+03`, avg `mu_mse=5.008512e+04`, avg `mu_mae=1.641459e+02`.
+- Full per-sample IoU and area tables are recorded in `experiments/dual_network/S41_200x100_false_positive_suppression_probe/summary.md`.
+
+Current judgment:
+- `area3_bce7` gives the best combined result: highest average IoU, lowest average predicted defect area, and lowest mu errors among S41 configs.
+- Moderate area strengthening helps, but blindly increasing area prior from 3 to 5 is not the best false-positive control path.
+- Stronger BCE with moderate area prior is the current 200x100 follow-up candidate.
+- The boundary is unchanged: this is still a semi-supervised BCE mask-prior upper bound, not unsupervised weak-form success.
+
+Next-step recommendation:
+- If continuing 200x100, use `area3_bce7` as the next candidate and focus on failure-sample taxonomy, structural false-positive suppression, or post-processing analysis rather than more blind prior-weight scans.
+
+
+## Step S42: Fresh 200x100 area3_bce7 candidate validation
+
+Purpose:
+- Validate the S41 candidate `area3_bce7` on a new 200x100 / 100-sample dataset against baseline and the previous default `temp25_lambda5_outer60`.
+
+Configuration:
+- Data generation: `C:/Users/19166/anaconda3/envs/pinn_mfl/python.exe data_generator_v2.py --train-samples 100 --val-samples 0 --test-samples 0 --grid-x 200 --grid-y 100 --output-dir experiments/dual_network/S42_200x100_fresh_area3_bce7_validation/data --seed 1042`.
+- Train NPZ: `experiments/dual_network/S42_200x100_fresh_area3_bce7_validation/data/training_data_train.npz`.
+- Compared configs: `baseline`, `temp25_lambda5_outer60`, `area3_bce7`.
+- All runner configs used `outer_steps=60`, `phi_steps=30`, `mu_steps=30`, `test_radius=5.0`, and `center_mode=three`.
+
+Result summary:
+- `baseline`: avg `defect_iou=7.703941e-02`, avg `defect_area_pred=1.146581e+04`, avg `mu_mse=5.252954e+05`, avg `mu_mae=5.387451e+02`.
+- `temp25_lambda5_outer60`: avg `defect_iou=7.398354e-01`, avg `defect_area_pred=1.429090e+03`, avg `mu_mse=6.927535e+04`, avg `mu_mae=1.894512e+02`.
+- `area3_bce7`: avg `defect_iou=8.047192e-01`, avg `defect_area_pred=1.213090e+03`, avg `mu_mse=5.839230e+04`, avg `mu_mae=1.823810e+02`.
+- Full per-sample IoU comparison is recorded in `experiments/dual_network/S42_200x100_fresh_area3_bce7_validation/summary.md`.
+
+Current judgment:
+- `area3_bce7` is the best S42 config by average IoU, predicted defect area, mu_mse, and mu_mae.
+- It beats `temp25_lambda5_outer60` on IoU for 70/100 samples and should replace it as the current 200x100 default semi-supervised BCE diagnostic candidate.
+- Obvious weak `area3_bce7` samples below IoU 0.5: 5, 8, 11, 21, 23, 27, 28, 36, 52, 71, 72, 82, 83, 99.
+- Boundary unchanged: BCE is a semi-supervised / diagnostic upper bound, not unsupervised weak-form success.
+
+Next-step recommendation:
+- Use `area3_bce7` as the 200x100 default candidate for subsequent reporting or failure-sample taxonomy.
+- Do not continue blind radius / center / area-prior scans unless a targeted failure mode justifies it.
+
+
+## Step S43: 200x100 area3_bce7 failure diagnostics
+
+Purpose:
+- Read the completed S42 200x100 / 100-sample results and organize `area3_bce7` success samples, weak samples, and residual failure modes without running new training.
+
+Configuration:
+- Source metrics: `experiments/dual_network/S42_200x100_fresh_area3_bce7_validation/baseline/metrics.csv`, `temp25_lambda5_outer60/metrics.csv`, and `area3_bce7/metrics.csv`.
+- Diagnostic candidate: `area3_bce7`.
+- Output: `experiments/dual_network/S43_200x100_area3_bce7_failure_diagnostics/summary.md`, `diagnostics_rankings.csv`, and 25 representative PNG figures.
+
+Key findings:
+- S42 averages: baseline avg `defect_iou=7.703941e-02`, `temp25_lambda5_outer60` avg `defect_iou=7.398354e-01`, and `area3_bce7` avg `defect_iou=8.047192e-01`.
+- `area3_bce7` also improves average predicted area and continuous-field errors versus `temp25_lambda5_outer60`: avg `defect_area_pred=1.213090e+03`, avg `mu_mse=5.839230e+04`, avg `mu_mae=1.823810e+02`.
+- Top success samples by IoU: 47, 25, 85, 17, 15.
+- Weakest samples by IoU: 28, 5, 71, 23, 11, 21, 8, 72, 99, 83, 82, 36, 27, 52, 7.
+- Largest `temp25_lambda5_outer60` to `area3_bce7` IoU improvements: 39, 81, 22, 87, 4, 61, 57, 54, 91, 30.
+- Largest regressions versus `temp25_lambda5_outer60`: 82, 5, 64, 40, 23, 45, 72, 96, 28, 79.
+- Main residual issues remain false positives, area overprediction, centroid shift, and local shape-detail mismatch.
+- The boundary is unchanged: this is still a semi-supervised BCE mask-prior upper bound, not unsupervised weak-form success.
+
+Next-step recommendation:
+- Keep `area3_bce7` as the current 200x100 default candidate.
+- Do not continue blind area/BCE weight sweeps; prioritize weak-sample shape analysis, post-processing, or structural false-positive control.
+- Consider recording `area3_bce7` in `DUAL_NETWORK_RESULTS_REPORT` as the current 200x100 default.
+
+
+## Step S44: 200x100 post-processing threshold diagnostics
+
+Purpose:
+- Diagnose whether the residual false positives in S42 `area3_bce7` can be mitigated by threshold calibration, largest connected component filtering, or oracle area calibration without running new training.
+
+Data source:
+- Read S42 outputs only: `experiments/dual_network/S42_200x100_fresh_area3_bce7_validation/area3_bce7/sample_*/final_mu_pred.npy` and `final_mu_label.npy`.
+- Evaluated 100 samples with `label_mask = mu_label < 500`.
+
+Result summary:
+- Full results are recorded in `experiments/dual_network/S44_200x100_postprocess_threshold_probe/summary.md`.
+- `raw_threshold_500`: avg `defect_iou=8.047192e-01`, avg `defect_area_pred=1.213090e+03`, avg absolute area error `3.355900e+02`.
+- Direct threshold sweep best average IoU remains threshold `500`, avg `defect_iou=8.047192e-01`; lower thresholds reduce area but reduce IoU more.
+- Largest connected component at threshold `500` gives avg `defect_iou=8.058842e-01`, avg `defect_area_pred=1.181090e+03`, and avg absolute area error `3.052100e+02`, a very small average IoU improvement.
+- Oracle area top-k gives avg `defect_iou=7.788534e-01`, below raw thresholding despite exact label-area usage.
+
+Current judgment:
+- False positives are not mainly a simple threshold-calibration or area-calibration issue.
+- LCC can slightly reduce area and slightly improve average IoU, but the gain is too small to treat as a robust default without validation on complex or multi-component defects.
+- Since oracle top-k is below raw thresholding, the remaining bottleneck is partly the `mu_pred` spatial ranking / shape signal itself rather than only mask area selection.
+- Boundary unchanged: S42/S44 remain semi-supervised BCE mask-prior diagnostic upper-bound results, not unsupervised weak-form success.
+
+Next-step recommendation:
+- Do not continue blind threshold or area sweeps.
+- If continuing 200x100, test LCC as an optional post-processing ablation on fresh data, but prioritize structural false-positive control or weak-sample shape analysis.
+
+
+## Step S45: 200x100 model capacity probe
+
+Purpose:
+- Test whether PhiNet/MuNet capacity limits local shape recovery and false-positive control at 200x100 after S44 showed that simple thresholding, LCC filtering, and oracle area top-k do not substantially resolve the residual errors.
+
+Configuration:
+- Data: `experiments/dual_network/S42_200x100_fresh_area3_bce7_validation/data/training_data_train.npz`.
+- Samples: 0-29.
+- Shared setup: `area3_bce7`, `outer_steps=60`, `phi_steps=30`, `mu_steps=30`, `test_radius=5.0`, `center_mode=three`.
+- Capacity configs: `cap_32x2`, `cap_64x3`, `cap_128x4`.
+- Runner interface change: `train_dual_variational.py` now exposes `--hidden-dim` and `--num-layers`; defaults remain `32` and `2`.
+
+Result summary:
+- Full per-sample results are recorded in `experiments/dual_network/S45_200x100_model_capacity_probe/summary.md`.
+- `cap_32x2`: avg `defect_iou=7.581612e-01`, avg `defect_area_pred=1.612800e+03`, avg `mu_mse=7.100698e+04`, avg `mu_mae=2.023675e+02`.
+- `cap_64x3`: avg `defect_iou=7.008694e-01`, avg `defect_area_pred=1.687733e+03`, avg `mu_mse=7.751988e+04`, avg `mu_mae=2.043629e+02`.
+- `cap_128x4`: avg `defect_iou=8.680831e-01`, avg `defect_area_pred=1.179267e+03`, avg `mu_mse=4.888211e+04`, avg `mu_mae=1.657460e+02`.
+- On the S42/S43 weak subset within samples 0-29 (`5, 8, 11, 21, 23, 27, 28`), `cap_128x4` has the best weak-sample avg IoU: `7.931741e-01`.
+- No NaN/inf values were found in the metrics.
+
+Current judgment:
+- `cap_128x4` clearly improves the 30-sample probe, supporting the hypothesis that 200x100 local shape recovery is partly capacity-limited.
+- `cap_64x3` is not a stable intermediate in this run and should not be promoted as a default.
+- `cap_128x4` still needs fresh/larger validation before replacing the current 200x100 default because a few samples regress relative to `cap_32x2`.
+- Boundary unchanged: BCE remains a semi-supervised diagnostic upper bound, not unsupervised weak-form success.
+
+Next-step recommendation:
+- Validate `cap_128x4` on a fresh or larger 200x100 sample set before adopting it as the new capacity default.
+- If it remains stronger, update the 200x100 default candidate to combine `area3_bce7` with larger PhiNet/MuNet capacity; otherwise return to loss/structure changes.
+
+
+## Step S46: Fresh 200x100 capacity validation
+
+Purpose:
+- Validate the S45 capacity result on a fresh 200x100 / 50-sample dataset by comparing the existing `32x2 + area3_bce7` runner against the larger `128x4 + area3_bce7` capacity candidate.
+
+Configuration:
+- Data generation: `C:/Users/19166/anaconda3/envs/pinn_mfl/python.exe data_generator_v2.py --train-samples 50 --val-samples 0 --test-samples 0 --grid-x 200 --grid-y 100 --output-dir experiments/dual_network/S46_200x100_fresh_capacity_validation/data --seed 1046`.
+- Train NPZ: `experiments/dual_network/S46_200x100_fresh_capacity_validation/data/training_data_train.npz`.
+- Compared configs: `cap32_area3_bce7` (`hidden_dim=32`, `num_layers=2`) versus `cap128_area3_bce7` (`hidden_dim=128`, `num_layers=4`).
+- Shared setup: `outer_steps=60`, `phi_steps=30`, `mu_steps=30`, `test_radius=5.0`, `center_mode=three`, `lambda_area_prior=3.0`, `lambda_mask_prior=1.0`, `lambda_mask_bce_prior=7.0`, `area_prior_temperature=50.0`, `mask_prior_temperature=25.0`.
+
+Result summary:
+- Full per-sample results are recorded in `experiments/dual_network/S46_200x100_fresh_capacity_validation/summary.md`.
+- `cap32_area3_bce7`: avg `defect_iou=8.252710e-01`, avg `defect_area_pred=1.071520e+03`, avg `mu_mse=5.076185e+04`, avg `mu_mae=1.663466e+02`.
+- `cap128_area3_bce7`: avg `defect_iou=8.628616e-01`, avg `defect_area_pred=8.390600e+02`, avg `mu_mse=4.923852e+04`, avg `mu_mae=1.764913e+02`.
+- `cap128` improves IoU on 19/50 samples and regresses on 31/50 samples.
+- Obvious IoU < 0.5 failures: `cap32` samples 4, 10, 17, 38, 49; `cap128` sample 22.
+
+Current judgment:
+- `cap128_area3_bce7` is stronger on average and reduces severe failures, average predicted area, and average `mu_mse`.
+- It is not uniformly stable sample-by-sample and has worse average `mu_mae`, so S46 supports `cap128` as the current 200x100 capacity candidate, not as an unconditional final default.
+- Boundary unchanged: BCE remains a semi-supervised diagnostic upper bound, not unsupervised weak-form success.
+
+Next-step recommendation:
+- Diagnose `cap128` regression samples, especially samples 22, 45, 41, 11, and 6.
+- If promoting `cap128`, validate it on a 100-sample fresh run or define an explicit average-IoU versus per-sample-stability criterion first.
+
+
+## Step S47: 200x100 100-sample capacity validation
+
+Purpose:
+- Validate whether the S46 `128x4 + area3_bce7` capacity candidate is stable on a fresh 200x100 / 100-sample dataset when compared against `32x2 + area3_bce7`.
+
+Configuration:
+- Data generation: `C:/Users/19166/anaconda3/envs/pinn_mfl/python.exe data_generator_v2.py --train-samples 100 --val-samples 0 --test-samples 0 --grid-x 200 --grid-y 100 --output-dir experiments/dual_network/S47_200x100_100sample_capacity_validation/data --seed 1047`.
+- Train NPZ: `experiments/dual_network/S47_200x100_100sample_capacity_validation/data/training_data_train.npz`.
+- Compared configs: `cap32_area3_bce7` (`hidden_dim=32`, `num_layers=2`) versus `cap128_area3_bce7` (`hidden_dim=128`, `num_layers=4`).
+- Shared setup: `outer_steps=60`, `phi_steps=30`, `mu_steps=30`, `test_radius=5.0`, `center_mode=three`, `lambda_area_prior=3.0`, `lambda_mask_prior=1.0`, `lambda_mask_bce_prior=7.0`, `area_prior_temperature=50.0`, `mask_prior_temperature=25.0`.
+
+Result summary:
+- Full per-sample results are recorded in `experiments/dual_network/S47_200x100_100sample_capacity_validation/summary.md`.
+- `cap32_area3_bce7`: avg `defect_iou=8.341983e-01`, avg `defect_area_pred=9.976200e+02`, avg `mu_mse=5.061777e+04`, avg `mu_mae=1.742169e+02`.
+- `cap128_area3_bce7`: avg `defect_iou=8.475844e-01`, avg `defect_area_pred=9.081600e+02`, avg `mu_mse=5.336808e+04`, avg `mu_mae=1.851059e+02`.
+- `cap128` improves IoU on 45/100 samples and regresses on 55/100 samples.
+- Obvious IoU < 0.5 failures: `cap32` samples 25, 33, 39, 44, 63, 67, 87, 92; `cap128` samples 21, 39, 44, 75, 94.
+
+Current judgment:
+- `cap128_area3_bce7` improves average IoU and reduces average predicted defect area, but it worsens average `mu_mse`, average `mu_mae`, and the sample-level win rate.
+- S47 does not support promoting `128x4` as the 200x100 default capacity. The more defensible default remains `32x2 + area3_bce7`, while `128x4 + area3_bce7` remains a high-capacity diagnostic candidate.
+- Boundary unchanged: BCE remains a semi-supervised diagnostic upper bound, not unsupervised weak-form success.
+
+Next-step recommendation:
+- Do not continue broad capacity sweeps from this result alone.
+- Inspect `cap128` regression samples, especially 75, 44, 21, 40, 94, 71, 43, 98, 28, and 60, before deciding whether a targeted structural or loss change is justified.
+
+
+## Step S48: Signal-conditioned dual-network skeleton
+
+Purpose:
+- Start the next branch stage after per-sample semi-supervised optimization: define a minimal signal-conditioned dual-network interface whose inference inputs are `Bz signal + coords`, not `mu_label` or `label_mask`.
+
+Added files:
+- `CONDITIONAL_DUAL_NETWORK_PLAN.md`: Chinese design note for the conditional model stage, including motivation, target interface, boundary with `main`, and S48 scope.
+- `conditional_dual_models.py`: PyTorch model skeleton with `BzEncoder`, `ConditionalMLP`, `ConditionalMuNet`, `ConditionalPhiNet`, and `ConditionalDualNet`.
+- `smoke_test_conditional_dual_models.py`: forward-shape and error-path smoke test.
+- `experiments/dual_network/S48_conditional_model_skeleton/summary.md`: S48 artifact summary.
+
+Smoke test:
+- Runs `ConditionalDualNet(signal_len=200, latent_dim=32, hidden_dim=64, num_layers=3)`.
+- Checks both `coords` shapes `[N,2]` and `[B,N,2]`.
+- Verifies output shapes: `latent=[B,32]`, `mu=[B,N,1]`, `phi=[B,N,1]`.
+- Verifies `mu` remains inside `[1.0,1000.0]`.
+- Verifies invalid `signals` / `coords` shapes raise `ValueError`.
+
+Current judgment:
+- S48 only creates the model skeleton and smoke test. It does not run formal training, does not save checkpoints, and does not claim predictive performance.
+- The branch boundary is now explicit: per-sample runner results remain semi-supervised diagnostic upper bounds; the conditional model stage is the path toward a label-free inference interface that can later be compared with the main baseline.
+
+Next-step recommendation:
+- S49 should add the conditional runner data interface / batch loader for `.npz` files, then run a tiny supervised smoke-train loop before any larger evaluation.
+
+
+## Step S49: Conditional dual-network data interface
+
+Purpose:
+- Extend the S48 signal-conditioned model skeleton with review cleanup and a minimal batch data interface for future conditional runners.
+
+Review cleanup:
+- `conditional_dual_models.py` now initializes all `nn.Linear` layers with Xavier uniform weights and zero biases.
+- `smoke_test_conditional_dual_models.py` now includes a backward smoke test through `mu` and `phi`.
+
+Added files:
+- `conditional_dual_data_utils.py`: minimal `.npz` loader, `x/y` to coords builder, conditional batch builder, and `infer_signal_len`.
+- `smoke_test_conditional_dual_data_utils.py`: tempfile-based smoke test for conditional batch loading and forward integration with `ConditionalDualNet`.
+- `experiments/dual_network/S49_conditional_data_interface/summary.md`: S49 artifact summary.
+
+Smoke test result:
+- `smoke_test_conditional_dual_models.py` passes.
+- `smoke_test_conditional_dual_data_utils.py` passes.
+- `conditional_dual_data_utils.py` runs with no arguments and exits after printing usage context.
+
+Current judgment:
+- The conditional stage now has a minimal path from `.npz` fields (`signals`, `mu_maps`, `coords` or `x/y`) to batch tensors (`signals`, `coords`, `mu_label`, `mask_label`).
+- No formal training was run and no performance claim is made.
+
+Next-step recommendation:
+- S50 should create a conditional supervised training runner skeleton with a tiny batch smoke-train loop before any larger validation.
+
+
+## Step S50: Conditional supervised training runner skeleton
+
+Purpose:
+- Create the first minimal supervised training entry point for `ConditionalDualNet`, moving the branch from data interface toward a shared-parameter conditional model that trains on `signals + coords` batches.
+
+Added files:
+- `train_conditional_dual.py`: minimal supervised runner using `conditional_dual_data_utils.py` and `conditional_dual_models.py`.
+- `smoke_test_train_conditional_dual.py`: tempfile-based smoke test for the runner.
+- `experiments/dual_network/S50_conditional_training_runner_skeleton/summary.md`: S50 artifact summary.
+
+Training skeleton:
+- Inputs: `signals [B,signal_len]`, `coords [N,2]`, `mu_label [B,N,1]`, `mask_label [B,N,1]`.
+- Model: `ConditionalDualNet`.
+- Losses: mask BCE, mask Dice, optional `mu_mse`.
+- Outputs: `metrics.csv` and `run_summary.md`.
+- No model weights, checkpoints, `.npy` arrays, or figures are saved.
+
+Smoke test:
+- `train_conditional_dual.py` with no arguments prints usage context and exits normally.
+- `smoke_test_train_conditional_dual.py` creates a temporary `.npz`, runs five supervised steps on samples `0,1,2`, checks `metrics.csv` / `run_summary.md`, and verifies no weights or arrays were saved.
+
+Current boundary:
+- S50 does not connect weak-form / physics loss and does not run a formal experiment.
+- This is not a main-baseline comparison. It only verifies the conditional supervised training closure.
+
+Next-step recommendation:
+- S51 should run the conditional supervised runner on a real small `.npz` and check whether the shared model can learn train-sample masks before adding validation or weak-form losses.
+
+
+## Step S51: Conditional supervised small-data probe
+
+Purpose:
+- Use a real generated 20x10 / 20-sample `.npz` dataset to verify whether the conditional supervised runner can learn train-sample masks.
+
+Configuration:
+- Data generation: `python data_generator_v2.py --train-samples 20 --val-samples 0 --test-samples 0 --grid-x 20 --grid-y 10 --output-dir experiments/dual_network/S51_conditional_supervised_small_data_probe/data --seed 1051`.
+- Train NPZ: `experiments/dual_network/S51_conditional_supervised_small_data_probe/data/training_data_train.npz`.
+- Runner: `train_conditional_dual.py`.
+- Samples: `0-19`.
+- Training: `steps=300`, `lr=1e-3`, `hidden_dim=64`, `num_layers=3`, `latent_dim=32`.
+- Loss: `lambda_mask_bce=1.0`, `lambda_mask_dice=1.0`, `lambda_mu_mse=0.0`, `mask_temperature=50.0`.
+- No weak-form / physics loss, no checkpoints, no arrays, and no figures.
+
+Result summary:
+- Full results are recorded in `experiments/dual_network/S51_conditional_supervised_small_data_probe/summary.md`.
+- Final train averages: `defect_iou=5.228869e-01`, `defect_area_pred=5.050000e+00`, `mu_mse=3.178682e+04`, `mu_mae=1.286587e+02`.
+- All metrics are finite.
+- Final train IoU range: min `0.000000e+00`, max `1.000000e+00`.
+
+Current judgment:
+- The conditional supervised training closure is usable: the shared signal-conditioned model learns nontrivial mask signal on real 20x10 train samples.
+- The result is not yet strong and includes failed train samples, so model/loss settings still need work.
+- S51 is train-set probe only and does not measure generalization or main-baseline competitiveness.
+
+Next-step recommendation:
+- Build a train/val/test conditional protocol before claiming generalization.
+- After validation exists, consider adding weak-form / physics loss while preserving the inference boundary: `signals + coords` only.
+
+
+## Step S52: Conditional train-set overfit probe
+
+Purpose:
+- Check whether the conditional supervised model can fit the S51 20x10 train set more strongly by increasing training steps, adding a light `mu_mse` term, or increasing model capacity.
+
+Configuration:
+- Data: `experiments/dual_network/S51_conditional_supervised_small_data_probe/data/training_data_train.npz`.
+- Samples: `0-19`.
+- Compared configs:
+  - `longer_bce_dice`: 1000 steps, `hidden_dim=64`, `num_layers=3`, `latent_dim=32`, BCE + Dice.
+  - `longer_bce_dice_mu1e-4`: same, plus `lambda_mu_mse=1e-4`.
+  - `bigger_bce_dice`: 1000 steps, `hidden_dim=128`, `num_layers=4`, `latent_dim=64`, BCE + Dice.
+
+Result summary:
+- Full results are recorded in `experiments/dual_network/S52_conditional_train_overfit_probe/summary.md`.
+- `longer_bce_dice`: avg `defect_iou=8.211111e-01`, avg `defect_area_pred=5.600000e+00`, avg `mu_mse=6.942074e+03`, avg `mu_mae=2.143848e+01`.
+- `longer_bce_dice_mu1e-4`: avg `defect_iou=7.919444e-01`, avg `defect_area_pred=5.500000e+00`, avg `mu_mse=5.815452e+03`, avg `mu_mae=1.315498e+01`.
+- `bigger_bce_dice`: avg `defect_iou=9.375000e-01`, avg `defect_area_pred=5.950000e+00`, avg `mu_mse=2.941439e+03`, avg `mu_mae=1.233218e+01`.
+- All metrics are finite.
+
+Current judgment:
+- S51 was partly undertrained: longer BCE + Dice training improves train IoU substantially.
+- Light `mu_mse` helps continuous errors but slightly hurts train IoU relative to the no-`mu_mse` longer run.
+- The bigger conditional model is best across train IoU and continuous `mu` errors, so current train-set fitting is capacity-sensitive.
+- S52 remains a train-set overfit probe, not a generalization result.
+
+Next-step recommendation:
+- Use `bigger_bce_dice` as the next supervised conditional candidate.
+- Create a train/val/test conditional protocol before adding weak-form loss or comparing with the main baseline.
+
+
+## Step S53: Conditional train/val generalization probe
+
+Purpose:
+- Extend `train_conditional_dual.py` with optional eval `.npz` support and test whether the signal-conditioned supervised model generalizes from 20x10 train samples to held-out val samples.
+
+Runner update:
+- Added `--eval-npz-path` and `--eval-sample-indices`.
+- When eval data is provided, the runner writes `eval_metrics.csv` in addition to train `metrics.csv`.
+- Eval is forward-only and does not backpropagate.
+
+Configuration:
+- Data generation: `python data_generator_v2.py --train-samples 80 --val-samples 20 --test-samples 0 --grid-x 20 --grid-y 10 --output-dir experiments/dual_network/S53_conditional_train_val_probe/data --seed 1053`.
+- Train NPZ: `experiments/dual_network/S53_conditional_train_val_probe/data/training_data_train.npz`.
+- Val NPZ: `experiments/dual_network/S53_conditional_train_val_probe/data/training_data_val.npz`.
+- Compared configs: `big_bce_dice` and `big_bce_dice_mu1e-4`.
+
+Result summary:
+- Full results are recorded in `experiments/dual_network/S53_conditional_train_val_probe/summary.md`.
+- `big_bce_dice` train: avg `defect_iou=9.350000e-01`, avg `defect_area_pred=6.662500e+00`, avg `mu_mse=2.731668e+03`, avg `mu_mae=8.359778e+00`.
+- `big_bce_dice` val: avg `defect_iou=7.141148e-02`, avg `defect_area_pred=5.250000e+00`, avg `mu_mse=5.220703e+04`, avg `mu_mae=6.033646e+01`.
+- `big_bce_dice_mu1e-4` train and val both have avg `defect_iou=0.000000e+00` and empty predicted masks; val continuous errors improve relative to `big_bce_dice`, but the mask objective collapses.
+- All metrics are finite.
+
+Current judgment:
+- `big_bce_dice` strongly fits train samples but does not generalize to held-out val samples in this setup.
+- The light `mu_mse` variant improves continuous errors but destroys mask learning.
+- S53 does not demonstrate useful conditional train/val generalization; it exposes overfitting and loss-balance issues.
+
+Next-step recommendation:
+- Do not compare against the main baseline yet.
+- Diagnose conditional generalization before adding weak-form loss: validation-aware selection, reduced capacity / regularization, better signal encoder design, and loss balancing are likely next targets.
+
+
+## Step S54: Conditional train/val/test generalization probe
+
+Purpose:
+- Extend `train_conditional_dual.py` with optional test `.npz` support and evaluate the conditional supervised model on 20x10 train / val / test splits.
+
+Runner update:
+- Added `--test-npz-path` and `--test-sample-indices`.
+- When test data is provided, the runner writes `test_metrics.csv` in addition to train `metrics.csv` and optional `eval_metrics.csv`.
+- Val and test evaluation are forward-only and do not backpropagate.
+
+Configuration:
+- Data generation: `python data_generator_v2.py --train-samples 200 --val-samples 50 --test-samples 50 --grid-x 20 --grid-y 10 --output-dir experiments/dual_network/S54_conditional_train_val_test_probe/data --seed 1054`.
+- Train NPZ: `experiments/dual_network/S54_conditional_train_val_test_probe/data/training_data_train.npz`.
+- Val NPZ: `experiments/dual_network/S54_conditional_train_val_test_probe/data/training_data_val.npz`.
+- Test NPZ: `experiments/dual_network/S54_conditional_train_val_test_probe/data/training_data_test.npz`.
+- Compared configs: `medium_bce_dice` and `big_bce_dice`.
+
+Result summary:
+- Full results are recorded in `experiments/dual_network/S54_conditional_train_val_test_probe/summary.md`.
+- `medium_bce_dice`: train avg `defect_iou=8.627310e-01`, val avg `defect_iou=5.660991e-02`, test avg `defect_iou=8.526794e-02`.
+- `big_bce_dice`: train avg `defect_iou=9.397538e-01`, val avg `defect_iou=7.397455e-02`, test avg `defect_iou=7.558780e-02`.
+- Both configs have finite metrics and a large train-to-held-out IoU gap.
+
+Current judgment:
+- The conditional supervised model can fit train samples, especially with the bigger config.
+- Held-out val/test IoU remains low, so S54 still indicates overfitting rather than useful conditional generalization.
+- `big_bce_dice` remains the stronger diagnostic candidate because it has the best train and val IoU plus lower val continuous errors, but it is not ready for main-baseline comparison.
+
+Next-step recommendation:
+- Do not move to main-baseline comparison yet.
+- Diagnose conditional generalization before adding weak-form loss or scaling resolution: regularization, validation-aware selection, signal encoder design, augmentation, and loss balancing are the next likely targets.
+
+
+## Step S55: Conditional data-scale generalization probe
+
+Purpose:
+- Test whether S54's low held-out val/test IoU is mainly caused by too few train samples by scaling the 20x10 conditional supervised dataset from 200 train samples to 1000 train samples.
+
+Configuration:
+- Data generation: `python data_generator_v2.py --train-samples 1000 --val-samples 200 --test-samples 200 --grid-x 20 --grid-y 10 --output-dir experiments/dual_network/S55_conditional_datascale_generalization_probe/data --seed 1055`.
+- Train / val / test: 1000 / 200 / 200 samples at 20x10.
+- Compared configs:
+  - `medium_bce_dice_datascale`: 5000 steps, `hidden_dim=64`, `num_layers=3`, `latent_dim=32`, BCE + Dice.
+  - `big_bce_dice_datascale`: 5000 steps, `hidden_dim=128`, `num_layers=4`, `latent_dim=64`, BCE + Dice.
+
+Result summary:
+- Full results are recorded in `experiments/dual_network/S55_conditional_datascale_generalization_probe/summary.md`.
+- `medium_bce_dice_datascale`: train avg `defect_iou=6.568019e-01`, val avg `defect_iou=9.390210e-02`, test avg `defect_iou=8.759288e-02`.
+- `big_bce_dice_datascale`: train avg `defect_iou=9.130737e-01`, val avg `defect_iou=8.848209e-02`, test avg `defect_iou=7.708859e-02`.
+- All metrics are finite.
+
+Current judgment:
+- Increasing train data improves held-out IoU modestly relative to S54, but val/test IoU remains low.
+- The larger model still fits train strongly and keeps a large train-to-held-out gap.
+- The medium model has slightly better held-out IoU and smaller gaps, so it is the better next diagnostic path for generalization.
+- S55 suggests weak generalization is not mainly a 200-sample data shortage; architecture, signal representation, regularization, or loss design remain likely bottlenecks.
+
+Next-step recommendation:
+- Do not scale to higher resolution yet.
+- Focus on conditional generalization diagnostics: validation-aware early stopping, regularization, augmentation, and signal encoder/loss design.
+
+
+## Step S56: Conditional signal ablation probe
+
+Purpose:
+- Check whether the conditional supervised model actually uses `Bz signal`, or whether it mainly relies on coordinates and dataset-level spatial priors.
+
+Runner update:
+- Added `--signal-ablation` to `train_conditional_dual.py`.
+- When enabled, the runner performs forward-only zero-signal and shuffled-signal evaluation after training.
+- It writes train/eval/test ablation CSV files without changing training loss or saving weights, checkpoints, arrays, or images.
+
+Configuration:
+- Reused S55 20x10 data: 1000 train, 200 val, 200 test samples.
+- Config: `big_bce_dice_signal_ablation`.
+- 5000 steps, `hidden_dim=128`, `num_layers=4`, `latent_dim=64`, BCE + Dice, `lambda_mu_mse=0.0`.
+
+Result summary:
+- Full results are recorded in `experiments/dual_network/S56_conditional_signal_ablation_probe/summary.md`.
+- Correct signal IoU: train `9.072941e-01`, val `9.372990e-02`, test `8.830051e-02`.
+- Zero signal IoU: train `1.577167e-02`, val `1.992248e-02`, test `2.013694e-02`.
+- Shuffled signal IoU: train `6.966472e-02`, val `6.911540e-02`, test `5.805073e-02`.
+- All metrics are finite.
+
+Current judgment:
+- The model clearly uses correct signals on train samples.
+- On val/test, correct signals still outperform zero/shuffled signals, but the gap is small and held-out IoU remains low.
+- The model is not purely coordinate-only, but signal conditioning does not generalize strongly.
+- The bottleneck is more likely signal encoder / conditioning / normalization / loss design than data quantity alone.
+
+Next-step recommendation:
+- Do not scale resolution or compare with the main baseline yet.
+- Prioritize signal conditioning diagnostics: normalize signals, improve `BzEncoder`, adjust conditioning injection, and add validation-aware regularization.
+
+
+## Step S57: Conditional signal normalization probe
+
+Purpose:
+- Test whether weak held-out conditional generalization is caused by raw `Bz signal` scale or unstable signal conditioning.
+
+Runner update:
+- Added `--signal-normalization` to `train_conditional_dual.py`.
+- Supported modes: `none`, `train_zscore`, and `per_sample_zscore`.
+- Normalization is applied only to model input signals and never modifies the source `.npz` files.
+- If signal ablation is enabled, normalization is applied before zero/shuffled ablation.
+
+Configuration:
+- Reused S55 20x10 data: 1000 train, 200 val, 200 test samples.
+- Shared model/loss config: 5000 steps, `hidden_dim=128`, `num_layers=4`, `latent_dim=64`, BCE + Dice.
+- Compared configs: `norm_none_reference`, `norm_train_zscore`, `norm_per_sample_zscore`.
+
+Result summary:
+- Full results are recorded in `experiments/dual_network/S57_conditional_signal_normalization_probe/summary.md`.
+- `norm_none_reference`: train / val / test IoU = `9.114212e-01` / `9.318296e-02` / `8.784143e-02`.
+- `norm_train_zscore`: train / val / test IoU = `8.914478e-01` / `7.994475e-02` / `8.733596e-02`.
+- `norm_per_sample_zscore`: train / val / test IoU = `9.116529e-01` / `9.567763e-02` / `9.598926e-02`.
+- All metrics are finite.
+
+Current judgment:
+- `train_zscore` does not improve held-out IoU.
+- `per_sample_zscore` is the best S57 normalization setting, but the improvement is modest and held-out IoU remains low.
+- Raw signal scale is therefore not the main explanation for weak generalization.
+- The bottleneck still points to signal encoder / conditioning architecture, regularization, and loss design.
+
+Next-step recommendation:
+- Keep `per_sample_zscore` as a weakly better diagnostic setting.
+- Prioritize `BzEncoder` / conditioning changes instead of continuing scalar normalization sweeps or scaling resolution.
+
+
+## Step S58: Conditional FiLM conditioning probe
+
+Purpose:
+- Test whether FiLM-style latent conditioning improves conditional train / val / test generalization compared with the current concat conditioning.
+
+Runner/model update:
+- Added `conditioning_mode` to `ConditionalMLP`, `ConditionalMuNet`, `ConditionalPhiNet`, and `ConditionalDualNet`.
+- Supported modes: `concat` and `film`; default remains `concat`.
+- Added `--conditioning-mode` to `train_conditional_dual.py`; metrics and run summaries now record `conditioning_mode`.
+
+Configuration:
+- Reused S55 20x10 data: 1000 train, 200 val, 200 test samples.
+- Shared runner config: 5000 steps, `hidden_dim=128`, `num_layers=4`, `latent_dim=64`, BCE + Dice.
+- Compared configs: `concat_per_sample_zscore_reference`, `film_per_sample_zscore`, `film_train_zscore`.
+
+Result summary:
+- Full results are recorded in `experiments/dual_network/S58_conditional_film_probe/summary.md`.
+- `concat_per_sample_zscore_reference`: train / val / test IoU = `8.649705e-01` / `7.280748e-02` / `1.063626e-01`.
+- `film_per_sample_zscore`: train / val / test IoU = `9.563841e-01` / `6.837561e-02` / `7.330513e-02`.
+- `film_train_zscore`: train / val / test IoU = `9.696210e-01` / `8.486297e-02` / `8.279666e-02`.
+- All metrics are finite.
+
+Current judgment:
+- FiLM conditioning improves train fitting and lowers train continuous errors.
+- FiLM does not improve held-out IoU in S58; it increases train-to-held-out gaps.
+- The concat per-sample-zscore reference has the best test IoU, while `film_train_zscore` has the best val IoU and continuous held-out errors.
+- S58 suggests FiLM is not a generalization fix in the current runner.
+
+Next-step recommendation:
+- Do not switch the default conditioning mode to FiLM.
+- Continue diagnosing signal encoder architecture, regularization, validation-aware early stopping, and supervised loss design before adding weak-form loss or scaling resolution.
+
+
+## Step S59: Conditional signal encoder architecture probe
+
+Purpose:
+- Test whether the `BzEncoder` architecture limits conditional train / val / test generalization.
+- Compare the existing MLP encoder against a new 1D CNN encoder while keeping the supervised BCE + Dice loss unchanged.
+
+Model/runner update:
+- Added `encoder_type` to `ConditionalDualNet`; supported modes are `mlp` and `cnn`, with default `mlp`.
+- Added `ConvBzEncoder` for `signals [B, signal_len] -> latent [B, latent_dim]`.
+- Added `--encoder-type` to `train_conditional_dual.py`; train / eval / test metrics and run summaries now record `encoder_type`.
+- Smoke tests cover `mlp + concat`, `mlp + film`, `cnn + concat`, `cnn + film`, backward propagation, and invalid `encoder_type`.
+
+Configuration:
+- Reused S55 20x10 data: 1000 train, 200 val, 200 test samples.
+- Shared runner config: 5000 steps, `hidden_dim=128`, `num_layers=4`, `latent_dim=64`, BCE + Dice, `signal_normalization=per_sample_zscore`.
+- Compared configs: `mlp_concat_reference`, `cnn_concat`, and `cnn_film`.
+
+Result summary:
+- Full results are recorded in `experiments/dual_network/S59_conditional_signal_encoder_probe/summary.md`.
+- `mlp_concat_reference`: train / val / test IoU = `8.432535e-01` / `9.821131e-02` / `1.118232e-01`.
+- `cnn_concat`: train / val / test IoU = `9.442416e-01` / `9.915262e-02` / `9.681660e-02`.
+- `cnn_film`: train / val / test IoU = `9.844595e-01` / `1.254790e-01` / `1.094247e-01`.
+- All metrics are finite.
+
+Current judgment:
+- The CNN encoder improves train fitting, but does not consistently improve held-out test IoU.
+- `cnn_film` gives the best S59 val IoU and strongest train fit, but also the largest train-to-held-out gap.
+- The MLP concat reference remains competitive on test IoU.
+- Encoder capacity alone does not solve conditional generalization.
+
+Next-step recommendation:
+- Do not treat CNN or CNN + FiLM as a solved default yet.
+- Keep `mlp_concat_reference` as the generalization baseline and use `cnn_film` as a high-capacity diagnostic setting.
+- Next work should focus on validation-aware training, regularization, supervised loss design, and possible dataset ambiguity before scaling resolution or adding weak-form loss.
+
+
+## Step S60: Conditional local signal feature probe
+
+Purpose:
+- Test whether weak conditional held-out generalization is caused by compressing all `Bz signal` information into one global latent vector.
+- Add coordinate-aligned local signal features so each coordinate point can receive the Bz value aligned to its x position.
+
+Model/runner update:
+- Added optional `point_features [B,N,K]` support to `ConditionalMLP`, `ConditionalMuNet`, `ConditionalPhiNet`, and `ConditionalDualNet`.
+- Added `extra_point_dim`, default `0`, so old behavior is unchanged when no point features are requested.
+- Added `--point-signal-mode` to `train_conditional_dual.py`; supported modes are `none`, `local_value`, and `local_value_abs`.
+- Metrics and run summaries now record `point_signal_mode`.
+
+Configuration:
+- Reused S55 20x10 data: 1000 train, 200 val, 200 test samples.
+- Shared runner config: 5000 steps, `hidden_dim=128`, `num_layers=4`, `latent_dim=64`, `encoder_type=mlp`, `conditioning_mode=concat`, BCE + Dice, `signal_normalization=per_sample_zscore`.
+- Compared configs: `no_local_signal_reference`, `local_value`, and `local_value_abs`.
+
+Result summary:
+- Full results are recorded in `experiments/dual_network/S60_conditional_local_signal_feature_probe/summary.md`.
+- `no_local_signal_reference`: train / val / test IoU = `9.165308e-01` / `8.535813e-02` / `1.000321e-01`.
+- `local_value`: train / val / test IoU = `8.968483e-01` / `8.595360e-02` / `9.525210e-02`.
+- `local_value_abs`: train / val / test IoU = `8.831255e-01` / `9.574179e-02` / `9.469099e-02`.
+- All metrics are finite.
+
+Current judgment:
+- Local signal features do not provide a stable val/test IoU improvement.
+- `local_value_abs` improves S60 val IoU and test continuous errors, but test IoU remains below the no-local reference.
+- The current conditional bottleneck is therefore not simply global latent compression of local Bz signal information.
+
+Next-step recommendation:
+- Do not switch the default conditional runner to local point signal features.
+- Keep the no-local MLP concat reference as the held-out comparison baseline.
+- Next work should focus on validation-aware training, regularization, target / loss design, and dataset ambiguity checks.
+
+
+## Step S61: Conditional direct mask head probe
+
+Purpose:
+- Test whether conditional generalization is limited by forming masks indirectly through `mu_pred < 500`.
+- Add an optional direct mask head that predicts `mask_logits` / `mask_prob` while preserving existing `mu` / `phi` outputs.
+
+Model/runner update:
+- Added `ConditionalMaskNet` and `predict_mask` support to `ConditionalDualNet`.
+- When `predict_mask=True`, `forward` returns `mask_logits` and `mask_prob`.
+- Added `--mask-head-mode mu_threshold|direct` to `train_conditional_dual.py`.
+- In `direct` mode, BCE / Dice loss and IoU / area metrics use `mask_prob`; `mu` remains diagnostic unless `lambda_mu_mse` is nonzero.
+
+Configuration:
+- Reused S55 20x10 data: 1000 train, 200 val, 200 test samples.
+- Shared runner config: 5000 steps, `hidden_dim=128`, `num_layers=4`, `latent_dim=64`, `encoder_type=mlp`, `conditioning_mode=concat`, `signal_normalization=per_sample_zscore`, `point_signal_mode=none`, BCE + Dice, `lambda_mu_mse=0.0`.
+- Compared configs: `mu_threshold_reference` and `direct_mask_head`.
+
+Result summary:
+- Full results are recorded in `experiments/dual_network/S61_conditional_direct_mask_head_probe/summary.md`.
+- `mu_threshold_reference`: train / val / test IoU = `8.861030e-01` / `8.633440e-02` / `1.256267e-01`.
+- `direct_mask_head`: train / val / test IoU = `9.953174e-01` / `9.028429e-02` / `8.906158e-02`.
+- All metrics are finite.
+
+Current judgment:
+- Direct mask head strongly improves train-set mask fitting.
+- Direct mask head does not improve held-out test IoU and increases the train-to-held-out gap.
+- With `lambda_mu_mse=0.0`, the direct head leaves `mu` effectively unoptimized, so continuous `mu_mse` / `mu_mae` are much worse.
+- The bottleneck is not simply the indirect `mu_pred -> mask` path.
+
+Next-step recommendation:
+- Do not switch the conditional baseline to direct mask head as-is.
+- Keep `mu_threshold` as the held-out comparison baseline.
+- If revisiting direct mask prediction, use a balanced multi-task loss with an explicit `mu` term and validation-aware selection.
+
+
+## Step S62: Conditional direct mask multi-task loss probe
+
+Purpose:
+- Test whether adding a light `mu_mse` term to the direct mask head can fix the large continuous `mu` errors observed in S61.
+- Check whether this multi-task loss preserves direct mask-head IoU on train / val / test splits.
+
+Configuration:
+- Reused S55 20x10 data: 1000 train, 200 val, 200 test samples.
+- Shared runner config: 5000 steps, `hidden_dim=128`, `num_layers=4`, `latent_dim=64`, `encoder_type=mlp`, `conditioning_mode=concat`, `signal_normalization=per_sample_zscore`, `point_signal_mode=none`, `mask_head_mode=direct`, BCE + Dice.
+- Compared `lambda_mu_mse`: `0.0`, `1e-5`, and `1e-4`.
+
+Result summary:
+- Full results are recorded in `experiments/dual_network/S62_conditional_direct_mask_multitask_probe/summary.md`.
+- `direct_mu0_reference`: train / val / test IoU = `9.828120e-01` / `1.051470e-01` / `9.803234e-02`; test `mu_mse=2.335287e+05`, test `mu_mae=4.689150e+02`.
+- `direct_mu1e-5`: train / val / test IoU = `9.937419e-01` / `9.816303e-02` / `9.670001e-02`; test `mu_mse=5.399731e+04`, test `mu_mae=5.539699e+01`.
+- `direct_mu1e-4`: train / val / test IoU = `9.199159e-01` / `1.003297e-01` / `8.550005e-02`; test `mu_mse=5.202169e+04`, test `mu_mae=5.378262e+01`.
+- All metrics are finite.
+
+Current judgment:
+- `lambda_mu_mse` fixes the direct head's continuous `mu` error scale.
+- `direct_mu1e-5` is the best direct-head multi-task diagnostic setting because it keeps near-perfect train IoU and greatly improves `mu_mse` / `mu_mae`.
+- None of the direct-head multi-task configs improves held-out test IoU over the S61 `mu_threshold_reference`.
+- Stronger `lambda_mu_mse=1e-4` starts to trade off mask IoU against continuous `mu` discipline.
+
+Next-step recommendation:
+- Keep `mu_threshold_reference` as the current conditional held-out baseline.
+- Do not treat direct multi-task as a replacement baseline yet.
+- If continuing direct-head work, focus on validation-aware selection and held-out generalization rather than train IoU.
+
+
+## Step S63: Conditional derived Bz signal feature probe
+
+Purpose:
+- Test whether richer single-Bz input features improve conditional held-out generalization.
+- Compare the existing raw signal input against a derived `raw_abs_grad` feature mode using raw Bz, `abs(Bz)`, and finite-difference signal gradients.
+- This is not a COMSOL multi-height experiment; it only transforms the existing single Bz signal.
+
+Runner update:
+- Added `--signal-feature-mode raw|raw_abs_grad` to `train_conditional_dual.py`.
+- Feature construction happens after `signal_normalization`.
+- In `raw_abs_grad`, the encoder input length is `3 * signal_len`; the original `.npz` files are not modified.
+- Metrics and run summaries now record `signal_feature_mode` and `encoder_input_length`.
+
+Configuration:
+- Reused S55 20x10 data: 1000 train, 200 val, 200 test samples.
+- Shared runner config: 5000 steps, `hidden_dim=128`, `num_layers=4`, `latent_dim=64`, `encoder_type=mlp`, `conditioning_mode=concat`, `signal_normalization=per_sample_zscore`, `point_signal_mode=none`, `mask_head_mode=mu_threshold`, BCE + Dice, `lambda_mu_mse=0.0`.
+- Compared configs: `raw_reference` and `raw_abs_grad`.
+
+Result summary:
+- Full results are recorded in `experiments/dual_network/S63_conditional_derived_bz_feature_probe/summary.md`.
+- `raw_reference`: train / val / test IoU = `8.758866e-01` / `9.413832e-02` / `1.040388e-01`.
+- `raw_abs_grad`: train / val / test IoU = `9.142336e-01` / `1.081610e-01` / `1.036962e-01`.
+- All metrics are finite.
+
+Current judgment:
+- `raw_abs_grad` improves train IoU and val IoU, but does not improve test IoU.
+- The held-out test result remains essentially flat relative to `raw_reference`.
+- Derived channels from the current single Bz signal are therefore not a stable fix for conditional generalization.
+
+Next-step recommendation:
+- Do not continue blindly adding single-signal derived features.
+- Keep the raw / `mu_threshold` conditional setup as the comparison baseline.
+- If the branch continues, move toward multi-height / COMSOL Bz data interfaces or clearer signal-to-shape dataset diagnostics.
+
+
+## Step S64: Multi-height Bz signal interface skeleton
+
+Purpose:
+- Move the conditional branch from single-Bz feature tweaks toward a multi-height / COMSOL-style Bz input interface.
+- Let the data utilities and supervised runner accept both `[B,L]` single-channel signals and `[B,C,L]` multi-channel signals.
+- Prepare for future multi-height / multi-component Bz data without running formal training or calling COMSOL in this step.
+
+Schema update:
+- `signals [num_samples, signal_len]` remains supported and preserves old behavior.
+- `signals [num_samples, num_channels, signal_len]` is now accepted by `conditional_dual_data_utils.py`.
+- 3D signals are flattened channels-first into `[B, C*L]`, with order `[channel0 all x, channel1 all x, ...]`.
+- `get_conditional_batch` records `signal_original_shape`, `signal_channels`, `signal_length_per_channel`, `flattened_signal_length`, and `signal_flatten_order`.
+- `infer_signal_len(dataset)` now returns the flattened encoder input length.
+
+Smoke test:
+- `smoke_test_conditional_dual_data_utils.py` now verifies `[4,3,20]` signals flatten to `[3,60]`, metadata is correct, and `ConditionalDualNet(signal_len=60)` forwards.
+- `smoke_test_train_conditional_dual.py` now includes a tempfile multi-channel train / eval / test runner call.
+- Full design notes are in `MULTI_HEIGHT_BZ_INTERFACE_PLAN.md`; stage summary is in `experiments/dual_network/S64_multiheight_bz_interface/summary.md`.
+
+Current boundary:
+- S64 is interface-only.
+- No formal training, COMSOL call, checkpoint, `.npy`, or image output is introduced.
+- No effect claim is made.
+
+Next-step recommendation:
+- S65 can either create a synthetic multi-channel proxy probe or add a COMSOL multi-height Bz `.npz` conversion entrypoint.
+
+
+## Step S65: Synthetic multi-height Bz proxy probe
+
+目的：
+- 测试 S64 新增的 multi-channel signal interface 是否能通过真实 train / val / test conditional runner 调用。
+- 基于 S55 现有 single Bz signals 构造 synthetic multi-height proxy channels。
+- 观察 proxy 是否改善 held-out val/test IoU，同时明确边界：这不是 COMSOL 数据，也不是真实物理 multi-height 结果。
+
+数据构造：
+- 新增 `build_multiheight_proxy_npz.py` 和 `smoke_test_build_multiheight_proxy_npz.py`。
+- 输入必须是 single-channel `signals [N,L]`；如果输入已经是 `[N,C,L]`，则抛出 `ValueError`，避免重复构造 proxy 数据。
+- proxy channels：
+  - channel 0：raw Bz；
+  - channel 1：moving-average `window=3` 乘以 `0.8`；
+  - channel 2：moving-average `window=7` 乘以 `0.6`。
+- S65 proxy shapes 为 train `(1000, 3, 20)`、val `(200, 3, 20)`、test `(200, 3, 20)`。
+
+配置：
+- 共享 runner 配置：5000 steps，`hidden_dim=128`，`num_layers=4`，`latent_dim=64`，`encoder_type=mlp`，`conditioning_mode=concat`，`signal_normalization=per_sample_zscore`，`signal_feature_mode=raw`，`point_signal_mode=none`，`mask_head_mode=mu_threshold`，BCE + Dice，`lambda_mu_mse=0.0`。
+- 对比 `single_channel_reference` 和 `synthetic_multiheight_proxy`。
+
+结果摘要：
+- 完整结果记录在 `experiments/dual_network/S65_synthetic_multiheight_proxy_probe/summary.md`。
+- `single_channel_reference`：train / val / test IoU = `9.032763e-01` / `9.708926e-02` / `9.556112e-02`。
+- `synthetic_multiheight_proxy`：train / val / test IoU = `5.832855e-01` / `1.055699e-01` / `1.116188e-01`。
+- 所有 metrics 均为 finite。
+
+当前判断：
+- S64 multi-channel interface 可以端到端处理 proxy `[N,3,L]` signals。
+- 相比 S65 single-channel reference，proxy 改善 held-out val/test IoU，并降低 held-out continuous `mu` errors。
+- 但 proxy train IoU 明显更低，最终训练端点不够稳定。
+- 由于 proxy channels 仍由单条 Bz signal 派生，不能把该结果解释为真实 multi-height physics 证据。
+
+下一步建议：
+- 转向真实 COMSOL / multi-height Bz dataset 或 conversion path。
+- 如果继续做 synthetic proxy，应先加入 validation-aware selection 或稳定训练，再给出更强结论。
+
+
+## Step S66: COMSOL-style multi-height Bz dataset interface
+
+目的：
+- 从 synthetic proxy signals 推进到真实 COMSOL / multi-height Bz dataset interface。
+- 定义 multi-channel Bz data 预期使用的 `.npz` schema。
+- 在真实 COMSOL export 或训练前，先增加 validator 和 mock smoke test。
+
+Schema / validator：
+- 新增 `COMSOL_MULTIHEIGHT_BZ_DATA_PLAN.md`。
+- 新增 `comsol_multiheight_npz_utils.py`，包含 `validate_comsol_multiheight_npz(npz_path)` 和 `print_npz_summary(npz_path)`。
+- 必需 schema fields 为 `signals`、`mu_maps` 或 `masks`、以及 `x/y` 或 `coords`。
+- `signals` 必须是 3D `[num_samples, num_channels, signal_len]`，且 `num_channels >= 2`。
+- 推荐 metadata 包括 `source_type`、`signal_channel_names`、`lift_off_values`、`field_components`、`probe_line_y_values`、`signal_flatten_order`、`geometry_units`、`field_units`。
+
+Smoke test：
+- 新增 `smoke_test_comsol_multiheight_npz_utils.py`。
+- smoke test 创建 mock COMSOL-style `signals [5,3,20]`，验证 metadata，通过 `conditional_dual_data_utils.py` 读取，检查 flatten 到 `[3,60]`，并运行 `ConditionalDualNet(signal_len=60)` forward。
+- 同时验证缺字段、2D signals、`C < 2` 等场景会抛出预期 `ValueError`。
+
+当前边界：
+- S66 不调用 COMSOL。
+- S66 不生成真实 COMSOL 数据。
+- S66 不运行正式训练，也不声称模型性能。
+
+下一步建议：
+- S67 可以准备 COMSOL exporter / converter，或通过 COMSOL MCP 项目生成第一批真实 multi-height Bz pilot dataset。
+
+
+## Step S67: COMSOL multi-height CSV to NPZ converter
+
+目的：
+- 创建一个标准转换入口，用于把后续 COMSOL-style long CSV signal export 转成 S66 multi-channel NPZ schema。
+- S67 仅做 converter / smoke-test：不调用 COMSOL，不生成真实 COMSOL 数据，不训练模型。
+
+Converter：
+- 新增 `convert_comsol_multiheight_csv_to_npz.py`。
+- CLI 参数为 `--signals-csv`、`--target-npz`、`--output-npz`。
+- 必需 CSV 列为 `sample_index`、`channel_index`、`channel_name`、`lift_off`、`field_component`、`x_index`、`x`、`value`。
+- converter 按 `sample_index`、`channel_index`、`x_index` 排序，构造 `signals [num_samples, num_channels, signal_len]`，复制 `mu_maps` 或 `masks`，复制 `x/y` 或 `coords`，并写入 COMSOL-style metadata。
+
+Smoke test：
+- 新增 `smoke_test_convert_comsol_multiheight_csv_to_npz.py`。
+- smoke test 创建包含 3 个 samples、3 个 channels、20 个 x points 的 mock CSV，并创建带 `mu_maps [3,10,20]` 的 target NPZ。
+- smoke test 使用 `comsol_multiheight_npz_utils.validate_comsol_multiheight_npz` 验证转换后的文件，通过 `conditional_dual_data_utils.py` 读取，检查 flatten 到 `[2,60]`，并运行 `ConditionalDualNet(signal_len=60)` forward。
+- 同时检查缺少 CSV 必需列、sample/channel/x 覆盖不完整等失败场景。
+
+当前边界：
+- S67 只使用 mock CSV。
+- S67 不是真实 COMSOL export result。
+- S67 不训练模型。
+
+下一步建议：
+- S68 可以准备 COMSOL exporter 侧 CSV 约定，或通过 COMSOL MCP 项目生成第一批真实 multi-height Bz pilot dataset。
+## Step S68: COMSOL pilot data handoff
+
+目的：
+- 固定第一批真实 COMSOL-style multi-height Bz pilot 数据的请求范围。
+- 让后续 COMSOL MCP / COMSOL 项目能按 S67 converter schema 导出 `signals_multiheight.csv` 和 `targets.npz`。
+
+产物：
+- 新增 `COMSOL_PILOT_DATA_REQUEST.md`。
+- 新增 `experiments/dual_network/S68_comsol_pilot_handoff/summary.md`。
+
+pilot 建议规模：
+- samples = 5 到 10；
+- grid_x = 200；
+- grid_y = 100；
+- probe x points = 200；
+- channels = 3；
+- `lift_off_values = [0.5, 1.0, 2.0]`；
+- `field_components = ["Bz", "Bz", "Bz"]`。
+
+当前边界：
+- S68 不调用 COMSOL。
+- S68 不生成真实 COMSOL 数据。
+- S68 不训练模型，也不声称模型效果。
+
+下一步建议：
+- 在 COMSOL MCP 项目或相关对话中生成 5-10 个真实 pilot samples。
+- 回到本支线后，使用 S67 converter 转换为 `comsol_multiheight_pilot.npz`，并用 S66 validator 验证。
+## Step S69: COMSOL pilot handoff end-to-end dry-run
+
+目的：
+- 用 tempfile 模拟 COMSOL 侧输出 `signals_multiheight.csv` 和 `targets.npz`。
+- 验证 CSV -> NPZ -> validator -> conditional batch -> model forward 的端到端 handoff 链路。
+
+dry-run 覆盖流程：
+- 创建 mock `signals_multiheight.csv`，包含 4 个 samples、3 个 channels、20 个 x points。
+- 创建 mock `targets.npz`，包含 `mu_maps [4,10,20]`、`x [20]`、`y [10]`。
+- 调用 `convert_comsol_multiheight_csv_to_npz.py` 生成 converted NPZ。
+- 调用 `validate_comsol_multiheight_npz` 验证 converted NPZ。
+- 通过 `conditional_dual_data_utils.py` 读取 batch，检查 signals flatten 为 `[3,60]`。
+- 运行 `ConditionalDualNet(signal_len=60)` forward，并检查 `mu` / `phi` shape。
+
+当前边界：
+- S69 不调用 COMSOL。
+- S69 不生成真实 COMSOL 数据。
+- S69 不训练模型，也不保存训练产物。
+
+下一步建议：
+- 使用 S70 prompt 切到 COMSOL MCP 项目生成真实 pilot 数据。
+## Step S70: COMSOL MCP pilot prompt package
+
+目的：
+- 准备一个可直接交给 COMSOL MCP / COMSOL 相关对话的 pilot 任务提示文件。
+- 降低后续生成真实 COMSOL-style multi-height Bz pilot 数据时的上下文整理成本。
+
+产物：
+- 新增 `COMSOL_MCP_PILOT_PROMPT.md`。
+- 新增 `experiments/dual_network/S70_comsol_mcp_prompt_package/summary.md`。
+
+当前边界：
+- S70 不调用 COMSOL。
+- S70 不生成真实 COMSOL 数据。
+- S70 不训练模型，也不声称模型效果。
+
+下一步建议：
+- 切到 COMSOL MCP 项目，使用 `COMSOL_MCP_PILOT_PROMPT.md` 生成 5-10 个真实 pilot samples。
+- 数据返回后，先用 S67 converter 转换，再用 S66 validator 验证。
+
+## Step S71: Real COMSOL pilot multi-height Bz ingest
+
+目的：
+- 将 `comsol_pilot_exports/` 中的第一批真实 COMSOL-style multi-height Bz pilot 数据接入支线实验目录。
+- 验证 S67 converter、S66 validator、conditional data utils 和 model forward 链路能处理真实 pilot 数据。
+
+raw 文件：
+- `experiments/dual_network/S71_comsol_pilot_ingest/raw/signals_multiheight.csv`
+- `experiments/dual_network/S71_comsol_pilot_ingest/raw/targets.npz`
+- `experiments/dual_network/S71_comsol_pilot_ingest/raw/README.md`
+
+converter 输出：
+- `experiments/dual_network/S71_comsol_pilot_ingest/converted/comsol_multiheight_pilot.npz`
+- `signals shape = [5, 3, 200]`
+- target 字段包含 `mu_maps` 和 `masks`
+
+validator / loader 结果：
+- `comsol_multiheight_npz_utils.py` validator 通过。
+- `get_conditional_batch(dataset, [0,1,2])` 输出 `signals shape = [3, 600]`。
+- `infer_signal_len(dataset) = 600`。
+- `ConditionalDualNet(signal_len=600)` forward 通过，输出 `mu` / `phi` shape 为 `[3, 20000, 1]`。
+
+当前边界：
+- 这是真实 COMSOL pilot，但只有 5 个样本。
+- 当前固定仿体，只改动磁性参数。
+- S71 主要验证数据接口和转换链路，不代表形状泛化能力。
+
+下一步建议：
+- 用 converted NPZ 做极小规模 conditional runner sanity probe。
+
+## Step S72: Real COMSOL pilot conditional sanity probe
+
+目的：
+- 使用 S71 converted NPZ 做极小规模 conditional supervised sanity training。
+- 验证真实 COMSOL multi-height Bz pilot 能被 `train_conditional_dual.py` 正常读取、训练并输出 metrics。
+
+配置：
+- `npz-path = experiments/dual_network/S71_comsol_pilot_ingest/converted/comsol_multiheight_pilot.npz`
+- `sample-indices = 0,1,2,3,4`
+- `steps = 300`
+- `hidden_dim = 64`
+- `num_layers = 3`
+- `latent_dim = 32`
+- `signal_normalization = per_sample_zscore`
+- `signal_feature_mode = raw`
+- `mask_head_mode = mu_threshold`
+- `lambda_mask_bce = 1.0`
+- `lambda_mask_dice = 1.0`
+- `lambda_mu_mse = 0.0`
+
+结果摘要：
+- 输出 `experiments/dual_network/S72_comsol_pilot_conditional_sanity_probe/train5_multichannel/metrics.csv`。
+- 输出 `experiments/dual_network/S72_comsol_pilot_conditional_sanity_probe/train5_multichannel/run_summary.md`。
+- `avg defect_iou = 4.767923e-01`
+- `avg defect_area_pred = 4.019000e+03`
+- `avg mu_mse = 9.244401e+04`
+- `avg mu_mae = 2.460563e+02`
+- 所有 metrics 均为 finite。
+
+当前边界：
+- S72 是 sanity probe，不是正式训练。
+- 样本数只有 5，且第一批 pilot 固定仿体，只改动磁性参数。
+- 结果只说明真实 COMSOL pilot 可以进入 conditional runner，不代表泛化能力。
+
+下一步建议：
+- 准备下一批几何变化 COMSOL 数据请求，用于后续真正的 train / val / test conditional probe。
+
+## Step S73: COMSOL geometry-variation data request
+
+目的：
+- 基于 S71/S72，准备下一批真正用于 conditional model train / val / test 的 COMSOL 数据请求。
+- 明确下一批数据必须变化缺陷几何，而不是像第一批 pilot 一样固定仿体、只改磁性参数。
+
+产物：
+- 新增 `COMSOL_GEOMETRY_VARIATION_DATA_REQUEST.md`。
+- 新增 `experiments/dual_network/S73_comsol_geometry_variation_request/summary.md`。
+
+建议规模：
+- 优先建议 train samples = 50 到 100，val samples = 10 到 20，test samples = 10 到 20。
+- 如果 COMSOL 运行成本过高，可以先做 train = 20，val = 5，test = 5。
+- 保持 `grid_x = 200`、`grid_y = 100`、`probe x points = 200`、3 个 Bz channels 和 `lift_off_values = [0.5, 1.0, 2.0]`。
+
+必须变化的缺陷参数：
+- defect center x；
+- defect center y；
+- defect radius / width；
+- defect depth 或等效形状参数；
+- defect permeability / mu；
+- 可选：椭圆长短轴、旋转角、边界不规则度。
+
+当前边界：
+- S73 只准备数据请求文档。
+- S73 不调用 COMSOL，不生成真实数据，不训练模型。
+
+下一步建议：
+- 在 COMSOL 侧生成带几何变化的 train / val / test multi-height Bz 数据。
+- 回到本支线后用 S67 converter 分别转换，并用 S66 validator 检查后再做 conditional train / val / test probe。
+
+
+## Step S74: COMSOL geometry-variation data ingest
+
+目的：
+- 接入真实 COMSOL geometry-variation train / val / test multi-height Bz 数据。
+- 验证 S67 converter、S66 validator、conditional data utils 和 model forward 链路。
+
+产物：
+- raw 数据复制到 `experiments/dual_network/S74_comsol_geometry_data_ingest/raw/`。
+- converted NPZ 输出到 `experiments/dual_network/S74_comsol_geometry_data_ingest/converted/`。
+- `data_quality_summary.csv` 记录 split 规模、label area 和 finite 检查。
+- `defect_param_summary.md` 记录实际变化的缺陷参数。
+
+结果：
+- train / val / test signals shape 分别为 `[50,3,200]`、`[10,3,200]`、`[10,3,200]`。
+- channels-first flatten 后 encoder input length 为 600。
+- validator 通过，conditional batch 可读出 `[B,600]`，`ConditionalDualNet(signal_len=600)` forward 通过。
+
+边界：
+- 这是 pilot 级真实 COMSOL geometry 数据，不是最终正式大规模数据。
+- `defect_type` 固定为 `ellipsoid`，但 center、axis / width、depth / shape parameter 和磁性参数已变化。
+
+下一步：
+- 使用 converted train / val / test NPZ 运行第一轮 conditional supervised train / val / test probe。
+
+## Step S75: COMSOL geometry-variation conditional probe
+
+目的：
+- 在真实 COMSOL multi-height geometry-variation 数据上运行第一轮 conditional supervised train / val / test probe。
+- 判断真实多高度 Bz 是否比早期 synthetic single-Bz conditional 阶段显示更强 held-out 潜力。
+
+配置：
+- train / val / test samples = 50 / 10 / 10。
+- signals shape = `[samples,3,200]`，flattened length = 600。
+- 运行 `medium_multichannel` 和 `big_multichannel`。
+- 两组均使用 `signal_normalization=per_sample_zscore`、`mask_head_mode=mu_threshold`、BCE + Dice、`train_point_subsample=4096`。
+
+结果摘要：
+- `medium_multichannel` train / val / test IoU = `5.225618e-01` / `4.088045e-01` / `3.961416e-01`。
+- `big_multichannel` train / val / test IoU = `5.391816e-01` / `4.067505e-01` / `3.997817e-01`。
+- 所有 metrics 均为 finite。
+
+当前判断：
+- 相比早期 synthetic single-Bz conditional 阶段约 0.1 左右的 held-out IoU，真实 COMSOL multi-height geometry 数据显示明显更好的 val/test 潜力。
+- 当前仍是 pilot 规模，存在 train-held-out gap，不能作为最终主线替代结论。
+
+下一步：
+- 扩大 COMSOL geometry 数据规模，并检查 target/mask 定义、loss balance 和 validation-aware selection。
+
+## Step S76: COMSOL geometry pilot summary
+
+S76 汇总 S74/S75 结果：真实 COMSOL multi-height geometry-variation 数据已经完成 ingest、converter、validator、loader、runner 和第一轮 conditional probe。当前结果支持继续扩大真实 COMSOL geometry 数据规模，但仍属于 pilot 阶段。
+
+下一步建议：
+- 将 train samples 扩大到 200+，保持独立 val/test。
+- 增加旋转角、边界不规则度、非椭圆形状或多缺陷类型。
+- 继续排查 `mu_maps` / `masks` target 定义与 loss balance。
+
+
+## Step S77: COMSOL target/mask consistency diagnostics
+
+目的：
+- 检查 S74 COMSOL geometry converted NPZ 中 `mu_maps` 与 provided `masks` 是否一致。
+- 判断 S75 train IoU 偏低是否可能来自 mask label 构造差异。
+
+结果摘要：
+- train / val / test 均同时包含 `mu_maps` 和 `masks`。
+- `mu_maps < 500.0` 与 `masks > 0.5` 完全一致。
+- train / val / test 的 `avg_mask_iou` 均为 `1.0`，`avg_abs_area_diff = 0`，`total_mismatch_count = 0`。
+
+当前判断：
+- target/mask source 差异不是当前 train IoU 偏低的原因。
+- 仍可继续使用默认 `mask_source=mu_threshold`。
+
+下一步：
+- 增加 runner 的 `mask_source` 支持并在训练路径中确认 `mu_threshold` 与 provided `masks` 是否表现一致。
+
+## Step S78: COMSOL mask-source training probe
+
+目的：
+- 增加 `mask_source=mu_threshold|masks` 支持。
+- 在真实 COMSOL geometry 数据上比较 `mu_threshold` mask 与 provided masks 的训练表现。
+
+结果摘要：
+- `mu_threshold_reference` train / val / test IoU = `5.401838e-01` / `4.041796e-01` / `4.047063e-01`。
+- `provided_masks` train / val / test IoU = `5.403162e-01` / `4.011194e-01` / `3.888755e-01`。
+- 所有 metrics 均为 finite。
+
+当前判断：
+- `provided_masks` 没有明显改善。
+- 由于 S77 已证明两类 mask 完全一致，S78 的差异属于训练随机波动。
+- target/mask source 不是当前主要瓶颈。
+
+下一步：
+- 因最佳 train IoU 仍低于 0.70，按规则执行 S79 train-fit adaptation probe。
+
+## Step S79: COMSOL train-fit adaptation probe
+
+执行原因：
+- S78 最佳 train IoU 为 `5.403162e-01`，低于 0.70。
+- 因此执行 train-fit adaptation probe，测试 longer steps、larger point subsample 和 BCE weight 是否能改善 train fit。
+
+结果摘要：
+- `longer_steps` train / val / test IoU = `5.392316e-01` / `4.066157e-01` / `4.049452e-01`。
+- `bigger_subsample` train / val / test IoU = `5.374537e-01` / `4.070184e-01` / `3.955204e-01`。
+- `bce2_dice1` train / val / test IoU = `5.295864e-01` / `4.052605e-01` / `3.696685e-01`。
+
+当前判断：
+- 三组都没有把 train IoU 提升到 0.70。
+- 简单增加 steps、增大 point subsample 或提高 BCE 权重不是主要解决方案。
+
+下一步：
+- 继续排查 target / loss / model 表达和数据分布，而不是只继续加训练步数。
+
+## Step S80: COMSOL target/mask and train-fit summary
+
+S80 汇总 S77-S79：
+- `mu_maps` 与 `masks` 完全一致，target/mask source 不是主要瓶颈。
+- `mask_source=masks` 没有改善 held-out IoU。
+- S79 显示 train fit 偏低不是简单 steps、subsample 或 BCE 权重问题。
+
+当前瓶颈排序：
+1. data size/diversity 仍是高优先级瓶颈；当前只有 50/10/10，且 `defect_type=ellipsoid` 固定。
+2. model/loss 需要继续调整；mask-only BCE + Dice 和当前 conditional MLP 可能不足。
+3. target/mask 不是主要瓶颈。
+
+下一步建议：
+- 保持 `mask_source=mu_threshold` 默认。
+- 做 COMSOL 版本的 direct mask head / `mu_mse` / boundary-aware 或 area calibration 诊断。
+- 扩大 COMSOL geometry 数据并增加 defect type、旋转角、边界不规则度。
+
+## Step S81: COMSOL direct mask / multitask output head probe
+
+???
+- ??? COMSOL geometry-variation multi-height Bz ????? direct mask head ??? `mu_mse` multi-task loss?
+- ?? `mu_threshold` ?? mask ??????? conditional model ??????
+
+???
+- ???S74 converted train / val / test NPZ?signals shape ? `[50,3,200]` / `[10,3,200]` / `[10,3,200]`?flattened length ? `600`?
+- ?????`steps=3000`?`hidden_dim=128`?`num_layers=4`?`latent_dim=64`?`signal_normalization=per_sample_zscore`?`train_point_subsample=4096`?
+- ???`mu_threshold_reference`?`direct_mu0`?`direct_mu1e-5`?
+
+?????
+- `mu_threshold_reference` train / val / test IoU = `5.373772e-01` / `3.988888e-01` / `3.905152e-01`?
+- `direct_mu0` train / val / test IoU = `5.394977e-01` / `4.063294e-01` / `3.930224e-01`?
+- `direct_mu1e-5` train / val / test IoU = `5.290736e-01` / `4.030755e-01` / `3.944752e-01`?
+- `direct_mu1e-5` ?????? `mu_mse` / `mu_mae`???????? held-out IoU?
+
+?????
+- direct mask head ???? `mu_threshold` ?? mask ??????
+- `mu_mse` multi-task ??? `mu` ?????????????? mask IoU ???
+- ????? `mu_threshold` baseline?
+
+??????
+- ?? S74-S81 ??????
+- ??????????? COMSOL geometry-variation V2 ?????
+
+## Step S82: COMSOL conditional bottleneck decision summary
+
+S82 ?? S74-S81?
+- S74/S75 ???? COMSOL multi-height ???????held-out IoU ? `0.40`??????? synthetic single-Bz ???
+- S77/S78 ???? target/mask source ??????
+- S79 ?????? steps?point subsample ? BCE ???????????
+- S81 ?? direct head / ?? `mu_mse` ?????? held-out IoU?
+
+???????
+1. `data size/diversity`???????`defect_type=ellipsoid` ????? rotation ? boundary irregularity?
+2. `model/conditioning`??? conditional MLP / latent conditioning ?????
+3. `loss/output head`?direct head ?????????????????
+4. `train fitting`?train IoU ???????????????
+5. `target/mask`????????
+
+??????
+- ?? `mu_threshold` baseline?
+- ???? COMSOL geometry ?????? defect type?rotation angle ? boundary irregularity?
+
+## Step S83: COMSOL geometry variation request V2
+
+???
+- ?? `COMSOL_GEOMETRY_VARIATION_DATA_REQUEST_V2.md`??????? COMSOL ????????
+
+???
+- `COMSOL_GEOMETRY_VARIATION_DATA_REQUEST_V2.md`
+- `experiments/dual_network/S83_comsol_geometry_request_v2/summary.md`
+
+?????
+- S83 ??????????? COMSOL???? V2 ?????????
+
+??????
+- ? V2 ???? COMSOL MCP / COMSOL ??? train/val/test ???
+- ??????? S67 converter ? S66/S67 validator ????????? conditional probe?
+
+## Step S84: COMSOL geometry V2 data ingest
+
+目的：
+- 将 `comsol_geometry_variation_v2_exports/` 中的真实 COMSOL geometry V2 fallback 数据接入支线实验目录。
+- 使用 S67 converter 转换 train / val / test long CSV + target NPZ。
+- 验证 converted NPZ 能被 validator、conditional data utils 和 `ConditionalDualNet` 使用。
+
+结果摘要：
+- converted train / val / test signals shape = `[100,3,200]` / `[20,3,200]` / `[20,3,200]`。
+- flattened signal length = `600`。
+- target 字段包含 `mu_maps` 和 `masks`。
+- validator 通过。
+- `get_conditional_batch(train, [0,1,2])` 输出 `signals [3,600]`。
+- `ConditionalDualNet(signal_len=600)` forward 通过。
+- label area 均值 train / val / test = `5.355851e-02` / `5.383750e-02` / `5.350000e-02`。
+- signals 和 targets 均未发现 NaN / Inf。
+
+当前边界：
+- V2 使用 fallback 规模 train=100 / val=20 / test=20。
+- 包含 `rectangular_notch` / `rotated_rect` multi_defect，不包含 `ellipsoid`。
+- `boundary_irregularity` 是 proxy。
+- magnetic parameters 当前固定。
+
+下一步建议：
+- 使用 S84 converted NPZ 执行 S85 conditional train / val / test probe。
+
+## Step S85: COMSOL geometry V2 conditional probe
+
+目的：
+- 使用 S84 converted train / val / test NPZ 运行第一轮 V2 conditional supervised probe。
+- 判断更丰富几何变化是否相对 V1 S75 改善 held-out 泛化。
+
+配置：
+- `signal_normalization=per_sample_zscore`
+- `signal_feature_mode=raw`
+- `mask_head_mode=mu_threshold`
+- `train_point_subsample=4096`
+- `steps=3000`
+- `lambda_mask_bce=1.0`
+- `lambda_mask_dice=1.0`
+- `lambda_mu_mse=0.0`
+- `medium_multichannel_v2`: `hidden_dim=64`, `num_layers=3`, `latent_dim=32`
+- `big_multichannel_v2`: `hidden_dim=128`, `num_layers=4`, `latent_dim=64`
+
+结果摘要：
+- `medium_multichannel_v2` train / val / test IoU = `2.307939e-01` / `2.107340e-01` / `2.048062e-01`。
+- `big_multichannel_v2` train / val / test IoU = `3.023806e-01` / `2.593440e-01` / `2.768323e-01`。
+- 所有 metrics 均为 finite。
+
+当前判断：
+- `big_multichannel_v2` 优于 medium，但仍低于 V1 S75。
+- V2 没有显示出比 V1 更好的 val/test 潜力。
+- 当前不是典型 train 高、held-out 低的过拟合；train 本身也偏低。
+- 主要问题更可能来自 V2 target / signal 语义、mask/rasterization 适配、runner/loss 或模型对 multi_defect 目标拟合不足。
+
+下一步建议：
+- 不建议直接继续扩大 V2 样本量。
+- 先做 V2 target / mask / signal semantic diagnostics，再决定是否扩大数据。
+
+## Step S86: COMSOL geometry V2 pilot summary
+
+S86 汇总 S84/S85：
+- S84 已完成真实 COMSOL geometry V2 fallback 数据接入，converted NPZ 可被 conditional runner 使用。
+- S85 的 best 配置是 `big_multichannel_v2`，但 train / val / test IoU 仍为 `3.023806e-01` / `2.593440e-01` / `2.768323e-01`。
+- 与 V1 S75 best held-out IoU 约 `0.40` 相比，V2 当前结果更低。
+
+当前判断：
+- V2 几何更复杂，但本轮没有显示更好的 held-out 泛化潜力。
+- 由于 train IoU 也偏低，不能把结果简单归因于数据量不足。
+- 下一步优先排查 V2 数据语义和 target/mask 适配，再考虑扩大 COMSOL V2。
+
+下一步建议：
+- 检查 V2 `mu_maps` / `masks` 一致性。
+- 对比 V1/V2 label area、signal scale、Bz 语义和 lift-off 定义。
+- 如 target / signal 无异常，再围绕 `big_multichannel_v2` 做 runner/loss 诊断。
+
+## Step S87: COMSOL V1/V2 target distribution diagnostics
+
+目的：
+- 比较 V1 S74 与 V2 S84 的 target / mask / label area / defect distribution。
+- 判断 S85 V2 低于 V1 是否可能来自 target/mask、label 面积或 defect 分布变化。
+
+结果摘要：
+- V1/V2 的 `mu_maps < 500` 与 provided `masks > 0.5` 均完全一致，avg mask IoU = `1.0`，total mismatch count = `0`。
+- V1 train mean label area ratio = `1.172090e-01`。
+- V2 train mean label area ratio = `5.355850e-02`。
+- V2/V1 train label area ratio = `0.457`。
+- V1 是 `ellipsoid`，并且 magnetic parameters 有变化。
+- V2 是 `rectangular_notch` / `rotated_rect` multi_defect，包含 rotation 和 boundary proxy，但 magnetic parameters 固定。
+
+当前判断：
+- target/mask 定义没有发现异常。
+- V2 label area 明显小于 V1，且 defect distribution 更复杂，足以部分解释 V2 train/val/test IoU 下降。
+
+下一步建议：
+- 继续检查 V1/V2 Bz signal scale、lift-off 和 offset 语义，确认是否还有 signal-side 问题。
+
+## Step S88: COMSOL V1/V2 signal semantics diagnostics
+
+目的：
+- 比较 V1/V2 multi-height Bz signals 的尺度、lift-off 通道衰减和 offset / background 风险。
+
+结果摘要：
+- V1 train mean_abs_signal = `4.143948e-05`。
+- V2 train mean_abs_signal = `1.528793e-04`，V2/V1 = `3.689`。
+- V1 train mean_peak_abs_signal = `4.144736e-05`。
+- V2 train mean_peak_abs_signal = `4.868779e-04`，V2/V1 = `11.747`。
+- V2 offset/peak = `0.041`，未显示强 DC/background 主导。
+- V2 lift-off monotonic_decay_fraction：train `0.92`，val `0.95`，test `0.90`。
+- V1 val/test signals 接近常量，说明 V1/V2 signal 语义并不完全可比。
+
+当前判断：
+- V2 signal scale 与 V1 有明显差异，但 S85 已使用 `per_sample_zscore`，简单 centered preprocessing 不是优先修正方向。
+- lift-off 通道总体合理，没有发现需要立即修正 channel order 或 lift-off 定义的证据。
+
+下一步建议：
+- 不执行额外 centered-only 大训练；将结论汇总到 S90。
+
+## Step S89: COMSOL signal interpretation probe
+
+执行状态：
+- S89 已跳过。
+
+跳过原因：
+- S88 未发现 V2 有强 DC/background offset。
+- S85 已使用 `signal_normalization=per_sample_zscore`。
+- 额外执行 `per_sample_center` 训练会重复消耗训练时间，且不直接针对当前最可疑问题。
+
+下一步建议：
+- 汇总 S87/S88 结论，优先判断 V2 退化是否来自 label area、任务难度和 runner/loss 适配。
+
+## Step S90: COMSOL V2 data/signal diagnostic summary
+
+S90 汇总 S87-S89：
+- target/mask 定义正常；V1/V2 `mu_maps < 500` 与 `masks > 0.5` 完全一致。
+- V2 label area 明显小于 V1，train mean label area ratio 只有 V1 的 `0.457`。
+- V2 defect distribution 从 V1 的 `ellipsoid` 变为 multi_defect / non-ellipsoid，并包含 rotation 和 boundary proxy。
+- V2 signal scale 与 V1 有明显差异，但没有强 offset 风险，lift-off 衰减总体合理。
+- S89 因无必要而跳过。
+
+当前瓶颈排序：
+1. label area / defect distribution 变化。
+2. model/loss 对 multi_defect / small-label target 不适配。
+3. signal scale / signal semantics 差异。
+4. data size / diversity。
+5. target/mask 定义。
+
+下一步建议：
+- 不要直接扩大 V2 数据。
+- 先做 small-label / multi_defect 目标的 runner/loss 适配，例如 area calibration、boundary-aware loss、positive sampling 或 focal-style BCE。
+- 如果重新生成数据，应加入 V1-like ellipsoid / larger-area bridge samples，避免任务分布一次性跳变过大。
+## Step S91: COMSOL V2 focal / weighted mask BCE support
+
+目的：
+- 针对 V2 label area 更小、正负样本不平衡更强的问题，在 `train_conditional_dual.py` 中加入可选 mask BCE loss 模式。
+
+实现：
+- 新增 `--mask-bce-mode`，支持 `bce`、`pos_weighted_bce`、`focal_bce`。
+- 新增 `--pos-weight`、`--focal-gamma`、`--focal-alpha`。
+- 默认 `mask_bce_mode=bce` 保持旧行为。
+- `metrics.csv` / `eval_metrics.csv` / `test_metrics.csv` 记录 `mask_bce_mode`。
+- `run_summary.md` 记录 loss 模式和参数。
+
+检查：
+- `python train_conditional_dual.py` 通过。
+- `python smoke_test_train_conditional_dual.py` 通过。
+- related `py_compile` 通过。
+
+当前判断：
+- S91 只是 runner 能力扩展，不代表模型效果改善。
+
+## Step S92: COMSOL V2 positive-aware point sampling support
+
+目的：
+- V2 label area 约为 V1 的 45.7%，随机 point subsample 可能采不到足够正类点；S92 增加 positive-aware sampling 作为诊断能力。
+
+实现：
+- 新增 `--point-sampling-mode`，支持 `random` 和 `positive_balanced`。
+- 新增 `--positive-fraction`。
+- 默认 `point_sampling_mode=random` 保持旧行为。
+- `positive_balanced` 只影响训练 loss；eval / test 仍使用完整 coords。
+- 当前实现对整个 batch 使用同一组 point indices，按 batch 内任一样本为正的坐标聚合正类点。
+
+检查：
+- smoke test 已覆盖 `positive_balanced`。
+- related `py_compile` 通过。
+
+当前判断：
+- 该采样是诊断工具，需要通过 S93 判断是否适合 V2。
+
+## Step S93: COMSOL V2 small-label adaptation probe
+
+目的：
+- 在 V2 COMSOL train/val/test 数据上测试 `positive_balanced` sampling、`pos_weighted_bce` 和 `focal_bce` 是否改善 small-label / multi_defect 条件下的 train fit 和 held-out IoU。
+
+共同配置：
+- `hidden_dim=128`
+- `num_layers=4`
+- `latent_dim=64`
+- `steps=3000`
+- `signal_normalization=per_sample_zscore`
+- `mask_head_mode=mu_threshold`
+- `train_point_subsample=4096`
+- `point_sampling_mode=positive_balanced`
+- `positive_fraction=0.5`
+
+结果摘要：
+- `balanced_bce` train / val / test IoU = `0.000000e+00` / `0.000000e+00` / `0.000000e+00`。
+- `balanced_pos_weight5` train / val / test IoU = `0.000000e+00` / `0.000000e+00` / `0.000000e+00`。
+- `balanced_focal` train / val / test IoU = `0.000000e+00` / `0.000000e+00` / `0.000000e+00`。
+- 三组 `defect_area_pred` 均为 `0`。
+- 所有 metrics 均为 finite。
+
+Claude Code review：
+- 已调用 review。
+- 结论是没有发现 loss / sampling / label 对齐的 must-fix 实现错误。
+- 零预测面积更可能来自训练动态和 sparse point supervision，而不是实现 bug。
+
+当前判断：
+- `positive_balanced` sampling 没有改善 V2，反而导致 full-grid 预测塌缩为全背景。
+- `pos_weighted_bce` 和 `focal_bce` 没有改善 held-out IoU。
+- S93 不支持把这些配置作为 V2 默认训练策略。
+
+下一步建议：
+- 保留 S85 `big_multichannel_v2` 作为当前 V2 baseline。
+- 不继续盲目扫 `pos_weight` / `focal_alpha`。
+- 转向更直接的 mask target、area calibration、boundary-aware loss、curriculum 数据或模型/conditioning 调整。
+
+## Step S94: COMSOL V2 small-label adaptation summary
+
+S94 汇总：
+- S91/S92 新增了 small-label 相关 runner 能力。
+- S93 证明当前 `positive_balanced` + weighted/focal BCE 组合没有改善 V2，且全部退化为零面积预测。
+- 当前主要瓶颈仍是 V2 small-label / multi_defect target 与 `mu_threshold` 输出路径、loss/runner 适配之间的不匹配。
+
+下一步建议：
+- 回到 S85 baseline。
+- 优先测试 direct mask / area calibration / boundary-aware 目标，或准备包含 V1-like bridge samples 的 curriculum 数据。
+## Step S95: COMSOL V2 small-label adaptation failure summary
+
+目的：
+- 总结 S91-S94 的失败模式，避免继续盲目调 `pos_weighted_bce` / `focal_bce`。
+
+结果摘要：
+- S93 `balanced_bce` / `balanced_pos_weight5` / `balanced_focal` 的 train / val / test IoU 全为 `0.000000e+00`。
+- 三组 `defect_area_pred` 均为 `0.000000e+00`。
+- 当前最佳 V2 baseline 仍是 S85 `big_multichannel_v2`，train / val / test IoU = `3.023806e-01` / `2.593440e-01` / `2.768323e-01`。
+
+当前判断：
+- target/mask 不是主因；
+- simple class imbalance loss 不是当前解法；
+- 当前更像 train dynamics / task difficulty / curriculum 问题。
+
+下一步建议：
+- 增加 training history logging；
+- 测试 V1 pretrain -> V2 finetune curriculum bridge。
+
+## Step S96: Training history logging and curriculum support
+
+目的：
+- 扩展 `train_conditional_dual.py`，支持训练动态记录和可选 pretrain / finetune curriculum。
+
+实现：
+- 新增 `--history-interval`。当 `history_interval > 0` 时写出 `training_history.csv`。
+- `training_history.csv` 记录 `phase`、`step`、loss、batch IoU、batch area、`mu` 范围和当前 loss/sampling 配置。
+- 新增 `--pretrain-npz-path`、`--pretrain-sample-indices`、`--pretrain-steps`。
+- 如果不提供 pretrain 或 `pretrain_steps <= 0`，默认行为保持旧逻辑。
+- pretrain 与 finetune 使用同一个模型和 optimizer，不保存中间权重。
+
+检查：
+- `python train_conditional_dual.py` 通过。
+- `python smoke_test_train_conditional_dual.py` 通过。
+- related `py_compile` 通过。
+- Claude Code review 未发现 must-fix 问题。
+
+## Step S97: COMSOL V1-to-V2 curriculum bridge probe
+
+目的：
+- 比较 V2-only baseline reproduce 与 V1 pretrain -> V2 finetune，判断 V1-like COMSOL 数据是否能缓解 V2 small-label / multi_defect 训练困难。
+
+结果摘要：
+- `v2_only_baseline_reproduce` train / val / test IoU = `0.000000e+00` / `0.000000e+00` / `0.000000e+00`。
+- `v1_pretrain_v2_finetune` train / val / test IoU = `0.000000e+00` / `0.000000e+00` / `0.000000e+00`。
+- 两组最终 `defect_area_pred` 均为 `0`。
+- V1 pretrain 阶段能正常训练，pretrain step 2000 batch IoU 约为 `5.327341e-01`。
+- V2 finetune 阶段仍塌缩为全背景。
+
+training history：
+- V2-only 从初始非零预测面积逐步塌缩到 `batch_area_pred=0`。
+- curriculum 在 V1 pretrain 后进入 V2 finetune，也同样塌缩。
+
+Claude Code review：
+- 已调用 review。
+- 未发现 runner / curriculum / target alignment 的 must-fix bug。
+- 结论是 V2-specific training dynamics，而不是 curriculum wiring bug。
+
+当前判断：
+- V1 -> V2 pretrain 不能改善 V2 train/val/test；
+- 当前问题不是单纯初始化问题；
+- V2 objective 会在 finetune 阶段把模型推回全背景解。
+
+## Step S98: COMSOL curriculum summary
+
+S98 汇总：
+- S95 确认 simple imbalance loss 失败；
+- S96 增加 history 和 curriculum 能力；
+- S97 显示 V1 pretrain 不能阻止 V2 finetune 全背景塌缩。
+
+当前瓶颈：
+1. V2 train dynamics；
+2. V2 small-label / multi_defect target difficulty；
+3. 单纯 V1 pretrain bridge 不足；
+4. 当前 model/loss 对 positive area 缺少直接约束；
+5. 后续数据需要 mixed curriculum，而不是只扩大 V2。
+
+下一步建议：
+- 优先测试 area calibration、positive area prior、direct mask head 或 boundary-aware objective；
+- 数据侧准备 V1-like larger-area、intermediate-area 和 V2-like multi_defect 的 mixed curriculum。
+
+## Step S99: COMSOL V2 background-collapse failure summary
+
+目的：
+- 汇总 S93 和 S97 的共同失败模式，明确当前阶段优先处理 V2 `defect_area_pred=0` 的全背景塌缩。
+
+结果摘要：
+- S93 `balanced_bce` / `balanced_pos_weight5` / `balanced_focal` 均全背景，train / val / test IoU 均为 `0.000000e+00`。
+- S97 `v2_only_baseline_reproduce` 和 `v1_pretrain_v2_finetune` 也均全背景。
+- V1 pretrain 可拟合 V1，但 V2 finetune 会再次塌缩。
+
+当前判断：
+- 这不是 target/mask 定义问题，也不是简单数据量问题。
+- 当前首要问题是 V2 small-label / multi_defect 训练动态容易进入全背景解。
+
+下一步建议：
+- 增加 area calibration / foreground floor loss，测试是否可以恢复非零 hard foreground 和非零 IoU。
+
+## Step S100: Area calibration and foreground floor support
+
+目的：
+- 扩展 `train_conditional_dual.py`，让 conditional runner 可以显式约束 predicted foreground area。
+
+实现：
+- 新增 `--lambda-area-loss`。
+- 新增 `--area-loss-mode none|batch_ratio_mse|foreground_floor`。
+- 新增 `--foreground-floor-ratio`。
+- `batch_ratio_mse` 对 sampled step 中的 soft predicted foreground ratio 和 label foreground ratio 做 MSE。
+- `foreground_floor` 只惩罚 soft predicted ratio 低于 `foreground_floor_ratio * true_ratio`。
+- `training_history.csv` 新增 `area_loss`、`pred_area_soft_mean`、`true_area_mean`。
+- `metrics.csv` / `eval_metrics.csv` / `test_metrics.csv` 记录 `area_loss_mode` 和 `lambda_area_loss`。
+- 默认 `lambda_area_loss=0` 且 `area_loss_mode=none`，保持旧行为。
+
+检查：
+- `python train_conditional_dual.py` 通过。
+- `python smoke_test_train_conditional_dual.py` 通过。
+- related `py_compile` 通过。
+
+Claude Code review：
+- 已调用 review。
+- review 聚焦 area target 语义和 sampled coords 对齐。
+- 最终实现按本阶段要求使用当前 training step 的 sampled labels 计算 area loss，并通过 smoke test。
+
+## Step S101: COMSOL V2 background-collapse suppression probe
+
+目的：
+- 在 V2 train / val / test 数据上测试 `batch_ratio_mse` 和 `foreground_floor` 是否能恢复非零 area 与 IoU。
+
+共同配置：
+- `hidden_dim=128`
+- `num_layers=4`
+- `latent_dim=64`
+- `steps=3000`
+- `mask_head_mode=mu_threshold`
+- `mask_source=mu_threshold`
+- `train_point_subsample=4096`
+- `history_interval=250`
+
+结果摘要：
+- `v2_baseline_with_history` train / val / test IoU = `0.000000e+00` / `0.000000e+00` / `0.000000e+00`。
+- `area_ratio_mse` train / val / test IoU = `0.000000e+00` / `0.000000e+00` / `0.000000e+00`。
+- `foreground_floor` train / val / test IoU = `0.000000e+00` / `0.000000e+00` / `0.000000e+00`。
+- 三组 hard `defect_area_pred` 均为 `0.000000e+00`。
+- `area_ratio_mse` 降低了 `mu_mse` / `mu_mae`，但没有让 hard foreground 越过 `mu_threshold`。
+
+当前判断：
+- area calibration / foreground floor 没有抑制 hard 全背景塌缩。
+- 当前问题不是单纯 foreground area 总量不足，而是 soft defect / predicted `mu` 没有形成可越过 hard threshold 的定位结构。
+
+下一步建议：
+- 转向 direct mask + area loss、threshold calibration、boundary/localization loss 或 staged curriculum。
+
+## Step S102: COMSOL V2 collapse suppression summary
+
+S102 汇总 S99-S101：
+- S100 新增的 area loss 能记录并影响 soft foreground dynamics。
+- S101 三组最终 hard `defect_area_pred` 均为 0，未恢复非零 V2 train / val / test IoU。
+- S85 `big_multichannel_v2` 仍是当前 V2 最佳历史 baseline。
+- 当前瓶颈更新为 hard `mu_threshold` 输出路径、small-label / multi_defect 训练动态，以及缺少定位 / 边界约束。
+
+下一步建议：
+- 不继续只扫 `lambda_area_loss`。
+- 优先测试 `mask_head_mode=direct` + area loss。
+- 增加 predicted `mu` threshold margin 诊断。
+- 准备 boundary/localization objective 或 V1-like -> intermediate -> V2-like staged curriculum。
+
+## Step S103: COMSOL V2 hard-threshold margin diagnostics
+
+目的：
+- 诊断 S101 中 soft foreground 非零但 hard `defect_area_pred=0` 的原因。
+
+结果摘要：
+- `v2_baseline_with_history`、`area_ratio_mse`、`foreground_floor` 三组均 `hard_area_zero=True`。
+- 三组均 `soft_hard_mismatch=True`：soft foreground 面积非零，但 hard mask 为 0。
+- 三组均 `no_threshold_crossing=True`：最后 history 的 `min_mu` 仍高于 `500`。
+- `area_ratio_mse` 将 `min_mu` 降到约 `541`，但仍未跨过 `mu_threshold=500`。
+
+当前判断：
+- S101 的问题是 hard-threshold crossing 不足，而不是 soft foreground 完全塌缩。
+- 需要直接优化正/负样本相对 `mu_threshold` 的 margin。
+
+## Step S104: Threshold-margin loss support
+
+目的：
+- 在 `train_conditional_dual.py` 中加入 threshold-margin objective，直接推动正样本低于 `mu_threshold`，并可选约束负样本高于 threshold。
+
+实现：
+- 新增 `--lambda-threshold-margin`。
+- 新增 `--threshold-margin-mode none|positive_hinge|bidirectional_hinge`。
+- 新增 `--positive-mu-margin` 和 `--negative-mu-margin`。
+- `positive_hinge` 只约束正样本 `mu_pred < 500 - positive_mu_margin`。
+- `bidirectional_hinge` 同时约束负样本 `mu_pred > 500 + negative_mu_margin`。
+- `training_history.csv` 新增 threshold margin loss、positive / negative margin loss、sampled 正负点数和 sampled 正负 `mu` 均值。
+- 默认 `lambda_threshold_margin=0` 且 `threshold_margin_mode=none`，保持旧行为。
+
+检查：
+- `python train_conditional_dual.py` 通过。
+- `python smoke_test_train_conditional_dual.py` 通过。
+- related `py_compile` 通过。
+
+Claude Code review：
+- 已调用 review。
+- review 未发现 threshold-margin loss math、sampled mask alignment 或默认兼容性的 must-fix 问题。
+
+## Step S105: COMSOL V2 threshold-margin probe
+
+目的：
+- 测试 threshold-margin loss 是否能恢复非零 hard mask / IoU。
+
+结果摘要：
+- `v2_baseline_reference` train / val / test IoU = `0.000000e+00` / `0.000000e+00` / `0.000000e+00`。
+- `positive_margin_lambda1` train / val / test IoU = `5.355850e-02` / `5.383750e-02` / `5.350000e-02`，但 hard area 变为全图 `20000`。
+- `positive_margin_lambda10` train / val / test IoU = `5.355850e-02` / `5.383750e-02` / `5.350000e-02`，同样全前景。
+- `bidirectional_margin_lambda1` train / val / test IoU = `1.305192e-01` / `1.185913e-01` / `1.266814e-01`，hard area 非零且非全图。
+
+当前判断：
+- threshold margin 可以恢复 hard foreground。
+- positive-only margin 会造成全前景，说明负样本 margin 很重要。
+- bidirectional margin 修复了 hard-threshold collapse，但 held-out IoU 仍低于 S85 baseline，说明定位 / shape 仍是瓶颈。
+
+## Step S106: COMSOL V2 threshold-margin summary
+
+S106 汇总 S103-S105：
+- hard threshold crossing 是 V2 collapse 的关键瓶颈之一。
+- threshold-margin objective 可以恢复非零 hard mask。
+- positive-only margin 过度扩张为全前景。
+- `bidirectional_hinge` 是当前更合理的 threshold objective，但仍不足以恢复 S85 水平。
+
+下一步建议：
+- 基于 `bidirectional_hinge` 做 margin/lambda 细调和 validation-aware selection。
+- 测试 direct mask + margin / area 组合。
+- 加入 localization / boundary loss，解决恢复面积后定位不足的问题。
+
+## Step S110: COMSOL V2 localization objective early stop and diagnostic gate switch
+
+目的：
+- 将 S109 原计划的 full V2 long-run objective 搜索提前收束，避免继续运行信息增益较低的剩余长实验。
+
+已完成结果：
+- S108 validation-aware endpoint selection 已接入 `train_conditional_dual.py`，默认 `val_selection_metric=none` 时保持旧行为。
+- Claude Code review 已调用；must-fix 的 `val_selection_interval <= 0` guard 已修复；shared coords `[N,2]` / labels `[B,N,1]` 的采样维度已对照 data utils 确认。
+- `bidir_margin_val_select` 选中 best step 2000，但 train / val / test IoU 只有 `5.641042e-02` / `5.671201e-02` / `5.617056e-02`，预测面积偏大。
+- `bidir_margin_area_ratio` 没有改善定位，train / val / test IoU 为 `5.212874e-02` / `5.467077e-02` / `5.347047e-02`，预测面积更接近全图。
+- `bidir_margin_floor` 已完成，train / val / test IoU 为 `1.508809e-01` / `1.344480e-01` / `1.440315e-01`，是 S109 已完成配置中最好，但仍低于 S85 `big_multichannel_v2`。
+- `direct_mask_area_ratio` 未运行，因阶段策略切换而停止。
+
+当前判断：
+- validation-aware selection、margin + area calibration 没有显示出足够的 full-run 改善。
+- V2 当前不是简单 area / margin / endpoint selection 能解决；核心问题仍是 localization / shape 学习不稳定。
+- 后续不再直接启动 full V2 长实验，先进入 quick diagnostic gate。
+
+下一步建议：
+- 建立 S111 quick diagnostic gate protocol。
+- 任何新 V2 objective / output path 先通过 5-sample train-overfit gate，再进入 20-train / 5-val mini gate，最后才允许 full V2 train / val / test。
+
+## Step S111: COMSOL V2 quick diagnostic gate protocol
+
+目的：
+- 建立后续 COMSOL V2 runner objective、output path 和 loss 组合的快速诊断门槛，减少 full train / val / test 长实验盲扫。
+
+产物：
+- `COMSOL_V2_QUICK_DIAGNOSTIC_GATES.md`
+- `experiments/dual_network/S111_comsol_v2_quick_gate_protocol/summary.md`
+
+规则摘要：
+- Gate 1: V2 train samples 0..4 的 5-sample train-overfit gate；建议 train IoU >= 0.5、area_pred 非 0 且不接近全图，才进入 Gate 2。
+- Gate 2: V2 train 0..19 / val 0..4 的 mini generalization gate；要求 val IoU 非零且预测面积不极端。
+- Gate 3: 只有 Gate 1 和 Gate 2 都通过后，才运行 full V2 train=100 / val=20 / test=20。
+
+当前判断：
+- S111 是后续 V2 目标函数和输出路径实验的执行门槛，不是新的训练结果。
+- 下一步 S112 应先在 Gate 1 比较 S85 big baseline、direct mask head、bidirectional margin、direct mask + area。
+
+## Step S112: COMSOL parametric inverse model plan
+
+目的：
+- 停止继续在 V2 dense conditional runner 上盲目调 margin / area / focal / sampling，转向利用 `defect_params` 的低维几何参数反演路线。
+
+计划：
+- 输入仍使用 COMSOL V2 multi-height Bz signals，shape `[B,3,200]` 或 flatten `[B,600]`。
+- 输出 `max_components` 个 component 的 `presence`、`component_type` 和连续几何参数。
+- 第一版按 `center_x`、`center_y` 排序 component，降低 permutation ambiguity。
+- 第一版训练 presence BCE、type CE 和 continuous SmoothL1 / MSE；rasterized mask IoU 只做评估，不反传。
+
+产物：
+- `COMSOL_PARAMETRIC_INVERSE_PLAN.md`
+- `experiments/dual_network/S112_comsol_parametric_inverse_plan/summary.md`
+
+当前边界：
+- 本路线仍是 diagnostic / pilot，不代表主线替代。
+- 本阶段只做 skeleton、smoke 和小规模 probe，不保存权重或 checkpoint。
+
+## Step S113: COMSOL parametric target builder
+
+目的：
+- 从 V2 `defect_params.csv` / NPZ metadata 中构造 component-level parametric targets，用于参数反演训练。
+
+实现：
+- 新增 `comsol_parametric_targets.py`。
+- 优先读取 split 目录中的 `defect_params.csv`，没有 CSV 时 fallback 到 NPZ 的 `defect_params` 字段。
+- 优先使用 `source_component_json` 中的 component-level fields；sample-level aggregate fields 只作为 fallback。
+- 每个 sample 内按 `center_x`、`center_y` 排序。
+- 超过 `max_components` 直接抛出 `ValueError`，不静默截断。
+
+结果：
+- train / val / test 均成功生成 `parametric_targets.npz`。
+- `max_components=3` 适合当前 V2 数据；所有样本均为 3 个 component。
+- `type_vocab=rectangular_notch, rotated_rect`，train / val / test 一致。
+- continuous schema 为 `center_x, center_y, axis_x, axis_y, depth_or_shape_param, rotation_angle`。
+
+检查：
+- `python comsol_parametric_targets.py` 通过。
+- `python smoke_test_comsol_parametric_targets.py` 通过。
+- related `py_compile` 通过。
+
+## Step S114: COMSOL parametric inverse model skeleton
+
+目的：
+- 创建从 flattened multi-height Bz signal 到 component-level geometry parameters 的 PyTorch model skeleton。
+
+实现：
+- 新增 `comsol_parametric_inverse_models.py`。
+- `ParametricBzEncoder` 输入 `[B,600]`，输出 latent。
+- `ComponentParamHead` 输出 `presence_logits`、`type_logits` 和 continuous parameters。
+- `ParametricInverseNet` 包装 encoder + head。
+
+检查：
+- `python smoke_test_comsol_parametric_inverse_models.py` 通过。
+- related `py_compile` 通过。
+
+## Step S115: COMSOL parametric inverse training probe
+
+目的：
+- 在 V2 train / val / test 上运行首个 parametric inverse training probe，判断参数反演路线是否有非平凡信号。
+
+配置：
+- train=100, val=20, test=20。
+- signals per-sample zscore 后 flatten 为 `[B,600]`。
+- `steps=3000`, `lr=1e-3`, `hidden_dim=128`, `latent_dim=64`, `max_components=3`。
+- loss = presence BCE + type CE + continuous SmoothL1。
+- continuous targets 使用 train split present components 的 mean / std 标准化训练，最终反标准化评估。
+- rasterized mask IoU / Dice 只做评估，不反传。
+
+结果摘要：
+- train / val / test presence accuracy = `1.0` / `1.0` / `1.0`。
+- train / val / test type accuracy = `1.0` / `0.65` / `0.6667`。
+- val / test center MAE = `1.485341e-03` / `1.285206e-03`。
+- val / test rotation MAE = `7.731843` / `7.740396` degree。
+- val / test rasterized param mask IoU = `0.369908` / `0.424462`。
+
+当前判断：
+- parametric route 没有出现 dense V2 runner 的全背景 / 全前景塌缩。
+- 参数反演路线已有非平凡 val/test 信号，值得继续推进。
+- 这不是 dense mask baseline，也不代表最终主线替代；后续需补充 quick gate 和更严格 rasterization / val selection。
+
+检查：
+- `python train_comsol_parametric_inverse.py` 通过。
+- `python smoke_test_train_comsol_parametric_inverse.py` 通过。
+- related `py_compile` 通过。
+
+## Step S116: COMSOL parametric route summary
+
+S116 汇总 S112-S115：
+- S113 成功构造 V2 component-level parametric targets。
+- S114 创建 parametric inverse model skeleton。
+- S115 首个 V2 parametric probe 显示 presence、type 和连续 geometry 参数均有学习信号。
+- 非可微 rasterized mask IoU 在 val/test 达到约 `0.37` / `0.42`，高于最近 dense V2 collapse / all-foreground failure runs，也高于 S85 V2 test IoU `0.2768`。
+
+当前瓶颈：
+1. `rotation_angle` 泛化误差仍偏高。
+2. `component_type` val/test accuracy 约 `0.65`，仍不稳。
+3. rasterization 当前是近似 rectangle / rotated rectangle。
+4. MLP encoder 可能不足以提取 Bz 局部结构。
+
+下一步建议：
+- 用 S111 quick gates 复核 parametric route 的小样本 overfit 能力。
+- 实现更完整的 rasterized mask IoU 分组评估。
+- 增强 angle / type loss 或尝试 1D CNN / attention signal encoder。
+
+## Step S117: COMSOL parametric rasterization oracle
+
+目的：
+- 检查 V2 ground-truth parametric targets 经非可微 rasterizer 重建 target masks 的理论上限。
+- 如果 oracle mask IoU 本身不足，则优先修复 rasterizer / target schema，而不是继续训练 parametric inverse model。
+
+实现：
+- 新增 `comsol_parametric_rasterizer.py` 和 `smoke_test_comsol_parametric_rasterizer.py`。
+- 支持 `rotated_rect` 和 `rectangular_notch`，第一版均按 rotated rectangle 近似处理。
+- `axis_x` / `axis_y` 按 full width / full height 解释，rasterizer 内部转换为 half extent。
+- 多 component 取 union mask。
+
+结果摘要：
+- train / val / test oracle avg IoU = `7.229967e-01` / `7.232882e-01` / `7.165838e-01`。
+- train / val / test oracle avg Dice = `8.365438e-01` / `8.366408e-01` / `8.323042e-01`。
+- 三个 split 的 avg oracle IoU 均高于 `0.70` gate。
+
+当前判断：
+- 当前 parametric target + rasterizer 有足够上限，可以继续 S118/S119。
+- oracle IoU 不是接近 1，说明 rasterization 仍是近似，后续需要继续检查 notch 语义、边界离散化和更完整 geometry 表达。
+
+## Step S118: COMSOL parametric target normalization and angle/type refinement
+
+目的：
+- 改进 parametric inverse target 表示，减少 raw angle 和不同量纲 continuous targets 对训练的干扰。
+
+实现：
+- `comsol_parametric_targets.py` 新增 `--angle-encoding raw|sincos`。
+- `rotation_angle` 在 `sincos` 模式下变为 `rotation_sin` 和 `rotation_cos`。
+- 新增 `--normalize-continuous` 和 `--normalization-stats-npz`，train split 计算 stats，val/test 复用 train stats。
+- `train_comsol_parametric_inverse.py` 支持 normalized targets、raw-unit metric 反归一化、circular rotation MAE，以及 `--type-class-weighting inverse_freq`。
+
+refined target schema：
+- `center_x, center_y, axis_x, axis_y, depth_or_shape_param, rotation_sin, rotation_cos`
+
+当前判断：
+- S118 只改变参数监督表示和 metric 口径，不改变 V2 data schema。
+- normalization 只使用 train statistics，val/test 未泄漏自身统计量。
+
+## Step S119: COMSOL refined parametric inverse training probe
+
+目的：
+- 测试 angle sin/cos、continuous normalization 和 inverse-frequency type weighting 是否改善 parametric inverse 的 type / rotation / mask IoU。
+
+配置：
+- `refined_mlp`: S84 V2 train/val/test NPZ + S118 refined targets，`steps=3000`，`hidden_dim=128`，`latent_dim=64`，`max_components=3`，`type_class_weighting=inverse_freq`。
+- `refined_mlp_longer`: 因 `refined_mlp` 的 val/test mask IoU 低于 S115，未继续运行。
+
+结果摘要：
+- train presence / type accuracy = `1.000000` / `1.000000`，mask IoU = `6.689502e-01`。
+- val presence / type accuracy = `1.000000` / `6.166667e-01`，rotation MAE = `7.278932e+00` degree，mask IoU = `3.257646e-01`。
+- test presence / type accuracy = `1.000000` / `6.833333e-01`，rotation MAE = `7.859528e+00` degree，mask IoU = `3.885092e-01`。
+
+当前判断：
+- S118 refined target 表示没有带来 held-out mask IoU 改善。
+- test type accuracy 小幅高于 S115，但 val type accuracy 和 val/test mask IoU 均不如 S115。
+- 当前瓶颈更可能在 encoder/head/loss 分解，而不是单纯 raw angle 或 continuous target scale。
+
+## Step S120: COMSOL parametric route decision
+
+S120 汇总 S117-S119：
+- S117 oracle rasterizer 通过 gate，说明 parametric targets 可重建 target masks 到约 `0.72` avg IoU 上限。
+- S118 target refinement 明确了 angle sin/cos、train-stat normalization 和 type weighting 的实现口径。
+- S119 refined MLP 没有改善 val/test mask IoU，`refined_mlp_longer` 因信息增益低而跳过。
+
+当前判断：
+- parametric route 继续成立，因为它避免了 dense V2 runner 的全背景 / 全前景塌缩，并保留非平凡 mask IoU 信号。
+- 但当前 MLP + component heads 不是最终方案，下一步不应只延长训练。
+
+下一步建议：
+- 优先做 1D CNN / attention signal encoder 或 component-specific heads。
+- 增加 grouped evaluation，分别看 `rectangular_notch` / `rotated_rect` 与 component order。
+- 如果要进入 forward consistency / differentiable rasterization，应先固定 rasterizer semantics，并以 S117 oracle 作为上限参考。
+
+Planned next stages, not completed:
+- S121: parametric error decomposition，按 type、rotation、component order 和 geometry range 拆解 S115/S119 误差。
+- S122: component-specific heads + stronger signal encoder，测试 slot/head 分离、1D CNN 或 attention pooling。
+- S123: quick gate architecture probe，先做小规模 train-overfit / mini generalization gate。
+- S124: best architecture full probe，仅在 quick gates 通过后执行。
+- S125: route decision summary，决定是否进入 forward consistency / differentiable rasterization。
+
+## Step S121: COMSOL parametric error decomposition
+
+目的：
+- 对比 S115 raw 与 S119 refined 的 parametric metrics，并与 S117 oracle rasterization upper bound 比较。
+
+产物：
+- `comsol_parametric_error_diagnostics.py`
+- `smoke_test_comsol_parametric_error_diagnostics.py`
+- `experiments/dual_network/S121_comsol_parametric_error_diagnostics/summary.md`
+
+结果摘要：
+- S115 train mask IoU = `6.980716e-01`，oracle gap = `2.492512e-02`，说明 train 已接近 oracle。
+- S115 val / test oracle gap = `3.533803e-01` / `2.921214e-01`。
+- S119 val / test oracle gap = `3.975235e-01` / `3.280746e-01`，没有改善。
+- val/test type accuracy 约 `0.62` 到 `0.68`，rotation MAE 约 `7` 到 `8` degree。
+
+当前判断：
+- presence 已基本解决。
+- 主要瓶颈是 held-out type / rotation / geometry generalization，而不是 target/mask schema 或 oracle rasterizer 上限不足。
+- 下一步应改 head、encoder 和 loss 分解。
+
+## Step S122: Component-specific heads and stronger signal encoder support
+
+目的：
+- 扩展 parametric inverse model，测试 component-specific heads、CNN1D encoder 和 attention pooling 是否改善 type / rotation 泛化。
+
+实现：
+- `comsol_parametric_inverse_models.py` 新增 `encoder_type=mlp|cnn1d|cnn1d_attention`。
+- `comsol_parametric_inverse_models.py` 新增 `head_mode=shared|component_specific`。
+- `train_comsol_parametric_inverse.py` 新增 `--encoder-type`、`--head-mode`。
+- `train_comsol_parametric_inverse.py` 新增 continuous group weights：`--lambda-center`、`--lambda-axis`、`--lambda-depth`、`--lambda-rotation`。
+- 默认 `mlp/shared` 和 group weights 全为 `1.0` 时保持旧行为。
+
+检查：
+- `smoke_test_comsol_parametric_inverse_models.py` 通过。
+- `smoke_test_train_comsol_parametric_inverse.py` 通过。
+- related `py_compile` 通过。
+
+## Step S123: COMSOL parametric architecture quick gate
+
+目的：
+- 用 2000-step quick gate 比较 shared/component-specific heads 与 MLP/CNN/attention encoder，避免 full-run 盲扫。
+
+结果摘要：
+- `raw_mlp_shared_reference` val / test mask IoU = `3.122039e-01` / `3.738216e-01`。
+- `raw_mlp_component_specific` val / test mask IoU = `3.572195e-01` / `3.376996e-01`。
+- `raw_cnn_component_specific` val / test mask IoU = `3.662237e-01` / `3.892232e-01`。
+- `raw_attention_component_specific` val / test mask IoU = `2.313885e-01` / `2.771757e-01`。
+
+当前判断：
+- `raw_cnn_component_specific` 是 S123 内部最佳，并且 val type accuracy 提升到 `7.000000e-01`。
+- 但没有配置超过 S115 raw baseline 的 val/test mask IoU。
+- 因 `raw_cnn_component_specific` 在 type / rotation 上有改善，允许进入 S124 longer probe。
+
+## Step S124: COMSOL parametric best architecture full probe
+
+目的：
+- 只对 S123 内部最佳 `raw_cnn_component_specific` 执行 6000-step full probe。
+
+结果摘要：
+- train / val / test mask IoU = `3.831555e-01` / `3.133465e-01` / `3.153288e-01`。
+- val / test type accuracy = `6.333333e-01` / `6.333333e-01`。
+- val / test rotation MAE = `7.125315e+00` / `8.518946e+00` degree。
+
+当前判断：
+- longer CNN/component-specific training 没有改善，反而低于 S115 与 S123 quick result。
+- `raw_cnn_component_specific_longer` 不应作为默认配置。
+
+## Step S125: COMSOL parametric architecture decision
+
+S125 汇总 S121-S124：
+- 当前整体最佳仍是 S115 raw parametric MLP baseline，val / test mask IoU = `3.699078e-01` / `4.244624e-01`。
+- S123/S124 的 component-specific heads、CNN1D 和 attention encoder 没有形成新的默认配置。
+- parametric route 继续成立，因为 S117 oracle gate 通过，且该路线避免 dense V2 runner 的全背景 / 全前景塌缩。
+
+下一步建议：
+- 不继续拉长当前 CNN/component-specific 配置。
+- 增加 per-sample prediction export 和 grouped diagnostics。
+- 考虑更明确的 slot decoder / set prediction，而不是简单 independent heads。
+- 若进入 forward consistency / differentiable rasterization，先固定 rasterizer semantics，并以 S117 oracle 作为上限参考。
+
+## Step S126: COMSOL parametric per-sample prediction export
+
+目的：
+- 为 parametric runner 增加 per-sample / per-component prediction export，避免只用 aggregate metrics 判断 type、rotation、slot 和 mask IoU 失败来源。
+
+实现：
+- `train_comsol_parametric_inverse.py` 新增 `--export-predictions`。
+- 输出 `train_predictions.csv`、`val_predictions.csv`、`test_predictions.csv`。
+- 同时输出 `train_prediction_mask_metrics.csv`、`val_prediction_mask_metrics.csv`、`test_prediction_mask_metrics.csv`，记录 per-sample pred mask IoU、Dice、oracle IoU、oracle gap 和 area。
+
+结果摘要：
+- S126 使用 S115 raw MLP 配置复现 baseline 并导出 predictions。
+- train / val / test mask IoU = `6.980716e-01` / `3.699078e-01` / `4.244624e-01`，与 S115 对齐。
+
+当前判断：
+- prediction export 没有改变默认 fixed-order 训练行为。
+- 导出的 component rows 可支撑 S127 grouped diagnostics。
+
+## Step S127: COMSOL parametric grouped diagnostics
+
+目的：
+- 基于 S126 prediction exports，按 `type_true`、`component_slot`、rotation error bin、target area bin 和 oracle gap 分组诊断 parametric route 的失败模式。
+
+产物：
+- `comsol_parametric_grouped_diagnostics.py`
+- `smoke_test_comsol_parametric_grouped_diagnostics.py`
+- `experiments/dual_network/S127_comsol_parametric_grouped_diagnostics/summary.md`
+
+结果摘要：
+- 全 split 合并后 `rectangular_notch` / `rotated_rect` 的 type accuracy 分别为 `9.095238e-01` / `8.952381e-01`，但 held-out val/test 仍是 S115 中约 `0.65` / `0.6667`。
+- slot 1 type accuracy 较低，为 `8.571429e-01`。
+- rotation error bin 与 mask IoU 明显相关：`0-5` degree bin 的 mean mask IoU 为 `6.380047e-01`，`5-10` / `10-20` bins 降到约 `4.17e-01` / `4.00e-01`。
+- worst samples 中存在大 oracle gap，例如 test sample `10` 的 pred IoU = `3.188098e-03`，oracle IoU = `7.455231e-01`。
+
+当前判断：
+- presence 不是瓶颈。
+- held-out type / rotation / geometry generalization 仍是核心问题。
+- slot 1 较弱支持测试 set matching，但不应预设 permutation loss 一定有效。
+
+## Step S128: COMSOL parametric permutation/set-matching support
+
+目的：
+- 测试 fixed-order component regression 是否受 slot/order ambiguity 限制。
+
+实现：
+- `train_comsol_parametric_inverse.py` 新增 `--component-matching-mode fixed|permutation_min`。
+- `permutation_min` 对 `max_components=3` 枚举 `3! = 6` 个 permutation，选择最小 component loss 反传。
+- 默认 `fixed` 保持旧行为。
+- prediction export 在 `permutation_min` 下会记录 `matched_slot`；absent/padded target slot 的连续误差写为 NaN。
+
+检查：
+- `smoke_test_train_comsol_parametric_inverse.py` 覆盖 `--export-predictions` 和 `--component-matching-mode permutation_min`。
+- related `py_compile` 通过。
+
+Claude Code review：
+- 已调用轻量 review。
+- must-fix：permutation export 必须匹配 target slot；padded slot 不应写有效连续误差。
+- 已修复并重跑 smoke / py_compile。
+
+## Step S129: COMSOL parametric set-matching probe
+
+目的：
+- 比较 fixed-order 与 `permutation_min`，判断 slot/order ambiguity 是否限制 S115 raw MLP baseline。
+
+结果摘要：
+- `fixed_reference` train / val / test mask IoU = `6.980716e-01` / `3.699078e-01` / `4.244624e-01`。
+- `permutation_min` train / val / test mask IoU = `6.773069e-01` / `1.787238e-01` / `2.462286e-01`。
+- `permutation_min` val / test type accuracy = `5.833333e-01` / `5.833333e-01`，低于 fixed。
+- `permutation_min` val / test rotation MAE = `9.429713e+00` / `1.084679e+01` degree，低于 fixed。
+
+当前判断：
+- loss-side permutation matching 没有改善 parametric route，反而劣化 held-out metrics。
+- 当前 fixed-order component sorting 不是最主要瓶颈。
+
+## Step S130: COMSOL parametric set-matching decision
+
+S130 汇总 S126-S129：
+- prediction export 成功，且 S126 复现 S115 baseline。
+- grouped diagnostics 显示 held-out type / rotation / geometry generalization 和 oracle gap 是主要问题。
+- `permutation_min` 没有缓解 slot/order ambiguity，且显著低于 fixed baseline。
+
+当前最佳：
+- 仍是 S115 raw MLP / shared head / fixed-order baseline，val / test mask IoU = `3.699078e-01` / `4.244624e-01`。
+
+下一步建议：
+- 不把 `permutation_min` 作为默认训练模式。
+- 不回到 dense mask margin / area / focal / sampling 盲扫。
+- 若继续 parametric route，优先测试 forward consistency / differentiable rasterization、geometry-aware rotation/type objective，或更明确的 slot/query decoder。
+
+## Step S131: COMSOL parametric set-matching stage summary
+
+目的：
+- 收束 S126-S130，确认 loss-side set matching 不作为下一阶段主方向。
+
+结论：
+- S126 prediction export 已可输出 train / val / test 的 per-component predictions 和 per-sample mask metrics。
+- S127 grouped diagnostics 显示 presence 不是瓶颈，主要问题仍是 held-out type / rotation / geometry generalization；slot 1 相对更弱，但不足以说明 slot/order ambiguity 是主因。
+- S129 fixed 明显优于 `permutation_min`，fixed val / test mask IoU = `3.699078e-01` / `4.244624e-01`，permutation val / test mask IoU = `1.787238e-01` / `2.462286e-01`。
+
+当前判断：
+- Parametric route 继续，但下一步不继续 permutation matching。
+- 下一阶段转向 differentiable raster mask supervision，让 mask-level error 直接约束 geometry parameters。
+
+## Step S132: COMSOL differentiable parametric rasterizer
+
+目的：
+- 新增 PyTorch differentiable soft rasterizer，把 predicted component geometry 转成 soft mask，使 mask loss 可以反传到 geometry parameters。
+
+实现：
+- `comsol_differentiable_parametric_rasterizer.py`
+- `smoke_test_comsol_differentiable_parametric_rasterizer.py`
+- `soft_rasterize_components`
+- `soft_bce_loss`
+- `soft_dice_loss`
+
+实现口径：
+- 沿用 S117 hard rasterizer 的 full width / full height axis 语义。
+- `axis_x` / `axis_y` 使用 `abs(axis).clamp_min(eps)`。
+- `rotation_angle` 按项目 raw schema 视为 degree；`rotation_angle_rad` 才视为 radian；refined schema 使用 `rotation_sin` / `rotation_cos`。
+- 多 component 使用 probabilistic union: `1 - product(1 - component_prob)`。
+
+检查：
+- differentiable rasterizer smoke test 通过。
+- related `py_compile` 通过。
+
+Claude Code review：
+- 已调用。
+- must-fix：rotation unit heuristic 不可靠。
+- 已修复为显式 schema 口径，并补充 small-degree、sincos、`type_logits=None`、zero-presence smoke 覆盖。
+
+## Step S133: COMSOL parametric raster mask loss support
+
+目的：
+- 将 S132 soft rasterizer 接入 `train_comsol_parametric_inverse.py`，让 parametric inverse model 可选接受 mask-level differentiable supervision。
+
+实现：
+- 新增 `--lambda-raster-bce`
+- 新增 `--lambda-raster-dice`
+- 新增 `--raster-softness-cells`
+- 新增 `--raster-target-source masks|mu_threshold`
+
+默认行为：
+- `lambda_raster_bce=0` 且 `lambda_raster_dice=0` 时不计算 raster loss，保持旧行为。
+
+检查：
+- `smoke_test_train_comsol_parametric_inverse.py` 覆盖 BCE + Dice raster loss path。
+- related `py_compile` 通过。
+
+## Step S134: COMSOL parametric raster-supervision quick gate
+
+目的：
+- 比较 parameter-only baseline 与 differentiable raster mask supervision，判断 mask-level supervision 是否改善 parametric route 的 held-out mask IoU。
+
+配置：
+- 使用 S84 V2 converted NPZ + S113 raw targets。
+- 共同配置为 `encoder_type=mlp`、`head_mode=shared`、`component_matching_mode=fixed`、`steps=3000`、`export_predictions=true`。
+
+结果摘要：
+- `param_only_reference` val / test mask IoU = `3.699078e-01` / `4.244624e-01`。
+- `raster_dice1` val / test mask IoU = `3.523885e-01` / `4.385081e-01`。
+- `raster_bce05_dice1` val / test mask IoU = `3.697576e-01` / `4.096553e-01`。
+- `raster_dice1_soft2` val / test mask IoU = `3.577784e-01` / `4.088950e-01`。
+
+当前判断：
+- `raster_dice1` 小幅提升 test mask IoU，但 val 降低。
+- raster supervision 目前没有稳定超过 S115 / parameter-only baseline。
+- 中途发现 raster loss 应对 model output 反归一化后再 soft rasterize；已修复并重跑 raster-supervised runs。
+
+Claude Code review：
+- 已再次 review `train_comsol_parametric_inverse.py` 与 `comsol_differentiable_parametric_rasterizer.py` 的 raster loss integration。
+- review 确认修复后 unscaled geometry、target alignment 和默认兼容性均正确，无 must-fix。
+
+## Step S135: COMSOL parametric raster-supervision decision
+
+S135 汇总 S131-S134：
+- set matching 不作为下一阶段主方向。
+- differentiable rasterizer 和 raster BCE / Dice loss 已接入。
+- S134 显示 raster supervision 有一定信号，但没有稳定超过 S115 baseline。
+
+当前最佳：
+- 仍是 S115 / S134 `param_only_reference` raw MLP / shared head / fixed-order baseline。
+
+下一步建议：
+- 不直接把 S134 raster loss 配置升为默认。
+- 可继续 parametric route，优先测试两阶段训练：parameter-only prefit，再短程 raster fine-tune。
+- 可结合 validation-aware selection 或 forward consistency，但仍以 S115 baseline 和 S117 oracle upper bound 作为参照。
+
+## Step S136: COMSOL parametric raster-supervision stage summary
+
+目的：
+- 收束 S131-S135，确认 raster loss 从训练初期直接加入没有稳定超过 parameter-only baseline。
+
+结论：
+- `permutation_min` 已在 S129 证明不是主方向。
+- S132/S133 的 differentiable soft rasterizer 与 raster mask loss 已接入，并通过 smoke / py_compile / Claude Code review。
+- S134 中 `raster_dice1` 小幅提升 test mask IoU，但 val 降低；`raster_bce05_dice1` 和 `raster_dice1_soft2` 也未稳定超过 S115 / S134 parameter-only baseline。
+
+当前判断：
+- Raster loss 仍有价值，但不应从训练开始直接加入作为默认。
+- 下一步转向 two-stage parameter prefit + raster fine-tune，并加入 validation-aware endpoint selection。
+
+## Step S137: COMSOL parametric two-stage raster fine-tune support
+
+目的：
+- 在 `train_comsol_parametric_inverse.py` 中支持 delayed raster loss，使 raster BCE / Dice 可以只在 parameter prefit 后启用。
+- 增加 validation-aware endpoint selection，判断 raster fine-tune 期间是否存在更好的中间 endpoint。
+
+实现：
+- 新增 `--raster-loss-start-step`，默认 `0`，保持原有从 step 1 启用 raster loss 的行为；如果 raster loss 权重为 0，则无作用。
+- 新增 `--val-selection-metric none|val_mask_iou|val_loss` 和 `--val-selection-interval`。
+- best state 只用内存 `state_dict` deep copy 保存，不写出权重或 checkpoint。
+- `training_history.csv` 新增 `raster_loss_active`、`val_mask_iou_at_step`、`val_loss_at_step` 和 `is_best_step`。
+- `run_summary.md` 记录 `raster_loss_start_step`、validation selection 参数、`best_step` 和 best metric。
+
+检查：
+- `smoke_test_train_comsol_parametric_inverse.py` 覆盖 raster schedule、val selection、以及 delayed raster loss 与 `val_loss` selection 的非法组合。
+- related `py_compile` 通过。
+
+Claude Code review：
+- 已调用。
+- must-fix 1：`val_loss` 与 delayed raster loss 会比较不同 loss 组成。已修复为直接报错并建议使用 `val_mask_iou`。
+- must-fix 2：`val_mask_iou` selection 可能保留 pre-raster endpoint。已修复为 raster 阶段开始后重置 best tracking，并在 final step 也执行 selection 检查。
+
+## Step S138: COMSOL two-stage raster fine-tune probe
+
+目的：
+- 比较 parameter-only baseline 与 two-stage raster fine-tune，判断 raster loss 是否更适合后期 fine-tune。
+
+配置：
+- 数据使用 S84 V2 converted NPZ + S113 raw parametric targets。
+- 共同配置为 `encoder_type=mlp`、`head_mode=shared`、`component_matching_mode=fixed`、`steps=3000`、`export_predictions=true`。
+- 三组均使用 `val_selection_metric=val_mask_iou`、`val_selection_interval=500`。
+
+结果摘要：
+- `param_only_val_select` train / val / test mask IoU = `5.745143e-01` / `4.339882e-01` / `3.966467e-01`，best_step = `500`。
+- `two_stage_raster_dice` train / val / test mask IoU = `7.427683e-01` / `4.050472e-01` / `4.022032e-01`，best_step = `3000`。
+- `two_stage_raster_bce_dice` train / val / test mask IoU = `5.686725e-01` / `2.810415e-01` / `3.105837e-01`，best_step = `2500`。
+
+当前判断：
+- validation-aware selection 能提高 val endpoint，但 `param_only_val_select` 的 test 低于 S115 baseline。
+- `two_stage_raster_dice` 改善 train geometry calibration，但 held-out val/test 仍未超过 S115 / S134 parameter-only baseline。
+- `two_stage_raster_bce_dice` 明显劣化，不适合作为默认。
+
+## Step S139: COMSOL two-stage raster decision
+
+S139 汇总 S136-S138：
+- raster loss 从头训练没有稳定超过 parameter-only baseline。
+- delayed raster fine-tune 提高了 train-side mask calibration，但没有稳定提升 held-out baseline。
+- validation selection 对 val 有帮助，但没有转化为稳定 test 改善。
+
+当前最佳：
+- 仍是 S115 / S134 `param_only_reference` raw MLP / shared head / fixed-order baseline，val / test mask IoU = `3.699078e-01` / `4.244624e-01`。
+
+下一步建议：
+- 不继续盲扫 raster BCE / Dice 权重。
+- 不回到 dense conditional mask runner。
+- Parametric route 继续，但优先转向 forward consistency / physics feature extraction。
+- 如果继续 raster route，建议只测试 very short post-selection raster fine-tune，而不是长程 raster fine-tune。
+
+## Step S140: COMSOL parametric raster fine-tune stage summary
+
+目的：
+- 收束 S136-S139，确认 raster fine-tune 没有稳定超过 S115 / S134 parameter-only baseline。
+- 将下一步从 raster BCE / Dice 权重搜索转向 physics-based MFL signal features 与 feature fusion。
+
+结论：
+- raster loss 从训练初期直接加入不稳定。
+- two-stage raster fine-tune 提高 train-side mask calibration，但没有稳定改善 held-out val/test。
+- validation-aware selection 只改善 val endpoint，没有稳定改善 test。
+- 当前最佳仍是 S115 / S134 `param_only_reference` raw MLP / shared head / fixed-order baseline。
+
+下一步：
+- S141 提取 multi-height Bz physics features。
+- S142 将 features 接入 parametric inverse runner。
+- S143 比较 raw signal、physics features 与 raw+features。
+
+## Step S141: COMSOL MFL physics feature extraction
+
+目的：
+- 从 COMSOL V2 multi-height Bz signals `[N,3,200]` 中提取显式 physics-inspired MFL features，测试 raw MLP 是否缺少稳定物理特征抽取能力。
+
+实现：
+- 新增 `comsol_mfl_physics_features.py`。
+- 新增 `smoke_test_comsol_mfl_physics_features.py`。
+- 支持 `feature_mode=basic_peak|peak_decay_width`。
+
+特征类别：
+- per-channel `mean`、`std`、`min`、`max`、`peak_abs`、`peak_to_peak`。
+- peak position：`argmax_x`、`argmin_x`、`argmax_abs_x`。
+- `energy`、`abs_area`、`signed_area`。
+- `positive_peak_count`、`negative_peak_count`、`half_abs_width`、`center_of_abs_mass`、`left_right_abs_balance`。
+- lift-off decay ratios：`peak_abs_ch1_over_ch0`、`peak_abs_ch2_over_ch0`、`energy_ch1_over_ch0`、`energy_ch2_over_ch0`。
+- inter-channel correlations：`corr_ch0_ch1`、`corr_ch0_ch2`、`corr_ch1_ch2`。
+
+结果：
+- train / val / test features shape = `[100,58]` / `[20,58]` / `[20,58]`。
+- 所有 features 均为 finite。
+- `peak_abs_ch1_over_ch0` 均值约 `0.94`，`peak_abs_ch2_over_ch0` 均值约 `0.80-0.85`，与多高度衰减直觉一致。
+
+检查：
+- `python comsol_mfl_physics_features.py` 正常打印说明。
+- `python smoke_test_comsol_mfl_physics_features.py` 通过。
+- related `py_compile` 通过。
+
+## Step S142: COMSOL parametric inverse physics feature fusion support
+
+目的：
+- 扩展 parametric inverse model 和 runner，使其可选使用 physics features 或 raw signal + physics features。
+
+实现：
+- `comsol_parametric_inverse_models.py` 新增 `FeatureMLP`。
+- `ParametricInverseNet` 新增 `feature_dim` 和 `feature_fusion_mode=none|features_only|concat_latent`。
+- `forward(signals, features=None)` 默认保持旧调用兼容；当 fusion mode 需要 features 但未提供时抛出 `ValueError`。
+- `train_comsol_parametric_inverse.py` 新增 `--feature-npz`、`--val-feature-npz`、`--test-feature-npz` 和 `--feature-fusion-mode`。
+- feature normalization 只使用 train feature mean/std，val/test 使用 train stats。
+
+检查：
+- `smoke_test_comsol_parametric_inverse_models.py` 覆盖 `features_only`、`concat_latent`、missing features 和 feature dim mismatch。
+- `smoke_test_train_comsol_parametric_inverse.py` 覆盖 `concat_latent` runner path。
+- related `py_compile` 通过。
+
+Claude Code review：
+- 已调用。
+- review 结论：feature fusion semantics、sample alignment、train-only normalization、forward signatures、default compatibility 和 no checkpoint/weight output 均无 must-fix。
+
+## Step S143: COMSOL parametric physics feature fusion probe
+
+目的：
+- 比较 raw signal、physics features、raw+features，判断 physics-based MFL features 是否改善 parametric inverse held-out generalization。
+
+配置：
+- 使用 S84 V2 converted NPZ + S113 raw targets + S141 features。
+- 共同配置为 `steps=3000`、`encoder_type=mlp`、`head_mode=shared`、`component_matching_mode=fixed`、`export_predictions=true`。
+
+结果摘要：
+- `raw_signal_reference` train / val / test mask IoU = `6.980716e-01` / `3.699078e-01` / `4.244624e-01`。
+- `physics_features_only` train / val / test mask IoU = `7.273660e-01` / `2.362846e-01` / `2.327774e-01`。
+- `raw_plus_physics_features` train / val / test mask IoU = `6.756908e-01` / `3.313752e-01` / `3.051455e-01`。
+
+当前判断：
+- physics features 能在 train 上强拟合 geometry，但 held-out val/test 明显低于 raw reference。
+- raw+features 改善 val type accuracy 和 val rotation MAE，但 mask IoU 和 test 指标未改善。
+- 当前最佳仍是 raw signal reference / S115 baseline。
+
+## Step S144: COMSOL physics feature route summary
+
+S144 汇总 S140-S143：
+- S140 确认 raster fine-tune 不作为当前主方向。
+- S141 成功提取 `[100,58]` / `[20,58]` / `[20,58]` physics features。
+- S142 支持 `features_only` 和 `concat_latent` fusion，review 无 must-fix。
+- S143 显示 physics features 有 train-side signal，但没有稳定改善 held-out mask IoU。
+
+当前最佳：
+- 仍是 S115 / S143 `raw_signal_reference` raw MLP / shared head / fixed-order baseline，val / test mask IoU = `3.699078e-01` / `4.244624e-01`。
+
+下一步建议：
+- Parametric route 继续，但不把 S141 feature fusion 作为默认。
+- 优先转向 forward consistency / learned forward surrogate，或把 physics features 作为 auxiliary target / regularizer，而不是直接 concat 输入。
+
+## Step S145: COMSOL parametric physics feature stage summary
+
+目的：
+- 收束 S140-S144，确认 direct physics feature concat 没有超过 raw signal baseline，并将下一步转向 learned forward surrogate / forward consistency。
+
+核心产物：
+- `experiments/dual_network/S145_comsol_parametric_physics_feature_stage_summary/summary.md`
+
+关键结论：
+- Raster fine-tune 和 direct physics feature fusion 都没有稳定超过 S115 / S143 raw signal baseline。
+- S141 physics features 本身有 train-side signal，但 `features_only` 和 `concat_latent` 没有改善 held-out mask IoU。
+- 当前最佳仍是 `raw_signal_reference` raw MLP / shared head / fixed-order baseline，train / val / test mask IoU = `6.980716e-01` / `3.699078e-01` / `4.244624e-01`。
+
+当前判断：
+- Direct feature concat 不作为下一阶段默认路线。
+- 下一步应学习 geometry -> Bz 的 lightweight forward surrogate，并把它作为 consistency referee，诊断预测 geometry 是否能解释输入 Bz。
+
+## Step S146: COMSOL parametric forward surrogate implementation
+
+目的：
+- 实现 geometry parameters -> multi-height Bz signal 的轻量 learned forward surrogate，为后续 forward consistency 提供 in-memory referee。
+
+核心产物：
+- `comsol_parametric_forward_surrogate.py`
+- `train_comsol_parametric_forward_surrogate.py`
+- `smoke_test_comsol_parametric_forward_surrogate.py`
+- `smoke_test_train_comsol_parametric_forward_surrogate.py`
+- `experiments/dual_network/S146_comsol_parametric_forward_surrogate/summary.md`
+
+实现要点：
+- `geometry_vector` 使用 fixed-order component flatten，包含 presence、type one-hot / probabilities 和 continuous geometry parameters。
+- Surrogate 为 MLP，输出 flattened Bz signal。
+- 训练使用 train split per-dimension z-score；val/test 只复用 train stats。
+- 输出 metrics / history / summary，不保存权重或 checkpoint。
+
+下一步：
+- S147 在 V2 train/val/test 上训练 surrogate，并用 signal correlation / NRMSE 判断是否可以用于 consistency。
+
+## Step S147: COMSOL parametric forward surrogate quality gate
+
+目的：
+- 在 V2 COMSOL 数据上训练 geometry -> Bz learned forward surrogate，并判断它是否足够用于 inverse forward consistency。
+
+配置：
+- S84 V2 converted NPZ + S113 raw parametric targets。
+- MLP surrogate，`steps=5000`，`hidden_dim=256`，`num_layers=4`。
+- 使用 train-only signal z-score normalization。
+
+结果：
+- train `signal_nrmse_raw=3.767854e-01`，`signal_corr=9.258671e-01`。
+- val `signal_nrmse_raw=5.026852e-01`，`signal_corr=8.657639e-01`。
+- test `signal_nrmse_raw=4.577952e-01`，`signal_corr=8.886174e-01`。
+
+Gate 判断：
+- val/test `signal_corr >= 0.80` 且 `signal_nrmse_raw < 1.0`，S147 通过。
+- 继续执行 S148/S149 learned forward consistency inverse probe。
+
+## Step S148: COMSOL parametric inverse forward-consistency support
+
+目的：
+- 在 S147 gate 通过后，实现 in-memory learned forward consistency inverse runner。
+
+核心产物：
+- `train_comsol_parametric_inverse_forward_consistency.py`
+- `smoke_test_train_comsol_parametric_inverse_forward_consistency.py`
+- `experiments/dual_network/S148_comsol_parametric_forward_consistency_support/summary.md`
+
+实现要点：
+- 先训练 true geometry -> normalized Bz 的 forward surrogate；
+- 冻结 surrogate，不保存任何权重；
+- inverse model 训练时加入 predicted geometry -> frozen surrogate -> input Bz 的 normalized MSE；
+- predicted presence/type 送入 surrogate 前使用 straight-through hard binary / one-hot，避免 hard-trained surrogate 接收任意 soft distribution。
+
+Review：
+- Claude Code review 初次指出 3 个 must-fix：soft presence/type OOD、continuous mean/std detach、重复 normalization path。
+- 已修复并复核，无剩余 must-fix。
+
+## Step S149: COMSOL parametric forward-consistency inverse probe
+
+目的：
+- 比较 parameter-only baseline 与 learned forward consistency，判断 signal reconstruction residual 是否改善 parametric inverse 的 held-out generalization。
+
+结果摘要：
+- `param_only_reference` train / val / test mask IoU = `6.980716e-01` / `3.699078e-01` / `4.244624e-01`。
+- `forward_consistency_lambda01` train / val / test mask IoU = `5.947000e-01` / `3.103259e-01` / `3.954980e-01`。
+- `forward_consistency_lambda1` train / val / test mask IoU = `4.301722e-01` / `2.477730e-01` / `3.392353e-01`。
+
+当前判断：
+- `lambda=0.1` 对 val/test rotation MAE 有局部改善，但 mask IoU 未改善。
+- `lambda=1.0` forward constraint 过强，明显伤害 mask IoU 和 test type accuracy。
+- 当前最佳仍是 S115 / S143 raw MLP / shared head / fixed-order parameter-only baseline。
+
+## Step S150: COMSOL forward consistency route summary
+
+S150 总结 S145-S149：
+- S147 forward surrogate 通过 quality gate，val/test `signal_corr` 分别为 `8.657639e-01` / `8.886174e-01`，`signal_nrmse_raw` 为 `5.026852e-01` / `4.577952e-01`。
+- S148 in-memory forward consistency support 已实现并通过 review。
+- S149 显示简单 learned forward consistency 没有超过 parameter-only baseline。
+
+路线判断：
+- Learned forward surrogate 可作为 diagnostic referee 保留。
+- 当前 forward consistency objective 不作为默认训练目标。
+- 不建议继续盲扫 consistency lambda；下一步更适合 physics-derived auxiliary prediction、type/rotation-specific supervision 或更强 geometry target。
+
+## Step S151: COMSOL forward consistency stage summary
+
+目的：
+- 收束 S145-S150，确认 learned forward surrogate 本身可用，但 simple forward consistency loss 当前不作为默认 objective。
+
+核心产物：
+- `experiments/dual_network/S151_comsol_forward_consistency_stage_summary/summary.md`
+
+关键结论：
+- S147 forward surrogate 通过 quality gate，val/test `signal_corr` 为 `8.657639e-01` / `8.886174e-01`。
+- S149 `lambda_forward_consistency=0.1` 和 `1.0` 都没有超过 parameter-only baseline，且 lambda 越大 mask IoU 越差。
+- 当前最佳仍是 S115 / S143 / S149 `param_only_reference` raw MLP / shared head / fixed-order baseline。
+
+当前判断：
+- Forward surrogate 保留为 residual diagnostic / consistency referee。
+- 不继续盲扫 consistency lambda。
+- 下一步先验证 residual 对 type / rotation / axis 错误是否敏感，并直接测试 type / rotation targeted supervision。
+
+## Step S152: COMSOL forward residual sensitivity diagnostic
+
+目的：
+- 检查 learned forward surrogate residual 是否能区分 true / predicted / type-swapped / rotation-perturbed / axis-scaled geometry。
+
+核心产物：
+- `comsol_forward_residual_diagnostics.py`
+- `smoke_test_comsol_forward_residual_diagnostics.py`
+- `experiments/dual_network/S152_comsol_forward_residual_diagnostics/summary.md`
+
+关键结果：
+- val true / type-swapped / rotation-perturbed / axis-scaled / predicted avg signal NRMSE = `2.680198e-01` / `7.348850e-01` / `2.741137e+00` / `2.661547e-01` / `7.572894e-01`。
+- test true / type-swapped / rotation-perturbed / axis-scaled / predicted avg signal NRMSE = `2.606982e-01` / `4.385888e-01` / `4.292691e+00` / `2.691335e-01` / `7.149153e-01`。
+
+当前判断：
+- Forward residual 对 rotation 很敏感，对 type 中等敏感，但对 axis scaling 基本不敏感。
+- predicted residual 与 mask IoU 相关性有限，不能单独作为 mask IoU proxy。
+- 这解释了 S149 中 forward consistency loss 没有稳定改善 mask IoU。
+
+Review：
+- Claude Code review 已尝试，第一次 budget limit，第二次 timeout；本地 smoke / py_compile 通过，自检未发现必须修复项。
+
+## Step S153: COMSOL type/rotation targeted supervision support
+
+目的：
+- 在不回到 dense mask runner 的前提下，直接加强当前 parametric route 的 held-out type / rotation 瓶颈。
+
+实现：
+- `train_comsol_parametric_inverse.py` 新增 `--lambda-type-extra`，在原 type CE 基础上额外加权 type loss。
+- 新增 `--lambda-rotation-extra` 和 `--rotation-loss-mode mse|circular`，对 raw `rotation_angle` 或 sin/cos rotation target 加额外 rotation loss。
+- 默认值均保持旧行为：`lambda_type_extra=0.0`、`lambda_rotation_extra=0.0`、`rotation_loss_mode=mse`。
+
+检查：
+- `smoke_test_train_comsol_parametric_inverse.py` 已覆盖 targeted loss path。
+- Claude Code review 尝试调用但超时；本地 smoke / py_compile 通过，自评未发现 must-fix。
+
+## Step S154: COMSOL type/rotation targeted supervision probe
+
+目的：
+- 测试 type / rotation targeted loss 是否改善 held-out type / rotation / mask IoU。
+
+结果摘要：
+- `param_only_reference` val / test mask IoU = `3.699078e-01` / `4.244624e-01`。
+- `type_extra` val / test mask IoU = `2.987030e-01` / `4.268750e-01`。
+- `rotation_extra` val / test mask IoU = `3.953165e-01` / `4.134323e-01`。
+- `type_rotation_extra` val / test mask IoU = `3.817137e-01` / `3.627724e-01`。
+
+当前判断：
+- `type_extra` 没有改善 type accuracy，test mask IoU 的微小提升不稳定。
+- `rotation_extra` 有 val-side signal，但 test 未超过 S115。
+- 没有一组稳定超过 S115 / S143 parameter-only baseline。
+
+## Step S155: COMSOL forward residual and type/rotation decision
+
+S155 总结 S151-S154：
+- Forward residual 对 rotation 敏感，对 type 中等敏感，对 axis scaling 不敏感。
+- Simple forward consistency 不作为默认 loss。
+- Simple type / rotation extra losses 没有形成稳定新 best。
+
+当前最佳：
+- 仍是 S115 / S143 / S149 / S154 `param_only_reference` raw MLP / shared head / fixed-order parameter-only baseline。
+
+下一步建议：
+- 不继续盲扫 forward consistency lambda 或 simple type / rotation loss 权重。
+- 优先考虑更强 target representation、type/rotation-balanced COMSOL data、type-specific heads / auxiliary classifier，或 forward residual offline ranking。
+
+## Step S156: COMSOL type/rotation loss stage summary
+
+目的：
+- 收束 S151-S155，确认 simple type / rotation extra losses 没有稳定突破 S115 / S143 raw MLP baseline。
+- 将下一步从继续调 loss 权重切换到 parameter-level oracle ablation。
+
+核心产物：
+- `experiments/dual_network/S156_comsol_type_rotation_loss_stage_summary/summary.md`
+
+关键结论：
+- S152 显示 forward residual 对 rotation 很敏感，对 type 中等敏感，对 axis scaling 基本不敏感，但 predicted residual 与 mask IoU 相关性有限。
+- S154 显示 `type_extra` 没有改善 type accuracy，`rotation_extra` 只有局部 val-side signal，组合 loss test 退化。
+- 当前最佳仍是 `param_only_reference` raw MLP / shared head / fixed-order parameter-only baseline。
+
+当前判断：
+- 不继续盲扫 type / rotation loss 权重。
+- 下一步用 oracle ablation 直接判断 type、rotation、center、axis、depth 哪些误差真正限制 final mask IoU。
+
+## Step S157: COMSOL parametric oracle ablation implementation
+
+目的：
+- 基于已有 S126 prediction export 和 S113 GT parametric targets，新增只读 diagnostic 脚本。
+- 从 `pred_all` 出发逐项替换 GT 参数，复用 hard rasterizer 比较 mask IoU / Dice。
+
+核心产物：
+- `comsol_parametric_oracle_ablation.py`
+- `smoke_test_comsol_parametric_oracle_ablation.py`
+- `experiments/dual_network/S157_comsol_parametric_oracle_ablation/summary.md`
+
+实现要点：
+- variants 包括 `pred_all`、`gt_type`、`gt_rotation`、`gt_type_rotation`、`gt_center`、`gt_axis`、`gt_depth`、`gt_continuous_all`、`gt_type_continuous` 和 `gt_all`。
+- 脚本强制检查 prediction CSV 字段、sample / component grid、type vocab、target schema 和 CSV true 值对齐。
+- rotation 按 raw degree 语义处理，并在 rasterization 前转为 sin/cos schema，避免 hard rasterizer 的 degree/radian heuristic。
+
+检查：
+- `smoke_test_comsol_parametric_oracle_ablation.py` 已覆盖 rotation oracle 提升、`gt_all` sanity、type mismatch 重建和缺字段错误。
+
+## Step S158: COMSOL parametric oracle ablation
+
+目的：
+- 在 S115 / S126 raw MLP baseline predictions 上运行 parameter-level oracle ablation。
+- 判断 type、rotation、center、axis、depth 哪些误差真正限制 final rasterized mask IoU。
+
+核心产物：
+- `experiments/dual_network/S158_comsol_parametric_oracle_ablation_results/summary.md`
+- `experiments/dual_network/S158_comsol_parametric_oracle_ablation_results/*/per_sample_oracle_ablation.csv`
+- `experiments/dual_network/S158_comsol_parametric_oracle_ablation_results/*/aggregate_oracle_ablation.csv`
+
+关键结果：
+- `pred_all` train / val / test IoU = `6.980716e-01` / `3.699078e-01` / `4.244624e-01`，复现 S115 baseline。
+- `gt_all` train / val / test IoU = `7.229967e-01` / `7.232882e-01` / `7.165838e-01`，对齐 S117 oracle。
+- `gt_center` train / val / test IoU = `7.233959e-01` / `7.148715e-01` / `7.229199e-01`，是单项替换中最大、最稳定提升。
+- `gt_axis` 只有小幅提升，`gt_rotation` 没有改善 val/test，`gt_type` 和 `gt_depth` 对当前 hard mask rasterization 没有影响。
+
+当前判断：
+- held-out mask IoU 的主要限制是 component center localization。
+- type / rotation loss 不是当前 final mask IoU gap 的首要方向。
+
+## Step S159: COMSOL parametric oracle ablation decision
+
+S159 基于 S158 给出参数瓶颈排序：
+1. `center_x` / `center_y`
+2. continuous 参数累计误差，主要由 center 贡献
+3. `axis_x` / `axis_y`
+4. `rotation`
+5. `type`
+6. `depth_or_shape_param`
+7. presence
+
+路线判断：
+- Parametric route 继续。
+- 下一步优先围绕 center / localization targeted diagnostic，而不是继续盲扫 type CE、rotation extra loss、forward consistency lambda 或 dense mask loss。
+
+建议：
+- 测试 center-specific loss scaling、center target normalization / coordinate reparameterization、signal-to-center auxiliary head、center-bin classification + offset，或 per-component Bz peak-position alignment features。
+
+## Step S160: COMSOL parametric center bottleneck summary
+
+目的：
+- 收束 S156-S159，确认当前最大 final mask IoU bottleneck 是 `center_x` / `center_y` localization。
+
+核心产物：
+- `experiments/dual_network/S160_comsol_parametric_center_bottleneck_summary/summary.md`
+
+关键结论：
+- `gt_center` 将 val / test mask IoU 从 `0.369908` / `0.424462` 提升到 `0.714872` / `0.722920`，接近 `gt_all` / S117 oracle。
+- type / rotation / axis / depth 都不是当前 hard rasterized mask IoU gap 的首要因素。
+- 下一步停止盲扫 type / rotation / forward / raster loss，聚焦 center localization。
+
+## Step S161: COMSOL parametric center error diagnostics
+
+目的：
+- 基于 S126 prediction export 量化 center error 的 grid-cell / axis-relative 尺度，并检查它与 mask IoU 的相关性。
+
+核心产物：
+- `comsol_parametric_center_diagnostics.py`
+- `smoke_test_comsol_parametric_center_diagnostics.py`
+- `experiments/dual_network/S161_comsol_parametric_center_diagnostics/summary.md`
+
+关键结果：
+- val / test `center_l2_grid_mae` = `8.017750` / `6.998191`。
+- val / test `center_axis_relative_l2_mae` = `0.445062` / `0.394215`。
+- val / test center grid L2 vs mask IoU Pearson = `-0.926528` / `-0.910617`，Spearman = `-0.902256` / `-0.908271`。
+- `center_y_grid_mae` 高于 `center_x_grid_mae`，held-out y localization 更弱。
+
+## Step S162: COMSOL center-aware loss support
+
+目的：
+- 给 parametric inverse runner 增加 center-specific loss，直接针对 S158/S161 暴露的 localization bottleneck。
+
+实现：
+- 新增 `--lambda-center-grid`，用 x/y grid spacing 将 meter center error 转成 grid-cell MSE。
+- 新增 `--lambda-center-axis-relative` 和 `--center-axis-relative-eps`，用 GT full-width/full-height axis 归一 center error 并计算 SmoothL1。
+- 两类 center loss 仅对 present components 生效；默认值为 `0.0`，保持旧行为。
+- metrics / run summary / training history 记录 center loss 配置与 `center_grid_mae`、`center_axis_relative_mae`。
+
+Review：
+- Claude Code review 指出两个 must-fix：grid spacing uniformity tolerance 过严、eval center metrics 缺少 guard。
+- 已修复：spacing tolerance 放宽到 5%，eval spacing 异常时 `center_grid_mae=nan`；随后 smoke / py_compile 通过。
+
+## Step S163: COMSOL parametric center-aware loss quick gate
+
+目的：
+- 用同一轮 1500-step reference 比较 center-aware loss 是否改善 held-out center localization 和 mask IoU。
+
+结果：
+- `param_only_1500_reference` val / test mask IoU = `0.415913` / `0.427099`。
+- `center_grid_loss` val / test mask IoU = `0.470171` / `0.504389`，同时降低 center grid / axis-relative error。
+- `center_axis_relative` val / test mask IoU = `0.374787` / `0.392738`，未通过 gate。
+
+判断：
+- `center_grid_loss` 同时提升 val 和 test，满足 S163 gate，进入 S164 3000-step confirm。
+
+## Step S164: COMSOL center-aware full probe
+
+目的：
+- 对 S163 最优配置 `center_grid_loss` 做 3000-step confirm。
+
+结果：
+- `center_grid_loss_3000` train / val / test mask IoU = `0.726483` / `0.469423` / `0.498874`。
+- 相比 S115 / S158 pred_all baseline `0.698072` / `0.369908` / `0.424462`，val / test 均有改善。
+- 该配置仍低于 S117 oracle，但已形成稳定 center-targeted 改善。
+
+## Step S165: COMSOL center-localization decision
+
+S165 的决策是：
+- 当前最佳 parametric 配置更新为 raw MLP / shared head / fixed-order + `lambda_center_grid=0.1`。
+- Center-aware grid loss 是有效方向，但不应继续简单加大 lambda。
+- 下一步应围绕 center-bin classification + offset、signal-to-center auxiliary head、per-component peak-position alignment 或 stable repeat 做结构性 center localization 改进。
+## Step S166: COMSOL center-grid stability stage summary
+
+目的：
+- 收束 S160-S165，确认 `lambda_center_grid=0.1` 值得做 stability repeat，但还不能直接升级为默认候选。
+
+核心产物：
+- `experiments/dual_network/S166_comsol_center_grid_stability_stage_summary/summary.md`
+
+判断：
+- 本阶段不再调 center lambda，不继续 `center_axis_relative`，也不开发 center-bin / auxiliary head。
+- 下一步先增加 reproducible seed support，再做最短 stable repeat。
+
+## Step S167: COMSOL parametric inverse seed support
+
+目的：
+- 为 center-grid stability repeat 增加最小 seed control。
+
+实现：
+- `train_comsol_parametric_inverse.py` 新增 `--seed`，默认 `0`。
+- `torch.manual_seed`、`np.random.seed` 和 Python `random.seed` 均使用 `args.seed`。
+- metrics / run summary 记录 seed。
+- smoke test 覆盖 seed 参数、metrics/summary 记录、同 seed 重复一致性和不同 seed 可运行。
+
+Review：
+- Claude Code review 指出 must-fix：Python `random` 未 seed。
+- 已修复并重跑 smoke / py_compile 通过。
+
+## Step S168: COMSOL center-grid stability repeat
+
+目的：
+- 验证 S164 `lambda_center_grid=0.1` 是否稳定，而不是单次初始化波动。
+
+结果：
+- `existing_unrecorded` val / test IoU = `0.469423` / `0.498874`。
+- `center_grid_seed1` val / test IoU = `0.485716` / `0.505590`。
+- `center_grid_seed2` val / test IoU = `0.446966` / `0.503713`。
+- seed1 未触发 early stop，因此执行 seed2。
+
+## Step S169: COMSOL center-grid stability aggregate
+
+目的：
+- 汇总 S164 existing run 与 S168 seed1/seed2，逐条判断 acceptance criteria。
+
+核心产物：
+- `experiments/dual_network/S169_comsol_center_grid_stability_summary/summary.md`
+- `experiments/dual_network/S169_comsol_center_grid_stability_summary/aggregate_stability_metrics.csv`
+- `experiments/dual_network/S169_comsol_center_grid_stability_summary/acceptance_criteria.csv`
+
+结论：
+- 所有 completed runs 的 val/test IoU 都高于 historical param-only baseline。
+- median test IoU = `0.503713`，超过 `0.474462` 门槛。
+- 3/3 runs 的 test IoU >= `0.48`。
+- val/test center_grid_mae 均低于 S161 baseline。
+
+## Step S170: COMSOL center-grid candidate decision
+
+S170 的决策是：
+- raw MLP / shared head / fixed-order + `lambda_center_grid=0.1` 升级为当前 COMSOL parametric route candidate。
+- 不继续简单加大 lambda，也不回到 type / rotation / forward / raster loss sweep。
+- 下一步如需继续提升，应转向 center-bin classification + offset、signal-to-center auxiliary head 或 per-component peak-position alignment。
+
+## Step S171: COMSOL center-grid candidate consolidation
+
+- Consolidated S166-S170 as a documentation-only stage.
+- Current COMSOL parametric route candidate on `feature/dual-network-variational`: raw MLP / shared head / fixed-order + `lambda_center_grid=0.1`.
+- Boundary: this is not a main baseline replacement and no new training was run.
+
+## Step S172: COMSOL parametric candidate reproduce command
+
+- Updated `DUAL_NETWORK_REPRODUCE.md` with an explicit reproduction command for the current candidate.
+- The command keeps CLI defaults unchanged and explicitly passes `--lambda-center-grid 0.1`, `--lambda-center-axis-relative 0.0`, `--seed <N>`, `--lambda-raster-bce 0.0`, `--lambda-raster-dice 0.0`, `--val-selection-metric none`, and `--val-selection-interval 0`.
+- The command uses `train_comsol_parametric_inverse.py`, not the forward-consistency runner.
+
+## Step S173: COMSOL center-grid candidate docs update
+
+- Updated README, stage summary, terms, artifact index, and reproduce docs.
+- This stage changed only Markdown documentation.
+- No Python file, CLI default, training result, checkpoint, weight, image, or `.npy` artifact was added.
+
+## Step S174: COMSOL center representation next route
+
+- Selected `center-bin classification + offset` as the next recommended route.
+- Deferred `signal-to-center auxiliary head`, `per-component peak-position alignment`, and COMSOL V3 data design until after one center representation probe.
+- Do not continue simple center lambda sweeps.
+
+## Step S175: COMSOL center-grid candidate stage decision
+
+- Final decision: keep raw MLP / shared head / fixed-order + `lambda_center_grid=0.1` as the current COMSOL parametric route candidate for this branch.
+- This is a branch-local candidate, not a main baseline replacement.
+- Next route: center-bin classification + offset.
+
+## Step S176: COMSOL center-bin route summary
+
+- Started the center representation route after S171-S175 consolidated the center-grid candidate.
+- Preflight chose per-axis coarse bins plus bin-normalized offsets, not a 2D joint bin.
+- Default bin size: `8` grid cells.
+
+## Step S177: COMSOL center-bin offset support
+
+- Extended `comsol_parametric_inverse_models.py` with optional `center_representation=bin_offset` outputs:
+  - `center_x_bin_logits`
+  - `center_y_bin_logits`
+  - `center_offset`
+- Extended `train_comsol_parametric_inverse.py` with:
+  - `--center-representation continuous|bin_offset`
+  - `--center-bin-size-cells`
+  - `--lambda-center-bin`
+  - `--lambda-center-offset`
+- Default remains `continuous`, preserving historical behavior.
+- Claude Code review found no must-fix correctness bugs; a non-blocking observability suggestion was addressed by adding bin accuracy / offset MAE metrics and a decoded-center smoke check.
+
+## Step S178: COMSOL center-bin offset quick gate
+
+- Ran a 1500-step same-seed quick gate against the current candidate reference.
+- `current_candidate_reference_1500_seed1` val/test IoU = `0.494508` / `0.493461`.
+- `center_bin_offset` val/test IoU = `0.496768` / `0.517553`.
+- `center_bin_offset_plus_grid` val/test IoU = `0.546311` / `0.586546`.
+- `center_bin_offset_plus_grid` passed gate because it improved val/test IoU and reduced val/test center_grid_mae.
+
+## Step S179: COMSOL center-bin offset full confirm
+
+- Ran 3000-step confirm for `center_bin_offset_plus_grid`.
+- Train / val / test mask IoU = `0.716101` / `0.542935` / `0.581320`.
+- Val / test center_grid_mae = `3.362513` / `2.721649`.
+- Result is stronger than the S170 center-grid candidate band, but only for one recorded seed.
+
+## Step S180: COMSOL center-bin offset decision
+
+- Continue center-bin + offset route.
+- Do not yet replace the current S170 COMSOL parametric candidate.
+- Next step should be an S169-style stability repeat for `center_bin_offset_plus_grid`.
+- If that repeat is unstable, stop tuning center-bin/grid lambdas and move to `signal-to-center auxiliary head`.
+
+## Step S181: COMSOL center-bin offset plus grid stability stage summary
+
+- S181 set the next phase as a stability validation for `center_bin_offset_plus_grid`.
+- Scope stayed fixed: reuse S179 seed1, add seed2/seed3, and compare against the S170 center-grid candidate range.
+- No new lambda values, raster loss, forward consistency, type/rotation loss, or `center_bin_offset`-only run were added.
+
+## Step S182: COMSOL center-bin repeat reproducibility check
+
+- No Python change was needed.
+- The runner already records `--seed`, `center_representation`, center-bin counts, center-bin losses, `center_grid_mae`, bin accuracy, and offset MAE.
+- `DUAL_NETWORK_REPRODUCE.md` already contained the center-bin offset plus grid command; S185 updates it from route probe to current branch candidate.
+
+## Step S183: COMSOL center-bin offset plus grid stability repeat
+
+- Reused S179 `center_bin_offset_plus_grid_3000_seed1`.
+- Added `center_bin_offset_plus_grid_3000_seed2` and `center_bin_offset_plus_grid_3000_seed3`.
+- Seed2 did not trigger early stop: val/test IoU = `0.484303` / `0.575504`, val/test `center_grid_mae` = `6.282760` / `2.929023`.
+- Seed3 completed: val/test IoU = `0.492127` / `0.578738`, val/test `center_grid_mae` = `6.026593` / `2.804331`.
+
+## Step S184: COMSOL center-bin offset plus grid stability aggregate
+
+- S184 compares the S170 center-grid historical range and all three center-bin runs in one table.
+- Test IoU for the three center-bin runs = `0.581320`, `0.575504`, and `0.578738`; median test IoU = `0.578738`.
+- All acceptance criteria passed, including held-out center error reduction and non-collapsed x/y bin accuracy.
+
+## Step S185: COMSOL center-bin offset plus grid candidate decision
+
+- S185 promotes `center_bin_offset_plus_grid` to the current COMSOL parametric route candidate on `feature/dual-network-variational`.
+- Current candidate: raw MLP / shared head / fixed-order + `center_representation=bin_offset`, `center_bin_size_cells=8`, `lambda_center_bin=1.0`, `lambda_center_offset=1.0`, and `lambda_center_grid=0.1`.
+- Boundary: this is a branch-local candidate, not a main baseline replacement.
+- Because seed2/seed3 val IoU is lower than S179 seed1, the decision records: 升级为支线当前 candidate，但仍需后续在 center-bin 下一阶段继续观察.
+
+## Step S186: COMSOL center-bin candidate consolidation
+
+- S186 records why `center_bin_offset_plus_grid` replaces the S170 center-grid candidate.
+- The stable three-run test IoU range is `0.575504-0.581320`, above the S170 center-grid test range `0.498874-0.505590`.
+- Current candidate configuration: raw MLP / shared head / fixed-order + `center_representation=bin_offset`, `center_bin_size_cells=8`, `lambda_center_bin=1.0`, `lambda_center_offset=1.0`, `lambda_center_grid=0.1`, and `lambda_center_axis_relative=0.0`.
+- Boundary remains: branch-local candidate, not a main baseline replacement, not a final solution.
+
+## Step S187: COMSOL center-bin error diagnostics
+
+- S187 reads only existing S179 / S183 / S184 / S185 artifacts; no new training was run.
+- Prediction CSVs were available, so S187 reconstructs x/y center-bin correctness and joins it with per-sample mask IoU.
+- Test is stable because test `center_grid_mae` stays near `2.72-2.93` and test x/y bin accuracy stays at or above `0.833333` / `0.900000`.
+- Val is more variable because seed2/seed3 val `center_grid_mae` rises to `6.282760` / `6.026593`, compared with seed1 `3.362513`.
+- The likely residual bottleneck is x-bin stability first, with y-bin secondary.
+
+## Step S188: COMSOL center-bin next route decision
+
+- S188 selects `signal-to-center auxiliary head` as the next unique route.
+- Rationale: center-bin + offset works, but val center localization is still less stable than test; the signal latent likely needs more direct center supervision.
+- Not recommended now: more center lambda tuning, `center_axis_relative`, COMSOL V3 data generation, type/rotation loss sweeps, raster/forward-consistency sweeps, or dense conditional mask runner work.
+
+## Step S189: COMSOL signal-to-center auxiliary head stage summary
+
+- S189 keeps the S185 `center_bin_offset_plus_grid` configuration as the current branch COMSOL parametric candidate.
+- The stage tests whether a signal-to-center auxiliary head can reduce remaining val center-bin instability, especially x-bin instability from S187.
+- Scope excludes new lambda sweeps, raster loss, forward consistency, type/rotation loss, and dense conditional mask runner work.
+
+## Step S190: COMSOL signal-to-center auxiliary head support
+
+- S190 adds an optional auxiliary center head to `ParametricInverseNet` and `train_comsol_parametric_inverse.py`.
+- New knobs: `--aux-center-head`, `--lambda-aux-center-bin`, `--lambda-aux-center-offset`, `--aux-center-x-weight`, and `--aux-center-y-weight`.
+- Defaults keep old behavior unchanged: aux is off, center representation defaults are unchanged, and existing main `center_*` metrics retain their meaning.
+- Claude Code review was attempted but timed out before returning findings; smoke tests and py_compile passed before continuing.
+
+## Step S191: COMSOL signal-to-center auxiliary quick gate
+
+- S191 ran a same-round 1500-step seed-1 quick gate.
+- `current_candidate_reference` val/test IoU = `0.546311` / `0.586546`, so the reference reproduced a strong S178/S185-level result.
+- `aux_center_bin_offset` val/test IoU = `0.516648` / `0.567790`.
+- `aux_center_bin_offset_xweighted` val/test IoU = `0.542723` / `0.580217`.
+- Both auxiliary groups were lower than the same-round reference and worsened held-out `center_grid_mae`, so neither passed gate.
+
+## Step S192: COMSOL signal-to-center auxiliary full confirm
+
+- S192 was skipped because no S191 auxiliary group satisfied the gate.
+- No 3000-step auxiliary full confirm was run.
+- The stage does not increase auxiliary weights or promote the auxiliary head.
+
+## Step S193: COMSOL signal-to-center auxiliary decision
+
+- The optional auxiliary head is technically usable but did not improve held-out mask IoU versus the same-round current-candidate reference.
+- Current COMSOL parametric route candidate remains the S185 `center_bin_offset_plus_grid` configuration on `feature/dual-network-variational`.
+- Next work should diagnose sample-level disagreement or consider more structural center representation refinement instead of another auxiliary lambda sweep.
+
+## Step S194: COMSOL signal-to-center auxiliary failure summary
+
+- S194 summarizes why the signal-to-center auxiliary head does not continue in its current form.
+- S191 same-round reference val/test IoU was `0.546311` / `0.586546`; aux variants reached `0.516648` / `0.567790` and `0.542723` / `0.580217`.
+- Both auxiliary variants worsened held-out `center_grid_mae`; S192 was skipped.
+- Current candidate remains S185 `center_bin_offset_plus_grid`.
+
+## Step S195: COMSOL center-bin failure diagnostics script
+
+- S195 adds `comsol_center_bin_failure_diagnostics.py` and a smoke test.
+- The script reads existing prediction exports and mask metrics only; it does not train, modify runner code, or save weights.
+- Because S191 prediction CSVs do not expose raw bin logits/offset heads, the script reconstructs bin and offset diagnostics from decoded centers plus `run_summary.md` grid/bin parameters.
+
+## Step S196: COMSOL center-bin failure diagnostics
+
+- S196 ran diagnostics on S191 `current_candidate_reference`, `aux_center_bin_offset`, and `aux_center_bin_offset_xweighted`.
+- Current reference val/test x wrong rates are `0.200000` / `0.133333`, versus y wrong rates `0.083333` / `0.033333`.
+- Plain aux worsened x/y wrong rates and IoU; x-weighted aux slightly reduced val x wrong rate but worsened y wrong rate, center-grid error, and IoU.
+- The residual failure is more x-bin dominated, especially slots 0 and 2, with low-IoU samples showing higher center-grid error.
+
+## Step S197: COMSOL center-bin failure decision
+
+- S197 keeps the S185 `center_bin_offset_plus_grid` configuration as the current branch candidate.
+- Do not continue the current auxiliary-head route or tune auxiliary lambdas.
+- Next unique direction: center-x-bin focused calibration / hard-sample refinement of the main center-bin output, especially for slots 0 and 2.
+
+## Step S198: COMSOL x-bin failure stage summary
+
+- S198 summarizes S194-S197 and scopes the next probe to the main center-bin output.
+- Residual held-out errors are more x-bin dominated than y-bin dominated, with slots 0 and 2 more fragile than slot 1.
+- The stage explicitly excludes auxiliary-head tuning, raster loss, forward consistency, type/rotation loss, dense mask runner work, and dynamic hard-sample mining.
+
+## Step S199: COMSOL main center-bin loss weighting support
+
+- S199 extends `train_comsol_parametric_inverse.py` with optional main center-bin CE weights: `--center-bin-x-weight`, `--center-bin-y-weight`, and `--center-bin-slot-weights`.
+- The implementation changes only the main `center_x_bin_logits` / `center_y_bin_logits` CE term; offset loss, decoded center, rasterization, prediction export, and evaluation are unchanged.
+- Defaults preserve the previous `0.5 * (x_loss + y_loss)` behavior. Smoke coverage checks default compatibility, non-default weights, invalid slot weight length, and absence of checkpoint / weight artifacts.
+- Claude Code review was attempted, but the CLI returned `API Error: 402 Insufficient Balance`; no review findings were returned. Smoke and py_compile passed, and no blocking self-review issue was found.
+
+## Step S200: COMSOL x-bin center calibration quick gate
+
+- S200 ran a same-round 1500-step seed-1 quick gate with explicit `--export-predictions` for every training command.
+- `current_candidate_reference` reproduced the S191/S185-level reference: val/test IoU = `0.546311` / `0.586546`, val/test x wrong = `0.200000` / `0.133333`, and val/test center_grid_mae = `3.250844` / `2.572883`.
+- `x_bin_weighted` reached val/test IoU = `0.545284` / `0.555791`, val/test x wrong = `0.183333` / `0.166667`, and val/test center_grid_mae = `3.420898` / `2.813688`.
+- `x_bin_slot_weighted` reached val/test IoU = `0.518272` / `0.543191`, val/test x wrong = `0.250000` / `0.183333`, and val/test center_grid_mae = `5.811699` / `3.065946`.
+- Neither weighted group passed gate. The reference was healthy, so the failure is not a reproduction-risk issue.
+
+## Step S201: COMSOL x-bin center calibration full confirm
+
+- S201 was skipped because no S200 candidate satisfied the quick gate.
+- No 3000-step x-bin weighted full confirm was run.
+- The current branch COMSOL parametric candidate remains S185 `center_bin_offset_plus_grid`.
+
+## Step S202: COMSOL x-bin center calibration decision
+
+- Simple x-bin CE reweighting and slot-aware weighting do not continue in their current form.
+- `x_bin_weighted` slightly reduced val x wrong rate, but it did not improve held-out IoU and worsened test x-bin behavior and center_grid_mae.
+- `x_bin_slot_weighted` overfit train and degraded both held-out splits.
+- The next route should inspect low-IoU samples where bins are already correct but offset / decoded center / geometry interaction still fails, rather than continuing x-bin lambda or slot-weight sweeps.
+
+## Step S203: COMSOL x-bin weighting failure summary
+
+- S203 freezes the S185 `center_bin_offset_plus_grid` configuration as the current branch COMSOL parametric candidate.
+- The same-round S200 reference was healthy, so S198-S202 is treated as a route failure for simple x-bin / slot loss weighting rather than a reproduction failure.
+- The stage stops simple center-bin x/y/slot weight sweeps, auxiliary-head lambda tuning, raster loss, forward consistency, type/rotation loss, and dense mask runner detours.
+
+## Step S204: COMSOL hard-sample center-bin package
+
+- S204 uses only existing S200 prediction exports and S200/S196-style diagnostics; no new training, new seed, or runner change was used.
+- It creates `hard_sample_summary.csv`, `hard_component_summary.csv`, `hard_sample_run_comparison.csv`, `run_delta_summary.csv`, and `summary.md`.
+- The package contains 23 held-out current-candidate hard sample keys. Reference labels are `x_bin_wrong=12`, `both_bins_wrong=3`, `bins_correct_center_or_offset_bad=5`, `geometry_or_type_interaction=2`, and `y_bin_wrong=1`.
+- Existing CSVs do not include raw bin logits or softmax margins, so S204 can rank / categorize hard samples but cannot do confidence calibration.
+
+## Step S205: COMSOL V3 hard-case data request
+
+- S205 drafts `COMSOL_V3_HARD_CASE_DATA_REQUEST.md`.
+- The request is a small hard-case pack, not a broad data expansion: preserve the V2 `200x100` grid, three Bz channels, long CSV conversion path, and component metadata needed for parametric targets.
+- Targeted cases include x-bin boundary centers, slot 0 / slot 2 fragility, near / medium component spacing, mixed type sequences, rotated-rect mixtures, and all-bins-correct low-IoU patterns.
+- Suggested size is `20/5/5` pilot or `40/10/10` if generation budget allows.
+
+## Step S206: COMSOL hard-sample / data-design decision
+
+- S206 keeps S185 `center_bin_offset_plus_grid` frozen as the current branch candidate; it is not a main baseline replacement.
+- Because S204 shows a mixed taxonomy rather than a pure x-bin failure, the next route should not be another x-bin CE weight.
+- Recommended next action: use the S205 hard-case request as the data-design artifact and pair it with bins-correct low-IoU diagnostics before any new training.
+
+## Step S207: COMSOL V3 hard-case pack preflight
+
+- S207 refines `COMSOL_V3_HARD_CASE_DATA_REQUEST.md` into a concrete hard-case pilot specification.
+- Default requested size is train / val / test = `60` / `20` / `20`; fallback for high COMSOL cost is `30` / `10` / `10`.
+- Default hard-case mix is `x_bin_wrong_like` = `24/8/8`, `both_bins_wrong_like` = `9/3/3`, `bins_correct_center_or_offset_bad` = `15/5/5`, `geometry_or_type_interaction` = `9/3/3`, and `rare_y_bin_wrong` = `3/1/1`.
+- The request preserves V2-compatible files and fields: `signals_multiheight.csv`, `targets.npz`, `defect_params.csv`, and split `README.md`, with three Bz channels, signal length `200`, and `lift_off_values=[0.5,1.0,2.0]`.
+- Generation should be followed by an ingest gate only: converter, validator, parametric target build, split-local sample order check, and hard-case label coverage check. No training is part of S207.
+
+## Step S208: COMSOL V3 hard-case pilot ingest
+
+- S208 copied the real COMSOL V3 hard-case fallback export into `experiments/dual_network/S208_comsol_v3_hard_case_ingest/raw/` and converted train/val/test to V2-compatible NPZ files.
+- Split sizes are train/val/test = `30` / `10` / `10`; converted signal shapes are `[30,3,200]`, `[10,3,200]`, and `[10,3,200]`.
+- The CSV row counts are `18000`, `6000`, and `6000`; all signal values are finite, every sample/channel has complete `x_index=0..199`, and `masks` exactly match `mu_maps < 500`.
+- The fallback pack is real COMSOL output and not synthetic or copied from V2, but currently contains single unrotated rectangular Block hard cases rather than true rotated or multi-component solved geometries.
+
+## Step S209: COMSOL V3 hard-case parametric targets
+
+- S209 built `max_components=3` fixed-order parametric targets for the S208 converted NPZ files.
+- The schema is `center_x`, `center_y`, `axis_x`, `axis_y`, `depth_or_shape_param`, and `rotation_angle`; `type_vocab` is `rectangular_notch`.
+- The fallback pilot has one present component per sample. This is enough for an ingest gate and hard-case pilot evaluation, but not enough to claim multi-component COMSOL generalization.
+
+## Step S210: COMSOL V3 hard-case oracle raster gate
+
+- S210 rasterized the S209 ground-truth parametric targets against the S208 masks.
+- Oracle train/val/test IoU is `1.000000` / `1.000000` / `1.000000`; Dice is also `1.000000` on all splits.
+- The oracle gate passes and confirms target/rasterizer alignment for this fallback pilot.
+
+## Step S211: COMSOL V3 hard-case ingest gate decision
+
+- S211 concludes that the real COMSOL V3 hard-case fallback pilot can proceed to candidate evaluation.
+- The next recommended step is to evaluate the frozen S185 `center_bin_offset_plus_grid` candidate on V3 hard-case val/test as a zero-shot diagnostic before considering any fine-tune.
+- Boundary remains explicit: this is a branch-local hard-case pilot, not a broad V3 benchmark, because rotated and multi-component solved geometries are not yet covered.
+
+## Step S212: COMSOL V3 hard-case candidate evaluation setup
+
+- S212 scopes the evaluation to the real COMSOL V3 hard-case fallback pilot with train/val/test shapes `[30,3,200]`, `[10,3,200]`, and `[10,3,200]`.
+- The evaluated branch candidate is S185/S181 `center_bin_offset_plus_grid`: raw MLP / shared head / fixed-order, `center_representation=bin_offset`, `center_bin_size_cells=8`, `lambda_center_bin=1.0`, `lambda_center_offset=1.0`, and `lambda_center_grid=0.1`.
+- The stage remains branch-local and does not replace main baselines or claim rotated / multi-component COMSOL coverage.
+
+## Step S213: COMSOL V3 zero-shot candidate evaluation
+
+- S213 attempted V2-train to V3 val/test zero-shot evaluation, but stopped before training because V3 center targets are outside the V2 train grid used by center-bin target construction.
+- V2 train grid is approximately `[-0.04,0.04]` / `[-0.01,0.01]`, while V3 uses `[0,4500]` / `[0,3000]`.
+- No valid zero-shot V3 metrics were produced; this is a geometry-unit / grid-coordinate compatibility issue, not a model performance result.
+
+## Step S214: COMSOL V3 small-train quick probe
+
+- S214 trained on V3 train and evaluated on V3 val/test for both the current center-bin candidate and a continuous param-only reference.
+- `v3_train_candidate` train/val/test IoU was `0.019715` / `0.046905` / `0.044968`, with val/test `center_grid_mae` `37.474541` / `44.786293`.
+- `v3_train_param_only_reference` train/val/test IoU was `0.038119` / `0.078177` / `0.036448`, with val/test `center_grid_mae` `34.044182` / `37.399517`.
+- V3 small-train did not fit useful masks; presence/type are trivial, while center/axis geometry remains poor.
+
+## Step S215: COMSOL V3 hard-case grouped diagnostics
+
+- S215 adds `comsol_v3_hard_case_grouped_diagnostics.py` and groups S214 predictions by `hard_case_type`.
+- The hardest held-out groups are not isolated to one class; `bins_correct_center_or_offset_bad` is consistently weak, but several hard-case types have near-zero IoU.
+- The grouped evidence supports the coordinate / representation compatibility diagnosis rather than a simple hard-case label balancing fix.
+
+## Step S216: COMSOL V3 hard-case candidate evaluation decision
+
+- S216 keeps S185 `center_bin_offset_plus_grid` as the current branch candidate for V2-style data, but does not validate it on the current V3 fallback pack.
+- Do not proceed to larger V3 model training from these metrics.
+- Next unique recommendation: fix or standardize V3 geometry coordinates relative to the V2 parametric route, then rerun ingest/oracle and candidate evaluation.
+
+## Step S217: COMSOL V3 geometry convention audit
+
+- S217 audits the V2/V3 coordinate convention mismatch without modifying S208 raw data.
+- V2 uses centered meter-scale geometry, `x=[-0.04,0.04]` and `y=[-0.01,0.01]`; V3 raw uses COMSOL model coordinates, `x=[0,4500]` and `y=[0,3000]`.
+- V3 mask bbox centers align with raw `defect_center_x/y` within roughly half a raw grid cell, and `masks == (mu_maps < 500)` remains true, so the raw V3 pack is internally self-consistent but not V2-compatible.
+
+## Step S218: COMSOL V3 geometry normalized copy
+
+- S218 adds `normalize_comsol_v3_geometry_convention.py` and writes a normalized V3 copy under `experiments/dual_network/S218_comsol_v3_geometry_normalized/`.
+- The transform maps `x: [0,4500] -> [-0.04,0.04]` and `y: [0,3000] -> [-0.01,0.01]`; centers use the same affine transform, and `axis_x/y` use the corresponding length scales.
+- `signals`, `mu_maps`, and `masks` are unchanged. Depth / z values are retained raw because the hard rasterizer does not use depth and the V3 z convention has not been separately audited.
+
+## Step S219: COMSOL V3 normalized target and oracle gate
+
+- S219 rebuilds parametric targets from the S218 normalized V3 pack and reruns hard oracle rasterization.
+- Normalized oracle train/val/test IoU is `1.000000` / `1.000000` / `1.000000`, so the coordinate normalization preserves mask/target alignment.
+
+## Step S220: COMSOL V3 normalized zero-shot runability gate
+
+- S220 runs a 5-step V2-train to normalized-V3 val/test command only as a runability gate.
+- The previous `center_x target is outside the x grid range` error is gone.
+- Metrics and predictions were exported, but S220 does not interpret IoU or candidate strength; performance evaluation is deferred to a later stage.
+
+## Step S221: COMSOL V3 geometry normalization decision
+
+- S221 concludes that the V3 hard-case coordinate convention repair passes the audit, oracle, and runability gates.
+- The S185 `center_bin_offset_plus_grid` candidate is not replaced or degraded by this stage.
+- Next step: rerun V3 candidate evaluation on the normalized V3 pack as a new evaluation stage, while keeping the single-Block fallback limitation explicit.
+
+## Step S222: COMSOL normalized V3 candidate evaluation setup
+
+- S222 starts the actual normalized V3 performance evaluation after S217-S221 fixed the coordinate convention.
+- The evaluated branch candidate remains S185 `center_bin_offset_plus_grid`: raw MLP / shared head / fixed-order, `center_representation=bin_offset`, `center_bin_size_cells=8`, `lambda_center_bin=1.0`, `lambda_center_offset=1.0`, and `lambda_center_grid=0.1`.
+- Boundary: this is a branch-local evaluation on a real COMSOL single rectangular Block fallback pilot, not a main baseline replacement and not true rotated / multi-component COMSOL coverage.
+
+## Step S223: COMSOL normalized V3 zero-shot evaluation
+
+- S223 reran V2-train to normalized-V3 val/test because S220 was only a 5-step runability gate.
+- Zero-shot normalized V3 val/test mask IoU is `0.002348` / `0.012360`.
+- Val/test `center_grid_mae` is `58.098274` / `61.760284`; x-bin accuracy is `0.000000` / `0.000000`, and y-bin accuracy is `0.000000` / `0.100000`.
+- The coordinate mismatch is fixed, but V2-trained zero-shot generalization to this V3 hard-case pilot is not effective.
+
+## Step S224: COMSOL normalized V3 train quick probe
+
+- S224 trained on normalized V3 train and evaluated normalized V3 val/test for the current candidate and a continuous param-only reference.
+- `v3_normalized_train_candidate` train/val/test IoU is `0.019538` / `0.047127` / `0.044771`.
+- `v3_normalized_train_param_only_reference` train/val/test IoU is `0.039498` / `0.080140` / `0.037464`.
+- Neither configuration fits the normalized V3 hard-case pilot well; the current candidate is not clearly better than param-only on this pack.
+
+## Step S225: COMSOL normalized V3 hard-case grouped diagnostics
+
+- S225 reuses `comsol_v3_hard_case_grouped_diagnostics.py` with a val/test split filter so that S223 V2-train predictions are not joined against V3 train labels.
+- `bins_correct_center_or_offset_bad` is the most consistent hardest group across zero-shot, V3-train candidate, and V3-train param-only runs.
+- Failure is broad rather than isolated: `x_bin_wrong_like`, `both_bins_wrong_like`, and `bins_correct_center_or_offset_bad` all remain weak.
+
+## Step S226: COMSOL normalized V3 candidate evaluation decision
+
+- S226 concludes that the S185 candidate remains valid only as the current V2-style branch candidate; it is not validated on normalized V3 hard-case fallback data.
+- The normalized V3 pilot is useful as a failure signal but too small and too geometry-limited for another model/loss change.
+- Next unique recommendation: generate a larger real COMSOL V3 hard-case pack with true rotated and multi-component geometry coverage before further candidate training changes.
+
+## Step S227: COMSOL normalized V3 signal-target sanity gate
+
+- S227 adds `comsol_v3_signal_target_sanity.py` to check normalized V3 signal/target alignment before tiny-overfit.
+- Target-side checks pass: `masks == (mu_maps < 500)` has zero mismatches, bbox centers align with defect centers within roughly half a grid cell, S219 targets match normalized defect parameters to numerical tolerance, and center-bin targets are in range with offsets inside `[-0.5,0.5]`.
+- Signal-side check fails the tiny-overfit precondition: train/val/test all have `std_floor_trigger_rate=1.0` under the runner `std < 1e-8` rule. Train signal std ranges from `4.734403e-10` to `9.312454e-09`.
+
+## Step S228: COMSOL normalized V3 one-sample tiny-overfit
+
+- S228 was skipped because S227 triggered the signal-scale stop condition.
+- No one-sample training was run.
+
+## Step S229: COMSOL normalized V3 five-sample tiny-overfit
+
+- S229 was skipped because S228 did not run.
+- No five-sample subset was generated and no training was run.
+
+## Step S230: COMSOL normalized V3 full-train fit gate
+
+- S230 was skipped because the 1-sample and 5-sample gates were not meaningful after S227.
+- S224 remains the historical full-train failure reference, but no new 30-sample training was run in this stage.
+
+## Step S231: COMSOL normalized V3 tiny-overfit decision
+
+- S231 concludes that the current blocker is V3 Bz signal scale / export semantics, not target/raster alignment.
+- The next unique recommendation is to inspect COMSOL field expression, probe height, magnetization/source scaling, lift-off extraction, and the interaction with the runner `per_sample_zscore` floor.
+- Do not generate a larger V3 pack or change the model/runner until the signal-scale issue is resolved.
+
+## Step S232: COMSOL V3 repaired Bz signal 3-sample smoke
+
+- S232 runs a 3-sample real COMSOL mini-smoke for the repaired V3 Bz export path without training and without generating a fallback pack.
+- The repaired route uses `near_defect delta_Bz_solve`: same Block geometry/susceptibility background with `Mr_magn=0[A/m]`, defect solve with `Mr_magn=60[A/m]`, and probe `y=defect_center_y`, `z=block_top+lift`.
+- The three samples cover `x_bin_wrong_like`, `bins_correct_center_or_offset_bad`, and `rare_y_bin_wrong`.
+- `signals_multiheight.csv` has `1800` rows, all values are finite, every sample/channel has complete `x_index=0..199`, and converted shape is `[3,3,200]`.
+- Candidate signal std ranges are roughly `9.85e-07` to `1.05e-06`, and peak-to-peak ranges are roughly `4.51e-06` to `7.83e-06`; all exceed the `1e-8` floor.
+- `masks == (mu_maps < 500)` mismatch is `0`.
+- Decision: the repaired near-defect anomaly / delta-Bz route passes 3-sample smoke. Next step is to generate a repaired V3 hard-case fallback pack, still without treating this smoke as training or evaluation evidence.
+
+## Step S233: COMSOL V3 repaired hard-case ingest
+
+- S233 copies the repaired V3 hard-case fallback pack into `experiments/dual_network/S233_comsol_v3_repaired_hard_case_ingest/raw/` and converts train/val/test into V2-compatible multi-height NPZ files.
+- `hard_case_type` distributions are re-counted directly from ingested `defect_params.csv`: train `10/5/7/5/3`, val `3/2/2/2/1`, and test `3/2/2/2/1`.
+- Converted train/val/test shapes are `[30,3,200]`, `[10,3,200]`, and `[10,3,200]`.
+- Repaired Bz signal std ranges are train `1.678613e-06`-`3.162381e-06`, val `1.943240e-06`-`2.826707e-06`, and test `2.101787e-06`-`2.876971e-06`; all values are finite and every sample/channel exceeds the `1e-8` floor.
+
+## Step S234: COMSOL V3 repaired parametric targets
+
+- S234 builds fixed-order parametric targets for the repaired V3 pack.
+- Target schema is `center_x`, `center_y`, `axis_x`, `axis_y`, `depth_or_shape_param`, and `rotation_angle`; `type_vocab=rectangular_notch`, `angle_unit=degree`, and `max_components=3`.
+- All samples contain one component and no truncation was applied.
+
+## Step S235: COMSOL V3 repaired oracle rasterization
+
+- S235 reruns oracle rasterization using S233 converted data and S234 parametric targets.
+- Train/val/test oracle IoU is `1.000000` / `1.000000` / `1.000000`.
+- `masks == (mu_maps < 500)` mismatch remains `0`; raster target alignment is sound.
+
+## Step S236: COMSOL V3 repaired ingest gate decision
+
+- S236 concludes that the repaired V3 hard-case fallback pack passes ingest, target, and oracle gates.
+- No training was run, no model structure changed, and runner defaults were not modified.
+- Next step: evaluate the current branch COMSOL parametric candidate on this repaired V3 pack as a separate candidate-evaluation stage.
+
+## Step S237: COMSOL V3 repaired candidate evaluation setup
+
+- S237 starts branch-local evaluation of the current S185 `center_bin_offset_plus_grid` candidate on the repaired V3 hard-case fallback pilot.
+- The repaired pack has non-degenerate Bz signals and oracle rasterization IoU `1.000000` on train/val/test.
+- Boundary: single unrotated Block `rectangular_notch` fallback data only; not a main baseline replacement.
+
+## Step S238: COMSOL V3 repaired zero-shot evaluation
+
+- S238 attempts V2-train to repaired-V3 val/test zero-shot.
+- The command fails before metrics with `ValueError: center_x target is outside the x grid range`.
+- This is not the previous signal-scale failure; it is a cross-grid coordinate convention issue because repaired V3 is still in raw COMSOL coordinates.
+
+## Step S239: COMSOL V3 repaired train quick probe
+
+- S239 trains on repaired V3 train and evaluates repaired V3 val/test.
+- Current candidate train/val/test IoU is `0.998851` / `0.052874` / `0.197143`.
+- Candidate train/val/test center_grid_mae is `0.017465` / `14.233663` / `13.523300`; x-bin accuracy is `1.000000` / `0.700000` / `0.900000`, y-bin accuracy is `1.000000` / `0.100000` / `0.300000`.
+- Param-only train/val/test IoU is `0.986927` / `0.000000` / `0.157851`.
+
+## Step S240: COMSOL V3 repaired hard-case grouped diagnostics
+
+- S240 groups S239 prediction exports by repaired V3 `hard_case_type`.
+- Candidate train groups are near-perfect, but held-out failure is broad.
+- Candidate val has nonzero IoU only for `both_bins_wrong_like` (`0.264368`); candidate test is hardest for `geometry_or_type_interaction` and `rare_y_bin_wrong` (`0.000000`).
+
+## Step S241: COMSOL V3 repaired candidate evaluation decision
+
+- S241 concludes that repaired V3 signals are learnable on train, but the current candidate is not validated on held-out repaired V3 fallback data.
+- The repaired `30/10/10` pilot is useful as a signal and learnability gate, but too small and split-sensitive for a stable candidate decision.
+- Next unique recommendation: generate a larger repaired V3 hard-case pack before mixed V2+V3 training or multi-seed candidate validation.
+
+## Step S242: COMSOL repaired V3 coordinate normalization
+
+- S242 maps repaired V3 raw COMSOL `x/y` `[0,4500]` / `[0,3000]` to the V2-compatible meter convention `[-0.04,0.04]` / `[-0.01,0.01]`.
+- The same affine transform is applied to `defect_center_x/y` and `defect_axis_x/y`.
+- `signals`, `mu_maps`, and `masks` are unchanged; depth/z is retained raw because the current 2D rasterizer does not use it and the z convention remains unaudited.
+- Normalized train/val/test shapes remain `[30,3,200]`, `[10,3,200]`, and `[10,3,200]`.
+
+## Step S243: COMSOL repaired V3 normalized oracle gate
+
+- S243 rebuilds normalized repaired V3 parametric targets with schema `center_x`, `center_y`, `axis_x`, `axis_y`, `depth_or_shape_param`, and `rotation_angle`.
+- Oracle rasterization train/val/test IoU is `1.000000` / `1.000000` / `1.000000`.
+- The normalized target/raster gate passes.
+
+## Step S244: COMSOL repaired V3 normalized zero-shot
+
+- S244 reruns V2-train to normalized repaired V3 val/test using the current S185 center-bin candidate.
+- The previous `center_x target is outside the x grid range` error is gone.
+- Zero-shot val/test mask IoU is `0.007616` / `0.005248`; val/test `center_grid_mae` is `50.908295` / `58.765858`.
+- The coordinate convention is fixed, but V2-trained zero-shot transfer to the repaired V3 fallback pilot remains weak.
+
+## Step S245: COMSOL repaired V3 normalized train quick probe
+
+- S245 trains on normalized repaired V3 train and evaluates normalized repaired V3 val/test.
+- The current candidate reaches train/val/test IoU `1.000000` / `0.055172` / `0.188341`.
+- The continuous param-only reference reaches train/val/test IoU `0.773635` / `0.000000` / `0.171178`.
+- Grouped diagnostics show perfect train fitting but broad held-out hard-case failure, especially y-bin-sensitive held-out groups.
+
+## Step S246: COMSOL repaired V3 normalized evaluation decision
+
+- S246 keeps the S185 center-bin candidate as the current branch candidate; it is still not a main baseline replacement.
+- The repaired V3 signals and normalized targets are valid, and train is learnable, but the `30/10/10` fallback pilot remains too small and split-sensitive for a stable held-out decision.
+- Next unique recommendation: generate a larger repaired V3 hard-case pack before mixed V2+V3 training or candidate promotion.
+
+## Step S247: COMSOL V3 polygon route summary
+
+- S247 records the representation failure mechanism: V3 raw coordinates map to the V2-compatible grid with non-uniform x/y scale, so true rotated rectangles cannot be exactly represented by the old `center + axis + rotation` tuple after normalization.
+- The current S185 center-bin candidate remains the V2-style branch candidate; polygon vertices are introduced only as the V3 true-geometry oracle route.
+
+## Step S248: COMSOL polygon export schema request
+
+- S248 adds `COMSOL_V3_POLYGON_GEOMETRY_DATA_REQUEST.md`.
+- Required `polygon_params.csv` fields include raw and normalized vertices, component slots, COMSOL geometry tags, selection names, hard-case type, component count, union selection, and true rotated / true multi-component audit flags.
+- Metadata-only rotated or multi-component labels are explicitly rejected.
+
+## Step S249: COMSOL polygon target builder and hard rasterizer
+
+- S249 adds `comsol_polygon_targets.py`, `comsol_polygon_rasterizer.py`, and `smoke_test_comsol_polygon_rasterizer.py`.
+- The target schema is fixed four-corner polygons with `max_components=3`, `max_vertices=4`, raw vertices for audit, and normalized vertices for oracle/rasterizer use.
+- The hard rasterizer uses point-in-polygon semantics and boolean OR union across present components.
+
+## Step S250: COMSOL polygon mock oracle smoke
+
+- S250 validates polygon target/rasterizer behavior on mock masks before using COMSOL data.
+- Covered cases include axis-aligned rectangles, non-uniformly normalized rotated rectangles, multi-component union, overlap, reversed ordering, and degenerate polygon rejection.
+
+## Step S251: COMSOL true polygon 3-sample smoke
+
+- S251 runs a real COMSOL 3-sample smoke with fresh models and the repaired near-defect reduced-field Bz route.
+- The samples cover a true rotated Block, a true two-component Union, and a narrow near-boundary rotated component.
+- All solves succeeded after making the smoke geometry conservative enough for solver stability while retaining true rotation and true multi-component coverage.
+
+## Step S252: COMSOL polygon oracle gate
+
+- S252 builds polygon targets from S251 and rasterizes normalized vertices.
+- Per-sample polygon oracle IoU is `1.000000` / `1.000000` / `1.000000`, passing the `>=0.95` gate.
+
+## Step S253: COMSOL polygon route decision
+
+- S253 approves continuing the polygon / corner-point route for true V3 geometry representation.
+- No training was run, no larger pack was generated, and the S185 center-bin candidate is not replaced or degraded.
+
+## Step S254: COMSOL V3 polygon hard-case raw ingest
+
+- S254 copies the real polygon-compatible repaired Bz V3 hard-case pack into `experiments/dual_network/S254_comsol_v3_polygon_hard_case_ingest/raw/`.
+- The copied pack has train/val/test samples `30/10/10`, signal rows `18000/6000/6000`, finite repaired Bz signals, and `masks == (mu_maps < 500)` mismatch `0`.
+- Hard-case distributions re-counted from `defect_params.csv` are train `10/5/7/5/3`, val `3/2/2/2/1`, and test `3/2/2/2/1`.
+
+## Step S255: COMSOL V3 polygon converted validation
+
+- S255 converts train/val/test to V2-compatible NPZ files with signal shapes `[30,3,200]`, `[10,3,200]`, and `[10,3,200]`.
+- Converted files retain polygon fields `polygon_vertices_raw`, `polygon_vertices_norm`, `polygon_vertex_mask`, and `polygon_presence`.
+- Signal stats stay above the near-constant failure floor and all values are finite.
+
+## Step S256: COMSOL V3 polygon target validation
+
+- S256 exports rasterizer-ready polygon targets from embedded polygon arrays and `polygon_params.csv`.
+- The target schema is fixed four-corner polygon vertices with `max_components=3`, `max_vertices=4`, normalized vertices for rasterization, and raw vertices for audit.
+- `polygon_params.csv` covers all present components: train/val/test component rows are `38`, `13`, and `13`.
+
+## Step S257: COMSOL V3 polygon oracle raster gate
+
+- S257 rasterizes normalized polygon targets with the hard polygon rasterizer.
+- Train/val/test mean and min IoU are all `1.000000`, passing the polygon oracle gate.
+- This confirms the polygon representation removes the old true-rotated V3 oracle ceiling for the ingested pack.
+
+## Step S258: COMSOL V3 polygon ingest decision
+
+- S258 approves the polygon-compatible repaired V3 hard-case pack for the next polygon inverse route stage.
+- No training was run, the S185/S181 center-bin candidate is not replaced, and this is not a main baseline replacement.
+
+## Step S259: COMSOL V3 polygon inverse route summary
+
+- S259 starts the supervised polygon inverse route after S254-S258 validated the polygon V3 pack.
+- The route is `multi-height Bz -> presence/type/fixed four-corner polygon vertices -> hard polygon raster IoU`.
+- The old `train_comsol_parametric_inverse.py` runner is not extended because its targets, metrics, and exports are tied to `center + axis + rotation`.
+
+## Step S260: COMSOL V3 polygon inverse model skeleton
+
+- S260 adds `comsol_polygon_inverse_models.py`.
+- The first model predicts `presence_logits [B,3]`, `type_logits [B,3,T]`, and `vertices_norm [B,3,4,2]`.
+- The model smoke test passes, including shape checks, finite loss, and backward pass.
+
+## Step S261: COMSOL V3 polygon inverse runner
+
+- S261 adds `train_comsol_polygon_inverse.py`, an independent full-batch supervised runner for polygon vertices.
+- The loss is presence BCE, present-slot type CE, and present-vertex SmoothL1; optional center/box auxiliary losses default to `0.0`.
+- The hard polygon rasterizer is used for evaluation only, not differentiable training loss.
+- The runner smoke test passes and writes metrics, history, summary, and optional prediction exports.
+
+## Step S262: COMSOL V3 polygon tiny-overfit gate
+
+- S262 runs the one-sample overfit gate on train sample `0`, a true rotated single-component sample.
+- The result is train polygon mask IoU `0.883178`, presence accuracy `1.000000`, present type accuracy `1.000000`, and normalized vertex MAE `4.207401e-05`.
+- Because IoU is below the stop threshold `0.90`, the 5-sample overfit and train30/val10/test10 quick probe are skipped.
+
+## Step S263: COMSOL V3 polygon inverse decision
+
+- S263 does not promote a polygon inverse candidate and does not replace the S185/S181 center-bin branch candidate.
+- The failure is not a polygon oracle issue; S257 oracle IoU remains `1.000000`.
+- Next step: diagnose vertex-to-hard-raster sensitivity before retrying or scaling polygon inverse training.
+
+## Step S264: COMSOL V3 polygon one-sample failure summary
+
+- S264 freezes the S262 failure interpretation before any wider polygon inverse training.
+- S262 reached presence/type accuracy `1.000000` and vertex MAE `4.207401e-05`, but hard polygon IoU was only `0.883178`.
+- The stage keeps the S185/S181 center-bin candidate unchanged and does not run 5-sample or train30.
+
+## Step S265: COMSOL V3 polygon raster-sensitivity diagnostic
+
+- S265 adds `comsol_polygon_raster_sensitivity_diagnostics.py`.
+- The diagnostic confirms target-vertex oracle IoU is `1.000000`, while the S262 prediction adds `25` false-positive pixels.
+- Max vertex displacement is `0.333211` x-cells and `0.494064` y-cells, enough to expand the hard-rasterized mask from `189` to `214` pixels.
+
+## Step S266: COMSOL V3 polygon loss repair support
+
+- S266 extends `train_comsol_polygon_inverse.py` with default-off repair knobs.
+- New parameters are `--vertex-loss-space norm|grid`, `--lambda-area-aux`, and `--lambda-edge-aux`.
+- Defaults preserve the S259-S263 runner behavior; no model structure or differentiable polygon rasterizer is added.
+
+## Step S267: COMSOL V3 polygon one-sample repair probe
+
+- S267 runs only the first repair candidate, `longer_overfit`, because it passes gate.
+- `longer_overfit` reaches train IoU `1.000000`, presence/type accuracy `1.000000`, vertex MAE `7.786439e-07`, and pred/target area `189` / `189`.
+- The planned grid-loss and area/edge variants are skipped by the stop-on-pass rule.
+
+## Step S268: COMSOL V3 polygon one-sample repair decision
+
+- S268 concludes that the S262 blocker was precision/convergence under hard-raster sensitivity, not a polygon target or ordering issue.
+- The polygon inverse route may resume the staged 5-sample overfit gate next.
+- No polygon inverse candidate is promoted, and the S185/S181 center-bin candidate remains branch-local and unchanged.
+
+## Step S269: COMSOL V3 polygon 5-sample overfit setup
+
+- S269 starts only the 5-sample overfit gate after S267 passed one-sample.
+- The stage does not run train30, does not train the old center-bin candidate, and does not generate new COMSOL data.
+- The configuration reuses S267 `longer_overfit`: `10000` steps, `lr=1e-3`, `lambda_vertex=50.0`, and `vertex_smoothl1_beta=0.005`.
+
+## Step S270: COMSOL V3 polygon 5-sample subset
+
+- S270 creates a 5-sample subset from S254/S256 using `make_comsol_polygon_subset_package.py`.
+- Source train indices are `0,11,15,22,27`.
+- The subset covers `x_bin_wrong_like`, `both_bins_wrong_like`, `bins_correct_center_or_offset_bad`, `geometry_or_type_interaction`, and `rare_y_bin_wrong`.
+
+## Step S271: COMSOL V3 polygon 5-sample overfit
+
+- S271 trains only on the 5-sample subset and evaluates the same subset as train/val/test.
+- The run passes: mean/min train polygon IoU is `0.996028` / `0.985401`.
+- Presence accuracy and present type accuracy are both `1.000000`; vertex MAE is `5.359486e-06`.
+
+## Step S272: COMSOL V3 polygon 5-sample diagnostics
+
+- S272 groups the 5-sample result by hard-case type and sample.
+- The two multi-component samples both reach IoU `1.000000`.
+- The worst sample is source sample `27` (`rare_y_bin_wrong`) with IoU `0.985401`, area diff `-2`, and no gate failure.
+
+## Step S273: COMSOL V3 polygon 5-sample decision
+
+- S273 clears the 5-sample overfit gate and recommends planning a train30 / val10 / test10 quick probe next.
+- No polygon inverse candidate is promoted, and the S185/S181 center-bin branch candidate remains unchanged.
+
+## Step S274: COMSOL V3 polygon train30 quick probe setup
+
+- S274 starts the full S254-S258 polygon V3 quick probe after the one-sample and 5-sample gates pass.
+- The run reuses the S271 configuration: `10000` steps, `lr=1e-3`, `lambda_vertex=50.0`, `vertex_smoothl1_beta=0.005`, and seed `1`.
+- Train fit is the only acceptance gate; val/test are observation-only in this stage.
+
+## Step S275: COMSOL V3 polygon train30 quick probe
+
+- S275 trains on train30 and evaluates val10/test10.
+- Train mean/min polygon IoU is `0.731445` / `0.518519`, below the `0.90` / `0.80` gate.
+- Train presence/type accuracy is `1.000000` / `1.000000`, and train vertex MAE is `1.793932e-04`.
+- Val/test observation IoU is `0.033122` / `0.089484`.
+
+## Step S276: COMSOL V3 polygon train30 grouped diagnostics
+
+- S276 groups the train30 result by hard-case type.
+- Train failure is broad: `x_bin_wrong_like` is best at mean IoU `0.803422`, while `geometry_or_type_interaction` and `bins_correct_center_or_offset_bad` are weakest at `0.654147` and `0.682215`.
+- The worst train sample is sample `21` (`bins_correct_center_or_offset_bad`) with IoU `0.518519`.
+
+## Step S277: COMSOL V3 polygon train30 decision
+
+- S277 marks the train30 gate as failed.
+- Because train fit is below gate, no multi-seed validation, train extension, loss sweep, or candidate promotion is run.
+- Next step should be a targeted polygon vertex train-fit repair plan before rerunning train30.
+
+## Step S278: COMSOL V3 polygon train30 docs
+
+- S278 updates README, stage summary, artifact index, and experiment log.
+- The S185/S181 center-bin branch candidate remains unchanged and this result is not a main baseline replacement.
+
+## Step S279: COMSOL V3 polygon train30 failure summary
+
+- S279 starts a targeted train-fit repair stage after S274-S278 failed train30.
+- The blocker is not polygon oracle, target ordering, presence, or type; it is train30-scale vertex precision under hard rasterization.
+- No multi-seed, data expansion, or val/test generalization claim is allowed before train fit passes.
+
+## Step S280: COMSOL V3 polygon train30 failure diagnostics
+
+- S280 reuses S275/S276 outputs and does not train.
+- The failure is broad across hard-case types rather than isolated to one class.
+- Worst train sample `21` has IoU `0.518519`, target/pred area `63` / `60`, FP/FN pixels `18` / `21`, and max vertex displacement about `0.853` x-cells / `1.521` y-cells.
+- S280 concludes that area loss alone is not the first repair because the worst sample is mainly boundary-position disagreement, not total-area drift.
+
+## Step S281: COMSOL V3 polygon train30 repair support
+
+- S281 confirms no runner or model code change is needed.
+- Existing support already includes `--steps`, `--hidden-dim`, `--latent-dim`, `--vertex-loss-space`, and default-off center/box/area/edge auxiliary losses.
+- No Claude Code review is needed because no Python code is changed.
+
+## Step S282: COMSOL V3 polygon train30 repair quick gate
+
+- S282 reuses S275 as `current_train30_reference` and runs only `longer_train30`.
+- `longer_train30` changes only `steps=20000` and passes: train mean/min IoU `0.935101` / `0.802920`, presence/type accuracy `1.000000` / `1.000000`, and vertex MAE `5.560893e-05`.
+- All train hard-case groups clear the mean IoU `0.75` floor; the weakest group is `geometry_or_type_interaction` at `0.868425`.
+- By stop-on-pass, `larger_capacity_train30` and `area_edge_aux_train30` are skipped.
+
+## Step S283: COMSOL V3 polygon train30 repair decision
+
+- S283 marks the train30 fit gate as repaired.
+- The repair does not promote a polygon inverse candidate, does not replace the S185/S181 center-bin candidate, and is not a main baseline replacement.
+- Val/test remain observation-only; the next stage should plan held-out generalization diagnostics before any multi-seed candidate validation.
+
+## Step S284: COMSOL V3 polygon generalization failure summary
+
+- S284 starts a no-training diagnostic stage after S279-S283 repairs train30 fit.
+- `longer_train30` has train mean/min IoU `0.935101` / `0.802920`, but val/test mean IoU remains `0.046352` / `0.136720`.
+- This stage does not run training, multi-seed, larger model, extra steps, or new COMSOL data.
+
+## Step S285: COMSOL V3 polygon geometry and signal distribution diagnostics
+
+- S285 adds `comsol_polygon_generalization_diagnostics.py` and a smoke test.
+- Hard-case labels and signal scale are not obviously broken across splits.
+- True rotated rates are train/val/test `0.700` / `0.700` / `0.800`; true multi-component rates are `0.233` / `0.300` / `0.300`.
+- Signal std mean is train/val/test `2.124018e-06` / `2.266323e-06` / `1.900533e-06`.
+- The clearest distribution caveat is sparse x coverage: test `center_x` mean is `0.008342`, compared with train `-0.001439` and val `-0.002947`.
+
+## Step S286: COMSOL V3 polygon prediction failure diagnostics
+
+- S286 shows the held-out failure is vertex/shape dominated rather than presence/type dominated.
+- Zero-IoU samples are train/val/test `0/30`, `4/10`, and `6/10`.
+- Mean vertex MAE is train/val/test `5.575231e-05`, `5.368527e-03`, and `3.298867e-03`.
+- Val/test predictions show signed-area flips and occasional out-of-grid vertices; val sample `7` has `3` out-of-grid vertices and `2` signed-area flips.
+
+## Step S287: COMSOL V3 polygon generalization bottleneck summary
+
+- S287 concludes that the likely bottleneck is small-N memorization plus sparse geometry coverage causing direct vertex/shape extrapolation failure.
+- The result does not invalidate the polygon target schema or repaired Bz signal route.
+- Multi-seed validation is still premature because it would confirm instability without explaining or repairing it.
+
+## Step S288: COMSOL V3 polygon generalization decision
+
+- S288 recommends planning an output-shape / vertex-parameterization repair or controlled resplit diagnostic next.
+- The S185/S181 center-bin candidate remains unchanged, and the polygon inverse route remains branch-local.
+
+## Step S289: COMSOL V3 center-anchored polygon route summary
+
+- S289 starts a center-anchored polygon route after S284-S288 identified held-out absolute-vertex shape instability.
+- The route predicts component center with center-bin classification plus offset, then predicts four local polygon vertices in grid-cell units.
+- It does not replace the S185/S181 center-bin candidate or the S282 absolute-vertex polygon reference.
+
+## Step S290: COMSOL V3 center-anchored polygon targets
+
+- S290 builds train/val/test center-anchored targets from the S254/S256 polygon pack.
+- The new target schema adds `center_x_bin_targets`, `center_y_bin_targets`, `center_offset_targets`, and `local_vertices_grid`.
+- Center/local decode oracle preserves train/val/test polygon IoU `1.000000` / `1.000000` / `1.000000`.
+
+## Step S291: COMSOL V3 center-anchored polygon runner
+
+- S291 adds an independent center-anchored polygon inverse model and runner.
+- The model outputs presence/type, center x/y bin logits, center offsets, and grid-cell local vertices.
+- Losses are supervised only: presence BCE, type CE, center-bin CE, center-offset SmoothL1, and local-vertex SmoothL1.
+- The old absolute-vertex polygon runner remains unchanged.
+
+## Step S292: COMSOL V3 center-anchored polygon gates
+
+- S292 passes the one-sample gate with IoU `1.000000`.
+- S292 passes the five-sample gate with mean/min IoU `0.991549` / `0.957746`.
+- S292 passes the train30 gate with mean/min IoU `0.989276` / `0.857143`, presence/type `1.000000` / `1.000000`, and center x/y bin accuracy `1.000000` / `1.000000`.
+- Val/test remain observation-only and weak at mean IoU `0.072402` / `0.084416`, but signed-area flip and out-of-grid counts are both `0`.
+
+## Step S293: COMSOL V3 center-anchored polygon decision
+
+- S293 keeps the center-anchored polygon route alive because it passes all train-fit gates and removes the main held-out geometry pathology.
+- It is not yet a validated held-out candidate because val/test zero-IoU counts are `8/10` and `8/10`.
+- The next recommended direction is held-out center-bin localization diagnostics or matched-coverage resplit analysis, not multi-seed validation.
+
+## Step S294: COMSOL V3 center-anchored polygon held-out failure summary
+
+- S294 starts a read-only diagnostic stage after center-anchored train30 passes but held-out val/test remain weak.
+- No new training is run, the center-anchored runner is unchanged, and the S185/S181 center-bin candidate remains unchanged.
+
+## Step S295: COMSOL V3 center-anchored polygon failure diagnostics
+
+- S295 adds `center_anchored_polygon_failure_diagnostics.py` and a smoke test.
+- The held-out failure is center-bin dominated: all `16/16` zero-IoU samples have at least one center-bin error.
+- Y-bin is the stronger bottleneck: all `16/16` zero-IoU samples have y-bin errors, while `8/16` have x-bin errors.
+- Local shape regression is secondary in this run: correct-bin held-out components have mean local vertex grid MAE `0.867101`, while wrong-bin components have `2.487230`.
+
+## Step S296: COMSOL V3 center-anchored matched-coverage analysis
+
+- S296 shows held-out zero-IoU correlates with train center-bin coverage gaps.
+- There are `19` uncovered held-out component bins; `15/16` zero-IoU samples touch an uncovered bin, versus `1` nonzero-IoU sample.
+- Zero-IoU samples have higher nearest-train center-bin distance than nonzero samples: `1.468750` vs `0.250000`.
+
+## Step S297: COMSOL V3 center-anchored polygon decision
+
+- S297 recommends a matched-coverage resplit gate using the existing polygon V3 pack before model changes, extra steps, multi-seed validation, or larger COMSOL data.
+- If matched coverage still fails, the next repair should target y-bin localization and local-shape conditioning.
+
+## Step S298: COMSOL V3 polygon matched-coverage resplit setup
+
+- S298 starts a diagnostic resplit gate using the existing S254-S258 polygon V3 pack.
+- The resplit does not generate COMSOL data, does not overwrite the original split, and does not change the center-anchored runner.
+
+## Step S299: COMSOL V3 polygon matched-coverage resplit
+
+- S299 adds `make_comsol_polygon_matched_coverage_resplit.py` and a smoke test.
+- The new split keeps hard-case counts at train `10/5/7/5/3`, val `3/2/2/2/1`, and test `3/2/2/2/1`.
+- All `20/20` held-out samples have component bins within train center-bin distance `<=1`; exact same-bin coverage is only `4/20`.
+
+## Step S300: COMSOL V3 center-anchored matched-coverage train30 probe
+
+- S300 runs one unchanged center-anchored train30 probe on the S299 resplit with `steps=20000`, `seed=1`, and prediction export.
+- Train fit passes with mean/min IoU `0.995598` / `0.969697`, and train presence/type/x-bin/y-bin accuracy all `1.000000`.
+- Held-out val/test do not improve: mean IoU is `0.037245` / `0.072368`, and zero-IoU counts are `8/10` / `9/10`.
+
+## Step S301: COMSOL V3 polygon matched-coverage diagnostics
+
+- S301 shows matched coverage did not remove the center-bin bottleneck.
+- Held-out zero-IoU is `17/20`; all `17/17` zero-IoU samples have y-bin errors, and `9/17` have x-bin errors.
+- True rotated and multi-component samples remain difficult, but the dominant failure is still y-bin localization.
+
+## Step S302: COMSOL V3 polygon matched-coverage decision
+
+- S302 concludes that distance-1 matched center-bin coverage alone does not explain or fix the held-out failure.
+- The next unique recommendation is center-anchored y-bin localization repair, not multi-seed validation, more steps, a larger model, or a larger COMSOL pack.
+
+## Step S303: COMSOL V3 center-anchored y-bin failure summary
+
+- S303 starts a narrow y-bin localization repair after S298-S302 rules out distance-1 center-bin coverage as sufficient.
+- This stage does not run multi-seed, does not add steps or capacity, does not generate COMSOL data, and does not replace S185/S181.
+
+## Step S304: COMSOL V3 center-anchored y-bin diagnostics
+
+- S304 adds `center_anchored_y_bin_diagnostics.py` and a smoke test.
+- The S300 reference has train y-bin accuracy `1.000000`, but val/test y-bin accuracy only `0.230769` / `0.083333`.
+- Held-out y-bin errors are ordered failures, not only boundary noise: there are `6` adjacent y-bin errors and `15` y-bin errors with distance `>=2`.
+
+## Step S305: COMSOL V3 center-anchored y-bin loss support
+
+- S305 adds default-off y-bin soft-target loss options to `train_comsol_center_anchored_polygon_inverse.py`.
+- `neighbor_soft_ce` and `distance_soft_ce` are extra losses added on top of the unchanged hard center-bin CE.
+- Default behavior remains `center_y_bin_extra_loss_mode=none` and `lambda_center_y_bin_extra=0.0`.
+
+## Step S306: COMSOL V3 center-anchored y-bin quick gate
+
+- S306 first reruns `current_reference`, which exactly reproduces S300: train mean/min IoU `0.995598` / `0.969697`, val/test mean IoU `0.037245` / `0.072368`, and zero-IoU `8/10` / `9/10`.
+- `neighbor_soft_y` improves val/test y-bin accuracy to `0.307692` / `0.166667` and zero-IoU to `7/10` / `8/10`, but test mean IoU is `0.069911`, slightly below reference.
+- `distance_soft_y` does not improve the mechanism and worsens val IoU.
+
+## Step S307: COMSOL V3 center-anchored y-bin repair decision
+
+- S307 does not pass the y-bin repair gate.
+- The best repair is only a partial localization improvement; final mask IoU remains local-shape / conditioning limited.
+- The next unique recommendation is local-shape conditioning or bounded local output, not more y-loss tuning, multi-seed validation, extra steps, larger model changes, or more COMSOL data.
+
+## Step S308: COMSOL V3 center-anchored local-shape failure summary
+
+- S308 starts a bounded local-output repair after S303-S307 shows y-bin soft targets are not sufficient.
+- This stage keeps the center-bin path, model structure, target schema, training steps, and matched split fixed.
+- It does not generate COMSOL data, run multi-seed validation, or replace S185/S181.
+
+## Step S309: COMSOL V3 center-anchored local-shape diagnostics
+
+- S309 adds `center_anchored_local_shape_diagnostics.py` and a smoke test.
+- Target local-shape ranges are similar across matched train/val/test: train local abs x/y max `17.467779` / `3.798028`, val `16.804443` / `3.567063`, and test `17.467779` / `3.567063`.
+- The S306/S311 reference failure is still tied to bin/local-shape interaction: both-bin-correct components have local vertex grid MAE `0.021942`, while bin-wrong components have `3.454283`.
+
+## Step S310: COMSOL V3 center-anchored bounded local output support
+
+- S310 adds default-off local-shape output options to `train_comsol_center_anchored_polygon_inverse.py`.
+- `--local-shape-output-mode raw|bounded_tanh` defaults to `raw`, preserving previous behavior.
+- `bounded_tanh` maps raw local head outputs through `tanh(raw) * [bound_x,bound_y]`, with bounds from either fixed grid values or train-only target stats.
+
+## Step S311: COMSOL V3 center-anchored bounded local output quick gate
+
+- S311 first reruns `current_reference`, exactly reproducing the matched-split failure: train mean/min IoU `0.995598` / `0.969697`, val/test IoU `0.037245` / `0.072368`, and zero-IoU `8/10` / `9/10`.
+- `bounded_local_fixed_grid` preserves train fit but does not pass: val/test IoU are `0.024490` / `0.060554`, with zero-IoU `9/10` / `8/10`.
+- `bounded_local_train_stats` also preserves train fit but does not pass: val/test IoU are `0.029174` / `0.067532`, with zero-IoU `7/10` / `9/10`.
+
+## Step S312: COMSOL V3 center-anchored bounded local output decision
+
+- S312 concludes bounded local output did not repair held-out behavior.
+- The bounds did not cause saturation (`local_shape_saturation_frac=0.0`), so the active bottleneck is not simple local offset explosion.
+- The next unique recommendation is local-shape conditioning, such as conditioning local vertices on center bin, slot/type, or explicit bbox/scale; do not continue bound sweeps, y-loss tuning, multi-seed validation, or new COMSOL data yet.
+
+## Step S313: COMSOL V3 center-anchored local-shape conditioning summary
+
+- S313 starts a default-off local-shape conditioning probe after bounded local output fails.
+- The stage keeps the center-bin path, target schema, loss weights, steps, matched split, and S185/S181 candidate unchanged.
+- It does not generate COMSOL data, run multi-seed validation, or promote a polygon candidate.
+
+## Step S314: COMSOL V3 center-anchored local-shape conditioning support
+
+- S314 adds `--local-shape-conditioning-mode none|center_bin|center_bin_slot|center_bin_slot_type` and `--local-shape-conditioning-dim`.
+- `none` preserves the previous local vertex head path.
+- Conditioned modes feed the local vertex head with shared latent plus detached predicted center-bin soft context, center offset, optional slot embedding, and optional predicted type soft context.
+
+## Step S315: COMSOL V3 center-anchored local-shape conditioning smoke
+
+- S315 verifies the model and runner code paths for both default `none` mode and `center_bin_slot_type` conditioning.
+- The smoke tests cover forward shape, finite loss, backward pass, CLI parsing, metrics fields, and default-off compatibility before the quick gate.
+
+## Step S316: COMSOL V3 center-anchored local-shape conditioning quick gate
+
+- S316 first reruns `current_reference`, exactly reproducing S311: train mean/min IoU `0.995598` / `0.969697`, val/test IoU `0.037245` / `0.072368`, and zero-IoU `8/10` / `9/10`.
+- `conditioning_center_bin` improves train fit to mean/min IoU `0.999749` / `0.992481` and lowers train local MAE, but held-out val/test IoU are `0.027215` / `0.067059`, both below reference.
+- Because the first conditioned variant fails held-out acceptance and worsens val zero-IoU to `9/10`, `conditioning_center_bin_slot` and `conditioning_center_bin_slot_type` are skipped by stop condition.
+
+## Step S317: COMSOL V3 center-anchored local-shape conditioning decision
+
+- S317 concludes default-off local-shape conditioning did not repair held-out behavior.
+- The result indicates the bottleneck is not solved by feeding predicted center-bin context into the local head alone.
+- The next unique recommendation is a joint center-bin/local-shape repair, not more simple local-conditioning variants, y-loss tuning, bound sweeps, multi-seed validation, or new COMSOL data.
+
+## Step S318: COMSOL V3 center-anchored local-conditioning failure summary
+
+- S318 starts a causal diagnostic stage after `conditioning_center_bin` improves train fit but worsens held-out IoU.
+- The locked same-run reference has val/test IoU `0.037245` / `0.072368` and zero-IoU `8/10` / `9/10`.
+- `conditioning_center_bin` has val/test IoU `0.027215` / `0.067059` and zero-IoU `9/10` / `9/10`, so this stage does not continue simple local-conditioning variants.
+
+## Step S319: COMSOL V3 center-anchored oracle ablation
+
+- S319 adds `center_anchored_polygon_oracle_ablation.py` and a smoke test for offline teacher-forced center/local ablations.
+- `pred_all` reproduces exported reference metrics, and `gt_center_bin_offset_local` recovers val/test IoU `1.000000` / `1.000000`, confirming the ablation/rasterizer/sample join is aligned.
+- For the reference run, `gt_center_bin_offset` raises val/test IoU to `0.450778` / `0.438502` with zero-IoU `0/10` / `0/10`, while `gt_local` reaches only `0.058471` / `0.095985`.
+- For `conditioning_center_bin`, `gt_center_bin_offset` raises val/test IoU to `0.495734` / `0.574024`, while `gt_local` reaches only `0.034444` / `0.055102`.
+
+## Step S320: COMSOL V3 joint center/local repair spec
+
+- S320 treats S319 as evidence that held-out center decode is the dominant final-mask bottleneck.
+- The minimal conditional repair is default-off `joint_center_shape_mode=soft_center_scheduled`, where the local-shape head receives soft continuous center context with teacher-forced center context annealed toward predicted context.
+- The stage explicitly does not add differentiable raster loss, multi-seed validation, extra local-conditioning variants, y-loss, bound sweeps, or new COMSOL data.
+
+## Step S321: COMSOL V3 joint center/local quick gate
+
+- S321 reruns the same-run reference first and exactly reproduces S316/S318: train IoU `0.995598` / `0.969697`, val/test IoU `0.037245` / `0.072368`, and zero-IoU `8/10` / `9/10`.
+- The one allowed repair run, `soft_center_scheduled`, does not pass. Train mean/min IoU is `0.977544` / `0.818182`, below the `0.99` train mean gate.
+- Held-out behavior is not repaired: val IoU collapses to `0.000000`, test IoU reaches only `0.090810`, and val/test zero-IoU are `10/10` / `7/10`.
+
+## Step S322: COMSOL V3 joint center/local decision
+
+- S322 concludes that the offline oracle ablation is decisive, but the first `soft_center_scheduled` repair is not sufficient.
+- The next unique recommendation is an explicit center-local coupling route, such as decoded-center consistency loss or a component-query center/shape head.
+- Do not proceed to ad hoc variants, multi-seed validation, extra steps, larger model capacity, or new COMSOL data from this failed gate.
+
+## Step S323: COMSOL V3 center-decode failure summary
+
+- S323 starts a loss-side decoded-center repair after S319 proves center decode is the dominant held-out bottleneck.
+- `gt_center_bin` lifts val/test IoU from `0.037245` / `0.072368` to `0.273894` / `0.346678`, while `gt_offset` only reaches `0.056346` / `0.075000`.
+- This stage keeps hard argmax center decode as the official eval/export path and does not replace S185/S181.
+
+## Step S324: COMSOL V3 decoded-center diagnostics
+
+- S324 adds `center_anchored_center_decode_diagnostics.py` and a smoke test.
+- The new prediction export records hard decoded center error, soft expected-center error, center-bin probability margins, and offset x/y errors.
+- The same-run reference has val/test hard center L2 grid error `21.748188` / `15.275539` and y-bin accuracy `0.230769` / `0.083333`.
+
+## Step S325: COMSOL V3 decoded-center coupling support
+
+- S325 adds default-off center consistency loss modes to the center-anchored runner.
+- `soft_decoded_center` uses bin probability expectation plus offset to create a differentiable center loss in grid-cell units.
+- `soft_decoded_vertex` is available as a second-stage option but remains unused unless the center-only repair passes its stop conditions.
+
+## Step S326: COMSOL V3 decoded-center coupling quick gate
+
+- S326 first reruns `current_reference`, exactly reproducing S321: train IoU `0.995598` / `0.969697`, val/test IoU `0.037245` / `0.072368`, and zero-IoU `8/10` / `9/10`.
+- `soft_decoded_center_consistency` fails: train IoU is `0.983633` / `0.857143`, val/test IoU are `0.000000` / `0.034211`, and zero-IoU is `10/10` / `9/10`.
+- The train center error improves, but held-out center decode and final mask IoU do not improve reliably. `soft_decoded_vertex_consistency` is skipped by stop condition.
+
+## Step S327: COMSOL V3 decoded-center coupling decision
+
+- S327 concludes loss-side decoded-center coupling is not enough.
+- The next unique recommendation is a structural component-query center/shape head or equivalent shared component representation.
+- Do not continue loss-weight tuning, y-loss, local-conditioning, bound sweeps, teacher-forcing variants, multi-seed validation, extra steps, or new COMSOL data from this failed gate.
+
+## Step S328: COMSOL V3 component-query center/shape route summary
+
+- S328 starts an independent component-query polygon route after S323-S327 shows loss-side decoded-center consistency is insufficient.
+- The new route keeps `max_components=3`, uses learned fixed component/slot queries, and predicts presence, type, center bins, center offset, and local polygon vertices from the same query latent.
+- This stage does not replace S185/S181, the absolute polygon runner, or the center-anchored runner.
+
+## Step S329: COMSOL V3 component-query model / runner smoke
+
+- S329 adds `comsol_component_query_polygon_inverse_models.py`, `train_comsol_component_query_polygon_inverse.py`, and smoke tests.
+- The model smoke covers forward shape, finite supervised loss, backward pass, and query/head gradients.
+- The runner smoke covers tempfile training, metrics/history/summary writing, prediction export, and no checkpoint/weight/`.npy` output.
+
+## Step S330: COMSOL V3 component-query 1-sample gate
+
+- S330 runs only the first overfit gate on source train sample `0`.
+- The one-sample run reaches presence/type/x-bin/y-bin accuracy `1.000000`, decoded vertex MAE `5.918177e-06`, no out-of-grid vertices, and no signed-area flips.
+- The hard polygon IoU is `0.974227`, below the required `>=0.99`; pred/target area is `194` / `189`.
+- By stop condition, the 5-sample and train30 gates are not run.
+
+## Step S331: COMSOL V3 component-query same-run reference
+
+- S331 is skipped because S330 failed the one-sample gate.
+- The matched split same-run center-anchored reference is not rerun in this stage.
+
+## Step S332: COMSOL V3 component-query train30 decision
+
+- S332 records that the component-query path is implemented and smoke-tested but not validated.
+- The next unique recommendation is a component-query one-sample raster-sensitivity diagnostic before any 5-sample, same-run reference, train30, multi-seed, extra steps, or new COMSOL data.
+
+## Step S333: COMSOL V3 component-query 1-sample raster-sensitivity setup
+
+- S333 starts an offline diagnostic stage for the S330 one-sample failure.
+- The failing sample is train sample `0`: IoU `0.974227`, pred/target area `194` / `189`, decoded vertex MAE `5.918177e-06`, and presence/type/x-bin/y-bin accuracy `1.000000`.
+- No new training is run, and 5-sample / train30 remain blocked by the one-sample stop condition.
+
+## Step S334: COMSOL V3 component-query raster-sensitivity diagnostic
+
+- S334 adds `component_query_polygon_raster_sensitivity_diagnostics.py` and a smoke test.
+- The diagnostic reproduces the exported S330 prediction exactly: IoU `0.974227`, target area `189`, pred area `194`.
+- The miss is `5` false-positive pixels and `0` false-negative pixels.
+- `gt_center + pred_local_vertices` recovers IoU `1.000000`, while `pred_center + gt_local_vertices` only reaches `0.979275`.
+- Centroid alignment also recovers IoU `1.000000`; area-scaled and edge-scaled variants only reach `0.979275`.
+- Alpha interpolation toward GT reaches `0.989529` at `0.50` and `0.994737` at `0.75`.
+
+## Step S335: COMSOL V3 component-query raster-sensitivity decision
+
+- S335 concludes the S330 failure is a small center / centroid displacement amplified by hard rasterization, not a pure local-shape or area-only failure.
+- The component-query route should not enter 5-sample yet.
+- The next unique recommendation is a 1-sample repair quick gate with a tiny default-off center / centroid auxiliary or equivalent precision repair.
+
+## Step S336: COMSOL V3 component-query 1-sample raster repair setup
+
+- S336 starts a 1-sample-only repair stage for train sample `0`.
+- The stage locks the S330/S334 evidence: IoU `0.974227`, pred/target area `194 / 189`, false-positive / false-negative pixels `5 / 0`, and all presence/type/bin accuracies `1.000000`.
+- The stage does not enter 5-sample, train30, multi-seed, extra COMSOL data, or S185/S181 candidate replacement.
+
+## Step S337: COMSOL V3 component-query center/centroid aux support
+
+- S337 adds default-off `--lambda-decoded-center-aux`, `--lambda-polygon-centroid-aux`, and `--center-centroid-aux-smoothl1-beta`.
+- The losses operate in grid-cell units and are recorded in metrics/history/config.
+- Default lambda values are `0.0`, preserving prior component-query and center-anchored runner behavior.
+
+## Step S338: COMSOL V3 component-query 1-sample current reference
+
+- S338 exactly reproduces the S330 one-sample reference with IoU `0.974226804`, pred/target area `194 / 189`, no out-of-grid vertices, no signed-area flips, and presence/type/x-bin/y-bin accuracy `1.000000`.
+
+## Step S339: COMSOL V3 component-query 1-sample repair quick gate
+
+- `decoded_center_aux_small` improves IoU to `0.984126984`, but remains below the `>=0.99` gate and changes area to `186 / 189`.
+- Raster recheck shows false-positive / false-negative pixels `0 / 3`, so the repair shifts the error direction instead of solving the boundary precision.
+- `polygon_centroid_aux_small` reaches only IoU `0.963917526`; the combined aux run is skipped because neither single-aux run passes or reaches the conditional trigger.
+
+## Step S340: COMSOL V3 component-query center precision decision
+
+- S340 marks the 1-sample repair gate as failed.
+- The 5-sample and train30 gates remain blocked.
+- The next route should plan a more targeted center/local boundary precision repair rather than continuing tiny center/centroid aux as-is.
+
+## Step S341: COMSOL V3 component-query boundary precision failure summary
+
+- S341 starts another 1-sample-only repair stage after S336-S340.
+- The stage focuses on hard-raster boundary precision: current reference IoU `0.974226804`, area `194 / 189`, and FP/FN `5 / 0`.
+- It does not enter 5-sample, train30, multi-seed, new COMSOL generation, or S185/S181 candidate replacement.
+
+## Step S342: COMSOL V3 component-query boundary precision support
+
+- S342 keeps the component-query model unchanged.
+- It reuses default-off decoded-center aux and exposes existing `--lambda-area-aux` in the component-query runner with default `0.0`.
+- No default behavior changes and no new loss family is introduced.
+
+## Step S343: COMSOL V3 component-query boundary precision quick gate
+
+- S343 runs current reference, `center_aux_half`, and `center_aux_half_plus_tiny_area` on train sample `0`.
+- `center_aux_half` is closest: IoU `0.989528796`, area `191 / 189`, FP/FN `2 / 0`, with presence/type/x-bin/y-bin accuracy still `1.000000`.
+- `center_aux_half_plus_tiny_area` is worse at IoU `0.979166667`, area `191 / 189`, FP/FN `3 / 1`.
+
+## Step S344: COMSOL V3 component-query boundary precision raster recheck
+
+- S344 reruns offline raster sensitivity for all S343 outputs.
+- For `center_aux_half`, several offline variants such as centroid alignment, area scaling, and GT-center/local substitutions reach IoU `0.994736842` or higher.
+- The actual trained output remains below the hard IoU `0.99` acceptance threshold.
+
+## Step S345: COMSOL V3 component-query boundary precision decision
+
+- S345 marks the 1-sample boundary precision gate as failed.
+- The 5-sample and train30 gates remain blocked.
+- The next step should not be a broad lambda sweep; it should be a targeted boundary-aware 1-sample repair or an explicit review of the strict `>=0.99` gate on this 189-pixel mask.

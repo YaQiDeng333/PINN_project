@@ -1,0 +1,2 @@
+label,sample_index,component_slot,max_abs_dx_cells,max_abs_dy_cells,mean_l2_cells,max_l2_cells,pred_area_grid,true_area_grid,area_grid_diff,area_grid_ratio,pred_width_cells,true_width_cells,pred_height_cells,true_height_cells,max_edge_diff_cells,mean_edge_diff_cells
+s262_one_sample,0,0,0.3332105539711689,0.49406419506533134,0.2684051705852757,0.4941539810127155,202.5264716958015,194.09134017082164,8.435131524979852,1.0434595975150462,31.233860738214716,31.027696090438127,6.926655318811282,6.471344330056816,0.6564721035867844,0.2782608708521821

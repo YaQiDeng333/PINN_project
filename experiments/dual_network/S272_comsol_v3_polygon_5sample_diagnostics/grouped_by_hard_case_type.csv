@@ -1,0 +1,6 @@
+hard_case_type,sample_count,mean_iou,min_iou,mean_present_vertex_mae,max_abs_area_diff
+bins_correct_center_or_offset_bad,1,1.0,1.0,7.747068593744189e-06,0
+both_bins_wrong_like,1,1.0,1.0,5.049248557043029e-06,0
+geometry_or_type_interaction,1,1.0,1.0,5.827645509270951e-06,0
+rare_y_bin_wrong,1,0.9854014598540146,0.9854014598540146,3.8289581425487995e-06,2
+x_bin_wrong_like,1,0.9947368421052631,0.9947368421052631,4.186586011201143e-06,1
