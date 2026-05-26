@@ -1,0 +1,22 @@
+20.89 gain/amplitude calibration preflight
+
+repo_root: C:\Users\19166\Desktop\PINN_project
+dataset_id: comsol_true_3d_rbc_imported_watertight_pilot_v3_240
+registry_manifest_gate: pass
+artifact_manifest: C:\Users\19166\Desktop\PINN_project\results\manifests\true_3d_rbc_baseline_inference_artifact_manifest.json
+checkpoint_path: C:\Users\19166\Desktop\PINN_project\checkpoints\true_3d_rbc_baseline_artifacts\true_3d_rbc_v3_240_seed42_20_77_baseline.pt
+prediction_artifact_path: C:\Users\19166\Desktop\PINN_project\checkpoints\true_3d_rbc_baseline_artifacts\true_3d_rbc_v3_240_seed42_20_77_predictions.npz
+artifact_seed: 42
+n_samples: 240
+split_counts: {'train': 162, 'val': 39, 'test': 39}
+20_88_metrics_available: True
+20_88_metrics_path: C:\Users\19166\Desktop\PINN_project\results\metrics\true_3d_rbc_observation_perturbation_robustness_metrics.csv
+
+Subagent preflight summary:
+- Registry/Data: v3_240 is loaded through COMSOL_DATA_REGISTRY.md and manifest; no latest/newest NPZ scan is used.
+- Artifact: 20.88a checkpoint and prediction artifact manifest are present; checkpoint is loaded from ignored path.
+- Calibration design: only in-memory delta_b transforms are evaluated; labels are used only for metrics.
+- Safety/Git: no COMSOL, no data/NPZ writes, no checkpoint staging, CURRENT_BASELINE remains unchanged.
+
+Stop conditions:
+- Missing registry/manifest, missing checkpoint manifest, missing 20.88 metrics, or failed checkpoint load.

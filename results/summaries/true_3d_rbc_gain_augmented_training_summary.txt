@@ -1,0 +1,29 @@
+20.89 gain/amplitude augmentation training gate
+
+Scope:
+- Dataset: comsol_true_3d_rbc_imported_watertight_pilot_v3_240 loaded via registry/manifest
+- Model family: 20.77 small Conv1D encoder + MLP six-parameter head
+- Training: in-memory delta_b augmentation only; no COMSOL, no data/NPZ write, no checkpoint saved
+- Seeds: [42, 123, 2026]
+- Epochs: 300
+
+Candidate variants:
+- A1_global_gain_aug: random global gain 0.8-1.2, noise 0-10pct, signed zero drift 0-1pct
+- A2_axis_gain_aug: A1 plus per-axis Bx/By/Bz gain 0.9-1.1
+- A3_light_bx_attenuation_aug: A2 plus low-probability Bx attenuation 0.7-1.0; no Bx-missing training
+
+Selected robustness candidate: A2_axis_gain_aug, seed=123
+- clean profile_depth_rmse_m: 0.000525245
+- clean profile RMSE drop vs 20.85: 35.464%
+- clean projected Dice: 0.857961
+- gain 0.8 profile RMSE degradation: 24.614%
+- gain 1.2 profile RMSE degradation: 38.768%
+- Bx 50pct attenuation degradation: 59.279%
+- L/W/D clean MAE mm: 1.924 / 1.937 / 1.044
+- wMAE auxiliary clean: 0.213495
+
+Augmentation effective by gate: False
+
+Gate logic:
+- Effective requires clean profile RMSE drop <=10%, clean Dice no worse than 0.02 below baseline, and gain 0.8/1.2 degradation reduction >=50% versus A0.
+- Bx missing is not trained and remains a diagnostic-only failure mode.

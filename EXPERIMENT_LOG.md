@@ -1,5 +1,15 @@
 # 实验工作日志
 
+## 2026-05-27 更新：第 20.89 true 3D RBC gain/amplitude calibration and augmentation gate
+
+第 20.89 在固定 `dataset_id=comsol_true_3d_rbc_imported_watertight_pilot_v3_240` 和 20.88a baseline inference artifact 上完成 gain/amplitude robustness gate。本轮没有运行 COMSOL，没有生成或修改 data / NPZ，没有更新 `CURRENT_BASELINE.md`，也没有提交 checkpoint / preview / notes；所有扰动、校准和增强都只作用在内存中的 `delta_b` / BxByBz 输入上。
+
+Calibration-only 阶段复用 20.77/20.85 frozen checkpoint，validation-only 选择 `per_axis_rms_train_stats`。它在 test 上显著降低 gain/channel 退化：gain 0.8 profile degradation 从 no-calibration `123.845%` 降到 `21.194%`，gain 1.2 从 `69.657%` 降到 `21.194%`，Bx 50% attenuation 从 `141.577%` 降到 `12.331%`；但 clean profile RMSE 同时退化 `21.194%`，超过 `<=10%` clean gate，因此不能作为直接校准升级。
+
+Augmentation gate 按 20.77 small Conv1D + MLP six-parameter head 训练 in-memory augmentation 候选，seeds=`42/123/2026`，不保存 checkpoint。第一次 review 指出候选选择误用了 test 诊断排名；已修复为 calibration 用 validation 选策略、augmentation 用训练记录的 validation-only `best_val_score` 选 candidate/seed，test 只做最终报告。复审通过后，validation-selected candidate 为 `A2_axis_gain_aug` seed `123`。其 test clean profile RMSE 为 `0.000525245 m`，相对 20.85 clean 退化 `35.464%`；gain 0.8 degradation 为 `24.614%`，gain 1.2 degradation 为 `38.768%`，Bx 50% attenuation degradation 为 `59.279%`，clean Dice 为 `0.857961`，L/W/D MAE 为 `1.924/1.937/1.044 mm`，wMAE auxiliary 为 `0.213495`。增强显著缓解 gain / Bx attenuation，但 clean profile 代价过大，且 gain 1.2 reduction 未达到 50% gate，因此不升级 baseline。
+
+结论：`CURRENT_BASELINE` 继续保留 20.85 true 3D RBC profile-depth baseline。20.89 只证明当前模型的主要鲁棒性瓶颈是 amplitude/gain calibration 与 Bx 幅值依赖；`A2_axis_gain_aug` 只能作为 non-baseline robustness diagnostic。下一步唯一建议是进入 20.90 liftoff / sensor-offset COMSOL diagnostic pack，并带上 gain/amplitude control caveat；真实数据接入前仍需要明确 amplitude calibration protocol。
+
 ## 2026-05-26 更新：第 20.88 true 3D RBC observation perturbation robustness audit
 
 第 20.88 已在固定 `dataset_id=comsol_true_3d_rbc_imported_watertight_pilot_v3_240` 上完成 observation perturbation robustness audit。本轮复用第 20.88a 的 artifact manifest 和 ignored checkpoint，只对内存中的 `delta_b` / BxByBz 做扰动后前向推理；没有运行 COMSOL，没有训练，没有生成或修改 data / NPZ，没有更新 `CURRENT_BASELINE.md`。

@@ -1,5 +1,13 @@
 # PINN 优化路线
 
+## 2026-05-27 路线同步：20.89 gain/amplitude calibration and augmentation gate
+
+20.89 把 20.88 暴露出的 gain / Bx-amplitude sensitivity 单独拆出来验证。路线边界保持不变：不运行 COMSOL，不生成或修改 data / NPZ，不更新 `CURRENT_BASELINE.md`；本轮只在固定 v3_240 和 20.88a frozen artifact 上测试输入校准与 in-memory augmentation gate。
+
+校准和增强都证明“幅值归一化方向有用”，但都不能替代当前 baseline。Validation-selected `per_axis_rms_train_stats` 把 gain 0.8 / 1.2 的 test profile degradation 压到 `21.194% / 21.194%`，Bx 50% attenuation 压到 `12.331%`，但 clean profile 同样退化 `21.194%`，超过 `<=10%` clean gate。Validation-selected augmentation candidate `A2_axis_gain_aug` seed `123` 把 gain 0.8 degradation 压到 `24.614%`、Bx 50% attenuation 压到 `59.279%`，但 clean profile RMSE 退化 `35.464%`，gain 1.2 仍为 `38.768%`，所以只能作为 non-baseline robustness diagnostic。
+
+路线判断更新为：20.85 true 3D RBC profile-depth baseline 继续作为 `CURRENT_BASELINE`；gain/amplitude calibration 是真实数据接入前的明确 blocker；不要继续用小型 augmentation 直接替换 baseline。下一步应进入 20.90 liftoff / sensor-offset COMSOL diagnostic pack，并在该 pack 中显式记录 source/gain control、Bx channel dependence 和 amplitude normalization 假设。
+
 ## 2026-05-26 路线同步：20.88 observation perturbation robustness audit
 
 20.88 用 20.88a 恢复的 frozen baseline artifact 完成了 observation-space robustness audit。路线边界保持不变：不运行 COMSOL，不训练，不生成或修改 data / NPZ，不改 `CURRENT_BASELINE.md`；本轮只回答“当前 true 3D RBC baseline 对已有 `delta_b` 观测扰动是否稳”。

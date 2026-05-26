@@ -1,5 +1,15 @@
 # NEXT_STEP
 
+## 2026-05-27 after Stage 20.89 gain/amplitude calibration and augmentation gate
+
+Next step: **20.90 liftoff/sensor-offset COMSOL diagnostic pack, with explicit gain/amplitude control caveat**.
+
+Stage 20.89 showed that the current baseline is not noise-limited; it is amplitude/gain and Bx-amplitude sensitive. Calibration-only helped the stressed cases but cost too much clean profile accuracy: validation-selected `per_axis_rms_train_stats` reduced test gain 0.8 degradation from `123.845%` to `21.194%` and Bx 50% attenuation degradation from `141.577%` to `12.331%`, but clean profile RMSE degraded `21.194%`, above the `<=10%` gate.
+
+In-memory augmentation also helped robustness but is not a baseline upgrade. Validation-selected `A2_axis_gain_aug` seed `123` reduced gain 0.8 degradation to `24.614%` and Bx 50% attenuation degradation to `59.279%`, but clean profile RMSE degraded `35.464%` and gain 1.2 degradation remained `38.768%`. Keep `CURRENT_BASELINE` unchanged at the 20.85 true 3D RBC profile-depth baseline. Treat `A2_axis_gain_aug` only as a non-baseline robustness diagnostic, not as a replacement model.
+
+The next stage should measure physics-side variation instead of continuing small augmentation tweaks: run a controlled 20.90 liftoff / sensor-offset COMSOL diagnostic pack, while explicitly tracking amplitude normalization and Bx dependence. Real-data alignment remains blocked until there is a concrete amplitude calibration protocol.
+
 ## 2026-05-26 after Stage 20.88 observation perturbation robustness audit
 
 Next step: **gain/amplitude calibration or augmentation planning, while preparing the 20.89 liftoff/sensor-offset COMSOL diagnostic pack**.

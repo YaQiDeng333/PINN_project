@@ -1,0 +1,7 @@
+question,answer,evidence,decision
+Is calibration-only sufficient?,False,validation_selected=per_axis_rms_train_stats; test_clean_drop=21.194473772384566; test_gain08_reduction=82.88634167411573; test_gain12_reduction=69.57302124944881,do_not_use_calibration_only_as_upgrade
+Is augmentation effective enough to upgrade?,False,best=A2_axis_gain_aug seed=123; clean_drop=35.464181073901905; gain08_reduction=80.12509696959836; gain12_reduction=44.34360958751555,do_not_upgrade_due_to_clean_profile_cost
+Should CURRENT_BASELINE remain 20.85?,True,Neither calibration-only nor augmentation passed all gates; CURRENT_BASELINE.md was not modified.,retain_current_baseline
+Is a separate robustness candidate needed?,True,Augmentation sharply reduced gain/Bx attenuation degradation but paid a clean profile RMSE cost.,track_as_non_baseline_robustness_candidate_only
+Can 20.90 liftoff/sensor-offset COMSOL diagnostic proceed?,True,20.89 isolated amplitude/gain sensitivity as a blocker; liftoff/sensor-offset should be measured separately with controlled amplitude calibration.,proceed_to_20_90_with_gain_control_caveat
+Is real-data amplitude calibration still a blocker?,True,Gain 0.8 and Bx attenuation remain severe without explicit augmentation or calibration; augmentation is not clean enough for baseline transition.,real_data_requires_amplitude_calibration_protocol
