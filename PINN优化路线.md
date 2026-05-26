@@ -1,5 +1,13 @@
 # PINN 优化路线
 
+## 2026-05-26 路线同步：20.86 true 3D RBC baseline transition
+
+20.86 完成主线 baseline transition：项目当前 baseline 从 v3_complex 2D mask / boundary prediction 切换为 true 3D RBC-style profile-depth reconstruction。旧 2D baseline 没有删除，而是降级为 archived comparator；它不再是当前 `CURRENT_BASELINE`。
+
+新的当前 baseline 以 `comsol_true_3d_rbc_imported_watertight_pilot_v3_240` 为数据身份，输入是 Bx/By/Bz `delta_b=(N,3,3,201)`，模型是 20.77 small Conv1D encoder + MLP six-parameter head，输出 `L_m/W_m/D_m/wLD/wWD/wLW`，再生成 RBC-style 3D profile/depth 和 projected mask。20.85 formal rerun 复现了 20.77：selected seed `42`，test normalized MAE `0.678014`，profile depth RMSE `0.000387737 m`，Er-like profile error `0.340544`，L/W/D MAE `1.892/2.186/0.800 mm`，projected mask Dice `0.847727`。
+
+路线边界同步更新：20.81 只作为 projected-mask / visual comparator，20.83 作为 profile-primary negative gate；`wLD/wWD/wLW` 仍是 auxiliary diagnostics，不作为 headline metric。当前仍是 `exact_piao_rbc=False`、`rbc_style_approximation=True`，尚未在真实实验数据上验证，也不是 arbitrary free-form / multi-defect 部署级模型。后续工作应围绕 benchmark/report package、real-data alignment、exact Piao feature/representation refinement 展开，而不是继续把旧 2D baseline 当主线。
+
 ## 2026-05-26 路线同步：20.85 formal true 3D RBC benchmark rerun
 
 20.85 的路线意义是把 20.77 从一次 training gate 结果收口为可复核的 formal benchmark candidate。该 rerun 固定 `dataset_id=comsol_true_3d_rbc_imported_watertight_pilot_v3_240`，通过 registry / manifest 显式加载，不运行 COMSOL，不生成新数据，不修改 NPZ，也不更新 `CURRENT_BASELINE.md`。

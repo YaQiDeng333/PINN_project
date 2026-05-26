@@ -1,5 +1,13 @@
 # 实验工作日志
 
+## 2026-05-26 更新：第 20.86 true 3D RBC benchmark report + baseline transition
+
+第 20.86 完成 true 3D RBC benchmark report package，并将第 20.77 / 20.85 formal rerun 的 profile-depth candidate 升级为新的 `CURRENT_BASELINE`。本轮没有训练、没有运行 COMSOL、没有生成新数据、没有修改 NPZ，也没有提交 data / checkpoint / preview PNG / notes。此次是明确的 baseline transition：旧 v3_complex 2D mask-only / forward-consistency baseline 被降级为 archived comparator，不删除历史记录。
+
+新的 baseline 固定 `dataset_id=comsol_true_3d_rbc_imported_watertight_pilot_v3_240`，输入为 Bx/By/Bz `delta_b`，shape `(N,3,3,201)`，Conv1D 视图为 `(N,9,201)`；模型为 20.77 small Conv1D encoder + MLP six-parameter head，输出 `L_m/W_m/D_m/wLD/wWD/wLW`，再生成 RBC-style 3D profile/depth 和 projected mask。Formal rerun selected seed 为 `42`，train/val/test normalized MAE 为 `0.646111/0.748694/0.678014`，profile depth RMSE 为 `0.000387737 m`，Er-like profile error 为 `0.340544`，L/W/D MAE 为 `1.892/2.186/0.800 mm`，projected mask IoU/Dice 为 `0.750650/0.847727`，wMAE `0.201076` 只作为 auxiliary diagnostic。
+
+Benchmark report 明确了 comparator roles：20.81 只作为 projected-mask / visual comparator，20.83 是 profile-primary negative gate，旧 2D baseline 是 archived comparator。限制也同步写入：`exact_piao_rbc=False`，当前是 RBC-style / Piao-inspired approximation；尚未在真实实验数据上验证，也不是 arbitrary free-form / multi-defect 部署级 baseline。Review agent 只读复核通过，无 must-fix。
+
 ## 2026-05-26 更新：第 20.85 formal true 3D RBC benchmark rerun based on 20.77 candidate
 
 第 20.85 在固定 `dataset_id=comsol_true_3d_rbc_imported_watertight_pilot_v3_240` 上完成 formal benchmark rerun。本轮没有运行 COMSOL，没有生成或修改 data / NPZ，没有建立 baseline，也没有更新 `CURRENT_BASELINE.md`。数据加载继续通过 `COMSOL_DATA_REGISTRY.md` + manifest 的显式 dataset_id gate，禁止 latest/newest NPZ 自动扫描；模型输入仅为 `delta_b` / BxByBz，labels 只用于 supervision 和 metrics。

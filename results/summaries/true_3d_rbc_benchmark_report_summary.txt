@@ -1,0 +1,45 @@
+20.86 true 3D RBC benchmark report summary
+
+Task transition:
+- Previous CURRENT_BASELINE targeted 2D mask/boundary prediction on v3_complex.
+- New CURRENT_BASELINE targets true 3D RBC-style profile/depth reconstruction from Bx/By/Bz delta_b.
+
+Dataset identity:
+- dataset_id: comsol_true_3d_rbc_imported_watertight_pilot_v3_240
+- route: true_3d_piao_style
+- schema_version: true3d_profile_v1_piao_rbc
+- n_samples: 240
+- split_counts: {"test": 39, "train": 162, "val": 39}
+- exact_piao_rbc: false
+- rbc_style_approximation: true
+
+Method chain:
+- Bx/By/Bz delta_b -> Conv1D encoder -> six RBC-style parameters -> 3D profile/depth -> projected mask.
+- Input shape: delta_b=(N,3,3,201), Conv1D=(N,9,201).
+- Model: 20.77 small Conv1D encoder + MLP six-parameter head.
+- Selection: validation-only checkpoint/seed selection; selected seed 42.
+
+Main metrics:
+- test_total_normalized_mae: 0.6780143536818333
+- profile_depth_rmse_m: 0.0003877372636895579
+- er_like_profile_error: 0.3405436946031375
+- L/W/D MAE mm: 1.8918915996566796 / 2.1857599088778863 / 0.8002313476246901
+
+Auxiliary diagnostics:
+- wMAE: 0.20107580616306037
+- wLD/wWD/wLW: 0.2094394748027508 / 0.20446911683449379 / 0.18931882809369993
+
+Projected mask QA:
+- IoU/Dice: 0.7506502455785019 / 0.8477271366767738
+
+Comparator roles:
+- 20.77/20.85: CURRENT_BASELINE true 3D profile-depth candidate.
+- 20.81: projected-mask / visual comparator only.
+- 20.83: profile-primary negative gate.
+- old v3_complex 2D mask baseline: archived comparator.
+
+Limitations:
+- exact_piao_rbc=false; this is RBC-style / Piao-inspired approximation.
+- wLD/wWD/wLW are auxiliary diagnostics, not the headline success metric.
+- Not validated on real experimental data.
+- Not yet arbitrary free-form, multi-defect, or real-deployment ready.

@@ -1,0 +1,42 @@
+20.86 true 3D RBC baseline transition preflight summary
+
+working_directory: C:\Users\19166\Desktop\PINN_project
+git_status_before_changes: clean
+COMSOL_run: false
+training_run: false
+data_or_NPZ_modified: false
+
+Core artifacts:
+- 20.85 formal rerun summaries/metrics: present
+- 20.77 v3_240 training gate summaries/metrics: present
+- 20.81 feature-fusion summaries/metrics: present
+- 20.83 profile-primary summaries/metrics: present
+- COMSOL_DATA_REGISTRY.md: present
+- v3_240 manifest: present
+- CURRENT_BASELINE.md: present
+- EXPERIMENT_LOG.md / NEXT_STEP.md / PINN优化路线.md: present
+
+Dataset governance:
+- dataset_id: comsol_true_3d_rbc_imported_watertight_pilot_v3_240
+- route: true_3d_piao_style
+- status: pilot_generated
+- train_ready_candidate: true
+- exact_piao_rbc: false
+- rbc_style_approximation: true
+- baseline_ready in manifest/registry before transition: false
+- auto/latest/newest discovery: forbidden
+
+Baseline transition boundary:
+The v3_240 registry entry was created to forbid automatic baseline replacement. Stage 20.86 is an explicit user-directed baseline transition after 20.77/20.85 formal rerun, so CURRENT_BASELINE.md may be updated while registry/manifest remain historical data-governance records.
+
+Current baseline before transition:
+- v3_complex mask-only grid decoder + forward consistency
+- role after this stage: archived old 2D comparator
+
+Stop conditions checked:
+- Missing formal benchmark metrics: no
+- Missing registry/manifest: no
+- Dirty worktree before edits: no
+- Forbidden artifact staging risk before edits: no
+
+Decision: proceed with benchmark report package and CURRENT_BASELINE transition. Do not train, do not run COMSOL, do not modify data/NPZ, and do not submit generated data or preview artifacts.

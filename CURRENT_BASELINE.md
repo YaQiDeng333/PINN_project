@@ -1,5 +1,69 @@
 # CURRENT_BASELINE
 
+## 当前权威 baseline（第 20.86 后）
+
+本节是当前 `CURRENT_BASELINE` 的权威记录。若下方历史记录与本节冲突，以本节为准。
+
+第 20.86 将项目当前 baseline 从旧的 2D v3_complex mask/boundary prediction transition 到 true 3D RBC profile-depth prediction。旧 2D baseline 不删除，保留为 archived comparator；它不再是当前主线 `CURRENT_BASELINE`。
+
+### 当前 baseline scope
+
+* task：true 3D RBC-style defect profile/depth reconstruction
+* route：`true_3d_piao_style`
+* dataset_id：`comsol_true_3d_rbc_imported_watertight_pilot_v3_240`
+* dataset status：`pilot_generated`
+* dataset split：train/val/test = `162/39/39`
+* input：`delta_b` with Bx/By/Bz, shape `(N, 3, 3, 201)`
+* model input view：Conv1D channels `(N, 9, 201)`
+* output：`L_m, W_m, D_m, wLD, wWD, wLW`
+* generated geometry output：six RBC-style params -> 3D profile/depth grid -> projected mask
+* geometry method：`imported_watertight_mesh_solid`
+* baseline model：20.77 small Conv1D encoder + MLP six-parameter head
+* formal rerun stage：20.85
+* selected seed：`42`
+* checkpoint / seed selection：validation-only
+* test use：final evaluation only
+* baseline boundary：not validated for real experimental deployment
+
+### 当前 baseline test 指标
+
+以下数值来自第 20.85 formal rerun，稳定复现第 20.77 candidate。
+
+| metric | value |
+|---|---:|
+| train normalized MAE | 0.646111 |
+| val normalized MAE | 0.748694 |
+| test normalized MAE | 0.678014 |
+| profile_depth_rmse_m | 0.000387737 |
+| Er-like profile error | 0.340544 |
+| L_m MAE | 1.892 mm |
+| W_m MAE | 2.186 mm |
+| D_m MAE | 0.800 mm |
+| projected mask IoU | 0.750650 |
+| projected mask Dice | 0.847727 |
+| wMAE auxiliary | 0.201076 |
+| wLD / wWD / wLW auxiliary MAE | 0.209439 / 0.204469 / 0.189319 |
+
+### Comparator roles after transition
+
+* 20.77 / 20.85：current true 3D RBC profile-depth baseline.
+* 20.81：projected-mask / visual comparator only. It has higher Dice (`0.866573`) but worse profile RMSE (`0.000445297 m`) than 20.77/20.85.
+* 20.83：profile-primary loss negative gate. It has high Dice (`0.868042`) but worse profile RMSE (`0.000409718 m`) than 20.77/20.85, so it does not replace the baseline.
+* old v3_complex 2D mask-only / forward-consistency baseline：archived comparator, retained below for historical comparison.
+
+### Scope limits
+
+* `exact_piao_rbc = false`; this is RBC-style / Piao-inspired approximation, not an exact Piao 2019 reproduction.
+* `wLD/wWD/wLW` are auxiliary diagnostics, not the headline success metric.
+* The current headline metric is profile/depth reconstruction, especially `profile_depth_rmse_m` and Er-like profile error.
+* Projected mask IoU/Dice is 2D footprint QA, not a full substitute for 3D profile accuracy.
+* The baseline is not validated on real experimental MFL data.
+* The baseline is not yet arbitrary free-form, multi-defect, or production/deployment ready.
+
+## Archived comparator：旧 2D v3_complex mask / forward-consistency baseline
+
+以下旧段落为历史原文，保留用于溯源和 comparator；当前权威 baseline 以第 20.86 顶部段落为准。
+
 ## 当前权威 boundary baseline（第 18.4 后）
 
 本节是当前 `CURRENT_BASELINE` 的权威记录。若下方历史记录与本节冲突，以本节为准。

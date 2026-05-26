@@ -1,5 +1,15 @@
 # NEXT_STEP
 
+## 2026-05-26 after Stage 20.86
+
+Next step: **benchmark documentation and real-data alignment planning around the new true 3D RBC profile-depth baseline**.
+
+Stage 20.86 promoted the 20.77/20.85 formal rerun candidate to `CURRENT_BASELINE`. The project baseline has transitioned from old v3_complex 2D mask/boundary prediction to true 3D RBC-style profile-depth reconstruction. The old 2D baseline remains an archived comparator; it was not deleted.
+
+The new current baseline is fixed to `dataset_id=comsol_true_3d_rbc_imported_watertight_pilot_v3_240`, with Bx/By/Bz `delta_b` input `(N,3,3,201)`, Conv1D input `(N,9,201)`, and six RBC-style outputs `L_m/W_m/D_m/wLD/wWD/wLW`. Its headline metrics are profile/depth metrics: `profile_depth_rmse_m=0.000387737`, Er-like profile error `0.340544`, and L/W/D MAE `1.892/2.186/0.800 mm`. Projected mask Dice `0.847727` remains QA; wMAE `0.201076` remains auxiliary diagnostic.
+
+Immediate next work should not be another training tweak. The useful next step is to prepare a concise benchmark/report narrative and plan real-data alignment or exact-Piao/representation follow-up under the new baseline scope. Keep `exact_piao_rbc=False` and do not claim real experimental deployment readiness.
+
 ## 2026-05-26 after Stage 20.85
 
 Next step: **prepare paper/report display around the formal 20.77-profile benchmark candidate**.

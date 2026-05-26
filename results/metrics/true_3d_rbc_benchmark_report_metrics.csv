@@ -1,0 +1,31 @@
+section,metric,value,unit,role
+identity,dataset_id,comsol_true_3d_rbc_imported_watertight_pilot_v3_240,,current_true3d_baseline
+identity,route,true_3d_piao_style,,current_true3d_baseline
+identity,schema_version,true3d_profile_v1_piao_rbc,,current_true3d_baseline
+identity,n_samples,240,samples,current_true3d_baseline
+identity,split_counts,"{""test"": 39, ""train"": 162, ""val"": 39}",,current_true3d_baseline
+method,input,"delta_b Bx/By/Bz shape=(N,3,3,201), Conv1D=(N,9,201)",,current_true3d_baseline
+method,model,20.77 small Conv1D encoder + MLP six-parameter head,,current_true3d_baseline
+method,output,"L,W,D,wLD,wWD,wLW -> RBC-style 3D profile/depth/projected mask",,current_true3d_baseline
+selection,selected_seed,42,,current_true3d_baseline
+selection,best_epoch,6,epoch,current_true3d_baseline
+main,test_total_normalized_mae,0.6780143536818333,,current_true3d_baseline
+main,test_profile_depth_rmse_m,0.0003877372636895579,m,current_true3d_baseline
+main,test_er_like_profile_error,0.3405436946031375,,current_true3d_baseline
+main,test_L_mae_mm,1.8918915996566796,mm,current_true3d_baseline
+main,test_W_mae_mm,2.1857599088778863,mm,current_true3d_baseline
+main,test_D_mae_mm,0.8002313476246901,mm,current_true3d_baseline
+auxiliary,test_wMAE_auxiliary,0.20107580616306037,,diagnostic_only
+auxiliary,test_wLD_abs_error,0.2094394748027508,,diagnostic_only
+auxiliary,test_wWD_abs_error,0.20446911683449379,,diagnostic_only
+auxiliary,test_wLW_abs_error,0.18931882809369993,,diagnostic_only
+mask,test_projected_mask_iou,0.7506502455785019,,2d_footprint_qa
+mask,test_projected_mask_dice,0.8477271366767738,,2d_footprint_qa
+comparator,20.81_projected_mask_dice,0.8665725224434271,,visual_mask_comparator
+comparator,20.81_profile_depth_rmse_m,0.00044529733223988354,m,visual_mask_comparator
+comparator,20.83_projected_mask_dice,0.868041567724276,,negative_gate
+comparator,20.83_profile_depth_rmse_m,0.00040971767567754845,m,negative_gate
+limitation,exact_piao_rbc,false,,scope_boundary
+limitation,rbc_style_approximation,true,,scope_boundary
+limitation,real_experimental_validation,false,,scope_boundary
+limitation,arbitrary_freeform_multidefect,false,,scope_boundary
