@@ -460,3 +460,11 @@ Stage 20.84 closed the current true 3D RBC candidate ambiguity without new train
 The important route correction is that projected mask Dice and 3D profile quality must remain separate. 20.83 has the numerically highest Dice among the three compared candidates, but its profile RMSE is worse than 20.77; therefore it is not a replacement. 20.81 is retained as the visual comparator because it is not a negative profile-depth gate and has strong projected-mask behavior.
 
 Next route direction: use 20.77 for a formal benchmark rerun if consolidating the current candidate, or move to a more profile-native output representation if improving the method. Do not update `CURRENT_BASELINE.md`, do not write v3_240 as a baseline, and keep `exact_piao_rbc=False` / `rbc_style_approximation=True`.
+
+# 2026-05-27 Stage 20.90 route note
+
+Stage 20.90 adds the first small COMSOL diagnostic for physical acquisition variation around the current true 3D RBC baseline. The diagnostic uses 12 base geometries, 96 COMSOL variant rows, and 36 nominal-derived postprocess axis-misalignment rows. It is not training, not a baseline replacement, and does not change `CURRENT_BASELINE.md`.
+
+The route implication is narrow but important: liftoff is now the main robustness blocker. Raw source/amplitude variation can be reduced by the fixed 20.89 `per_axis_rms_train_stats` calibration, but calibration is only a diagnostic/acquisition caveat because it changes clean-scale behavior and is not promoted into the baseline. Scan-line offset and small sensor_x axis misalignment are lower risk in this pack.
+
+Next route direction: build a dedicated COMSOL liftoff robustness / augmentation data design before internal defect feasibility. Internal/buried defects still require a separate label schema and should not be mixed into the current surface RBC profile-depth baseline.

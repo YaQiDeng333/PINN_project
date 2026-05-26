@@ -1,0 +1,15 @@
+20.90 true 3D RBC liftoff / sensor-offset robustness summary
+
+metric_rows: 264
+input_modes: ['calibrated', 'raw']
+calibration_protocol: per_axis_rms_train_stats from 20.89; diagnostic caveat only, not baseline replacement
+baseline_artifact_manifest: results/manifests/true_3d_rbc_baseline_inference_artifact_manifest.json
+latest_newest_npz_scan: false
+training_run: false
+baseline_update: false
+
+worst_raw_test_factor: liftoff / liftoff_z_0p012 degradation=627.747% dice_drop=0.211738
+source_raw_mean_degradation_pct: 261.622
+source_calibrated_mean_degradation_pct: 0.000
+
+Boundary: spatial misalignment rows are nominal COMSOL rows shifted in postprocess; they are sensor-model diagnostics, not extra COMSOL solves.

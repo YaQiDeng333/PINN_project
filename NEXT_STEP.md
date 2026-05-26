@@ -339,3 +339,11 @@ forward profile refinement 已执行受控 sweep，但 validation 选择 `lambda
 
 当前 v3_240 状态是 `pilot_generated` 且 `train_ready_candidate=True`：N=240，split=162/39/39，curvature coverage=sharp 48 / round 49 / boxy 47 / LD_dominant 46 / WD_dominant 50，schema/registry/manifest validation 全部通过，baseline_ready=False。下一步唯一建议是执行 true 3D training gate on v3_240，必须通过 `dataset_id=comsol_true_3d_rbc_imported_watertight_pilot_v3_240` + manifest + `COMSOL_DATA_REGISTRY.md` 显式加载，禁止 latest/newest NPZ 自动扫描；重点检查 `D_m` 和 `wLD/wWD/wLW` 是否相对 v2_120 进一步稳定。
 
+
+## 2026-05-27 update after Stage 20.90
+
+Stage 20.90 completed a small true 3D RBC liftoff / sensor-offset COMSOL diagnostic pack using the fixed 20.85 baseline and the 20.88a inference artifact. It did not train a model, did not update `CURRENT_BASELINE.md`, and did not commit generated diagnostic data.
+
+The key result is that the baseline is not mainly noise-limited here; it is liftoff-sensitive. Source/amplitude variation is largely corrected by the fixed 20.89 `per_axis_rms_train_stats` diagnostic calibration, but liftoff still fails even after calibration. Scan-line offset and postprocess Bx/By/Bz sample misalignment were low-risk in this 12-base diagnostic pack.
+
+唯一下一步: design a dedicated COMSOL liftoff robustness / augmentation data pack before internal-defect feasibility or real-data claims. Calibration remains an acquisition diagnostic caveat, not a baseline replacement.

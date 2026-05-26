@@ -1,0 +1,26 @@
+20.90 true 3D RBC liftoff / sensor-offset diagnostic plan
+
+dataset_id: comsol_true_3d_rbc_imported_watertight_pilot_v3_240
+baseline_artifact: results/manifests/true_3d_rbc_baseline_inference_artifact_manifest.json
+calibration_protocol: per_axis_rms_train_stats from 20.89, diagnostic only, not baseline replacement
+base_geometry_count: 12
+evaluation_rows: 132
+comsol_rows: 96
+postprocess_rows: 36
+COMSOL variants per base: nominal; liftoff z=0.006/0.010/0.012 m; scan bundle offset +/-0.0005 m; Jscale 0.8/1.2.
+Postprocess variants per base: (+1,-1,0), (+2,-2,+1), (-1,+1,0) sensor_x sample shifts for Bx/By/Bz.
+Boundary: diagnostic pack only; no training; no baseline update; generated data/NPZ/.mph/raw CSV/temp files remain uncommitted.
+
+Selected base geometries:
+01. rbc_v2topup_077_buffer_shallow_small_compact_sharp split=test template=sharp depth=shallow reason=template_depth_pair_sharp_shallow_priority_test
+02. rbc_pilot_009_deep_small_compact_sharp split=test template=sharp depth=deep reason=template_depth_pair_sharp_deep_priority_test
+03. rbc_v3topup_118_test_round_shallow_balanced split=test template=round depth=shallow reason=template_depth_pair_round_shallow_priority_test
+04. rbc_v3topup_115_test_round_deep_compact split=test template=round depth=deep reason=template_depth_pair_round_deep_priority_test
+05. rbc_v3topup_125_test_boxy_shallow_balanced split=test template=boxy depth=shallow reason=template_depth_pair_boxy_shallow_priority_test
+06. rbc_pilot_036_deep_elongated_boxy split=test template=boxy depth=deep reason=template_depth_pair_boxy_deep_priority_test
+07. rbc_v2topup_037_shallow_elongated_LD_dominant split=test template=LD_dominant depth=shallow reason=template_depth_pair_LD_dominant_shallow_priority_test
+08. rbc_v2topup_043_deep_medium_balanced_LD_dominant split=test template=LD_dominant depth=deep reason=template_depth_pair_LD_dominant_deep_priority_test
+09. rbc_v2topup_049_shallow_elongated_WD_dominant split=test template=WD_dominant depth=shallow reason=template_depth_pair_WD_dominant_shallow_priority_test
+10. rbc_v2topup_052_deep_large_wide_WD_dominant split=test template=WD_dominant depth=deep reason=template_depth_pair_WD_dominant_deep_priority_test
+11. rbc_pilot_038_shallow_medium_balanced_LD_dominant split=test template=LD_dominant depth=shallow reason=clean_profile_best_sentinel
+12. rbc_v3topup_126_test_boxy_deep_wide split=test template=boxy depth=deep reason=clean_profile_worst_sentinel

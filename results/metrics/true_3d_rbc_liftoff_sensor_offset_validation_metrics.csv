@@ -1,0 +1,15 @@
+check_name,pass,observed,expected,notes
+registry_manifest_gate,True,0,0,explicit v3_240 registry/manifest gate
+plan_csv_exists,True,C:\Users\19166\Desktop\PINN_project\results\metrics\true_3d_rbc_liftoff_sensor_offset_plan.csv,existing 20.90 plan,
+diagnostic_npz_exists,True,C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\generated\true_3d_rbc_liftoff_sensor_offset_diagnostic_pack\true_3d_rbc_liftoff_sensor_offset_diagnostic_pack.npz,generated data path is ignored and uncommitted,
+plan_row_count,True,132,132,
+plan_comsol_row_count,True,96,96,
+plan_postprocess_row_count,True,36,36,
+plan_base_count,True,12,12,
+diagnostic_npz_required_fields,True,none,all required fields,
+diagnostic_success_rows,True,96,>=92 of 96 COMSOL rows,95% success threshold for factor conclusions
+delta_shape,True,"[96, 3, 3, 201]","(n,3,3,201)",
+finite_delta_b,True,True,True,
+delta_recompute_error,True,1.164153e-10,<=1e-8,float32 diagnostic NPZ storage
+nominal_rows,True,12,12,
+labels_join_dataset,True,12,all diagnostic base_sample_ids in v3_240,

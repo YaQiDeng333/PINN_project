@@ -1,0 +1,17 @@
+20.90 true 3D RBC liftoff / sensor-offset diagnostic preflight
+
+dataset_id: comsol_true_3d_rbc_imported_watertight_pilot_v3_240
+registry_manifest_gate: PASS
+n_samples: 240
+delta_b_shape: [240, 3, 3, 201]
+split_counts: train=162, val=39, test=39
+artifact_manifest_exists: True
+checkpoint_path: C:\Users\19166\Desktop\PINN_project\checkpoints\true_3d_rbc_baseline_artifacts\true_3d_rbc_v3_240_seed42_20_77_baseline.pt
+gain_metrics_exists: True
+source_plan_mesh_rows_available: 240
+subagent_method: liftoff/scan offset/source variation are the correct Layer-2 diagnostic factors; calibration is a caveat only.
+subagent_comsol: reuse imported_watertight_mesh_solid and 20.70 material/domain/solver protocol; parameterize sensor_z, scan_line_y, and Jscale.
+subagent_pinn: use v3_240 registry/manifest gate, 20.88a artifact manifest, and fixed per_axis_rms_train_stats calibration.
+subagent_experiment: fixed size 12 base geometries, 96 COMSOL rows, 36 postprocess misalignment rows, 132 evaluation rows.
+subagent_safety: do not submit data/NPZ/.mph/raw CSV/checkpoints/previews/notes/temp STL/CURRENT_BASELINE/baseline docs.
+stop_conditions: registry/manifest fail; artifact manifest missing; source COMSOL base script missing; plan cannot select 12 base geometries; COMSOL success <92/96; nominal replay drift.

@@ -2748,3 +2748,15 @@ Review agent 已完成只读复核，无 must-fix。review 建议把 audit/decis
 - gallery audit: best-profile examples are low profile-error by persisted CSV metrics and visual inspection; worst-profile examples, especially the deep/wide boxy case, retain a plausible 2D footprint but substantially underestimate 3D depth. High-Dice/high-profile-error cases confirm that projected mask quality cannot replace 3D profile metrics.
 - route decision: keep 20.77 as the profile/depth benchmark candidate for formal rerun; keep 20.81 as visual/mask comparator; do not continue small loss-weight tweaks on the current 20.83 profile-primary path.
 - review: independent read-only review agent passed. It suggested tightening the wording around Dice because 20.83 has the numerically highest Dice but is a negative profile-depth gate; the summaries were updated accordingly.
+
+# 2026-05-27 Stage 20.90 true 3D RBC liftoff / sensor-offset COMSOL diagnostic
+
+- scope: small diagnostic pack only. COMSOL was used to generate diagnostic rows; no training, no baseline update, no `CURRENT_BASELINE.md` change, and generated data/NPZ artifacts remain uncommitted.
+- dataset/baseline: fixed current true 3D RBC profile-depth baseline using `dataset_id=comsol_true_3d_rbc_imported_watertight_pilot_v3_240` and the 20.88a inference artifact manifest.
+- pack: 12 base geometries, 96 COMSOL solve rows, and 36 nominal-derived postprocess spatial-misalignment rows; total evaluation rows = 132. COMSOL success count was 96/96.
+- validation: diagnostic NPZ validation passed; validation explicitly allows float32 delta recompute tolerance for the generated diagnostic pack.
+- raw-input finding: liftoff is the dominant risk. The worst raw factor was `liftoff_z_0p012`, with profile RMSE degradation about `627.747%` and projected Dice drop about `0.211738` versus nominal.
+- calibrated-input finding: the fixed 20.89 `per_axis_rms_train_stats` calibration strongly reduced source/amplitude variation and partially reduced liftoff damage, but it is diagnostic only and is not a baseline replacement. Source/amplitude mean degradation improved from about `261.622%` raw to `0.000%` calibrated; liftoff remained failing at about `42.762%` mean calibrated degradation.
+- scan-line offset and postprocess axis misalignment were low risk in this pack: raw mean degradation was about `1.766%` for scan-line offset and `1.700%` for axis misalignment.
+- route decision: keep the 20.85 baseline unchanged. The next technical step should be dedicated COMSOL liftoff robustness / augmentation data design before internal-defect feasibility or real-data claims.
+- review: independent read-only review passed after one must-fix loop. The must-fix corrected nominal replay from circular nominal-vs-nominal comparison to regenerated COMSOL nominal rows versus the 20.88a clean prediction artifact for the same 12 base samples.
