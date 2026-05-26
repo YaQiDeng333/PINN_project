@@ -468,3 +468,8 @@ Stage 20.90 adds the first small COMSOL diagnostic for physical acquisition vari
 The route implication is narrow but important: liftoff is now the main robustness blocker. Raw source/amplitude variation can be reduced by the fixed 20.89 `per_axis_rms_train_stats` calibration, but calibration is only a diagnostic/acquisition caveat because it changes clean-scale behavior and is not promoted into the baseline. Scan-line offset and small sensor_x axis misalignment are lower risk in this pack.
 
 Next route direction: build a dedicated COMSOL liftoff robustness / augmentation data design before internal defect feasibility. Internal/buried defects still require a separate label schema and should not be mixed into the current surface RBC profile-depth baseline.
+# 2026-05-27 Stage 20.91 route note
+
+Stage 20.91 is a plan-only follow-up to the 20.90 liftoff diagnostic. It defines a dedicated liftoff augmentation pack with 48 base geometries and four paired liftoff levels per base (`0.006 / 0.008 / 0.010 / 0.012 m`), for 192 planned COMSOL rows. It does not run COMSOL, generate data, train, or update `CURRENT_BASELINE.md`.
+
+The route implication is that liftoff robustness should be addressed before internal/buried defects and before real-data claims. Calibration remains an acquisition diagnostic caveat only. The next method gate should compare the current unconditioned baseline family against a scalar `sensor_z_m` conditioned liftoff-aware variant in 20.92, after the pack is generated and validated.

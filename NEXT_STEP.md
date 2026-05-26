@@ -347,3 +347,8 @@ Stage 20.90 completed a small true 3D RBC liftoff / sensor-offset COMSOL diagnos
 The key result is that the baseline is not mainly noise-limited here; it is liftoff-sensitive. Source/amplitude variation is largely corrected by the fixed 20.89 `per_axis_rms_train_stats` diagnostic calibration, but liftoff still fails even after calibration. Scan-line offset and postprocess Bx/By/Bz sample misalignment were low-risk in this 12-base diagnostic pack.
 
 唯一下一步: design a dedicated COMSOL liftoff robustness / augmentation data pack before internal-defect feasibility or real-data claims. Calibration remains an acquisition diagnostic caveat, not a baseline replacement.
+## 2026-05-27 update after Stage 20.91
+
+Stage 20.91 completed the dedicated liftoff augmentation pack plan without running COMSOL, generating data/NPZ, training, or changing `CURRENT_BASELINE.md`. The plan selects 48 base geometries and four paired liftoff levels per base: `sensor_z_m=0.006 / 0.008 / 0.010 / 0.012`, for 192 planned COMSOL rows.
+
+唯一下一步：execute the 20.91 COMSOL liftoff augmentation pack generation as a separate confirmed stage, keeping generated NPZ/data ignored and uncommitted. After that, 20.92 should compare the current unconditioned baseline family against a scalar `sensor_z_m` conditioned liftoff-aware variant under multi-liftoff evaluation.

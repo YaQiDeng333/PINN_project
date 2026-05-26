@@ -1,0 +1,78 @@
+20.91 true 3D RBC liftoff augmentation pack plan
+
+dataset_id: comsol_true_3d_rbc_imported_watertight_pilot_v3_240
+registry_path: C:\Users\19166\Desktop\PINN_project\COMSOL_DATA_REGISTRY.md
+manifest_path: C:\Users\19166\Desktop\PINN_project\results\manifests\comsol_true_3d_rbc_imported_watertight_pilot_v3_240.manifest.json
+baseline_artifact: results/manifests/true_3d_rbc_baseline_inference_artifact_manifest.json
+calibration_protocol: per_axis_rms_train_stats from 20.89, diagnostic caveat only, not baseline replacement
+target_base_count: 48
+selected_base_count: 48
+target_met: True
+minimum_base_count: 32
+evaluation_rows: 192
+liftoff_levels_m: [0.006, 0.008, 0.01, 0.012]
+nominal_liftoff_m: 0.008
+COMSOL rows per base: 4
+planned_COMSOL_rows: 192
+requires_COMSOL_for_generation: true
+training_run: false
+baseline_update: false
+CURRENT_BASELINE_update: false
+sensor_z_condition_recommendation: plan 20.92 ablation comparing unconditioned model vs scalar sensor_z_m conditioned model.
+internal_defect_feasibility: deferred until liftoff robustness is characterized.
+
+Coverage:
+split: {'test': 8, 'train': 32, 'val': 8}
+curvature_template: {'LD_dominant': 9, 'round': 10, 'sharp': 10, 'WD_dominant': 9, 'boxy': 10}
+depth_bin: {'shallow': 16, 'medium': 16, 'deep': 16}
+aspect_bin: {'balanced': 12, 'narrow': 12, 'compact': 12, 'wide': 12}
+
+Selected base geometries:
+01. rbc_pilot_038_shallow_medium_balanced_LD_dominant split=test template=LD_dominant depth=shallow aspect=balanced reason=20_90_worst_liftoff_rank_1_liftoff_z_0p012
+02. rbc_v2topup_037_shallow_elongated_LD_dominant split=test template=LD_dominant depth=shallow aspect=narrow reason=20_90_worst_liftoff_rank_2_liftoff_z_0p012
+03. rbc_v3topup_118_test_round_shallow_balanced split=test template=round depth=shallow aspect=balanced reason=20_90_worst_liftoff_rank_3_liftoff_z_0p012
+04. rbc_v2topup_077_buffer_shallow_small_compact_sharp split=test template=sharp depth=shallow aspect=compact reason=20_90_worst_liftoff_rank_4_liftoff_z_0p012
+05. rbc_v2topup_049_shallow_elongated_WD_dominant split=test template=WD_dominant depth=shallow aspect=narrow reason=20_90_worst_liftoff_rank_5_liftoff_z_0p012
+06. rbc_v3topup_125_test_boxy_shallow_balanced split=test template=boxy depth=shallow aspect=balanced reason=20_90_worst_liftoff_rank_6_liftoff_z_0p012
+07. rbc_pilot_006_medium_medium_balanced_sharp split=train template=sharp depth=medium aspect=balanced reason=coverage_template_depth_sharp_medium
+08. rbc_pilot_010_deep_medium_balanced_sharp split=train template=sharp depth=deep aspect=balanced reason=coverage_template_depth_sharp_deep
+09. rbc_v2topup_019_medium_elongated_round split=train template=round depth=medium aspect=narrow reason=coverage_template_depth_round_medium
+10. rbc_v2topup_056_deep_elongated_round split=train template=round depth=deep aspect=narrow reason=coverage_template_depth_round_deep
+11. rbc_pilot_030_medium_medium_balanced_boxy split=train template=boxy depth=medium aspect=balanced reason=coverage_template_depth_boxy_medium
+12. rbc_pilot_034_deep_medium_balanced_boxy split=train template=boxy depth=deep aspect=balanced reason=coverage_template_depth_boxy_deep
+13. rbc_pilot_042_medium_medium_balanced_LD_dominant split=train template=LD_dominant depth=medium aspect=balanced reason=coverage_template_depth_LD_dominant_medium
+14. rbc_v3topup_134_train_LD_dominant_deep_balanced split=train template=LD_dominant depth=deep aspect=balanced reason=coverage_template_depth_LD_dominant_deep
+15. rbc_pilot_054_medium_medium_balanced_WD_dominant split=val template=WD_dominant depth=medium aspect=balanced reason=coverage_template_depth_WD_dominant_medium
+16. rbc_pilot_058_deep_medium_balanced_WD_dominant split=val template=WD_dominant depth=deep aspect=balanced reason=coverage_template_depth_WD_dominant_deep
+17. rbc_pilot_005_medium_small_compact_sharp split=val template=sharp depth=medium aspect=compact reason=coverage_aspect_depth_compact_medium
+18. rbc_v3topup_007_train_WD_dominant_deep_compact split=train template=WD_dominant depth=deep aspect=compact reason=coverage_aspect_depth_compact_deep
+19. rbc_v3topup_085_val_WD_dominant_shallow_wide split=val template=WD_dominant depth=shallow aspect=wide reason=coverage_aspect_depth_wide_shallow
+20. rbc_v3topup_082_train_LD_dominant_medium_wide split=train template=LD_dominant depth=medium aspect=wide reason=coverage_aspect_depth_wide_medium
+21. rbc_v3topup_019_train_WD_dominant_deep_wide split=train template=WD_dominant depth=deep aspect=wide reason=coverage_aspect_depth_wide_deep
+22. rbc_pilot_013_shallow_small_compact_round split=train template=round depth=shallow aspect=compact reason=balanced_fill_template_depth_aspect_split
+23. rbc_v3topup_058_train_boxy_medium_wide split=train template=boxy depth=medium aspect=wide reason=balanced_fill_template_depth_aspect_split
+24. rbc_v3topup_044_train_round_deep_compact split=train template=round depth=deep aspect=compact reason=balanced_fill_template_depth_aspect_split
+25. rbc_v2topup_004_shallow_elongated_sharp split=train template=sharp depth=shallow aspect=narrow reason=balanced_fill_template_depth_aspect_split
+26. rbc_v2topup_029_medium_large_wide_boxy split=train template=boxy depth=medium aspect=wide reason=balanced_fill_template_depth_aspect_split
+27. rbc_v3topup_056_train_boxy_deep_compact split=train template=boxy depth=deep aspect=compact reason=balanced_fill_template_depth_aspect_split
+28. rbc_v2topup_015_shallow_elongated_round split=train template=round depth=shallow aspect=narrow reason=balanced_fill_template_depth_aspect_split
+29. rbc_v3topup_028_train_sharp_medium_wide split=train template=sharp depth=medium aspect=wide reason=balanced_fill_template_depth_aspect_split
+30. rbc_v3topup_071_train_LD_dominant_deep_compact split=train template=LD_dominant depth=deep aspect=compact reason=balanced_fill_template_depth_aspect_split
+31. rbc_v2topup_026_shallow_elongated_boxy split=train template=boxy depth=shallow aspect=narrow reason=balanced_fill_template_depth_aspect_split
+32. rbc_v3topup_042_train_round_medium_wide split=train template=round depth=medium aspect=wide reason=balanced_fill_template_depth_aspect_split
+33. rbc_v2topup_009_deep_small_compact_sharp split=train template=sharp depth=deep aspect=compact reason=balanced_fill_template_depth_aspect_split
+34. rbc_v3topup_010_train_WD_dominant_shallow_narrow split=train template=WD_dominant depth=shallow aspect=narrow reason=balanced_fill_template_depth_aspect_split
+35. rbc_v3topup_070_train_LD_dominant_medium_wide split=train template=LD_dominant depth=medium aspect=wide reason=balanced_fill_template_depth_aspect_split
+36. rbc_v2topup_020_deep_small_compact_round split=train template=round depth=deep aspect=compact reason=balanced_fill_template_depth_aspect_split
+37. rbc_v3topup_029_train_sharp_shallow_narrow split=train template=sharp depth=shallow aspect=narrow reason=balanced_fill_template_depth_aspect_split
+38. rbc_pilot_031_medium_large_wide_boxy split=train template=boxy depth=medium aspect=wide reason=balanced_fill_template_depth_aspect_split
+39. rbc_v3topup_004_train_WD_dominant_deep_compact split=train template=WD_dominant depth=deep aspect=compact reason=balanced_fill_template_depth_aspect_split
+40. rbc_v3topup_094_val_round_shallow_narrow split=val template=round depth=shallow aspect=narrow reason=balanced_fill_template_depth_aspect_split
+41. rbc_v2topup_007_medium_large_wide_sharp split=train template=sharp depth=medium aspect=wide reason=balanced_fill_template_depth_aspect_split
+42. rbc_v2topup_042_deep_small_compact_LD_dominant split=val template=LD_dominant depth=deep aspect=compact reason=balanced_fill_template_depth_aspect_split
+43. rbc_v3topup_057_train_boxy_shallow_narrow split=train template=boxy depth=shallow aspect=narrow reason=balanced_fill_template_depth_aspect_split
+44. rbc_v2topup_040_medium_large_wide_LD_dominant split=test template=LD_dominant depth=medium aspect=wide reason=balanced_fill_template_depth_aspect_split
+45. rbc_v2topup_063_deep_small_compact_WD_dominant split=val template=WD_dominant depth=deep aspect=compact reason=balanced_fill_template_depth_aspect_split
+46. rbc_v3topup_045_train_round_shallow_narrow split=train template=round depth=shallow aspect=narrow reason=balanced_fill_template_depth_aspect_split
+47. rbc_v3topup_091_val_sharp_medium_balanced split=val template=sharp depth=medium aspect=balanced reason=balanced_fill_template_depth_aspect_split
+48. rbc_v3topup_126_test_boxy_deep_wide split=test template=boxy depth=deep aspect=wide reason=balanced_fill_template_depth_aspect_split

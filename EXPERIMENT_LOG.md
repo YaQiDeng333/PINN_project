@@ -2760,3 +2760,15 @@ Review agent 已完成只读复核，无 must-fix。review 建议把 audit/decis
 - scan-line offset and postprocess axis misalignment were low risk in this pack: raw mean degradation was about `1.766%` for scan-line offset and `1.700%` for axis misalignment.
 - route decision: keep the 20.85 baseline unchanged. The next technical step should be dedicated COMSOL liftoff robustness / augmentation data design before internal-defect feasibility or real-data claims.
 - review: independent read-only review passed after one must-fix loop. The must-fix corrected nominal replay from circular nominal-vs-nominal comparison to regenerated COMSOL nominal rows versus the 20.88a clean prediction artifact for the same 12 base samples.
+
+# 2026-05-27 Stage 20.91 true 3D RBC liftoff augmentation pack plan
+
+- scope: plan-only. No COMSOL run, no generated data/NPZ, no training, no checkpoint, no preview, and no `CURRENT_BASELINE.md` update.
+- dataset gate: explicit `dataset_id=comsol_true_3d_rbc_imported_watertight_pilot_v3_240` through `COMSOL_DATA_REGISTRY.md` and the tracked v3_240 manifest.
+- baseline artifact: fixed 20.88a artifact manifest `results/manifests/true_3d_rbc_baseline_inference_artifact_manifest.json`.
+- motivation: 20.90 identified liftoff as the main unsolved physical-acquisition blocker. Source/amplitude calibration remains a diagnostic caveat only.
+- plan result: target pack size met, with 48 base geometries and 4 paired liftoff levels per base, for 192 planned COMSOL rows.
+- liftoff levels: `sensor_z_m=0.006 / 0.008 / 0.010 / 0.012`; `0.008m` remains nominal.
+- coverage: split `train/val/test=32/8/8`; curvature template counts `sharp=10, round=10, boxy=10, LD_dominant=9, WD_dominant=9`; depth counts `shallow=16, medium=16, deep=16`; aspect counts `compact=12, balanced=12, wide=12, narrow=12`.
+- route decision: the next execution stage should generate this dedicated liftoff COMSOL pack, then 20.92 should compare unconditioned vs scalar `sensor_z_m` conditioned liftoff-aware training. Internal defect feasibility remains deferred.
+- review: independent read-only review passed with no must-fix. A suggestion to record exact registry/manifest paths in human-facing summaries was adopted.
