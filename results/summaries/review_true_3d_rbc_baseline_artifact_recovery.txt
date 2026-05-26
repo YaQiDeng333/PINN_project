@@ -1,0 +1,28 @@
+20.88a true 3D RBC baseline artifact recovery review
+
+Review agent: independent read-only Codex subagent.
+Review scope: scripts/export_true_3d_rbc_baseline_inference_artifact.py, recovery summaries/metrics, artifact manifest, ignored checkpoint/prediction artifacts, and safety boundary.
+
+Must-fix:
+none.
+
+Suggestion handled by main controller:
+The review agent noted that the first script version accepted an arbitrary --dataset-id even though artifact names and manifest semantics are fixed to v3_240. The script now rejects any dataset_id other than comsol_true_3d_rbc_imported_watertight_pilot_v3_240 and rejects any seed other than 42.
+
+Acceptable:
+- Dataset loading uses COMSOL_DATA_REGISTRY.md + manifest through the explicit loader.
+- There is no latest/newest NPZ scan.
+- The recovered artifact uses the 20.77/20.85 small Conv1D encoder + MLP six-parameter head with seed=42.
+- Training is artifact recovery only: no hyperparameter tuning, no architecture change, and no test-based selection.
+- No COMSOL run was performed.
+- No data or NPZ file was generated or modified.
+- CURRENT_BASELINE.md was not modified.
+- Checkpoint and prediction artifact are under checkpoints/true_3d_rbc_baseline_artifacts/ and are ignored.
+- results/manifests/true_3d_rbc_baseline_inference_artifact_manifest.json is sufficient for 20.88 to locate the ignored checkpoint/prediction artifacts.
+- Clean verification reproduces 20.85 exactly: test normalized MAE 0.6780143536818333, profile_depth_rmse_m 0.0003877372636895579, projected mask Dice 0.8477271366767738, with zero delta in the verification CSV.
+
+Can 20.88 reuse this artifact:
+yes.
+
+Short reason:
+The recovered checkpoint reloads and reproduces the tracked prediction artifact and the 20.85 clean benchmark metrics exactly. The only review suggestion was converted into a hard guard against dataset/seed misuse.

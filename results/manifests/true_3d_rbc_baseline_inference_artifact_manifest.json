@@ -1,0 +1,119 @@
+{
+  "artifact_id": "true_3d_rbc_v3_240_seed42_20_77_baseline_inference_artifact",
+  "stage": "20.88a_baseline_artifact_recovery",
+  "dataset_id": "comsol_true_3d_rbc_imported_watertight_pilot_v3_240",
+  "route": "true_3d_piao_style",
+  "exact_piao_rbc": false,
+  "rbc_style_approximation": true,
+  "purpose": "Enable 20.88 observation perturbation robustness evaluation without retraining.",
+  "checkpoint_path": "C:\\Users\\19166\\Desktop\\PINN_project\\checkpoints\\true_3d_rbc_baseline_artifacts\\true_3d_rbc_v3_240_seed42_20_77_baseline.pt",
+  "checkpoint_sha256": "2a3b948c4e16f4e17b800e20af48d47a87ef9c7d66912e75514f414f4b20329b",
+  "prediction_artifact_path": "C:\\Users\\19166\\Desktop\\PINN_project\\checkpoints\\true_3d_rbc_baseline_artifacts\\true_3d_rbc_v3_240_seed42_20_77_predictions.npz",
+  "prediction_artifact_sha256": "50822c9f0a2cbc2b855603403817caaec29db87e02cfed2afc08d0c3f26ff5d4",
+  "checkpoint_committed": false,
+  "prediction_artifact_committed": false,
+  "artifact_paths_are_ignored": true,
+  "model_class": "RBCConvRegressor",
+  "model_family": "20.77 small Conv1D encoder + MLP six-parameter head",
+  "seed": 42,
+  "best_epoch": 6,
+  "best_val_selection_metric": 0.9807505548000336,
+  "input": {
+    "delta_b_shape": [
+      240,
+      3,
+      3,
+      201
+    ],
+    "conv1d_shape": [
+      240,
+      9,
+      201
+    ],
+    "axis_names": [
+      "Bx",
+      "By",
+      "Bz"
+    ],
+    "model_input_fields": [
+      "delta_b"
+    ],
+    "forbidden_model_input_fields": [
+      "rbc_params",
+      "projected_mask_2d",
+      "profile_depth_grid_m",
+      "split",
+      "curvature_template",
+      "depth_bin",
+      "aspect_bin",
+      "sample_id"
+    ]
+  },
+  "normalization": {
+    "x_mean_shape": [
+      1,
+      9,
+      1
+    ],
+    "x_std_shape": [
+      1,
+      9,
+      1
+    ],
+    "y_mean_shape": [
+      1,
+      6
+    ],
+    "y_std_shape": [
+      1,
+      6
+    ],
+    "fit_scope": "train_split_only"
+  },
+  "split_counts": {
+    "train": 162,
+    "val": 39,
+    "test": 39
+  },
+  "protocol": {
+    "epochs": 300,
+    "batch_size": 8,
+    "lr": 0.003,
+    "weight_decay": 0.0001,
+    "loss": "weighted_smooth_l1",
+    "selection": "validation-only best checkpoint for fixed seed=42",
+    "test_final_only": true,
+    "hyperparameter_tuning": false,
+    "architecture_change": false
+  },
+  "test_metrics": {
+    "split": "test",
+    "sample_count": 39,
+    "normalized_param_mae": 0.6780143536818333,
+    "dimension_mae_norm": 0.4387845003213256,
+    "curvature_mae_norm": 0.9172442085467852,
+    "L_mae_mm": 1.8918915996566796,
+    "W_mae_mm": 2.1857599088778863,
+    "D_mae_mm": 0.8002313476246901,
+    "wLD_abs_error": 0.2094394748027508,
+    "wWD_abs_error": 0.20446911683449379,
+    "wLW_abs_error": 0.18931882809369993,
+    "wMAE_auxiliary": 0.20107580616306037,
+    "projected_mask_iou": 0.7506502455785019,
+    "projected_mask_dice": 0.8477271366767738,
+    "profile_depth_rmse_m": 0.0003877372636895579,
+    "er_like_profile_error": 0.3405436946031375,
+    "max_depth_error_m": 0.0008002313403173899,
+    "volume_proxy_rel_error": 0.5764562522168966
+  },
+  "forbidden_commit_artifacts": [
+    "checkpoint .pt",
+    "prediction .npz",
+    "data/",
+    "NPZ",
+    "checkpoint",
+    "preview PNG",
+    "notes",
+    "__pycache__"
+  ]
+}

@@ -1,0 +1,21 @@
+20.88a true 3D RBC baseline artifact recovery preflight summary
+
+dataset_id: comsol_true_3d_rbc_imported_watertight_pilot_v3_240
+registry_manifest_gate_pass: True
+schema_pass: True
+npz_path_resolved_from_manifest: C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\prepared\experimental\true_3d_rbc_pilot\comsol_true_3d_rbc_imported_watertight_pilot_v3_240.npz
+input_shape: delta_b=[240, 3, 3, 201], conv1d=[240, 9, 201]
+split_counts: {'train': 162, 'val': 39, 'test': 39}
+reference_material_missing: none
+existing_output_artifacts: {'checkpoint_path_exists': True, 'prediction_artifact_exists': True, 'artifact_manifest_exists': True}
+artifact_recovery_seed: 42
+model_protocol: 20.77/20.85 small Conv1D encoder + MLP six-parameter head
+loss: weighted SmoothL1 with dimension weights=1.0 and curvature weights=0.5
+selection: validation-only best checkpoint for fixed seed=42
+latest_newest_npz_scan: false
+COMSOL_run: false
+new_data_generation: false
+NPZ_modification: false
+tuning_or_architecture_change: false
+forbidden_submit: data/, NPZ, checkpoint, preview PNG, notes, __pycache__, baseline docs, CURRENT_BASELINE.md, scripts/visualize_current_baseline.py
+stage_gate: pass

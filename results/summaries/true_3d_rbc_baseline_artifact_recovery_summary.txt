@@ -1,0 +1,28 @@
+20.88a true 3D RBC baseline artifact recovery summary
+
+dataset_id: comsol_true_3d_rbc_imported_watertight_pilot_v3_240
+artifact_recovery_only: true
+COMSOL_run: false
+new_data_generation: false
+NPZ_modification: false
+CURRENT_BASELINE_update: false
+hyperparameter_tuning: false
+architecture_change: false
+test_based_selection: false
+model_family: 20.77/20.85 small Conv1D encoder + MLP six-parameter head
+seed: 42
+best_epoch: 6
+best_val_selection_metric: 0.980750554800
+checkpoint_path_ignored_not_committed: C:\Users\19166\Desktop\PINN_project\checkpoints\true_3d_rbc_baseline_artifacts\true_3d_rbc_v3_240_seed42_20_77_baseline.pt
+prediction_artifact_path_ignored_not_committed: C:\Users\19166\Desktop\PINN_project\checkpoints\true_3d_rbc_baseline_artifacts\true_3d_rbc_v3_240_seed42_20_77_predictions.npz
+artifact_manifest_committable: C:\Users\19166\Desktop\PINN_project\results\manifests\true_3d_rbc_baseline_inference_artifact_manifest.json
+checkpoint_sha256: 2a3b948c4e16f4e17b800e20af48d47a87ef9c7d66912e75514f414f4b20329b
+prediction_artifact_sha256: 50822c9f0a2cbc2b855603403817caaec29db87e02cfed2afc08d0c3f26ff5d4
+train_val_test_normalized_mae: 0.646111 / 0.748694 / 0.678014
+test_profile_depth_rmse_m: 0.000387737
+test_er_like_profile_error: 0.340544
+test_LWD_mae_mm: L=1.891892, W=2.185760, D=0.800231
+test_wMAE_auxiliary: 0.201076
+test_projected_mask_iou_dice: 0.750650, 0.847727
+clean_20_85_reproduction: pass
+next_step: return to 20.88 observation perturbation robustness audit using the artifact manifest.

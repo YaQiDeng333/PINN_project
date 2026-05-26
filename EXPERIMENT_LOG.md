@@ -1,5 +1,13 @@
 # 实验工作日志
 
+## 2026-05-26 更新：第 20.88a true 3D RBC baseline inference artifact recovery
+
+第 20.88a 已完成 frozen baseline artifact recovery/export。本轮只按固定 `dataset_id=comsol_true_3d_rbc_imported_watertight_pilot_v3_240` 和 seed `42` 复现 20.77/20.85 small Conv1D encoder + MLP six-parameter head；没有运行 COMSOL，没有生成或修改 data / NPZ，没有更新 `CURRENT_BASELINE.md`，也没有调参、换模型或用 test 反选。
+
+导出的 checkpoint 和 raw prediction artifact 位于 ignored 路径 `checkpoints/true_3d_rbc_baseline_artifacts/`，不会提交；可提交的定位文件是 `results/manifests/true_3d_rbc_baseline_inference_artifact_manifest.json`。verification 重新加载 checkpoint 并与 prediction artifact 对齐，clean test 指标精确复现 20.85：normalized MAE `0.6780143536818333`，profile_depth_rmse `0.0003877372636895579 m`，Er-like `0.3405436946031375`，L/W/D MAE `1.8918915996566796 / 2.1857599088778863 / 0.8002313476246901 mm`，projected mask IoU/Dice `0.7506502455785019 / 0.8477271366767738`，wMAE auxiliary `0.20107580616306037`。
+
+只读 review agent 通过，无 must-fix。review 建议将 dataset/seed 固定为硬约束，已处理：导出脚本现在拒绝非 v3_240 dataset 和非 seed=42。下一步可以回到第 20.88 observation perturbation robustness audit，用该 manifest 定位 ignored artifact，对扰动后的 `delta_b` 做 frozen-model inference。
+
 ## 2026-05-26 更新：第 20.88 observation perturbation robustness audit preflight blocker
 
 第 20.88 按规则进入 true 3D RBC observation perturbation robustness audit，但在 Stage A preflight 停止，没有执行扰动评估。本轮没有运行 COMSOL、没有训练、没有生成或修改 data / NPZ、没有修改 `CURRENT_BASELINE.md`，也没有实现 Stage B/C 扰动脚本。数据 gate 通过：`dataset_id=comsol_true_3d_rbc_imported_watertight_pilot_v3_240` 通过 `COMSOL_DATA_REGISTRY.md` + manifest 显式解析，`delta_b` shape 为 `(240,3,3,201)`，Conv1D view 为 `(240,9,201)`，split 为 `162/39/39`，Bx/By/Bz 轴和标签字段完整。

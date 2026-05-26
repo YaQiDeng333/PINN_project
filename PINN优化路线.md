@@ -1,5 +1,13 @@
 # PINN 优化路线
 
+## 2026-05-26 路线同步：20.88a baseline inference artifact recovery
+
+20.88a 解决了 20.88 preflight 暴露的 frozen artifact blocker。当前 true 3D RBC baseline 仍保持为 20.86 transition 后的 profile-depth baseline；本轮没有改 `CURRENT_BASELINE.md`，也没有生成新数据、修改 NPZ、运行 COMSOL 或改变模型路线。
+
+路线状态更新为：`comsol_true_3d_rbc_imported_watertight_pilot_v3_240` 的 20.77/20.85 seed=42 small Conv1D + MLP six-parameter head 已导出可复用 inference artifact。checkpoint 和 raw prediction artifact 放在 ignored 的 `checkpoints/true_3d_rbc_baseline_artifacts/`，提交的只是 `results/manifests/true_3d_rbc_baseline_inference_artifact_manifest.json`。clean verification 精确复现 20.85 的 profile-depth 主指标和 projected-mask QA 指标。
+
+因此下一步可以回到 20.88 observation perturbation robustness audit：只在内存中扰动现有 v3_240 `delta_b`，用 frozen artifact 前向评估 noise、gain、zero drift、reference subtraction error、jitter 和 channel dropout。20.88 仍然不是训练阶段，也不是 COMSOL 数据生成阶段；如果 observation perturbation 暴露敏感项，再根据 20.87 路线进入 augmentation 或 20.89 liftoff/sensor-offset COMSOL diagnostic pack。
+
 ## 2026-05-26 路线同步：20.88 observation robustness preflight blocker
 
 20.88 没有进入 observation perturbation robustness 评估，而是在 preflight 停止。原因不是 dataset/schema 问题：v3_240 registry / manifest gate 通过，输入 shape、split、Bx/By/Bz 轴和 profile/mask label 均可用；真正 blocker 是 frozen model artifact 缺失。当前仓库只有 20.77/20.85 的 clean metrics 和 per-sample profile error rows，没有能对扰动 `delta_b` 重新前向的 seed=42 checkpoint 或 raw prediction artifact。

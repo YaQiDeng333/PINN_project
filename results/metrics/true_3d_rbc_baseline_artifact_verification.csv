@@ -1,0 +1,14 @@
+metric,reference_value,recovered_value,delta,tolerance,pass
+test_normalized_param_mae,0.6780143536818333,0.6780143536818333,0.0,1e-06,True
+test_L_mae_mm,1.8918915996566796,1.8918915996566796,0.0,1e-06,True
+test_W_mae_mm,2.1857599088778863,2.1857599088778863,0.0,1e-06,True
+test_D_mae_mm,0.8002313476246901,0.8002313476246901,0.0,1e-06,True
+test_wMAE_auxiliary,0.20107580616306037,0.20107580616306037,0.0,1e-06,True
+test_projected_mask_iou,0.7506502455785019,0.7506502455785019,0.0,1e-06,True
+test_projected_mask_dice,0.8477271366767738,0.8477271366767738,0.0,1e-06,True
+test_profile_depth_rmse_m,0.0003877372636895579,0.0003877372636895579,0.0,1e-12,True
+test_er_like_profile_error,0.3405436946031375,0.3405436946031375,0.0,1e-09,True
+checkpoint_exists,True,True,0,0,True
+prediction_artifact_exists,True,True,0,0,True
+checkpoint_reload_prediction_match,True,True,0,0,True
+manifest_sufficient_for_20_88,True,True,0,0,True

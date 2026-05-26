@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-05-26 after Stage 20.88a
+
+Next step: **return to 20.88 observation perturbation robustness audit using the recovered frozen baseline artifact**.
+
+Stage 20.88a recovered the fixed 20.77/20.85 seed=42 inference artifact for `comsol_true_3d_rbc_imported_watertight_pilot_v3_240`. The checkpoint and raw prediction artifact are intentionally stored only under the ignored path `checkpoints/true_3d_rbc_baseline_artifacts/`; the committable locator is `results/manifests/true_3d_rbc_baseline_inference_artifact_manifest.json`.
+
+The artifact reload verification exactly reproduces the clean 20.85 metrics: test normalized MAE `0.6780143536818333`, profile_depth_rmse `0.0003877372636895579 m`, Er-like `0.3405436946031375`, L/W/D MAE `1.8918915996566796 / 2.1857599088778863 / 0.8002313476246901 mm`, projected mask IoU/Dice `0.7506502455785019 / 0.8477271366767738`. 20.88 can now perturb `delta_b` in memory and run frozen-model inference without retraining. Do not retrain inside 20.88, do not modify NPZ/data, and do not commit the ignored checkpoint or prediction artifact.
+
 ## 2026-05-26 after Stage 20.88 preflight blocker
 
 Next step: **recover or export the frozen 20.77/20.85 baseline model artifact before robustness evaluation**.
