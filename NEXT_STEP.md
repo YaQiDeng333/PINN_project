@@ -378,3 +378,9 @@ Only next step: train a nominal-preserving `S3_baseline_plus_liftoff_adapter` ca
 Stage 20.94 trained the nominal-preserving baseline+liftoff adapter on `comsol_true_3d_rbc_liftoff_aug_pack_v1` without COMSOL, new data, NPZ mutation, or `CURRENT_BASELINE.md` changes. Validation selected `A2_latent_residual_adapter`, seed `2026`. It preserved nominal behavior (`0.000333059 m -> 0.000335821 m`, `+0.829%`) and improved non-nominal profile RMSE (`0.000874310 m -> 0.000437214 m`, `-49.993%`) while raising non-nominal Dice from `0.683351` to `0.842378`.
 
 Only next step: run a formal liftoff benchmark for the A2 robustness candidate. Keep `CURRENT_BASELINE.md` unchanged until a separate benchmark/baseline transition explicitly approves a replacement or an auxiliary robustness baseline.
+
+## 2026-05-28 update after Stage 20.95
+
+Stage 20.95 completed the formal liftoff benchmark for `A2_latent_residual_adapter` using persisted 20.94 metrics and explicit `comsol_true_3d_rbc_liftoff_aug_pack_v1` registry/manifest loading. A2 is accepted as a `CURRENT_BASELINE` companion robustness module: nominal RMSE is preserved within `+0.829%`, while non-nominal RMSE improves by `49.993%` and non-nominal Dice rises to `0.842378`.
+
+Only next step: run a liftoff-conditioned inference smoke stage. Verify the frozen 20.85 baseline + A2 companion loading path, require `sensor_z_m` metadata, and keep `CURRENT_BASELINE.md` unchanged before real-data alignment or internal-defect feasibility.

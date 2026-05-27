@@ -2820,3 +2820,16 @@ Review agent 已完成只读复核，无 must-fix。review 建议把 audit/decis
 - comparison vs C0: nominal profile RMSE degraded only `0.829%`, within the <=10% guard; non-nominal profile RMSE improved by `49.993%`; non-nominal Dice improved by `0.159027`.
 - decision: A2 is a liftoff robustness candidate and should enter a formal liftoff benchmark. This is not a baseline replacement; `CURRENT_BASELINE.md` remains the nominal 20.85 baseline.
 - review: independent read-only review passed with no must-fix. Two provenance/input-boundary suggestions were adopted.
+
+# 2026-05-28 Stage 20.95 formal liftoff benchmark for A2 residual adapter
+
+- dataset_id: `comsol_true_3d_rbc_liftoff_aug_pack_v1`, explicitly loaded through `COMSOL_DATA_REGISTRY.md` and `results/manifests/comsol_true_3d_rbc_liftoff_aug_pack_v1.manifest.json`.
+- scope: formal report/audit only. No training, no COMSOL, no data/NPZ mutation, no checkpoint/preview/notes artifact committed, and no `CURRENT_BASELINE.md` update.
+- selected module: `A2_latent_residual_adapter`, seed `2026`, carried forward from 20.94 validation-only selection.
+- nominal result: C0 frozen 20.85 profile RMSE `0.000333059 m` -> A2 `0.000335821 m`, only `+0.829%`; nominal Dice improved from `0.843957` to `0.855910`.
+- non-nominal result: C0 profile RMSE `0.000874310 m` -> A2 `0.000437214 m`, `-49.993%`; non-nominal Dice improved from `0.683351` to `0.842378`; non-nominal L/W/D MAE was `1.939 / 1.715 / 0.871 mm`.
+- per-liftoff note: A2 strongly improves `0.010 m` and `0.012 m`; `0.006 m` remains a watch case with profile RMSE `0.000390434 m`, `+9.110%` vs C0, while Dice improves to `0.882553`.
+- decision: accept A2 as a `CURRENT_BASELINE` companion robustness module, not as `CURRENT_BASELINE` itself. The baseline remains the 20.85 nominal true 3D RBC profile-depth baseline.
+- metadata contract: `sensor_z_m` is required for multi-liftoff / real-experimental inference using the companion module.
+- artifact boundary: 20.95 uses persisted 20.94 aggregate metrics; per-sample A2 failure ranking was not recomputed because no per-sample A2 prediction artifact was available.
+- review: independent read-only review passed after the review file was saved; no experimental or route must-fix remained.

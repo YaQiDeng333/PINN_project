@@ -1,0 +1,28 @@
+20.95 formal liftoff benchmark for A2 residual adapter
+
+dataset_id: comsol_true_3d_rbc_liftoff_aug_pack_v1
+dataset_gate: registry + tracked manifest explicit load passed
+COMSOL_run: false
+training_run: false
+data_or_npz_write: false
+CURRENT_BASELINE_update: false
+benchmark_scope: companion robustness module audit, not baseline replacement
+selected_adapter: A2_latent_residual_adapter
+selected_seed: 2026
+
+Key test metrics:
+- A2 nominal profile RMSE: 0.000335820891 m; change vs C0: 0.829%
+- A2 non-nominal profile RMSE: 0.000437213542 m; change vs C0: -49.993%
+- A2 non-nominal Dice: 0.842378; C0 Dice: 0.683351
+- A2 non-nominal L/W/D MAE: 1.939 / 1.715 / 0.871 mm
+- A2 non-nominal wMAE auxiliary: 0.253896
+
+Comparator roles:
+- C0 frozen 20.85 baseline remains CURRENT_BASELINE and nominal reference.
+- C1 non-nominal RMSE 0.000659760544 m, but nominal RMSE 0.000809010626 m confirms nominal collapse.
+- C2 non-nominal RMSE 0.000674918964 m; it remains an ablation because 20.92 did not select it by validation.
+- A2 preserves nominal behavior while substantially improving non-nominal liftoff, so it is eligible as a CURRENT_BASELINE companion robustness module.
+
+Artifact boundary:
+- The formal audit uses persisted 20.94 aggregate metrics. Per-sample failure ranking is not recomputed.
+- failure_case_rows: 7

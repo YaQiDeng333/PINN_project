@@ -500,3 +500,9 @@ No new COMSOL is needed before that training gate. `CURRENT_BASELINE.md` remains
 Stage 20.94 validates the 20.93 route correction. The selected `A2_latent_residual_adapter` uses the frozen 20.85/20.77 baseline latent and baseline six-parameter prediction plus `sensor_z_m` to predict a residual correction. It keeps the nominal operating point effectively intact while cutting non-nominal liftoff profile RMSE by about half.
 
 This forms a liftoff robustness candidate, not a baseline replacement. The current baseline remains the 20.85 nominal true 3D RBC profile-depth baseline. The next route should be a formal liftoff benchmark for A2, with validation-only selection and grouped base splits retained. Internal/buried defects and real-data alignment remain deferred until the liftoff benchmark confirms stability.
+
+# 2026-05-28 Stage 20.95 route note
+
+Stage 20.95 formalizes the 20.94 A2 result as a companion robustness path. `A2_latent_residual_adapter` seed `2026` preserves the nominal `0.008 m` operating point (`0.000333059 m -> 0.000335821 m`, `+0.829%`) and improves non-nominal liftoff profile RMSE (`0.000874310 m -> 0.000437214 m`, `-49.993%`) with non-nominal Dice rising from `0.683351` to `0.842378`.
+
+The route status is now split deliberately: `CURRENT_BASELINE.md` remains the 20.85 nominal true 3D RBC profile-depth baseline, while A2 is accepted only as its liftoff companion module. `sensor_z_m` is a required metadata field for multi-liftoff or real-experimental inference. Internal/buried defect feasibility remains deferred; the next route step is a liftoff-conditioned inference smoke stage that verifies baseline + A2 loading and the `sensor_z_m` metadata contract.

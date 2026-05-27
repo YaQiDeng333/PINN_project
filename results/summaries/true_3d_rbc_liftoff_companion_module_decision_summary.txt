@@ -1,0 +1,24 @@
+20.95 true 3D RBC liftoff companion module decision
+
+Decision: accept A2_latent_residual_adapter as the CURRENT_BASELINE companion robustness module.
+CURRENT_BASELINE_update: false
+CURRENT_BASELINE_scope: unchanged 20.85 nominal true 3D RBC profile-depth baseline
+A2_scope: liftoff robustness companion module for multi-liftoff inference, not baseline replacement
+
+Evidence:
+- nominal profile RMSE change vs C0: 0.829% (0.0003330594072394888 -> 0.0003358208914505667 m)
+- non-nominal profile RMSE change vs C0: -49.993% (0.0008743096853625806 -> 0.0004372135417725076 m)
+- all-liftoff profile RMSE change vs C0: -44.267%
+- non-nominal Dice change vs C0: 0.159027 (0.6833513107587862 -> 0.8423780087179069)
+- non-nominal L/W/D MAE: 1.939 / 1.715 / 0.871 mm
+- non-nominal wMAE auxiliary: 0.253896
+- best A2 liftoff RMSE level: sensor_z_0.008 = 0.000335820891 m
+- worst A2 liftoff RMSE level: sensor_z_0.010 = 0.000491519109 m
+
+Operational boundary:
+- sensor_z_m is required metadata for multi-liftoff or real-experimental inference.
+- A2 should be loaded as a companion correction module after the frozen 20.85 baseline path.
+- wMAE remains auxiliary; profile RMSE, Er-like profile error, and Dice carry the benchmark decision.
+- Internal/buried defect feasibility remains deferred.
+
+Next unique step: liftoff-conditioned inference smoke, verifying frozen baseline + A2 adapter loading and the sensor_z_m metadata contract before real-data alignment.

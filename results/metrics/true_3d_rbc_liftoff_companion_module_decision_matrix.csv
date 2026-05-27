@@ -1,0 +1,8 @@
+decision_item,result,evidence,decision
+a2_preserves_nominal_operating_point,True,nominal_profile_rmse_change_pct=0.829; nominal_dice_delta=0.011953,pass_nominal_guard
+a2_improves_non_nominal_liftoff,True,non_nominal_profile_rmse_change_pct=-49.993; non_nominal_dice_delta=0.159027,pass_non_nominal_guard
+sensor_z_m_required_metadata,True,A2 is sensor_z-conditioned and 20.93 diagnosed unconditioned liftoff ambiguity.,require_sensor_z_m_for_multi_liftoff_or_real_experimental_inference
+current_baseline_companion_module,True,A2 preserves nominal C0 behavior while correcting non-nominal liftoff.,accept_as_companion_module
+current_baseline_update,False,CURRENT_BASELINE remains the 20.85 nominal true 3D RBC profile-depth baseline.,keep_CURRENT_BASELINE_unchanged
+internal_defect_feasibility,defer,Surface RBC liftoff robustness should first pass an inference smoke path with sensor_z_m metadata.,defer_internal_defect_feasibility
+next_unique_step,liftoff_conditioned_inference_smoke,Formal benchmark supports A2 as companion; next verify operational loading and sensor_z_m contract before real-data alignment.,run_liftoff_conditioned_inference_smoke

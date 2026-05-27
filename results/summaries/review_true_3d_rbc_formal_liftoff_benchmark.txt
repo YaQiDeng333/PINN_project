@@ -1,0 +1,63 @@
+20.95 independent read-only review: formal liftoff benchmark for A2 residual adapter
+
+- 必须修复；
+  - `results/summaries/review_true_3d_rbc_formal_liftoff_benchmark.txt` 当前不存在；主控需要保存本 review 后再继续文档同步/提交。
+
+- 建议修复；
+  - 20.95 使用的是 20.94 aggregate metrics；若后续需要 worst-case sample 级别审计，需要补 per-sample prediction artifact，但本轮按规则不应重新训练。
+
+- 可以接受；
+  - 未发现训练、COMSOL、data/NPZ 修改、checkpoint/preview/notes staged。
+  - `CURRENT_BASELINE.md` 无 diff。
+  - 通过 manifest 明确引用 `comsol_true_3d_rbc_liftoff_aug_pack_v1`。
+  - 关键数值与 20.94 一致：A2 seed 2026；nominal RMSE `0.000333059 -> 0.000335821`；non-nominal RMSE `0.000874310 -> 0.000437214`；non-nominal Dice `0.683351 -> 0.842378`。
+  - A2 被写成 companion robustness module，不是 CURRENT_BASELINE。
+  - `sensor_z_m` 被正确标为多 liftoff / 真实实验接入必要 metadata。
+  - internal defect 仍暂缓，route decision 合理。
+
+- 是否同意 A2 作为 CURRENT_BASELINE companion module；
+  - 同意。
+
+- 是否同意 CURRENT_BASELINE 保持 20.85；
+  - 同意。
+
+- 下一步更建议什么；
+  - liftoff-conditioned inference smoke：验证 20.85 frozen baseline + A2 adapter 的加载路径和 `sensor_z_m` metadata contract，再进入 real-data alignment。
+
+- 简短原因；
+  - A2 几乎保住 nominal，只让 RMSE 退化 `0.829%`，同时把 non-nominal RMSE 改善 `49.993%`，解决了 20.92 C1 “non-nominal 变好但 nominal 崩掉”的核心问题。
+
+Main-controller resolution:
+- The review file itself has now been saved.
+- The remaining note is a future artifact-quality suggestion, not a 20.95 must-fix.
+
+Re-review after resolution:
+
+- 必须修复；
+  - 无。
+
+- 建议修复；
+  - 若后续要做 sample-level worst-case 审计，需要补 A2 per-sample prediction artifact；本轮使用 20.94 aggregate metrics 做 formal benchmark 是符合规则的。
+
+- 可以接受；
+  - 工作目录已确认是 `C:\Users\19166\Desktop\PINN_project`。
+  - 当前工作树 clean，`git diff --cached --name-only` 为空。
+  - 提交内容不含 data、NPZ、checkpoint、preview PNG、notes、baseline docs 或 `CURRENT_BASELINE.md`。
+  - `results/summaries/review_true_3d_rbc_formal_liftoff_benchmark.txt` 已存在。
+  - 20.95 明确引用 `comsol_true_3d_rbc_liftoff_aug_pack_v1` manifest。
+  - A2 写成 `CURRENT_BASELINE` companion robustness module，没有替换 CURRENT_BASELINE。
+  - 关键 metrics 与 20.94 一致：A2 seed `2026`；nominal RMSE `0.000333059 -> 0.000335821`；non-nominal RMSE `0.000874310 -> 0.000437214`；non-nominal Dice `0.683351 -> 0.842378`。
+  - `sensor_z_m` 已标为多 liftoff / 真实实验接入必要 metadata。
+  - internal defect 仍暂缓。
+
+- 是否同意 A2 作为 CURRENT_BASELINE companion module；
+  - 同意。
+
+- 是否同意 CURRENT_BASELINE 保持 20.85；
+  - 同意。
+
+- 下一步更建议什么；
+  - liftoff-conditioned inference smoke：验证 20.85 frozen baseline + A2 adapter 的加载路径、推理接口和 `sensor_z_m` metadata contract，再进入 real-data alignment。
+
+- 简短原因；
+  - A2 几乎保住 nominal，RMSE 只退化 `0.829%`，同时把 non-nominal RMSE 改善 `49.993%`，解决了 C1 “non-nominal 变好但 nominal 崩掉”的核心问题；但它是 robustness companion，不是 CURRENT_BASELINE replacement。

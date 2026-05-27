@@ -1,0 +1,20 @@
+20.95 true 3D RBC formal liftoff benchmark preflight
+
+dataset_id: comsol_true_3d_rbc_liftoff_aug_pack_v1
+manifest_path: results\manifests\comsol_true_3d_rbc_liftoff_aug_pack_v1.manifest.json
+registry_path: COMSOL_DATA_REGISTRY.md
+rows: 192
+base_count: 48
+liftoff_levels_m: [0.006, 0.008, 0.01, 0.012]
+paired_liftoff_complete: True
+required_metrics_present: True
+missing_inputs: []
+baseline_artifact_manifest_present: True
+a2_executable_artifact_manifest_present: False
+artifact_policy: use persisted 20.94 metrics only if A2 executable artifact is unavailable; do not retrain.
+CURRENT_BASELINE_dirty: False
+forbidden_staged_files: []
+COMSOL_run: false
+training_run: false
+data_or_npz_write: false
+latest_newest_npz_scan: false
