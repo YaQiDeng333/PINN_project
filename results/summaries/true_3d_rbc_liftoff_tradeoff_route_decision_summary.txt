@@ -1,0 +1,15 @@
+20.93 true 3D RBC liftoff trade-off route decision
+
+Decision: B. train baseline+liftoff adapter model.
+
+Reason:
+- C1_unconditioned_liftoff_aug is not acceptable as a robustness candidate because it improves non-nominal liftoff but forgets nominal 0.008m behavior.
+- C2 sensor_z conditioning was not selected under the predeclared 20.92 validation protocol; test-only signs cannot be used for selection.
+- The next training gate should preserve the 20.85 nominal baseline path and learn a sensor_z-conditioned correction for non-nominal liftoff.
+
+Boundary:
+- This route requires a new training stage, but no new COMSOL data is required before that stage.
+- CURRENT_BASELINE remains unchanged.
+- Internal defect feasibility and real-data alignment remain deferred until liftoff robustness is bounded.
+
+Primary acceptance gate: Nominal profile RMSE degradation <=10% vs 20.85; non-nominal RMSE improves >=20% vs C0; Dice does not materially regress; no test selection.

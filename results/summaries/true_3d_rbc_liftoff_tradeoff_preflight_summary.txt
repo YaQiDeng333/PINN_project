@@ -1,0 +1,11 @@
+20.93 true 3D RBC liftoff trade-off audit preflight
+
+required_inputs_present: True
+missing_inputs: []
+analysis_source: existing 20.90/20.91/20.92 summaries and metrics only
+COMSOL_run: false
+training_run: false
+data_or_npz_write: false
+CURRENT_BASELINE_update: false
+forbidden_staged_files: []
+artifact_boundary: 20.92 has aggregate training metrics, but no per-sample C1/C2 prediction artifact or group-level C1/C2 output; group concentration is limited accordingly.

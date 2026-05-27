@@ -2796,3 +2796,14 @@ Review agent 已完成只读复核，无 must-fix。review 建议把 audit/decis
 - comparison vs C0: non-nominal profile RMSE improved by `24.539%` and Dice improved by `0.149778`, but nominal `0.008 m` profile RMSE regressed by `142.903%`.
 - decision: partial liftoff signal, not a passed robustness candidate. Keep `CURRENT_BASELINE.md` unchanged; inspect liftoff pack failure cases and nominal/non-nominal trade-off before more COMSOL, real-data alignment, or internal defect feasibility.
 - review: independent read-only review passed with no must-fix. One wording suggestion was adopted: sensor_z usefulness is marked as a post-hoc test diagnostic, not model selection.
+
+# 2026-05-27 Stage 20.93 liftoff trade-off audit and nominal-preserving strategy design
+
+- scope: read-only audit/design. No COMSOL run, no training, no data/NPZ/checkpoint/preview/notes mutation, and no `CURRENT_BASELINE.md` update.
+- sources: existing 20.90/20.91/20.92 summaries and metrics only.
+- audit result: the 20.92 selected `C1_unconditioned_liftoff_aug` seed `123` improved non-nominal profile RMSE from C0 `0.000874310 m` to `0.000659761 m` and Dice from `0.683351` to `0.833129`, but nominal `0.008 m` profile RMSE regressed from `0.000333059 m` to `0.000809011 m`.
+- diagnosis: C1 is an unconditioned mixed-liftoff model. It sees liftoff-dependent amplitude/shape changes without `sensor_z_m`, while nominal rows are only one quarter of the paired pack and the validation score did not include an explicit nominal-preservation penalty. The result is nominal forgetting on held-out base geometries.
+- C2 status: `C2_sensor_z_conditioned` was not selected by the predeclared validation protocol. Its post-hoc test signals remain diagnostic only and were not used for model selection.
+- strategy design: primary next strategy is `S3_baseline_plus_liftoff_adapter`; secondary ablation is `S2_sensor_z_conditioned_revised_selection`; `S4_paired_consistency_loss` is reserved as a regularizer after the base objective is stable.
+- route decision: next unique step is a nominal-preserving baseline+liftoff adapter training gate. It needs training but does not need new COMSOL data before that gate. `CURRENT_BASELINE.md` remains the 20.85 nominal true 3D RBC profile-depth baseline.
+- review: independent read-only review passed with no must-fix. A suggested CSV clarity fix was adopted by splitting profile RMSE relative change and wMAE relative change into explicit fields.

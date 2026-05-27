@@ -366,3 +366,9 @@ Stage 20.91 completed the dedicated liftoff augmentation pack plan without runni
 Stage 20.91b generated and validated the dedicated liftoff pack: 48 base geometries × 4 paired liftoff levels = 192/192 successful COMSOL rows. The generated NPZ remains in the ignored data path and is registered as `comsol_true_3d_rbc_liftoff_aug_pack_v1`; no training and no baseline update were performed.
 
 唯一下一步：enter 20.92 liftoff-aware training gate, comparing the current unconditioned baseline family against a scalar `sensor_z_m` conditioned model. Keep calibration as a diagnostic/acquisition caveat and keep internal/buried defect feasibility deferred.
+
+## 2026-05-27 update after Stage 20.93
+
+Stage 20.93 audited the 20.92 nominal/non-nominal liftoff trade-off without COMSOL, training, data/NPZ mutation, or `CURRENT_BASELINE.md` changes. The key finding is that `C1_unconditioned_liftoff_aug` is not a robustness candidate: it improves non-nominal profile RMSE and Dice, but nominal `0.008 m` profile RMSE regresses from `0.000333059 m` to `0.000809011 m`.
+
+Only next step: train a nominal-preserving `S3_baseline_plus_liftoff_adapter` candidate. Keep the 20.85 nominal baseline path anchored, add a small `sensor_z_m`-conditioned correction for non-nominal liftoff, and evaluate with explicit nominal and non-nominal validation gates. No new COMSOL data is needed before this training gate; do not continue unconditional C1 augmentation, and keep internal/buried defects and real-data claims deferred.

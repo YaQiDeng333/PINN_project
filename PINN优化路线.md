@@ -486,3 +486,11 @@ Stage 20.92 tested whether the full 20.91b liftoff pack can produce a liftoff-ro
 The route result is mixed. Liftoff augmentation clearly helps non-nominal rows: selected `C1_unconditioned_liftoff_aug` seed `123` reduced test non-nominal profile RMSE from the fixed C0 baseline `0.000874310 m` to `0.000659761 m` and improved projected Dice from `0.683351` to `0.833129`. But it does not preserve the nominal operating point: nominal `0.008 m` profile RMSE regressed from `0.000333059 m` to `0.000809011 m`. C2 sensor_z conditioning did not win by validation selection, and its C1/C2 comparison remains a post-hoc diagnostic rather than a selection criterion.
 
 Therefore 20.92 is not a baseline transition and not yet a formal robustness candidate. `CURRENT_BASELINE.md` remains the 20.85 nominal true 3D RBC profile-depth baseline. The next route should inspect liftoff failure cases and design a nominal-preserving liftoff objective or paired-liftoff consistency protocol before internal defects, real-data claims, or more broad COMSOL expansion.
+
+# 2026-05-27 Stage 20.93 route note
+
+Stage 20.93 closes the first liftoff-aware training gate with a route correction. The useful signal from 20.92 is real but incomplete: unconditioned liftoff augmentation improved non-nominal rows, yet it severely damaged nominal `0.008 m` behavior. The failure mechanism is not lack of data volume; it is an unconditioned mixed-liftoff inverse problem plus validation that did not explicitly protect the 20.85 nominal baseline path.
+
+The next route should not continue C1-style unconditional augmentation. Use a nominal-preserving baseline+liftoff adapter as the primary next experiment: keep the 20.85 nominal path anchored and learn a small `sensor_z_m`-conditioned correction for non-nominal liftoff. A revised full `sensor_z_m`-conditioned model remains the secondary ablation, and paired liftoff consistency can be added as a regularizer if the adapter objective is stable.
+
+No new COMSOL is needed before that training gate. `CURRENT_BASELINE.md` remains unchanged, and internal/buried defects plus real-data alignment stay deferred until liftoff robustness can preserve nominal behavior while improving non-nominal rows.

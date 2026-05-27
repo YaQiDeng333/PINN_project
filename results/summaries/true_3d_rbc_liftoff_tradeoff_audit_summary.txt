@@ -1,0 +1,20 @@
+20.93 true 3D RBC liftoff nominal/non-nominal trade-off audit
+
+Scope: read-only audit of 20.90/20.91/20.92 summaries and metrics; no COMSOL, no training, no data/NPZ mutation, no CURRENT_BASELINE update.
+
+Main finding:
+- Selected 20.92 model: C1_unconditioned_liftoff_aug seed=123.
+- Non-nominal profile RMSE improved by -24.539% versus C0.
+- Nominal 0.008m profile RMSE regressed by 142.903% versus C0.
+
+Root-cause diagnosis:
+- C1 is unconditioned: it sees liftoff-altered signal amplitude/shape but is not told sensor_z_m, so the same geometry across four liftoffs becomes an ambiguous inverse mapping.
+- Validation selection used a row-aggregate parameter loss; nominal rows are only one quarter of the validation rows, and there was no explicit nominal-preservation penalty against the fixed 20.85 baseline.
+- C1 seed=123 looked best by validation, including validation nominal metrics, but failed to preserve nominal behavior on held-out base geometries; this points to base-level generalization and nominal forgetting, not test-based model selection.
+- C2 sensor_z conditioning was not selected because its validation selection metric was worse than C1. Post-hoc test comparisons are diagnostic only and must not be used to select the 20.92 model.
+
+Artifact limitation:
+- 20.92 persisted aggregate metrics, not per-sample C1/C2 predictions. Therefore concentration by depth_bin, curvature_template, or aspect_bin cannot be honestly computed for C1/C2 in this audit.
+
+Implication:
+- Do not continue unconditional C1 augmentation. The next training stage needs nominal-preserving selection/loss and likely a baseline+liftoff correction structure or revised sensor_z-conditioned protocol.
