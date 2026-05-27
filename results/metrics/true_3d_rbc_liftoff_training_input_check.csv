@@ -1,0 +1,47 @@
+check_name,pass,observed,notes,expected
+dataset_id,True,comsol_true_3d_rbc_liftoff_aug_pack_v1,,
+route,True,manifest=true_3d_piao_style_liftoff_robustness; registry=true_3d_piao_style_liftoff_robustness,,
+status,True,manifest=diagnostic_pack_generated; registry=diagnostic_pack_generated,,
+schema_version,True,true3d_profile_v1_piao_rbc_liftoff_aug,,
+train_ready_candidate,True,True,,
+baseline_ready_false,True,False,,
+geometry_method,True,imported_watertight_mesh_solid,,
+exact_piao_rbc_false,True,False,,
+rbc_style_approximation_true,True,True,,
+explicit_liftoff_training_allowed,True,"['explicit_liftoff_training_gate', 'schema_validation']",,
+schema_validation_allowed,True,"['explicit_liftoff_training_gate', 'schema_validation']",,
+baseline_forbidden,True,"['automatic_mainline_training', 'baseline_update', 'current_baseline_replacement', 'direct_training_without_manifest_gate', 'latest_newest_auto_discovery']",,
+latest_newest_forbidden,True,False,,
+auto_discovery_forbidden,True,False,,
+row_count,True,192,,
+base_count,True,48,,
+paired_liftoff_complete,True,True,,
+liftoff_levels,True,"[0.006, 0.008, 0.01, 0.012]",,
+npz_exists,True,C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\generated\true_3d_rbc_liftoff_aug_pack\true_3d_rbc_liftoff_aug_pack.npz,,
+npz_sha256,True,71022720e500d9a2be0ca09837bdbe705958cba879fc58d5f8ffff7404372a3c,,
+row_count,True,192,,192
+base_count,True,48,,48
+liftoff_levels,True,"[0.006, 0.008, 0.01, 0.012]",,"[0.006, 0.008, 0.01, 0.012]"
+paired_liftoff_complete,True,True,,True
+split_rows_by_base,True,"{'train': 128, 'val': 32, 'test': 32}",,"{'train': 128, 'val': 32, 'test': 32}"
+split_base_counts,True,"{'train': 32, 'val': 8, 'test': 8}",,"{'train': 32, 'val': 8, 'test': 8}"
+base_id_no_split_leakage,True,[],,[]
+delta_b_shape,True,"[192, 3, 3, 201]",,"[192, 3, 3, 201]"
+conv1d_shape,True,"[192, 9, 201]",,"[192, 9, 201]"
+axis_names,True,"['Bx', 'By', 'Bz']",,"['Bx', 'By', 'Bz']"
+delta_b_finite,True,finite,,finite
+rbc_params_finite,True,finite,,finite
+profile_labels_present,True,"[192, 33, 17]",,"[192, 33, 17]"
+projected_mask_present,True,"[192, 64, 128]",,"[192, 64, 128]"
+delta_recompute_error,True,1.164153e-10,,<=1e-7
+train_only_x_normalization,True,"{'x_mean': [1, 9, 1], 'x_std': [1, 9, 1]}",,"(1,9,1)"
+train_only_y_normalization,True,"{'y_mean': [1, 6], 'y_std': [1, 6]}",,"(1,6)"
+train_only_sensor_z_normalization,True,"{'z_mean': 0.008999999612569809, 'z_std': 0.0022360680159181356}",,"(1,1)"
+artifact_manifest_exists,True,C:\Users\19166\Desktop\PINN_project\results\manifests\true_3d_rbc_baseline_inference_artifact_manifest.json,,20.88a artifact manifest
+baseline_artifact_sha_verified,True,true_3d_rbc_v3_240_seed42_20_77_baseline_inference_artifact,,sha256 verified
+baseline_artifact_seed42,True,42,,42
+reference_exists:true_3d_rbc_benchmark_report_summary.txt,True,C:\Users\19166\Desktop\PINN_project\results\summaries\true_3d_rbc_benchmark_report_summary.txt,,existing 20.85/20.90/20.91b reference
+reference_exists:true_3d_rbc_liftoff_sensor_offset_route_decision_summary.txt,True,C:\Users\19166\Desktop\PINN_project\results\summaries\true_3d_rbc_liftoff_sensor_offset_route_decision_summary.txt,,existing 20.85/20.90/20.91b reference
+reference_exists:true_3d_rbc_liftoff_sensor_offset_group_summary.csv,True,C:\Users\19166\Desktop\PINN_project\results\metrics\true_3d_rbc_liftoff_sensor_offset_group_summary.csv,,existing 20.85/20.90/20.91b reference
+reference_exists:true_3d_rbc_liftoff_aug_pack_route_decision_summary.txt,True,C:\Users\19166\Desktop\PINN_project\results\summaries\true_3d_rbc_liftoff_aug_pack_route_decision_summary.txt,,existing 20.85/20.90/20.91b reference
+no_forbidden_artifacts_staged,True,[],,none

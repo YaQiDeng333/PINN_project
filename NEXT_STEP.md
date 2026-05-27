@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-05-27 after Stage 20.92 liftoff-aware training gate
+
+Next step: **inspect liftoff pack failure cases and the nominal/non-nominal trade-off before more COMSOL or real-data alignment**.
+
+Stage 20.92 trained the liftoff-aware gate on `comsol_true_3d_rbc_liftoff_aug_pack_v1` with grouped `base_sample_id` splits. `C1_unconditioned_liftoff_aug` seed `123` was selected by validation. It improved non-nominal liftoff profile RMSE versus the fixed 20.85 baseline (`0.000874310 m -> 0.000659761 m`) and improved non-nominal Dice (`0.683351 -> 0.833129`), but it badly regressed nominal `0.008 m` profile RMSE (`0.000333059 m -> 0.000809011 m`).
+
+This means 20.92 is useful evidence but not a robustness candidate upgrade. Keep `CURRENT_BASELINE.md` unchanged at the 20.85 true 3D RBC profile-depth baseline. Do not move to internal/buried defect feasibility yet, and do not claim real-data readiness. The next controlled step should audit failure cases by liftoff level/base geometry and decide whether the model needs a nominal-preserving loss, paired liftoff consistency, or a better sensor_z-conditioned protocol before generating more COMSOL data.
+
 ## 2026-05-27 after Stage 20.89 gain/amplitude calibration and augmentation gate
 
 Next step: **20.90 liftoff/sensor-offset COMSOL diagnostic pack, with explicit gain/amplitude control caveat**.

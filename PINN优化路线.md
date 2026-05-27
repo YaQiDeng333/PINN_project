@@ -479,3 +479,10 @@ The route implication is that liftoff robustness should be addressed before inte
 Stage 20.91b executed the dedicated liftoff COMSOL pack and produced a full paired dataset: 48 base geometries, four liftoff levels per base (`0.006 / 0.008 / 0.010 / 0.012 m`), 192/192 successful rows, and 48/48 complete paired bases. The pack is registered as `comsol_true_3d_rbc_liftoff_aug_pack_v1` under `true_3d_piao_style_liftoff_robustness`.
 
 This does not change `CURRENT_BASELINE.md`. The route now moves to 20.92 liftoff-aware training gate: compare the current unconditioned model family with a scalar `sensor_z_m` conditioned variant. Internal/buried defects remain deferred until surface-defect liftoff robustness is understood.
+# 2026-05-27 Stage 20.92 route note
+
+Stage 20.92 tested whether the full 20.91b liftoff pack can produce a liftoff-robust true 3D RBC model. The data gate passed: `comsol_true_3d_rbc_liftoff_aug_pack_v1` has 48 paired base geometries, four liftoff levels per base, and grouped base-level train/val/test splits with no geometry leakage.
+
+The route result is mixed. Liftoff augmentation clearly helps non-nominal rows: selected `C1_unconditioned_liftoff_aug` seed `123` reduced test non-nominal profile RMSE from the fixed C0 baseline `0.000874310 m` to `0.000659761 m` and improved projected Dice from `0.683351` to `0.833129`. But it does not preserve the nominal operating point: nominal `0.008 m` profile RMSE regressed from `0.000333059 m` to `0.000809011 m`. C2 sensor_z conditioning did not win by validation selection, and its C1/C2 comparison remains a post-hoc diagnostic rather than a selection criterion.
+
+Therefore 20.92 is not a baseline transition and not yet a formal robustness candidate. `CURRENT_BASELINE.md` remains the 20.85 nominal true 3D RBC profile-depth baseline. The next route should inspect liftoff failure cases and design a nominal-preserving liftoff objective or paired-liftoff consistency protocol before internal defects, real-data claims, or more broad COMSOL expansion.

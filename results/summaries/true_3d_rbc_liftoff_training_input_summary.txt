@@ -1,0 +1,11 @@
+20.92 liftoff training input summary
+
+dataset_id: comsol_true_3d_rbc_liftoff_aug_pack_v1
+delta_b_shape: [192, 3, 3, 201]
+conv1d_shape: [192, 9, 201]
+rbc_params_shape: [192, 6]
+profile_depth_grid_shape: [192, 33, 17]
+projected_mask_shape: [192, 64, 128]
+base_id_paired_liftoff_complete: True
+split_policy: existing 20.91b split is by base_sample_id; no geometry leakage
+normalization: input, target, and sensor_z scalers fit on train rows only

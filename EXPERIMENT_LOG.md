@@ -2784,3 +2784,15 @@ Review agent 已完成只读复核，无 must-fix。review 建议把 audit/decis
 - registry/manifest: `COMSOL_DATA_REGISTRY.md` and `results/manifests/comsol_true_3d_rbc_liftoff_aug_pack_v1.manifest.json` were updated/created with `allowed_use=schema_validation, explicit_liftoff_training_gate` and forbidden baseline/latest-newest usage.
 - route decision: full pack can enter 20.92 liftoff-aware training gate; compare unconditioned vs scalar `sensor_z_m` conditioned model. Internal defect feasibility remains deferred.
 - review: independent read-only review passed with no must-fix.
+# 2026-05-27 Stage 20.92 liftoff-aware true 3D RBC training gate
+
+- dataset_id: `comsol_true_3d_rbc_liftoff_aug_pack_v1`, loaded only through `COMSOL_DATA_REGISTRY.md` and `results/manifests/comsol_true_3d_rbc_liftoff_aug_pack_v1.manifest.json`.
+- scope: training gate on the existing 20.91b liftoff pack only. No COMSOL run, no new data generation, no NPZ modification, no checkpoint/preview artifact committed, and no `CURRENT_BASELINE.md` update.
+- input/split gate: passed. Pack has 192 rows, 48 base geometries, liftoff levels `0.006 / 0.008 / 0.010 / 0.012 m`, complete paired liftoff rows for every base, and grouped split by `base_sample_id`: train/val/test bases `32/8/8`, rows `128/32/32`.
+- fixed C0 baseline on the liftoff pack: test all-liftoff profile RMSE `0.000738997 m`, nominal `0.000333059 m`, non-nominal `0.000874310 m`, non-nominal Dice `0.683351`.
+- trained candidates: `C1_unconditioned_liftoff_aug` and `C2_sensor_z_conditioned`, seeds `42/123/2026`, validation-only selection and test-final reporting. `C3_calibrated_input_conditioned` was skipped because 20.89 calibration remains a diagnostic caveat, not a training/baseline protocol.
+- selected by validation: `C1_unconditioned_liftoff_aug`, seed `123`.
+- selected test metrics: all-liftoff profile RMSE `0.000697073 m`; nominal `0.000809011 m`; non-nominal `0.000659761 m`; non-nominal Er-like `0.899135`; non-nominal L/W/D MAE `2.224 / 1.741 / 1.477 mm`; non-nominal projected mask IoU/Dice `0.734606 / 0.833129`; non-nominal auxiliary wMAE `0.257595`.
+- comparison vs C0: non-nominal profile RMSE improved by `24.539%` and Dice improved by `0.149778`, but nominal `0.008 m` profile RMSE regressed by `142.903%`.
+- decision: partial liftoff signal, not a passed robustness candidate. Keep `CURRENT_BASELINE.md` unchanged; inspect liftoff pack failure cases and nominal/non-nominal trade-off before more COMSOL, real-data alignment, or internal defect feasibility.
+- review: independent read-only review passed with no must-fix. One wording suggestion was adopted: sensor_z usefulness is marked as a post-hoc test diagnostic, not model selection.

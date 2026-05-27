@@ -1,0 +1,18 @@
+20.92 true 3D RBC liftoff-aware training route decision
+
+selected_candidate: C1_unconditioned_liftoff_aug
+selected_seed: 123
+robustness_candidate: False
+sensor_z_conditioning_useful: False
+CURRENT_BASELINE_update: false
+next_step: inspect_liftoff_pack_failure_cases_before_more_COMSOL_or_real_data
+
+Decision evidence:
+- Did liftoff augmentation improve non-nominal profile RMSE vs fixed 20.85 baseline? True (-24.539261620871248% relative change)
+- Did nominal 0.008m performance remain stable? False (142.90279996877467% relative change)
+- Did projected mask Dice remain stable on non-nominal liftoff? True (Dice delta 0.14977787709150103)
+- Did L/W/D remain stable? True (L_mae_mm -64.36534705356202%; W_mae_mm -52.82871085224546%; D_mae_mm -19.115402385511988%)
+- Is sensor_z conditioning necessary/useful? False (post-hoc test diagnostic only, not selection: best C2 non-nominal RMSE=0.0006582463302038377; best C1=0.0005987553395243594)
+- Does 20.92 form a robustness candidate? False (selected=C1_unconditioned_liftoff_aug, seed=123; next_step=inspect_liftoff_pack_failure_cases_before_more_COMSOL_or_real_data)
+- Should CURRENT_BASELINE change? False (20.92 is a liftoff robustness gate; 20.85 nominal profile-depth baseline remains current.)
+- Can internal defect feasibility proceed now? False (Resolve/formalize liftoff robustness candidate first.)

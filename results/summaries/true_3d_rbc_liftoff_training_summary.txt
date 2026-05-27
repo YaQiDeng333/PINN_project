@@ -1,0 +1,24 @@
+20.92 liftoff-aware true 3D RBC training gate
+
+Scope:
+- Dataset: comsol_true_3d_rbc_liftoff_aug_pack_v1 loaded via registry/manifest
+- Split: by base_sample_id, train/val/test bases=32/8/8 and rows=128/32/32
+- Inputs: C1 uses delta_b only; C2 uses delta_b plus train-normalized sensor_z_m scalar
+- C3 skipped because calibration remains a diagnostic caveat, not a baseline/training protocol
+- Training: seeds 42/123/2026; validation-only selection; test final only; no checkpoint saved
+- COMSOL/data/NPZ/baseline update: false
+
+Selected robustness candidate: C1_unconditioned_liftoff_aug, seed=123
+epochs: 300
+test_all_profile_depth_rmse_m: 0.000697073
+test_nominal_0p008_profile_depth_rmse_m: 0.000809011
+test_non_nominal_profile_depth_rmse_m: 0.000659761
+test_non_nominal_er_like_profile_error: 0.899135
+test_non_nominal_LWD_MAE_mm: 2.224 / 1.741 / 1.477
+test_non_nominal_projected_mask_IoU_Dice: 0.734606 / 0.833129
+test_non_nominal_wMAE_auxiliary: 0.257595
+
+non_nominal_profile_rmse_change_vs_C0_pct: -24.539
+non_nominal_dice_change_vs_C0: 0.149778
+
+Interpretation boundary: this is a robustness candidate gate. CURRENT_BASELINE remains the 20.85 nominal-profile baseline until a separate baseline transition is approved.

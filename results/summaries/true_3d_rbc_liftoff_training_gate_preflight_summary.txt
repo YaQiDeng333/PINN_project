@@ -1,0 +1,21 @@
+20.92 true 3D RBC liftoff-aware training preflight summary
+
+dataset_id: comsol_true_3d_rbc_liftoff_aug_pack_v1
+registry_manifest_gate_pass: True
+npz_path: C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\generated\true_3d_rbc_liftoff_aug_pack\true_3d_rbc_liftoff_aug_pack.npz
+rows: 192
+base_count: 48
+liftoff_levels_m: [0.006, 0.008, 0.01, 0.012]
+split_rows: {'train': 128, 'val': 32, 'test': 32}
+split_bases: {'train': 32, 'val': 8, 'test': 8}
+base_id_split_leakage: []
+train_only_sensor_z_mean_std: 0.009000 / 0.002236
+model_inputs_allowed: delta_b/BxByBz; C2 may additionally use train-normalized sensor_z_m scalar
+forbidden_model_inputs: rbc_params, mask/profile labels, split, template/depth/aspect bins, sample_id/base_id
+labels_scope: supervision and metrics only
+COMSOL_run: false
+data_or_npz_write: false
+CURRENT_BASELINE_update: false
+
+Failed checks:
+- none

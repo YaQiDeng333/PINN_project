@@ -1,0 +1,35 @@
+20.92 liftoff-aware true 3D RBC training gate review
+
+Reviewer: independent read-only Codex review agent
+
+Must-fix:
+- None.
+
+Suggested fixes:
+- Clarify that sensor_z conditioning usefulness is a post-hoc test diagnostic and not part of candidate/model selection. The decision summary has been updated to make this explicit.
+
+Acceptable:
+- Yes.
+
+Checks:
+- No COMSOL run detected.
+- No data/NPZ generation or modification detected.
+- dataset_id=comsol_true_3d_rbc_liftoff_aug_pack_v1 is loaded through COMSOL_DATA_REGISTRY.md + manifest; auto/latest-newest discovery is disabled.
+- Split is by base_sample_id: train/val/test bases=32/8/8 and rows=128/32/32, with no base crossing splits.
+- C1 uses delta_b/BxByBz only; C2 only adds train-normalized sensor_z_m scalar.
+- rbc_params, profile/mask labels, split, base_id/sample_id, and grouping bins are used only for supervision, metrics, or grouping, not as model inputs.
+- Validation-only selection and test-final reporting are documented.
+- No checkpoint is submitted.
+- CURRENT_BASELINE.md remains unchanged.
+
+Does this form a robustness candidate:
+- No. Non-nominal liftoff profile RMSE improves, but nominal 0.008m profile RMSE regresses strongly, so the gate should be treated as partial signal rather than a passed robustness candidate.
+
+CURRENT_BASELINE:
+- Agree it should remain unchanged.
+
+Recommended next step:
+- Inspect liftoff pack failure cases and nominal/non-nominal trade-off before more COMSOL, real-data alignment, or internal defect feasibility.
+
+Reason:
+- Liftoff augmentation reduces non-nominal sensitivity but does not preserve nominal behavior, so it is not yet stable enough for a formal robustness candidate or baseline transition.
