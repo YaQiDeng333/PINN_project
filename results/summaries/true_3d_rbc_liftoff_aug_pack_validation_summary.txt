@@ -1,0 +1,23 @@
+20.91b true 3D RBC liftoff augmentation pack validation summary
+
+dataset_id: comsol_true_3d_rbc_liftoff_aug_pack_v1
+source_dataset_id: comsol_true_3d_rbc_imported_watertight_pilot_v3_240
+pack_status: diagnostic_pack_generated
+validation_pass: True
+train_ready_candidate: True
+planned_rows: 192
+successful_rows: 192
+planned_base_count: 48
+observed_base_count: 48
+complete_paired_base_count: 48
+incomplete_pair_count: 0
+liftoff_levels_m: [0.006, 0.008, 0.01, 0.012]
+npz_path_ignored: C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\generated\true_3d_rbc_liftoff_aug_pack\true_3d_rbc_liftoff_aug_pack.npz
+manifest_path: C:\Users\19166\Desktop\PINN_project\results\manifests\comsol_true_3d_rbc_liftoff_aug_pack_v1.manifest.json
+latest_newest_npz_scan: false
+COMSOL_run_by_this_script: false
+training_run: false
+baseline_update: false
+
+Failed checks:
+- none

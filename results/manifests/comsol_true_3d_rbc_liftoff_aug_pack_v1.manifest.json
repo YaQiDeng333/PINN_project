@@ -1,0 +1,75 @@
+{
+  "allowed_use": [
+    "schema_validation",
+    "explicit_liftoff_training_gate"
+  ],
+  "auto_discovery_allowed": false,
+  "axes": [
+    "Bx",
+    "By",
+    "Bz"
+  ],
+  "base_count": 48,
+  "baseline_ready": false,
+  "complete_paired_base_count": 48,
+  "comsol_commit": "92e2923e34b78df5bd32dee328123955b018aec4",
+  "comsol_inventory": "C:\\Users\\19166\\Desktop\\COMSOL_Multiphysics_MCP\\results\\inventory_true_3d_rbc_liftoff_aug_pack.csv",
+  "curvature_counts": {
+    "LD_dominant": 36,
+    "WD_dominant": 36,
+    "boxy": 40,
+    "round": 40,
+    "sharp": 40
+  },
+  "dataset_id": "comsol_true_3d_rbc_liftoff_aug_pack_v1",
+  "dataset_role": "liftoff_augmentation_diagnostic_pack",
+  "exact_piao_rbc": false,
+  "forbidden_use": [
+    "automatic_mainline_training",
+    "baseline_update",
+    "current_baseline_replacement",
+    "latest_newest_auto_discovery",
+    "direct_training_without_manifest_gate"
+  ],
+  "generated_at": "2026-05-27T17:59:04",
+  "generator_script": "scripts/generate_mfl_true_3d_rbc_liftoff_aug_pack.py",
+  "geometry_method": "imported_watertight_mesh_solid",
+  "incomplete_pair_count": 0,
+  "latest_newest_discovery_allowed": false,
+  "liftoff_levels_m": [
+    0.006,
+    0.008,
+    0.01,
+    0.012
+  ],
+  "manifest_path": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\manifests\\comsol_true_3d_rbc_liftoff_aug_pack_v1.manifest.json",
+  "n_samples": 192,
+  "notes": "20.91b metadata only; NPZ is generated data and is not committed. Use only through explicit dataset_id + manifest.",
+  "npz_path": "C:\\Users\\19166\\Desktop\\PINN_project\\data\\comsol_mfl\\generated\\true_3d_rbc_liftoff_aug_pack\\true_3d_rbc_liftoff_aug_pack.npz",
+  "npz_sha256": "71022720e500d9a2be0ca09837bdbe705958cba879fc58d5f8ffff7404372a3c",
+  "paired_liftoff_complete": true,
+  "pinn_commit": "3c7e5444b8024bcc640060c124172cb640048026",
+  "planned_base_count": 48,
+  "planned_rows": 192,
+  "rbc_style_approximation": true,
+  "route": "true_3d_piao_style_liftoff_robustness",
+  "schema_version": "true3d_profile_v1_piao_rbc_liftoff_aug",
+  "sensor_x_count": 201,
+  "source_dataset_ids": [
+    "comsol_true_3d_rbc_imported_watertight_pilot_v3_240"
+  ],
+  "source_manifest_paths": [
+    "C:\\Users\\19166\\Desktop\\PINN_project\\results\\manifests\\comsol_true_3d_rbc_imported_watertight_pilot_v3_240.manifest.json"
+  ],
+  "source_plan_csv": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\metrics\\true_3d_rbc_liftoff_aug_pack_plan.csv",
+  "split_counts": {
+    "test": 32,
+    "train": 128,
+    "val": 32
+  },
+  "stage": "20.91b",
+  "status": "diagnostic_pack_generated",
+  "train_ready_candidate": true,
+  "validation_pass": true,
+  "validation_script": "scripts/validate_true_3d_rbc_liftoff_aug_pack.py"
+}

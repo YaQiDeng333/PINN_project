@@ -352,3 +352,9 @@ The key result is that the baseline is not mainly noise-limited here; it is lift
 Stage 20.91 completed the dedicated liftoff augmentation pack plan without running COMSOL, generating data/NPZ, training, or changing `CURRENT_BASELINE.md`. The plan selects 48 base geometries and four paired liftoff levels per base: `sensor_z_m=0.006 / 0.008 / 0.010 / 0.012`, for 192 planned COMSOL rows.
 
 唯一下一步：execute the 20.91 COMSOL liftoff augmentation pack generation as a separate confirmed stage, keeping generated NPZ/data ignored and uncommitted. After that, 20.92 should compare the current unconditioned baseline family against a scalar `sensor_z_m` conditioned liftoff-aware variant under multi-liftoff evaluation.
+
+## 2026-05-27 update after Stage 20.91b
+
+Stage 20.91b generated and validated the dedicated liftoff pack: 48 base geometries × 4 paired liftoff levels = 192/192 successful COMSOL rows. The generated NPZ remains in the ignored data path and is registered as `comsol_true_3d_rbc_liftoff_aug_pack_v1`; no training and no baseline update were performed.
+
+唯一下一步：enter 20.92 liftoff-aware training gate, comparing the current unconditioned baseline family against a scalar `sensor_z_m` conditioned model. Keep calibration as a diagnostic/acquisition caveat and keep internal/buried defect feasibility deferred.

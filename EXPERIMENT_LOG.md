@@ -2772,3 +2772,15 @@ Review agent 已完成只读复核，无 must-fix。review 建议把 audit/decis
 - coverage: split `train/val/test=32/8/8`; curvature template counts `sharp=10, round=10, boxy=10, LD_dominant=9, WD_dominant=9`; depth counts `shallow=16, medium=16, deep=16`; aspect counts `compact=12, balanced=12, wide=12, narrow=12`.
 - route decision: the next execution stage should generate this dedicated liftoff COMSOL pack, then 20.92 should compare unconditioned vs scalar `sensor_z_m` conditioned liftoff-aware training. Internal defect feasibility remains deferred.
 - review: independent read-only review passed with no must-fix. A suggestion to record exact registry/manifest paths in human-facing summaries was adopted.
+
+# 2026-05-27 Stage 20.91b true 3D RBC liftoff augmentation pack generation
+
+- scope: executed the approved 20.91 liftoff pack only. COMSOL was run for the dedicated liftoff pack; no training, no 20.92 execution, no `CURRENT_BASELINE.md` update, and no generated data/NPZ/.mph/raw CSV/checkpoint/preview/notes/temp STL artifacts were committed.
+- dataset_id: `comsol_true_3d_rbc_liftoff_aug_pack_v1`.
+- source: `comsol_true_3d_rbc_imported_watertight_pilot_v3_240`, through explicit registry/manifest lineage.
+- generation result: full pack generated, `planned_comsol_rows=192`, `successful_comsol_rows=192`.
+- base/liftoff structure: 48 base geometries, each with paired `sensor_z_m=0.006 / 0.008 / 0.010 / 0.012 m`; complete paired base count = 48 and incomplete pair count = 0.
+- validation result: `validation_pass=True`, `train_ready_candidate=True`, `status=diagnostic_pack_generated`, `baseline_ready=False`.
+- registry/manifest: `COMSOL_DATA_REGISTRY.md` and `results/manifests/comsol_true_3d_rbc_liftoff_aug_pack_v1.manifest.json` were updated/created with `allowed_use=schema_validation, explicit_liftoff_training_gate` and forbidden baseline/latest-newest usage.
+- route decision: full pack can enter 20.92 liftoff-aware training gate; compare unconditioned vs scalar `sensor_z_m` conditioned model. Internal defect feasibility remains deferred.
+- review: independent read-only review passed with no must-fix.

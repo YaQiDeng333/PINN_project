@@ -1,0 +1,8 @@
+decision_item,status,evidence,decision,notes
+pack_fullness,pass,planned_rows=192; n_samples=192; base_count=48; complete_paired_base_count=48; status=diagnostic_pack_generated,full 192-row pack,A full pack requires 48 bases and all four liftoff levels for every base.
+paired_liftoff_completeness,pass,paired_liftoff_complete=True; complete_paired_base_count=48,paired comparison is valid,Each base must have sensor_z_m 0.006/0.008/0.010/0.012.
+schema_validation,pass,failed_hard_checks=[],schema usable,Success count checks are handled separately so partial packs can still be registered.
+enter_20_92_liftoff_training_gate,go,full_pack=True; validation_hard_failures=[],enter 20.92 liftoff-aware training gate,20.92 should compare unconditioned vs scalar sensor_z_m conditioned model.
+sensor_z_conditioning,recommended,20.90 showed liftoff is the main blocker; 20.91b pack is paired by geometry and liftoff.,run sensor_z_m-conditioned ablation in 20.92,"sensor_z_m is a known acquisition condition, not a defect label leak."
+internal_defect_feasibility,defer,liftoff robustness remains the active surface-defect blocker.,keep internal/buried defect feasibility deferred,Internal defects need a separate label schema and must not mix into the current surface RBC baseline.
+baseline_status,unchanged,CURRENT_BASELINE is not part of this pack generation stage.,do not update baseline,This pack is diagnostic/training-gate input only.

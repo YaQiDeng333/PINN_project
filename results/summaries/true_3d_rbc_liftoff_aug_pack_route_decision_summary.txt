@@ -1,0 +1,15 @@
+20.91b true 3D RBC liftoff augmentation pack route decision
+
+dataset_id: comsol_true_3d_rbc_liftoff_aug_pack_v1
+pack_status: diagnostic_pack_generated
+planned_rows: 192
+successful_rows: 192
+base_count: 48
+complete_paired_base_count: 48
+paired_liftoff_complete: True
+validation_hard_failures: []
+can_enter_20_92: True
+top_up_needed: False
+CURRENT_BASELINE_update: false
+internal_defect_feasibility: deferred
+unique_next_step: enter 20.92 liftoff-aware training gate with unconditioned vs sensor_z_m-conditioned ablation

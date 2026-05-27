@@ -473,3 +473,9 @@ Next route direction: build a dedicated COMSOL liftoff robustness / augmentation
 Stage 20.91 is a plan-only follow-up to the 20.90 liftoff diagnostic. It defines a dedicated liftoff augmentation pack with 48 base geometries and four paired liftoff levels per base (`0.006 / 0.008 / 0.010 / 0.012 m`), for 192 planned COMSOL rows. It does not run COMSOL, generate data, train, or update `CURRENT_BASELINE.md`.
 
 The route implication is that liftoff robustness should be addressed before internal/buried defects and before real-data claims. Calibration remains an acquisition diagnostic caveat only. The next method gate should compare the current unconditioned baseline family against a scalar `sensor_z_m` conditioned liftoff-aware variant in 20.92, after the pack is generated and validated.
+
+# 2026-05-27 Stage 20.91b route note
+
+Stage 20.91b executed the dedicated liftoff COMSOL pack and produced a full paired dataset: 48 base geometries, four liftoff levels per base (`0.006 / 0.008 / 0.010 / 0.012 m`), 192/192 successful rows, and 48/48 complete paired bases. The pack is registered as `comsol_true_3d_rbc_liftoff_aug_pack_v1` under `true_3d_piao_style_liftoff_robustness`.
+
+This does not change `CURRENT_BASELINE.md`. The route now moves to 20.92 liftoff-aware training gate: compare the current unconditioned model family with a scalar `sensor_z_m` conditioned variant. Internal/buried defects remain deferred until surface-defect liftoff robustness is understood.

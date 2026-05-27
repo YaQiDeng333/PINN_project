@@ -178,3 +178,33 @@ This registry records generated COMSOL dataset identities and allowed usage. It 
 - validation_script: `scripts/validate_true_3d_rbc_dataset_240_pack.py`
 - npz_sha256: 6cfd6c4dd32c474dbe4843ac520f541123a54a8f0082a94d3e28d0c8cd196817
 - notes: Metadata only. Generated NPZ/data files are not committed and must be loaded only by explicit dataset_id + manifest.
+
+## comsol_true_3d_rbc_liftoff_aug_pack_v1
+
+- dataset_role: liftoff_augmentation_diagnostic_pack
+- status: diagnostic_pack_generated
+- route: true_3d_piao_style_liftoff_robustness
+- stage: 20.91b
+- schema_version: true3d_profile_v1_piao_rbc_liftoff_aug
+- geometry_method: imported_watertight_mesh_solid
+- exact_piao_rbc: false
+- rbc_style_approximation: true
+- path: `C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\generated\true_3d_rbc_liftoff_aug_pack\true_3d_rbc_liftoff_aug_pack.npz`
+- manifest_path: `C:\Users\19166\Desktop\PINN_project\results\manifests\comsol_true_3d_rbc_liftoff_aug_pack_v1.manifest.json`
+- n_samples: 192
+- base_count: 48
+- paired_liftoff_complete: true
+- liftoff_levels_m: [0.006, 0.008, 0.01, 0.012]
+- split_counts: {'test': 32, 'train': 128, 'val': 32}
+- curvature_counts: {'LD_dominant': 36, 'round': 40, 'sharp': 40, 'WD_dominant': 36, 'boxy': 40}
+- train_ready_candidate: true
+- baseline_ready: false
+- auto_discovery_allowed: false
+- latest_newest_discovery_allowed: false
+- allowed_use: schema_validation, explicit_liftoff_training_gate
+- forbidden_use: automatic_mainline_training, baseline_update, current_baseline_replacement, latest_newest_auto_discovery, direct_training_without_manifest_gate
+- source_dataset_ids: comsol_true_3d_rbc_imported_watertight_pilot_v3_240
+- generator_script: `scripts/generate_mfl_true_3d_rbc_liftoff_aug_pack.py`
+- validation_script: `scripts/validate_true_3d_rbc_liftoff_aug_pack.py`
+- npz_sha256: 71022720e500d9a2be0ca09837bdbe705958cba879fc58d5f8ffff7404372a3c
+- notes: Metadata only. Generated NPZ/data files are not committed and must be loaded only by explicit dataset_id + manifest.
