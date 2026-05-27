@@ -2807,3 +2807,16 @@ Review agent 已完成只读复核，无 must-fix。review 建议把 audit/decis
 - strategy design: primary next strategy is `S3_baseline_plus_liftoff_adapter`; secondary ablation is `S2_sensor_z_conditioned_revised_selection`; `S4_paired_consistency_loss` is reserved as a regularizer after the base objective is stable.
 - route decision: next unique step is a nominal-preserving baseline+liftoff adapter training gate. It needs training but does not need new COMSOL data before that gate. `CURRENT_BASELINE.md` remains the 20.85 nominal true 3D RBC profile-depth baseline.
 - review: independent read-only review passed with no must-fix. A suggested CSV clarity fix was adopted by splitting profile RMSE relative change and wMAE relative change into explicit fields.
+
+# 2026-05-27 Stage 20.94 nominal-preserving liftoff adapter training gate
+
+- dataset_id: `comsol_true_3d_rbc_liftoff_aug_pack_v1`, loaded through `COMSOL_DATA_REGISTRY.md` and the tracked manifest only.
+- scope: liftoff robustness candidate training gate. No COMSOL run, no new data generation, no NPZ modification, no checkpoint/preview artifact committed, and no `CURRENT_BASELINE.md` update.
+- input/split gate: passed. Pack has 192 rows, 48 base geometries, four complete liftoff levels, and grouped split by `base_sample_id`: train/val/test bases `32/8/8`. `base_sample_id` is used only for split and paired consistency, not as model input.
+- baseline replay: frozen 20.85/20.77 baseline reproduced C0 test nominal profile RMSE `0.000333059 m`, non-nominal profile RMSE `0.000874310 m`, and non-nominal Dice `0.683351`.
+- candidate screen: seed `42` selected `A2_latent_residual_adapter`; it beat A1 output-residual and A3 full sensor_z model under validation-only nominal-preserving selection.
+- multi-seed: selected `A2_latent_residual_adapter`, seed `2026`.
+- selected test metrics: nominal profile RMSE `0.000335821 m`; non-nominal profile RMSE `0.000437214 m`; non-nominal projected mask IoU/Dice `0.741925 / 0.842378`; non-nominal L/W/D MAE `1.939 / 1.715 / 0.871 mm`; non-nominal auxiliary wMAE `0.253896`.
+- comparison vs C0: nominal profile RMSE degraded only `0.829%`, within the <=10% guard; non-nominal profile RMSE improved by `49.993%`; non-nominal Dice improved by `0.159027`.
+- decision: A2 is a liftoff robustness candidate and should enter a formal liftoff benchmark. This is not a baseline replacement; `CURRENT_BASELINE.md` remains the nominal 20.85 baseline.
+- review: independent read-only review passed with no must-fix. Two provenance/input-boundary suggestions were adopted.

@@ -1,0 +1,20 @@
+20.94 liftoff adapter selected candidate multi-seed training
+
+dataset_id: comsol_true_3d_rbc_liftoff_aug_pack_v1
+COMSOL_run: false
+data_or_npz_write: false
+CURRENT_BASELINE_update: false
+checkpoint_saved_or_committed: false
+selection: validation-only nominal-preserving score; test final only
+base_sample_id_usage: split grouping and paired-consistency regularization only; not a model input feature
+seeds: 42,123,2026
+selected_candidate: A2_latent_residual_adapter
+selected_seed: 2026
+eligible: True
+test_nominal_profile_depth_rmse_m: 0.000335821
+test_nominal_profile_rmse_change_vs_C0_pct: 0.829
+test_non_nominal_profile_depth_rmse_m: 0.000437214
+test_non_nominal_profile_rmse_change_vs_C0_pct: -49.993
+test_non_nominal_projected_mask_iou_dice: 0.741925/0.842378
+test_non_nominal_LWD_MAE_mm: 1.939/1.715/0.871
+test_non_nominal_wMAE_auxiliary: 0.253896

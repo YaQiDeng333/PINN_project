@@ -1,0 +1,18 @@
+20.94 true 3D RBC liftoff adapter preflight
+
+dataset_id: comsol_true_3d_rbc_liftoff_aug_pack_v1
+rows: 192
+base_count: 48
+liftoff_levels_m: [0.006, 0.008, 0.01, 0.012]
+split_rows: {train: 128, val: 32, test: 32}
+split_bases: {train: 32, val: 8, test: 8}
+paired_liftoff_complete: True
+base_split_leakage: []
+baseline_artifact_manifest_exists: True
+missing_reference_files: []
+forbidden_staged_files: []
+COMSOL_run: false
+training_run_in_preflight: false
+data_or_npz_write: false
+CURRENT_BASELINE_update: false
+preflight_status: PASS

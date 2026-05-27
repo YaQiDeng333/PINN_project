@@ -1,0 +1,6 @@
+decision_item,result,evidence,decision
+adapter_forms_robustness_candidate,True,nominal_change_pct=0.829; non_nominal_change_pct=-49.993; non_nominal_dice_delta=0.159027,pass_candidate
+sensor_z_conditioning_necessary,True,20.93 diagnosed unconditioned liftoff ambiguity; 20.94 candidates all use sensor_z or a sensor_z ablation.,keep_sensor_z_conditioning_for_liftoff_robustness
+adapter_preferred_over_full_model,True,validation-selected candidate=A2_latent_residual_adapter,adapter_preferred
+current_baseline_update,False,"20.94 is a robustness candidate gate, not a baseline replacement.",keep_CURRENT_BASELINE_20_85_unchanged
+next_step,formal_liftoff_benchmark,Proceed only if nominal is preserved and non-nominal improves without Dice collapse.,formal_liftoff_benchmark

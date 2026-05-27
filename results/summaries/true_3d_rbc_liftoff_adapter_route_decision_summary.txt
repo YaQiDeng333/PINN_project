@@ -1,0 +1,13 @@
+20.94 liftoff adapter route decision
+
+selected_candidate: A2_latent_residual_adapter
+selected_seed: 2026
+nominal_profile_rmse_change_vs_C0_pct: 0.829
+non_nominal_profile_rmse_change_vs_C0_pct: -49.993
+non_nominal_projected_mask_dice_delta_vs_C0: 0.159027
+robustness_candidate: True
+CURRENT_BASELINE_update: false
+COMSOL_or_data_generation: false
+
+Decision:
+- If robustness_candidate is true, proceed to a formal liftoff benchmark; otherwise refine adapter/paired consistency before real-data alignment or internal defect feasibility.

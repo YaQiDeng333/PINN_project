@@ -1,0 +1,30 @@
+20.94 independent read-only review: true 3D RBC liftoff adapter
+
+Must-fix:
+- None.
+
+Suggested fixes:
+- Split candidate-screen selected output from final multi-seed selected output to avoid provenance ambiguity.
+- State explicitly that `base_sample_id` is used only for grouped split / paired consistency and is not a model input.
+
+Controller response:
+- Adopted both suggestions. Candidate screen selected output is `results/metrics/true_3d_rbc_liftoff_adapter_candidate_screen_selected.csv`; final multi-seed selected output is `results/metrics/true_3d_rbc_liftoff_adapter_model_selected.csv`.
+- Training summary now states `base_sample_id_usage: split grouping and paired-consistency regularization only; not a model input feature`.
+
+Acceptable:
+- Yes.
+
+Checks:
+- No COMSOL run.
+- No data/NPZ mutation.
+- Dataset is loaded through `COMSOL_DATA_REGISTRY.md` and the tracked manifest for `comsol_true_3d_rbc_liftoff_aug_pack_v1`; no latest/newest scan.
+- Split is grouped by `base_sample_id`, with train/val/test bases 32/8/8 and no base leakage.
+- Baseline is frozen and used only as replay reference / prediction / latent source.
+- Model inputs are limited to allowed fields: delta_b/BxByBz, sensor_z_m, frozen baseline prediction/latent. Labels/profile/mask/bin/template/sample_id are supervision, metrics, split, or consistency metadata only.
+- Selection is validation-only with a nominal-preserving score; test is final reporting only.
+- `CURRENT_BASELINE.md` is unchanged.
+
+Review decision:
+- A2 latent residual adapter forms a liftoff robustness candidate.
+- Keep CURRENT_BASELINE unchanged.
+- Next recommended stage: formal liftoff benchmark.

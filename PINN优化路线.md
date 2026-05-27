@@ -494,3 +494,9 @@ Stage 20.93 closes the first liftoff-aware training gate with a route correction
 The next route should not continue C1-style unconditional augmentation. Use a nominal-preserving baseline+liftoff adapter as the primary next experiment: keep the 20.85 nominal path anchored and learn a small `sensor_z_m`-conditioned correction for non-nominal liftoff. A revised full `sensor_z_m`-conditioned model remains the secondary ablation, and paired liftoff consistency can be added as a regularizer if the adapter objective is stable.
 
 No new COMSOL is needed before that training gate. `CURRENT_BASELINE.md` remains unchanged, and internal/buried defects plus real-data alignment stay deferred until liftoff robustness can preserve nominal behavior while improving non-nominal rows.
+
+# 2026-05-27 Stage 20.94 route note
+
+Stage 20.94 validates the 20.93 route correction. The selected `A2_latent_residual_adapter` uses the frozen 20.85/20.77 baseline latent and baseline six-parameter prediction plus `sensor_z_m` to predict a residual correction. It keeps the nominal operating point effectively intact while cutting non-nominal liftoff profile RMSE by about half.
+
+This forms a liftoff robustness candidate, not a baseline replacement. The current baseline remains the 20.85 nominal true 3D RBC profile-depth baseline. The next route should be a formal liftoff benchmark for A2, with validation-only selection and grouped base splits retained. Internal/buried defects and real-data alignment remain deferred until the liftoff benchmark confirms stability.
