@@ -527,3 +527,11 @@ Stage 20.97 moves the true 3D RBC route from inference smoke into real-data inta
 The real-data boundary is now explicit. The current route requires tri-axis `Bx/By/Bz`, a trusted no-defect reference or prepared `delta_b`, Tesla units, three scan lines, 201 x-samples, known axis order, known coordinate system, `sensor_z_m` in meters, sensor alignment status, gain calibration status, specimen/material metadata, and magnetization setup. Missing `sensor_z_m`, missing reference subtraction, Bz-only input, unknown units/axis order, or internal/buried defects are blockers for this branch.
 
 The next route is a manifest-only dry run before any real signal array is accepted. This keeps real-data alignment grounded in acquisition metadata instead of silently forcing incomplete observations through the COMSOL-trained baseline.
+
+# 2026-05-28 Stage 20.98 route note
+
+20.98 用 20.97 的真实数据接入模板做了一次 manifest-only dry run。它没有读取真实信号数组，没有生成 data/NPZ，没有训练，没有运行 COMSOL，也没有修改 `CURRENT_BASELINE.md`。
+
+这次 dry run 的关键判断是：用户当前的“内部开缺陷铁块”不属于当前 true 3D RBC surface / near-surface baseline 的适用范围。manifest 已标记 `defect_location_type=internal_or_buried`，validator 因此给出 hard blocker；同时 `sensor_z_m`、三轴 `Bx/By/Bz`、no-defect reference、轴顺序、三条扫描线、201 点 `sensor_x_m`、单位、坐标系、传感器对齐状态、gain 状态和励磁设置都还未知，所以 `ready_for_inference=false`。
+
+路线结论：不要把 internal/buried defect 强行混入当前 surface RBC schema。下一步应先创建 internal defect feasibility schema，单独定义 burial depth / depth-to-surface、内部缺陷几何标签、no-defect reference、采集几何和真实数据 validator；当前 20.85 baseline 与 A2 liftoff companion 继续只服务 surface / near-surface RBC-style 分支。

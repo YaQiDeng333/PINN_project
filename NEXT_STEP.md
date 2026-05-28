@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-05-28 after Stage 20.98 real-data manifest dry run
+
+下一步唯一建议：**C. create internal defect feasibility schema**。
+
+20.98 只做真实数据 manifest dry run，没有读取真实信号数组、没有生成 data/NPZ、没有训练、没有运行 COMSOL，也没有更新 `CURRENT_BASELINE.md`。用户现有铁块被明确标记为 `internal_defect_iron_block` / `internal_or_buried`，因此不适合直接进入当前 surface / near-surface RBC-style true 3D baseline。
+
+当前 dry-run 的 `ready_for_inference=false`。硬 blocker 包括：缺真实 `Bx/By/Bz` 数组、缺匹配 no-defect reference、缺实测 `sensor_z_m`、缺轴顺序、缺三条 `scan_line_y_m`、缺 201 点 `sensor_x_m`、缺 Tesla 单位和坐标系、缺传感器对齐与 gain 状态、缺励磁设置；更关键的是缺陷位置属于 internal/buried 分支。不要把它强行送入 20.96 surface RBC 推理 runner。下一步应先定义 internal defect feasibility schema，包括 burial depth / depth-to-surface、内部缺陷标签、对应采集几何和 no-defect reference 规则。
+
 ## 2026-05-27 after Stage 20.92 liftoff-aware training gate
 
 Next step: **inspect liftoff pack failure cases and the nominal/non-nominal trade-off before more COMSOL or real-data alignment**.

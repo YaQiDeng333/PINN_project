@@ -1,0 +1,33 @@
+true 3D RBC 真实数据接入 schema 验证
+
+manifest: results\manifests\real_data_internal_block_dry_run_manifest.json
+sample_table: 未提供
+ready_for_inference: false
+blocker_count: 16
+warning_count: 3
+placeholder_warning_count: 0
+routes_detected: ['blocker_missing_sensor_z_m']
+
+主要 hard blockers:
+- manifest::defect_location_type observed=internal_or_buried message=internal/buried 缺陷需要独立 schema，不能直接进入当前 surface RBC baseline
+- manifest::data_available observed=False message=没有真实信号数组，不能推理
+- manifest::bxyz_available observed=unknown message=必须提供三轴 Bx/By/Bz
+- manifest::no_defect_reference_available observed=unknown message=必须提供匹配的 no-defect reference
+- global_metadata::axis_order observed=unknown message=axis_order 必须是 [Bx, By, Bz]
+- global_metadata::scan_line_y_m observed=unknown message=scan_line_y_m 必须映射为三条扫描线，推荐 [-0.001,0,0.001]
+- global_metadata::sensor_x_m observed=unknown message=sensor_x_m 必须有 201 个采样点，或提供 sensor_x_m_count=201
+- global_metadata::unit observed=unknown message=磁场单位必须是 Tesla
+- global_metadata::coordinate_system observed=unknown message=必须提供 coordinate_system
+- global_metadata::no_defect_reference_method observed=unknown message=必须提供 no_defect_reference_method
+- global_metadata::sensor_alignment_status observed=unknown message=必须提供 sensor_alignment_status
+- global_metadata::gain_calibration_status observed=unknown message=必须提供 gain_calibration_status
+- global_metadata::magnetization_setup observed=unknown message=必须提供 magnetization_setup
+- internal_block_dry_run_sample_001::no_defect_reference_id observed=unknown message=必须提供 no_defect_reference_id
+- internal_block_dry_run_sample_001::sensor_z_m observed=None message=sensor_z_m 必须提供，且必须在 [0.006,0.012] 内
+- internal_block_dry_run_sample_001::delta_b_shape observed=None message=delta_b shape 必须是 (3,3,201) 或 (N,3,3,201)
+
+validator_scope: 本阶段允许 manifest-only 验证，不要求真实数据文件存在。
+COMSOL_run: false
+training_run: false
+NPZ_write: false
+CURRENT_BASELINE_update: false

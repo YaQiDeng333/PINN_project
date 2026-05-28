@@ -1,0 +1,15 @@
+20.98 true 3D RBC 真实数据 manifest dry-run 只读 review
+
+必须修复：无。
+
+建议修复：已采纳。`ready_for_inference` 在 validation summary 和 route summary 中统一为小写 `false`，dry-run 相关 blocker 文案已改为中文；字段名和路径保留原始英文。
+
+可以接受：可以接受。未发现真实信号数组读取、data/NPZ 生成、训练、COMSOL、`CURRENT_BASELINE.md` 或 baseline docs 修改；review 时没有 staged 文件。
+
+ready_for_inference 是否应为 false：是。dry-run manifest 产生 16 个 hard blockers，足够明确阻止推理。
+
+internal defect 是否需要独立 schema：是。`internal_or_buried` 不能直接进入当前 surface / near-surface RBC baseline。
+
+下一步更建议什么：创建 internal defect feasibility schema，而不是把这块内部缺陷铁块接入当前 surface RBC 推理链。
+
+简短原因：dry-run manifest 正确标记为内部/埋藏缺陷，且缺少 `sensor_z_m`、三轴 `Bx/By/Bz`、no-defect reference、轴顺序、三条扫描线、201 点 `sensor_x`、单位、坐标系、对齐/gain 状态等关键字段；route decision 明确阻止 current surface RBC baseline 推理，口径正确。

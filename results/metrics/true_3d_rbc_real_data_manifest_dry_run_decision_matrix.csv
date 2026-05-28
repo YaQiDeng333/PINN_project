@@ -1,0 +1,6 @@
+question,answer,evidence,decision
+ready_for_inference,False,hard_blocker_count=16,不要对这个 dry-run manifest 运行 20.96 推理
+internal_or_buried_defect,True,internal_or_buried,当前 surface/near-surface RBC baseline 不是正确分支
+need_separate_internal_schema,True,internal_defect_feasibility_required,真实数据接入前先创建 internal defect feasibility schema
+minimum_metadata_if_future_surface_capture,"sensor_z_m, matched no-defect reference, tri-axis Bx/By/Bz, axis_order, scan_line_y_m, sensor_x_m=201, Tesla unit, coordinate_system, alignment status, gain status, magnetization setup, specimen geometry",20.97 schema contract,任何 surface/RBC-compatible 真实推理前必须补齐这些字段
+unique_next_step,C. create internal defect feasibility schema,internal defect iron block does not match current surface RBC baseline,实验设置澄清前不要进入 Bx/By/Bz surface baseline 推理

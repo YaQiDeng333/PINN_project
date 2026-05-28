@@ -1,0 +1,41 @@
+20.98 true 3D RBC 真实数据 manifest dry-run 路线判定
+
+manifest: results\manifests\real_data_internal_block_dry_run_manifest.json
+ready_for_inference: false
+hard_blocker_count: 16
+internal_defect_requires_separate_schema: true
+current_surface_rbc_baseline_fit: false
+
+hard blockers:
+- global_metadata::axis_order
+- global_metadata::coordinate_system
+- global_metadata::gain_calibration_status
+- global_metadata::magnetization_setup
+- global_metadata::no_defect_reference_method
+- global_metadata::scan_line_y_m
+- global_metadata::sensor_alignment_status
+- global_metadata::sensor_x_m
+- global_metadata::unit
+- internal_block_dry_run_sample_001::delta_b_shape
+- internal_block_dry_run_sample_001::no_defect_reference_id
+- internal_block_dry_run_sample_001::sensor_z_m
+- manifest::bxyz_available
+- manifest::data_available
+- manifest::defect_location_type
+- manifest::no_defect_reference_available
+
+如果未来要采集真实数据，最少需要补齐：
+- 实测 `sensor_z_m`，单位 m
+- 匹配的 `no_defect_reference_id` 和 no-defect reference 方法
+- 三轴 `Bx/By/Bz`；只有 Bz 仍是 blocker
+- `axis_order=[Bx,By,Bz]`
+- 三条 `scan_line_y_m`，以及重采样到 201 点的 `sensor_x_m`
+- Tesla 单位和坐标系定义
+- 传感器对齐状态和 gain calibration 状态
+- 试件几何、材料、励磁设置；如果是内部缺陷，还需要 burial depth / depth-to-surface 标签
+
+unique_next_step: C. create internal defect feasibility schema
+COMSOL_run: false
+training_run: false
+data_npz_generation: false
+CURRENT_BASELINE_update: false

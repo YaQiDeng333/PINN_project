@@ -2868,3 +2868,13 @@ Review agent 已完成只读复核，无 must-fix。review 建议把 audit/decis
 - validator: `scripts/validate_true_3d_rbc_real_data_intake_schema.py` supports manifest-only validation and does not require real data files. The template intentionally reports `ready_for_inference=False` until placeholder fields are replaced.
 - route decision: next step is a real-data manifest dry run, initially without a data file. Internal/buried defect remains a separate schema branch.
 - review: independent read-only review passed with no must-fix; two validator hardening suggestions were adopted.
+
+# 2026-05-28 Stage 20.98 true 3D RBC real-data manifest dry run
+
+- scope: manifest dry run only. No real signal array was read, no data/NPZ was generated, no COMSOL run, no training, no checkpoint/preview/notes mutation, and no `CURRENT_BASELINE.md` update.
+- dry-run manifest: `results/manifests/real_data_internal_block_dry_run_manifest.json`, based on the 20.97 real-data intake template.
+- specimen status: the user-owned iron block is marked as `specimen_type=internal_defect_iron_block` and `defect_location_type=internal_or_buried`.
+- validation result: `ready_for_inference=false`; 16 hard blockers were reported.
+- main blockers: internal/buried defect branch mismatch, no real signal array, unknown tri-axis `Bx/By/Bz`, unknown no-defect reference, missing/unknown `sensor_z_m`, unknown `axis_order`, unknown three-line `scan_line_y_m`, unknown 201-point `sensor_x_m`, unknown unit, unknown coordinate system, unknown sensor alignment / gain calibration status, and unknown magnetization setup.
+- route decision: the current surface / near-surface RBC baseline must not be used for this internal defect block. The next step is `C. create internal defect feasibility schema`.
+- review: independent read-only review passed with no must-fix. One suggestion was adopted by unifying `ready_for_inference=false` casing and writing dry-run blocker text in Chinese.

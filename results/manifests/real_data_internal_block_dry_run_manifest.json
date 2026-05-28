@@ -1,0 +1,49 @@
+{
+  "intake_schema_version": "true_3d_rbc_real_data_intake_v1",
+  "dry_run_stage": "20.98_real_data_manifest_dry_run",
+  "format": "prepared_delta_b",
+  "dataset_intake_id": "real_data_internal_block_dry_run",
+  "description": "仅用于用户现有内部开缺陷铁块的 manifest dry run；不附带真实信号数组。",
+  "specimen_type": "internal_defect_iron_block",
+  "defect_location_type": "internal_or_buried",
+  "schema_branch_recommendation": "internal_defect_feasibility_required",
+  "data_available": false,
+  "bxyz_available": "unknown",
+  "no_defect_reference_available": "unknown",
+  "data_file": null,
+  "data_file_required_for_manifest_only_validation": false,
+  "global_metadata": {
+    "axis_order": "unknown",
+    "scan_line_y_m": "unknown",
+    "sensor_x_m_count": "unknown",
+    "sensor_x_m": "unknown",
+    "delta_b_unit": "unknown",
+    "coordinate_system": "unknown",
+    "no_defect_reference_method": "unknown",
+    "sensor_alignment_status": "unknown",
+    "gain_calibration_status": "unknown",
+    "material": "iron",
+  "specimen_info": "内部开缺陷铁块；精确尺寸和埋深未知",
+    "magnetization_setup": "unknown"
+  },
+  "samples": [
+    {
+      "sample_id": "internal_block_dry_run_sample_001",
+      "specimen_id": "internal_block_001",
+      "split_tag": "dry_run_only",
+      "sensor_z_m": "unknown",
+      "no_defect_reference_id": "unknown",
+      "delta_b_shape": "unknown",
+      "ground_truth_LWD": {
+        "available": "optional/unknown",
+        "L_m": null,
+        "W_m": null,
+        "D_m": null
+      },
+      "profile_depth_ground_truth": {
+        "available": "unknown",
+        "reference": null
+      }
+    }
+  ]
+}

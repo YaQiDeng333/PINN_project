@@ -155,6 +155,22 @@ def parse_axis_order(value: Any) -> list[str] | None:
     return None
 
 
+def is_unknownish(value: Any) -> bool:
+    if value is None:
+        return True
+    if isinstance(value, str):
+        return value.strip().lower() in {"", "unknown", "optional/unknown", "unk", "n/a", "na", "none"}
+    return False
+
+
+def is_positive(value: Any) -> bool:
+    if isinstance(value, bool):
+        return value
+    if value is None:
+        return False
+    return str(value).strip().lower() in {"true", "yes", "y", "1", "available", "present"}
+
+
 def route_for_sensor_z(sensor_z_m: float | None) -> tuple[str, bool]:
     if sensor_z_m is None or not math.isfinite(sensor_z_m):
         return "blocker_missing_sensor_z_m", True
@@ -191,25 +207,37 @@ def validate_manifest(manifest: dict[str, Any], sample_table: list[dict[str, Any
     rows: list[dict[str, Any]] = []
     fmt = manifest.get("format")
     add_check(rows, "blocker", "manifest", "format", fmt in {"prepared_delta_b", "raw_defect_no_defect"}, fmt, "format must be prepared_delta_b or raw_defect_no_defect")
+    defect_location_type = manifest.get("defect_location_type")
+    internal_like = str(defect_location_type).strip().lower() in {"internal_or_buried", "internal", "buried", "subsurface"}
+    add_check(rows, "blocker", "manifest", "defect_location_type", not internal_like, defect_location_type, "internal/buried 缺陷需要独立 schema，不能直接进入当前 surface RBC baseline")
+    if str(manifest.get("schema_branch_recommendation", "")).strip().lower() == "internal_defect_feasibility_required":
+        add_check(rows, "warning", "manifest", "schema_branch_recommendation", False, manifest.get("schema_branch_recommendation"), "路线建议指向 internal defect feasibility 分支")
+    if not is_positive(manifest.get("data_available", True)):
+        add_check(rows, "blocker", "manifest", "data_available", False, manifest.get("data_available"), "没有真实信号数组，不能推理")
+    if not is_positive(manifest.get("bxyz_available", True)):
+        add_check(rows, "blocker", "manifest", "bxyz_available", False, manifest.get("bxyz_available"), "必须提供三轴 Bx/By/Bz")
+    if not is_positive(manifest.get("no_defect_reference_available", True)):
+        add_check(rows, "blocker", "manifest", "no_defect_reference_available", False, manifest.get("no_defect_reference_available"), "必须提供匹配的 no-defect reference")
     if has_placeholder(manifest.get("data_file")):
         add_check(rows, "warning", "manifest", "data_file", False, manifest.get("data_file"), "data_file still contains a template placeholder")
     meta = manifest.get("global_metadata", {})
     axis_order = meta.get("axis_order")
-    add_check(rows, "blocker", "global_metadata", "axis_order", axis_order == AXIS_ORDER, axis_order, "axis_order must be [Bx, By, Bz]")
-    add_check(rows, "blocker", "global_metadata", "axis_order_bz_only", axis_order != ["Bz"], axis_order, "Bz-only data is a blocker for this true 3D RBC route")
+    add_check(rows, "blocker", "global_metadata", "axis_order", axis_order == AXIS_ORDER, axis_order, "axis_order 必须是 [Bx, By, Bz]")
+    add_check(rows, "blocker", "global_metadata", "axis_order_bz_only", axis_order != ["Bz"], axis_order, "只有 Bz 是当前 true 3D RBC 路线的 blocker")
     scan_line = meta.get("scan_line_y_m")
     scan_ok = isinstance(scan_line, list) and len(scan_line) == 3 and all(abs(float(a) - b) < 1.0e-9 for a, b in zip(scan_line, SCAN_LINE_Y_M))
-    add_check(rows, "blocker", "global_metadata", "scan_line_y_m", scan_ok, scan_line, "scan_line_y_m must map to three lines, recommended [-0.001,0,0.001]")
+    add_check(rows, "blocker", "global_metadata", "scan_line_y_m", scan_ok, scan_line, "scan_line_y_m 必须映射为三条扫描线，推荐 [-0.001,0,0.001]")
     sensor_x_count = meta.get("sensor_x_m_count")
     sensor_x = meta.get("sensor_x_m")
     sensor_x_ok = sensor_x_count == 201 or (isinstance(sensor_x, list) and len(sensor_x) == 201)
-    add_check(rows, "blocker", "global_metadata", "sensor_x_m", sensor_x_ok, sensor_x_count if sensor_x_count is not None else type(sensor_x).__name__, "sensor_x_m must have 201 samples or sensor_x_m_count=201")
+    add_check(rows, "blocker", "global_metadata", "sensor_x_m", sensor_x_ok, sensor_x_count if sensor_x_count is not None else type(sensor_x).__name__, "sensor_x_m 必须有 201 个采样点，或提供 sensor_x_m_count=201")
     if has_placeholder(sensor_x):
         add_check(rows, "warning", "global_metadata", "sensor_x_m", False, sensor_x, "sensor_x_m still contains a template placeholder")
     unit = meta.get("delta_b_unit") or meta.get("b_unit")
-    add_check(rows, "blocker", "global_metadata", "unit", unit == "Tesla", unit, "magnetic field unit must be Tesla")
+    add_check(rows, "blocker", "global_metadata", "unit", unit == "Tesla", unit, "磁场单位必须是 Tesla")
     for field in ("coordinate_system", "no_defect_reference_method", "sensor_alignment_status", "gain_calibration_status", "material", "specimen_info", "magnetization_setup"):
-        add_check(rows, "blocker" if field in {"coordinate_system", "no_defect_reference_method", "sensor_alignment_status", "gain_calibration_status", "magnetization_setup"} else "warning", "global_metadata", field, bool(meta.get(field)), meta.get(field, ""), f"{field} should be provided")
+        known = bool(meta.get(field)) and not is_unknownish(meta.get(field))
+        add_check(rows, "blocker" if field in {"coordinate_system", "no_defect_reference_method", "sensor_alignment_status", "gain_calibration_status", "magnetization_setup"} else "warning", "global_metadata", field, known, meta.get(field, ""), f"必须提供 {field}")
         if has_placeholder(meta.get(field)):
             add_check(rows, "warning", "global_metadata", field, False, meta.get(field), f"{field} still contains a template placeholder")
     if meta.get("gain_calibration_status") in {"unknown", "", None}:
@@ -237,9 +265,9 @@ def validate_manifest(manifest: dict[str, Any], sample_table: list[dict[str, Any
                 add_check(rows, "blocker", item, "sample_table.delta_b_unit", sample_unit == "Tesla", sample_unit, "sample table delta_b_unit must be Tesla")
             if str(sample.get("format", "")) == "raw_defect_no_defect" and fmt == "prepared_delta_b":
                 add_check(rows, "blocker", item, "sample_table.format_conflict", False, sample.get("format"), "sample table raw rows cannot be validated against prepared_delta_b manifest")
-        add_check(rows, "blocker", item, "sample_id", bool(sample.get("sample_id")), sample.get("sample_id", ""), "sample_id is required")
-        add_check(rows, "blocker", item, "specimen_id", bool(sample.get("specimen_id")), sample.get("specimen_id", ""), "specimen_id is required")
-        add_check(rows, "blocker", item, "no_defect_reference_id", bool(sample.get("no_defect_reference_id")), sample.get("no_defect_reference_id", ""), "no_defect_reference_id is required")
+        add_check(rows, "blocker", item, "sample_id", bool(sample.get("sample_id")) and not is_unknownish(sample.get("sample_id")), sample.get("sample_id", ""), "sample_id is required")
+        add_check(rows, "blocker", item, "specimen_id", bool(sample.get("specimen_id")) and not is_unknownish(sample.get("specimen_id")), sample.get("specimen_id", ""), "specimen_id is required")
+        add_check(rows, "blocker", item, "no_defect_reference_id", bool(sample.get("no_defect_reference_id")) and not is_unknownish(sample.get("no_defect_reference_id")), sample.get("no_defect_reference_id", ""), "必须提供 no_defect_reference_id")
         for field in ("sample_id", "specimen_id", "no_defect_reference_id"):
             if has_placeholder(sample.get(field)):
                 add_check(rows, "warning", item, field, False, sample.get(field), f"{field} still contains a template placeholder")
@@ -248,10 +276,10 @@ def validate_manifest(manifest: dict[str, Any], sample_table: list[dict[str, Any
         except Exception:
             z = None
         route, route_blocker = route_for_sensor_z(z)
-        add_check(rows, "blocker", item, "sensor_z_m", not route_blocker, z, "sensor_z_m must be present and within [0.006,0.012]", route)
+        add_check(rows, "blocker", item, "sensor_z_m", not route_blocker, z, "sensor_z_m 必须提供，且必须在 [0.006,0.012] 内", route)
         if fmt == "prepared_delta_b":
             shape = parse_shape(sample.get("delta_b_shape") or manifest.get("delta_b_shape"))
-            add_check(rows, "blocker", item, "delta_b_shape", valid_signal_shape(shape), shape, "delta_b shape must be (3,3,201) or (N,3,3,201)", route)
+            add_check(rows, "blocker", item, "delta_b_shape", valid_signal_shape(shape), shape, "delta_b shape 必须是 (3,3,201) 或 (N,3,3,201)", route)
         elif fmt == "raw_defect_no_defect":
             defect = parse_shape(sample.get("b_defect_shape") or manifest.get("b_defect_shape"))
             ref = parse_shape(sample.get("b_no_defect_shape") or manifest.get("b_no_defect_shape"))
@@ -264,47 +292,54 @@ def validate_manifest(manifest: dict[str, Any], sample_table: list[dict[str, Any
     return rows
 
 
-def write_validation_summary(rows: list[dict[str, Any]], manifest_path: Path, sample_table_path: Path | None) -> None:
+def write_validation_summary(
+    rows: list[dict[str, Any]],
+    manifest_path: Path,
+    sample_table_path: Path | None,
+    summary_path: Path = VALIDATION_SUMMARY,
+) -> None:
     blockers = [row for row in rows if row["severity"] == "blocker" and not row["pass"]]
     warnings = [row for row in rows if row["severity"] == "warning" and not row["pass"]]
     placeholder_warnings = [row for row in warnings if "placeholder" in str(row.get("message", "")).lower()]
     ready = not blockers and not placeholder_warnings
     routes = sorted({str(row.get("route", "")) for row in rows if row.get("route")})
     lines = [
-        "20.97 true 3D RBC real-data intake schema validation",
+        "true 3D RBC 真实数据接入 schema 验证",
         "",
         f"manifest: {manifest_path}",
-        f"sample_table: {sample_table_path if sample_table_path else 'none'}",
-        f"ready_for_inference: {ready}",
+        f"sample_table: {sample_table_path if sample_table_path else '未提供'}",
+        f"ready_for_inference: {str(ready).lower()}",
         f"blocker_count: {len(blockers)}",
         f"warning_count: {len(warnings)}",
         f"placeholder_warning_count: {len(placeholder_warnings)}",
         f"routes_detected: {routes}",
         "",
-        "main blockers:",
+        "主要 hard blockers:",
     ]
     if blockers:
         lines.extend([f"- {row['item']}::{row['field']} observed={row['observed']} message={row['message']}" for row in blockers[:20]])
     else:
-        lines.append("- none")
+        lines.append("- 无")
     lines.extend(
         [
             "",
-            "validator_scope: manifest-only validation is allowed; real data files are not required at this stage.",
+            "validator_scope: 本阶段允许 manifest-only 验证，不要求真实数据文件存在。",
             "COMSOL_run: false",
             "training_run: false",
             "NPZ_write: false",
             "CURRENT_BASELINE_update: false",
         ]
     )
-    VALIDATION_SUMMARY.parent.mkdir(parents=True, exist_ok=True)
-    VALIDATION_SUMMARY.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    summary_path.parent.mkdir(parents=True, exist_ok=True)
+    summary_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Validate true 3D RBC real-data intake manifest/schema.")
     parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST)
     parser.add_argument("--sample-table", type=Path)
+    parser.add_argument("--summary", type=Path, default=VALIDATION_SUMMARY)
+    parser.add_argument("--matrix", type=Path, default=VALIDATION_MATRIX)
     parser.add_argument("--skip-preflight", action="store_true")
     return parser.parse_args()
 
@@ -316,8 +351,8 @@ def main() -> int:
     manifest = read_json(args.manifest)
     table = table_samples(args.sample_table) if args.sample_table else []
     rows = validate_manifest(manifest, table)
-    write_csv(VALIDATION_MATRIX, rows)
-    write_validation_summary(rows, args.manifest, args.sample_table)
+    write_csv(args.matrix, rows)
+    write_validation_summary(rows, args.manifest, args.sample_table, args.summary)
     blockers = [row for row in rows if row["severity"] == "blocker" and not row["pass"]]
     return 2 if blockers else 0
 
