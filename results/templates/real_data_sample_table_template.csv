@@ -1,0 +1,2 @@
+sample_id,specimen_id,split_tag,sensor_z_m,no_defect_reference_id,format,axis_order,delta_b_shape,b_defect_shape,b_no_defect_shape,delta_b_unit,coordinate_system,sensor_alignment_status,gain_calibration_status,ground_truth_LWD_available,profile_depth_ground_truth_available
+example_sample_001,example_specimen_001,unassigned,0.008,example_reference_001,prepared_delta_b,"Bx|By|Bz","3|3|201",,,Tesla,"x scan; y scan-line; z liftoff",verified_aligned,diagnostic_only_not_baseline_replacement,false,false

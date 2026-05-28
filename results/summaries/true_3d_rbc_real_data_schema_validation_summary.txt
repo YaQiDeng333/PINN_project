@@ -1,0 +1,18 @@
+20.97 true 3D RBC real-data intake schema validation
+
+manifest: C:\Users\19166\Desktop\PINN_project\results\templates\real_data_intake_manifest_template.json
+sample_table: none
+ready_for_inference: False
+blocker_count: 0
+warning_count: 5
+placeholder_warning_count: 5
+routes_detected: ['baseline']
+
+main blockers:
+- none
+
+validator_scope: manifest-only validation is allowed; real data files are not required at this stage.
+COMSOL_run: false
+training_run: false
+NPZ_write: false
+CURRENT_BASELINE_update: false

@@ -398,3 +398,11 @@ Stage 20.96 completed the liftoff-conditioned inference smoke. The runner loads 
 Smoke test result: auto test all-liftoff profile RMSE is `0.000411175 m` with Dice `0.842773`; nominal RMSE remains `0.000333059 m`; non-nominal RMSE is `0.000437214 m`, matching the 20.95 A2 companion result and improving over force-baseline non-nominal RMSE `0.000874310 m`. The `sensor_z_m` contract is now explicit: unit meters, validated range `[0.006, 0.012]`, missing value is an error, and out-of-range values are flagged.
 
 Only next step: move to real-data schema intake / acquisition metadata contract. Require `delta_b`, matched no-defect reference metadata, axis order, and `sensor_z_m` before any real-data inference claim. Internal/buried defect feasibility remains deferred.
+
+## 2026-05-28 update after Stage 20.97
+
+Stage 20.97 defined the real-data intake schema without training, COMSOL, data/NPZ mutation, or `CURRENT_BASELINE.md` changes. The intake contract now supports prepared `delta_b` and raw `b_defect + b_no_defect`, requires tri-axis `Bx/By/Bz`, `sensor_z_m`, no-defect reference provenance, Tesla units, coordinate system, sensor alignment status, gain status, and 201-sample `sensor_x`.
+
+The validator can run without real data files and checks the manifest/schema first. The included template is intentionally not inference-ready until placeholders such as specimen material and magnetization setup are replaced. Bz-only data is a blocker for this route, and internal/buried defects remain a separate schema.
+
+Only next step: perform a real-data manifest dry run. Start with metadata only: fill `results/templates/real_data_intake_manifest_template.json` or an equivalent manifest with actual `sensor_z_m`, no-defect reference, axis order, units, alignment, gain, specimen, and magnetization fields before attaching real signal arrays.

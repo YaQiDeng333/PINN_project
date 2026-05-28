@@ -1,0 +1,54 @@
+{
+  "intake_schema_version": "true_3d_rbc_real_data_intake_v1",
+  "format": "prepared_delta_b",
+  "dataset_intake_id": "example_real_data_batch_001",
+  "description": "Template only; replace placeholder values before real-data dry run.",
+  "data_file": "<optional_path_to_prepared_delta_b_or_raw_arrays>",
+  "data_file_required_for_manifest_only_validation": false,
+  "global_metadata": {
+    "axis_order": [
+      "Bx",
+      "By",
+      "Bz"
+    ],
+    "scan_line_y_m": [
+      -0.001,
+      0.0,
+      0.001
+    ],
+    "sensor_x_m_count": 201,
+    "sensor_x_m": "<optional_201_value_array_or_external_reference>",
+    "delta_b_unit": "Tesla",
+    "coordinate_system": "x=scan direction, y=scan-line offset, z=liftoff from specimen surface",
+    "no_defect_reference_method": "matched_no_defect_scan_same_sensor_z",
+    "sensor_alignment_status": "verified_aligned",
+    "gain_calibration_status": "diagnostic_only_not_baseline_replacement",
+    "material": "<specimen_material>",
+    "specimen_info": "<specimen_geometry_and_surface_notes>",
+    "magnetization_setup": "<magnet_or_current_source_setup>"
+  },
+  "samples": [
+    {
+      "sample_id": "example_sample_001",
+      "specimen_id": "example_specimen_001",
+      "split_tag": "unassigned",
+      "sensor_z_m": 0.008,
+      "no_defect_reference_id": "example_reference_001",
+      "delta_b_shape": [
+        3,
+        3,
+        201
+      ],
+      "ground_truth_LWD": {
+        "available": false,
+        "L_m": null,
+        "W_m": null,
+        "D_m": null
+      },
+      "profile_depth_ground_truth": {
+        "available": false,
+        "reference": null
+      }
+    }
+  ]
+}

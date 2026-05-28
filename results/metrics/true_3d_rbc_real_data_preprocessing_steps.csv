@@ -1,0 +1,11 @@
+step,name,input,output,blocker_if_missing
+1,read_raw_bxyz,raw Bx/By/Bz scans or prepared delta_b,array with axis metadata,Bx/By/Bz tri-axis data
+2,spatial_align_three_axes,Bx/By/Bz channels,aligned tri-axis field,sensor_alignment_status
+3,convert_units_to_tesla,field array and unit metadata,Tesla-valued field array,known unit
+4,match_no_defect_reference,defect scan and no-defect reference,matched reference pair,no_defect_reference_id
+5,compute_delta_b,b_defect and b_no_defect,delta_b=b_defect-b_no_defect,trusted delta_b or raw pair
+6,resample_sensor_x,sensor_x coordinate and signal,201 x-samples,resampling map to 201
+7,map_scan_line_y,scan_line_y metadata,"three scan lines matching [-0.001,0,0.001] convention",three-line y mapping
+8,write_sensor_z_metadata,measured liftoff,sensor_z_m per sample,sensor_z_m
+9,record_gain_calibration,gain/amplitude calibration info,diagnostic calibration flag,"not a blocker, but warning if unknown"
+10,call_20_96_inference_runner,delta_b + sensor_z_m + metadata,"RBC params, profile/depth, projected mask",validated intake manifest

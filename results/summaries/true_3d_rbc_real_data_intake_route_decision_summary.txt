@@ -1,0 +1,14 @@
+20.97 true 3D RBC real-data intake route decision
+
+template_blocker_count: 0
+template_placeholder_warning_count: 5
+real_data_ready_for_inference: false until an actual manifest and sample table pass validation
+manifest_dry_run_ready: true
+
+next unique step: ask for or prepare a real-data manifest dry run with no data file required at first. It must include sensor_z_m, no-defect reference provenance, tri-axis Bx/By/Bz availability, units, coordinate system, sensor alignment, and gain status.
+
+Bz-only condition: blocker for this route; create a separate Bz-only branch only if tri-axis data cannot be provided.
+Internal defect condition: separate schema; do not mix with current surface-breaking RBC baseline.
+CURRENT_BASELINE_update: false
+COMSOL_run: false
+training_run: false

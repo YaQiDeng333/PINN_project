@@ -520,3 +520,10 @@ Stage 20.96 turns the baseline plus A2 companion result into a usable inference 
 The smoke result preserves the split baseline/companion role. Auto routing keeps nominal profile RMSE at `0.000333059 m` and reproduces A2 non-nominal RMSE `0.000437214 m`; force-baseline non-nominal RMSE remains `0.000874310 m`. `sensor_z_m` is now a required metadata field for multi-liftoff or real-data inference. Values outside `[0.006, 0.012]` are flagged, and missing liftoff is a hard error.
 
 This is not a baseline replacement. `CURRENT_BASELINE.md` remains the 20.85 nominal true 3D RBC profile-depth baseline, while A2 remains a liftoff robustness companion module. The next route should move to real-data schema intake and acquisition metadata definition before real-data claims; internal/buried defects remain deferred.
+# 2026-05-28 Stage 20.97 route note
+
+Stage 20.97 moves the true 3D RBC route from inference smoke into real-data intake definition. The current model path is unchanged: `CURRENT_BASELINE.md` remains the 20.85 nominal true 3D RBC profile-depth baseline, and A2 remains a liftoff robustness companion module selected only when valid non-nominal `sensor_z_m` metadata is present.
+
+The real-data boundary is now explicit. The current route requires tri-axis `Bx/By/Bz`, a trusted no-defect reference or prepared `delta_b`, Tesla units, three scan lines, 201 x-samples, known axis order, known coordinate system, `sensor_z_m` in meters, sensor alignment status, gain calibration status, specimen/material metadata, and magnetization setup. Missing `sensor_z_m`, missing reference subtraction, Bz-only input, unknown units/axis order, or internal/buried defects are blockers for this branch.
+
+The next route is a manifest-only dry run before any real signal array is accepted. This keeps real-data alignment grounded in acquisition metadata instead of silently forcing incomplete observations through the COMSOL-trained baseline.

@@ -1,0 +1,27 @@
+severity,item,field,pass,observed,message,route
+blocker,manifest,format,True,prepared_delta_b,format must be prepared_delta_b or raw_defect_no_defect,
+warning,manifest,data_file,False,<optional_path_to_prepared_delta_b_or_raw_arrays>,data_file still contains a template placeholder,
+blocker,global_metadata,axis_order,True,"['Bx', 'By', 'Bz']","axis_order must be [Bx, By, Bz]",
+blocker,global_metadata,axis_order_bz_only,True,"['Bx', 'By', 'Bz']",Bz-only data is a blocker for this true 3D RBC route,
+blocker,global_metadata,scan_line_y_m,True,"[-0.001, 0.0, 0.001]","scan_line_y_m must map to three lines, recommended [-0.001,0,0.001]",
+blocker,global_metadata,sensor_x_m,True,201,sensor_x_m must have 201 samples or sensor_x_m_count=201,
+warning,global_metadata,sensor_x_m,False,<optional_201_value_array_or_external_reference>,sensor_x_m still contains a template placeholder,
+blocker,global_metadata,unit,True,Tesla,magnetic field unit must be Tesla,
+blocker,global_metadata,coordinate_system,True,"x=scan direction, y=scan-line offset, z=liftoff from specimen surface",coordinate_system should be provided,
+blocker,global_metadata,no_defect_reference_method,True,matched_no_defect_scan_same_sensor_z,no_defect_reference_method should be provided,
+blocker,global_metadata,sensor_alignment_status,True,verified_aligned,sensor_alignment_status should be provided,
+blocker,global_metadata,gain_calibration_status,True,diagnostic_only_not_baseline_replacement,gain_calibration_status should be provided,
+warning,global_metadata,material,True,<specimen_material>,material should be provided,
+warning,global_metadata,material,False,<specimen_material>,material still contains a template placeholder,
+warning,global_metadata,specimen_info,True,<specimen_geometry_and_surface_notes>,specimen_info should be provided,
+warning,global_metadata,specimen_info,False,<specimen_geometry_and_surface_notes>,specimen_info still contains a template placeholder,
+blocker,global_metadata,magnetization_setup,True,<magnet_or_current_source_setup>,magnetization_setup should be provided,
+warning,global_metadata,magnetization_setup,False,<magnet_or_current_source_setup>,magnetization_setup still contains a template placeholder,
+blocker,manifest,samples,True,1,at least one sample row is required,
+blocker,example_sample_001,sample_id,True,example_sample_001,sample_id is required,
+blocker,example_sample_001,specimen_id,True,example_specimen_001,specimen_id is required,
+blocker,example_sample_001,no_defect_reference_id,True,example_reference_001,no_defect_reference_id is required,
+blocker,example_sample_001,sensor_z_m,True,0.008,"sensor_z_m must be present and within [0.006,0.012]",baseline
+blocker,example_sample_001,delta_b_shape,True,"[3, 3, 201]","delta_b shape must be (3,3,201) or (N,3,3,201)",baseline
+warning,example_sample_001,ground_truth_LWD,True,not_available,inference can run but L/W/D scoring will be unavailable,baseline
+warning,example_sample_001,profile_depth_ground_truth,True,not_available,inference can run but profile scoring will be unavailable,baseline

@@ -1,0 +1,26 @@
+20.97 true 3D RBC real-data schema intake preflight
+
+exists:results\summaries\true_3d_rbc_liftoff_inference_metadata_contract.md: pass=True observed=C:\Users\19166\Desktop\PINN_project\results\summaries\true_3d_rbc_liftoff_inference_metadata_contract.md notes=
+exists:results\summaries\true_3d_rbc_liftoff_conditioned_inference_smoke_summary.txt: pass=True observed=C:\Users\19166\Desktop\PINN_project\results\summaries\true_3d_rbc_liftoff_conditioned_inference_smoke_summary.txt notes=
+exists:scripts\run_true_3d_rbc_liftoff_conditioned_inference.py: pass=True observed=C:\Users\19166\Desktop\PINN_project\scripts\run_true_3d_rbc_liftoff_conditioned_inference.py notes=
+exists:results\manifests\true_3d_rbc_baseline_inference_artifact_manifest.json: pass=True observed=C:\Users\19166\Desktop\PINN_project\results\manifests\true_3d_rbc_baseline_inference_artifact_manifest.json notes=
+exists:results\manifests\true_3d_rbc_a2_liftoff_adapter_inference_artifact_manifest.json: pass=True observed=C:\Users\19166\Desktop\PINN_project\results\manifests\true_3d_rbc_a2_liftoff_adapter_inference_artifact_manifest.json notes=
+exists:COMSOL_DATA_REGISTRY.md: pass=True observed=C:\Users\19166\Desktop\PINN_project\COMSOL_DATA_REGISTRY.md notes=
+exists:results\manifests\comsol_true_3d_rbc_imported_watertight_pilot_v3_240.manifest.json: pass=True observed=C:\Users\19166\Desktop\PINN_project\results\manifests\comsol_true_3d_rbc_imported_watertight_pilot_v3_240.manifest.json notes=
+exists:results\manifests\comsol_true_3d_rbc_liftoff_aug_pack_v1.manifest.json: pass=True observed=C:\Users\19166\Desktop\PINN_project\results\manifests\comsol_true_3d_rbc_liftoff_aug_pack_v1.manifest.json notes=
+exists:CURRENT_BASELINE.md: pass=True observed=C:\Users\19166\Desktop\PINN_project\CURRENT_BASELINE.md notes=
+current_baseline_true_3d_rbc: pass=True observed=CURRENT_BASELINE.md notes=
+registry_has_v3_240: pass=True observed=COMSOL_DATA_REGISTRY.md notes=
+registry_has_liftoff_pack: pass=True observed=COMSOL_DATA_REGISTRY.md notes=
+forbidden_staged_artifacts: pass=True observed=none notes=
+no_COMSOL_run: pass=True observed=not run notes=
+no_training_run: pass=True observed=not run notes=
+no_data_npz_mutation: pass=True observed=not modified notes=
+no_CURRENT_BASELINE_update: pass=True observed=not modified notes=
+
+preflight_pass: True
+latest_newest_npz_scan: false
+real_data_generation: false
+NPZ_write: false
+CURRENT_BASELINE_update: false
+stop_condition: stop if 20.96 inference artifacts, registry/manifest records, or CURRENT_BASELINE state are missing.

@@ -1,0 +1,7 @@
+question,answer,decision
+what_is_missing_before_real_data,"actual real-data manifest and sample table with measured sensor_z_m, tri-axis Bx/By/Bz, matched no-defect references, units, coordinate system, alignment status, and gain status",prepare a manifest dry run before any inference claim
+can_enter_real_data_manifest_dry_run,True,"yes, validator and templates are ready; dry run can be manifest-only first"
+need_no_defect_reference,True,"yes, either prepared delta_b with reference provenance or raw b_defect plus b_no_defect is required"
+if_only_bz_available,block_current_route,stop this true 3D RBC route or open a separate Bz-only branch; do not feed Bz-only data into the tri-axis baseline
+internal_defect_schema,separate_branch,internal/buried defects need a separate label schema and must not be mixed into the surface RBC baseline intake
+current_template_ready,False,template is runnable but contains placeholders; replace placeholders for a real manifest dry run

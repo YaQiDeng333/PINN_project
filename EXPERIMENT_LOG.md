@@ -2856,3 +2856,15 @@ Review agent 已完成只读复核，无 must-fix。review 建议把 audit/decis
 - comparison: force-baseline non-nominal RMSE was `0.000874310 m`, while auto/A2 non-nominal RMSE was `0.000437214 m`, reproducing the 20.95 A2 companion behavior. Auto route accuracy on test was `1.0`.
 - metadata contract: `sensor_z_m` is mandatory in meters; supported range is `[0.006, 0.012]`; missing `sensor_z_m` raises an error; out-of-range values are flagged and not treated as validated.
 - review: independent read-only review passed after fixing the `0.012 m` boundary out-of-range flag. A2 remains a companion robustness module, not `CURRENT_BASELINE`.
+
+# 2026-05-28 Stage 20.97 real-data schema intake contract
+
+- scope: schema, metadata contract, templates, validator, preprocessing plan, and route decision only. No training, no COMSOL, no data/NPZ/checkpoint/preview/notes mutation, and no `CURRENT_BASELINE.md` update.
+- baseline context: `CURRENT_BASELINE` remains the 20.85 nominal true 3D RBC profile-depth baseline; A2 remains the liftoff robustness companion module.
+- schema document: `REAL_DATA_INTAKE_SCHEMA.md`.
+- supported intake formats: recommended prepared `delta_b` with shape `(N,3,3,201)` or single sample `(3,3,201)`, and raw `b_defect + b_no_defect` with `delta_b=b_defect-b_no_defect`.
+- required metadata: `sensor_z_m`, `axis_order=[Bx,By,Bz]`, `scan_line_y_m`, `sensor_x_m` length 201, Tesla units, `no_defect_reference_id`, no-defect reference method, coordinate system, sensor alignment status, gain calibration status, material/specimen information, and magnetization setup.
+- blockers: missing `sensor_z_m`, missing no-defect reference, Bz-only data, unknown axis order or unit, inability to resample `sensor_x` to 201, inability to map three scan lines, out-of-range liftoff without retraining/validation, and internal/buried defect mixing.
+- validator: `scripts/validate_true_3d_rbc_real_data_intake_schema.py` supports manifest-only validation and does not require real data files. The template intentionally reports `ready_for_inference=False` until placeholder fields are replaced.
+- route decision: next step is a real-data manifest dry run, initially without a data file. Internal/buried defect remains a separate schema branch.
+- review: independent read-only review passed with no must-fix; two validator hardening suggestions were adopted.
