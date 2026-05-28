@@ -1,0 +1,12 @@
+21.0 内部缺陷 smoke pack registry summary
+
+registry_path: C:\Users\19166\Desktop\PINN_project\COMSOL_DATA_REGISTRY.md
+manifest_path: C:\Users\19166\Desktop\PINN_project\results\manifests\comsol_internal_defect_smoke_pack_v1.manifest.json
+dataset_id: comsol_internal_defect_smoke_pack_v1
+status: smoke_generated
+allowed_use: schema_validation, explicit_internal_training_gate
+forbidden_use: automatic_mainline_training, baseline_update, current_baseline_replacement, latest_newest_auto_discovery, direct_training_without_manifest_gate
+train_ready_candidate: false
+baseline_ready: false
+auto_discovery_allowed: false
+latest_newest_discovery_allowed: false

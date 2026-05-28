@@ -208,3 +208,30 @@ This registry records generated COMSOL dataset identities and allowed usage. It 
 - validation_script: `scripts/validate_true_3d_rbc_liftoff_aug_pack.py`
 - npz_sha256: 71022720e500d9a2be0ca09837bdbe705958cba879fc58d5f8ffff7404372a3c
 - notes: Metadata only. Generated NPZ/data files are not committed and must be loaded only by explicit dataset_id + manifest.
+
+## comsol_internal_defect_smoke_pack_v1
+
+- dataset_role: internal_defect_feasibility_smoke_pack
+- status: smoke_generated
+- route: internal_buried_defect_feasibility
+- stage: 21.0
+- schema_version: internal_defect_feasibility_v1
+- geometry_method: internal_cavity_comsol_solid
+- exact_piao_rbc: false
+- rbc_style_approximation: false
+- path: `C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\generated\internal_defect_smoke_pack\internal_defect_smoke_pack_v1.npz`
+- manifest_path: `C:\Users\19166\Desktop\PINN_project\results\manifests\comsol_internal_defect_smoke_pack_v1.manifest.json`
+- n_samples: 12
+- shape_counts: {'internal_sphere': 4, 'internal_ellipsoid': 4, 'internal_cuboid': 4}
+- burial_depth_counts: {'shallow': 6, 'medium': 3, 'deep': 3}
+- train_ready_candidate: false
+- baseline_ready: false
+- auto_discovery_allowed: false
+- latest_newest_discovery_allowed: false
+- allowed_use: schema_validation, explicit_internal_training_gate
+- forbidden_use: automatic_mainline_training, baseline_update, current_baseline_replacement, latest_newest_auto_discovery, direct_training_without_manifest_gate
+- source_dataset_ids: none
+- generator_script: `C:\Users\19166\Desktop\COMSOL_Multiphysics_MCP\scripts\generate_mfl_internal_defect_smoke_pack.py`
+- validation_script: `scripts/validate_internal_defect_smoke_pack.py`
+- npz_sha256: 29bdc339b8fc659d9cc888889a7d3f175630e28cc2e77cfa565c4599b0badb79
+- notes: Metadata only. Generated NPZ/data files are not committed and must be loaded only by explicit dataset_id + manifest.

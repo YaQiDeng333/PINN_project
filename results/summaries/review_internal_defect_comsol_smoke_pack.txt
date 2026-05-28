@@ -1,0 +1,21 @@
+21.0 internal / buried defect COMSOL smoke pack review
+
+必须修复：无。
+
+建议修复：
+- 提交时不要混入 COMSOL_Multiphysics_MCP 中既有无关 dirty item，尤其是 `scripts/generate_mfl_rectangular_sweep.py`。
+- 后续可把 `no_forbidden_data_staged` 检查前移到写 manifest/registry 之前，作为脚本硬化项。
+
+可以接受：
+- 没有训练。
+- 没有更新 `CURRENT_BASELINE.md`。
+- 没有把 internal defect 写成当前 baseline。
+- 两个仓库当前 staged diff 为空，NPZ / temp STL / generated data 没有 staged。
+- `comsol_internal_defect_smoke_pack_v1` 的 manifest / registry 使用 `route=internal_buried_defect_feasibility`，`baseline_ready=false`，`train_ready_candidate=false`，并包含 baseline/latest-newest 禁用项。
+- COMSOL summary / inventory 显示 12/12 success，`internal_sphere`、`internal_ellipsoid`、`internal_cuboid` 均覆盖。
+- validation 通过 `delta_b=(12,3,3,201)`、Bx/By/Bz axis、internal labels、no forbidden staged checks。
+
+是否可进入 21.1 internal pilot pack：可以。
+
+简短原因：
+这是 full smoke feasibility pass，不是训练集也不是 baseline；真实数据仍按 route decision 暂缓，COMSOL repo 现有 dirty items 未 staged、未回滚、未作为本轮结果混入。

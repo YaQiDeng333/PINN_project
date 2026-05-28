@@ -1,0 +1,71 @@
+{
+  "allowed_use": [
+    "schema_validation",
+    "explicit_internal_training_gate"
+  ],
+  "auto_discovery_allowed": false,
+  "axis_names": [
+    "Bx",
+    "By",
+    "Bz"
+  ],
+  "baseline_ready": false,
+  "burial_depth_counts": {
+    "deep": 3,
+    "medium": 3,
+    "shallow": 6
+  },
+  "created_at": "2026-05-28T22:33:27",
+  "dataset_id": "comsol_internal_defect_smoke_pack_v1",
+  "dataset_role": "internal_defect_feasibility_smoke_pack",
+  "exact_piao_rbc": false,
+  "forbidden_use": [
+    "automatic_mainline_training",
+    "baseline_update",
+    "current_baseline_replacement",
+    "latest_newest_auto_discovery",
+    "direct_training_without_manifest_gate"
+  ],
+  "generator_script": "C:\\Users\\19166\\Desktop\\COMSOL_Multiphysics_MCP\\scripts\\generate_mfl_internal_defect_smoke_pack.py",
+  "geometry_method": "internal_cavity_comsol_solid",
+  "internal_surface_mixed": false,
+  "label_fields": [
+    "L_m",
+    "W_m",
+    "D_m",
+    "burial_depth_m",
+    "depth_to_surface_m",
+    "defect_center_xyz_m",
+    "shape_type",
+    "ground_truth_method"
+  ],
+  "latest_newest_discovery_allowed": false,
+  "manifest_path": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\manifests\\comsol_internal_defect_smoke_pack_v1.manifest.json",
+  "n_samples": 12,
+  "npz_path": "C:\\Users\\19166\\Desktop\\PINN_project\\data\\comsol_mfl\\generated\\internal_defect_smoke_pack\\internal_defect_smoke_pack_v1.npz",
+  "npz_sha256": "29bdc339b8fc659d9cc888889a7d3f175630e28cc2e77cfa565c4599b0badb79",
+  "planned_samples": 12,
+  "rbc_style_approximation": false,
+  "route": "internal_buried_defect_feasibility",
+  "scan_line_y_m": [
+    -0.001,
+    0.0,
+    0.001
+  ],
+  "schema_version": "internal_defect_feasibility_v1",
+  "sensor_x_count": 201,
+  "sensor_z_m": 0.008,
+  "shape_counts": {
+    "internal_cuboid": 4,
+    "internal_ellipsoid": 4,
+    "internal_sphere": 4
+  },
+  "source_dataset_ids": [
+    "none"
+  ],
+  "stage": "21.0",
+  "status": "smoke_generated",
+  "surface_rbc_baseline_update": false,
+  "train_ready_candidate": false,
+  "validation_script": "scripts/validate_internal_defect_smoke_pack.py"
+}

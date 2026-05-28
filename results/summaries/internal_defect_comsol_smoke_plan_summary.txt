@@ -1,0 +1,23 @@
+21.0 内部/埋藏缺陷 COMSOL smoke pack 计划
+
+scope: 仅做 internal defect feasibility smoke；不是训练集，不是 baseline，也不是 surface RBC top-up。
+target_samples: 12
+minimum_partial_samples: 6
+sensor_z_m: 0.008
+scan_line_y_m: [-0.001, 0.0, 0.001]
+axis_order: [Bx, By, Bz]
+sensor_x_count: 201
+shape_type_coverage: {'internal_sphere': 4, 'internal_ellipsoid': 4, 'internal_cuboid': 4}
+burial_depth_coverage: {'shallow': 6, 'medium': 3, 'deep': 3}
+size_level_coverage: {'small': 3, 'large': 3, 'medium': 6}
+coordinate_convention: 扫描上表面 z=0，钢块内部 z<0，center_z_m = -(depth_to_surface_m + D_m/2)。
+
+required_label_fields: L_m, W_m, D_m, burial_depth_m, depth_to_surface_m, defect_center_xyz_m, shape_type, ground_truth_method, cavity_internal
+
+pass_gates:
+- smoke_generated: 12/12 行成功，三种 shape 和三种 burial depth 均通过 schema validation。
+- partial_smoke_generated: 至少 6 行成功且成功行通过 validation，但覆盖不完整。
+- blocked: 成功少于 6 行、Boolean/mesh/solve 系统性失败、缺 Bx/By/Bz、delta check 失败，或 generated data 被 staged。
+
+ellipsoid_note: 优先尝试 native COMSOL ellipsoid；不可用时记录失败，不 silent skip。
+plan_csv: C:\Users\19166\Desktop\PINN_project\results\metrics\internal_defect_comsol_smoke_plan.csv

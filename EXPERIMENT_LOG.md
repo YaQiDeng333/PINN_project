@@ -2773,6 +2773,20 @@ Review agent 已完成只读复核，无 must-fix。review 建议把 audit/decis
 - route decision: the next execution stage should generate this dedicated liftoff COMSOL pack, then 20.92 should compare unconditioned vs scalar `sensor_z_m` conditioned liftoff-aware training. Internal defect feasibility remains deferred.
 - review: independent read-only review passed with no must-fix. A suggestion to record exact registry/manifest paths in human-facing summaries was adopted.
 
+# 2026-05-28 Stage 21.0 internal / buried defect COMSOL smoke pack
+
+- scope: internal / buried defect feasibility smoke only. COMSOL was run for the smoke pack, but no training was performed, no `CURRENT_BASELINE.md` update was made, and internal defect was not mixed into the surface / near-surface RBC baseline.
+- dataset_id: `comsol_internal_defect_smoke_pack_v1`.
+- route: `internal_buried_defect_feasibility`.
+- generation result: full smoke pack generated, `planned_samples=12`, `successful_samples=12`, `status=smoke_generated`.
+- shape coverage: `internal_sphere=4`, `internal_ellipsoid=4`, `internal_cuboid=4`.
+- burial-depth coverage: `shallow=6`, `medium=3`, `deep=3`.
+- COMSOL result: Boolean subtract, mesh/solve, Bx/By/Bz export, and `delta_b=b_defect-b_no_defect` all passed for the successful 12/12 rows.
+- validation result: `delta_b`, `b_defect`, and `b_no_defect` have shape `(12,3,3,201)`; axis names are `Bx/By/Bz`; required labels include `L_m`, `W_m`, `D_m`, `burial_depth_m`, `depth_to_surface_m`, `defect_center_xyz_m`, `shape_type`, and `ground_truth_method`.
+- registry/manifest: `COMSOL_DATA_REGISTRY.md` and `results/manifests/comsol_internal_defect_smoke_pack_v1.manifest.json` were created/updated with `baseline_ready=false`, `train_ready_candidate=false`, `allowed_use=schema_validation, explicit_internal_training_gate`, and forbidden baseline/latest-newest usage.
+- route decision: full smoke feasibility passed and can enter 21.1 internal pilot pack. Real-data alignment remains deferred until internal pilot data and label semantics are stronger.
+- review: independent read-only review passed with no must-fix. The review confirmed that no forbidden artifacts were staged and that COMSOL repo existing dirty items were not mixed into this task.
+
 # 2026-05-27 Stage 20.91b true 3D RBC liftoff augmentation pack generation
 
 - scope: executed the approved 20.91 liftoff pack only. COMSOL was run for the dedicated liftoff pack; no training, no 20.92 execution, no `CURRENT_BASELINE.md` update, and no generated data/NPZ/.mph/raw CSV/checkpoint/preview/notes/temp STL artifacts were committed.

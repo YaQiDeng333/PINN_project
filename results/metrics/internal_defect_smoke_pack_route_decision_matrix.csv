@@ -1,0 +1,5 @@
+decision_option,recommended,status,evidence,next_action,notes
+A_enter_21_1_internal_pilot_pack,True,recommended,status=smoke_generated; n_samples=12; shape_groups=3; burial_groups=3,设计 21.1 internal pilot pack,只有 full smoke_generated 才进入 pilot。
+B_fix_or_top_up_smoke_pack,False,not_selected,partial_coverage=True; failed_checks=[],修复失败 shape 或补齐 burial 覆盖,partial smoke 只能作为 feasibility diagnostic。
+C_block_internal_route,False,not_selected,status=smoke_generated; n_samples=12; failed_checks=[],先修复 Boolean/mesh/solve/schema blocker,不可训练，不可声明 internal baseline。
+D_real_data_deferred,True,active_constraint,internal schema 仍是 COMSOL feasibility 阶段,真实实验继续暂缓,真实 internal block 需要独立 schema 和 ground truth。

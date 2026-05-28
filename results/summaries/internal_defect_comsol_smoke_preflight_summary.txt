@@ -1,0 +1,15 @@
+21.0 内部/埋藏缺陷 COMSOL smoke pack preflight
+
+subagent_support: available
+method_agent: internal defect 是独立 feasibility 分支，必须显式记录 burial_depth_m 和 defect_center_xyz_m；本轮不能称为 baseline。
+comsol_agent: steel block、material/domain/solver、sensor grid 和 Bx/By/Bz export 可复用；ellipsoid cavity 是主要几何风险。
+pinn_schema_agent: registry/manifest 必须使用显式 dataset_id，并禁止 latest/newest 自动发现。
+experiment_agent: target N=12，partial smoke 最低 N>=6，不建立训练 split。
+safety_agent: 禁止 staging data、NPZ、.mph、raw CSV、checkpoint、preview、notes、temp STL、CURRENT_BASELINE.md 和 baseline docs。
+
+stop_conditions:
+- PINN_project root mismatch.
+- COMSOL_Multiphysics_MCP root mismatch.
+- INTERNAL_DEFECT_SCHEMA.md missing.
+- COMSOL geometry cannot establish a fully internal cavity.
+- Generated data appears in git staging.

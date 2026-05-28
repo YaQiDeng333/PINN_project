@@ -1,0 +1,13 @@
+21.0 internal defect smoke pack route decision
+
+dataset_id: comsol_internal_defect_smoke_pack_v1
+status: smoke_generated
+successful_samples: 12
+shape_groups_with_success: 3
+burial_depth_groups_with_success: 3
+failed_checks: none
+
+unique_next_step: 设计 21.1 internal pilot pack
+current_baseline_update: false
+surface_rbc_mixed: false
+real_data_alignment: deferred

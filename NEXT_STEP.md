@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-05-28 after Stage 21.0 internal / buried defect COMSOL smoke pack
+
+下一步唯一建议：**进入 21.1 internal defect pilot pack 设计与生成**。
+
+21.0 已经跑通 internal / buried defect feasibility smoke：`comsol_internal_defect_smoke_pack_v1` 完成 12/12 COMSOL rows，覆盖 `internal_sphere`、`internal_ellipsoid`、`internal_cuboid`，并通过 Bx/By/Bz、`delta_b=b_defect-b_no_defect`、internal labels、registry/manifest validation。它仍不是训练集，也不是 baseline；`CURRENT_BASELINE.md` 继续保持 20.85 surface / near-surface true 3D RBC profile-depth baseline。
+
+21.1 应把 smoke 放大为 internal pilot pack：继续要求三轴 `Bx/By/Bz`、no-defect reference、`sensor_z_m`、`burial_depth_m / depth_to_surface_m`、`defect_center_xyz_m`、`shape_type` 和 ground truth method。真实实验数据继续暂缓；Bz-only 只能作为低能力诊断分支，不能替代三轴 internal 主线。
+
 ## 2026-05-28 after Stage 20.99 internal / buried defect feasibility schema
 
 下一步唯一建议：**执行 internal COMSOL smoke pack 前，先确认可采 metadata 和 ground truth 定义**。

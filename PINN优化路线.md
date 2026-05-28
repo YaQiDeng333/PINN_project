@@ -322,6 +322,14 @@ forward consistency 已通过 review 和 baseline 决策，后续应进入 physi
 
 ```text
 geometry-aware representation
+# 2026-05-28 Stage 21.0 route note
+
+21.0 把 internal / buried defect 从 schema 设计推进到 COMSOL feasibility smoke。`comsol_internal_defect_smoke_pack_v1` 已完成 12/12 rows，三类内部缺陷 `internal_sphere`、`internal_ellipsoid`、`internal_cuboid` 均通过 Boolean subtract、mesh/solve、Bx/By/Bz export 和 `delta_b=b_defect-b_no_defect` validation。
+
+路线边界保持不变：internal defect 不是 surface RBC baseline 的 top-up。当前 `CURRENT_BASELINE.md` 仍是 20.85 surface / near-surface true 3D RBC profile-depth baseline，A2 仍只是 liftoff companion module；internal branch 的核心标签是 `shape_type + L/W/D + burial_depth_m / depth_to_surface_m + defect_center_xyz_m`，不能强行套 surface RBC 的 profile/depth 语义。
+
+下一步路线：进入 21.1 internal pilot pack。21.1 应扩大样本数并继续固定三轴 `Bx/By/Bz`、no-defect reference、`sensor_z_m`、坐标系、材料/试件几何和 ground truth method；Bz-only 只能作为低能力诊断分支。真实实验 internal block 继续暂缓，直到 internal pilot pack 和 validator 更稳定。
+
 -> differentiable rasterization
 -> forward consistency / forward-model residual
 -> low-dimensional refinement

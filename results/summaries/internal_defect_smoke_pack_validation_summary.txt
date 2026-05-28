@@ -1,0 +1,17 @@
+21.0 内部/埋藏缺陷 smoke pack validation summary
+
+dataset_id: comsol_internal_defect_smoke_pack_v1
+status: smoke_generated
+planned_samples: 12
+successful_samples: 12
+validation_passed_for_available_rows: true
+shape_counts: {'internal_sphere': 4, 'internal_ellipsoid': 4, 'internal_cuboid': 4}
+burial_depth_counts: {'shallow': 6, 'medium': 3, 'deep': 3}
+npz_path_ignored: C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\generated\internal_defect_smoke_pack\internal_defect_smoke_pack_v1.npz
+manifest_path: C:\Users\19166\Desktop\PINN_project\results\manifests\comsol_internal_defect_smoke_pack_v1.manifest.json
+baseline_update: false
+current_surface_rbc_baseline_mixed: false
+latest_newest_npz_scan: false
+
+failed_checks:
+- none

@@ -1,0 +1,10 @@
+group_field,group_value,row_count,success_count,failure_count
+shape_type,internal_cuboid,4,4,0
+shape_type,internal_ellipsoid,4,4,0
+shape_type,internal_sphere,4,4,0
+burial_depth_level,deep,3,3,0
+burial_depth_level,medium,3,3,0
+burial_depth_level,shallow,6,6,0
+size_level,large,3,3,0
+size_level,medium,6,6,0
+size_level,small,3,3,0
