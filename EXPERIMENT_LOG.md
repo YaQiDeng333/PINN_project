@@ -1,5 +1,17 @@
 # 实验工作日志
 
+## 2026-05-28 Stage 21.2 internal defect training gate
+
+- 范围：只在 `comsol_internal_defect_pilot_pack_v1` 上执行 internal defect training gate；未运行 COMSOL，未生成或修改 data/NPZ，未更新 `CURRENT_BASELINE.md`，未创建 baseline。
+- 数据入口：通过 `COMSOL_DATA_REGISTRY.md` 和 `results/manifests/comsol_internal_defect_pilot_pack_v1.manifest.json` 显式加载，禁止 latest/newest NPZ scan。数据为 N=96，split=`64/16/16`，输入 `delta_b` 形状 `(96,3,3,201)`，Conv1D 输入 `(96,9,201)`。
+- 输入边界：模型输入只使用 `delta_b/BxByBz`；`shape_type`、`burial_depth_level`、`split`、`sample_id` 和所有 labels 只用于 supervision、metrics 和分组审计。
+- feature baseline：validation 选中 `svr_rbf_C10`，test total normalized MAE `0.878883`，L/W/D MAE `1.540 / 1.959 / 0.159 mm`，burial_depth MAE `0.922 mm`，center_xyz MAE `3.828 mm`，shape accuracy `0.000000`。
+- neural gate：small Conv1D multitask 模型运行 seeds `42/123/2026`，validation 选中 seed `2026`，test total normalized MAE `1.004271`，L/W/D MAE `1.629 / 1.597 / 0.159 mm`，burial_depth MAE `1.947 mm`，center_xyz MAE `2.666 mm`，shape accuracy `0.812500`。
+- 对比结论：neural 综合 score 优于 mean baseline 和 selected feature baseline，主要来自 shape classification；但纯回归 total MAE 与 burial_depth 上，`svr_rbf_C10` feature baseline 更强。
+- 关键 blocker：现有 split 覆盖不完整，val/test 都只有 `internal_cuboid`，且 burial_depth 覆盖不全；因此 N=96 只足够证明 internal 分支存在可学习信号，不足以支撑稳健 shape/depth 泛化结论。
+- route decision：下一步唯一建议是扩展 internal defect dataset，并重做分层 split；不要把 21.2 写成 baseline，也不要更新 `CURRENT_BASELINE.md`。
+- review：独立只读 review 通过，无 must-fix；建议修复项已落实为更精确的 feature baseline 对比口径。
+
 ## 2026-05-28 Stage 21.1 internal / buried defect pilot pack generation
 
 - scope: internal / buried defect pilot pack generation, schema validation, registry/manifest, and route decision only. No training, no `CURRENT_BASELINE.md` update, and no surface RBC baseline mixing.

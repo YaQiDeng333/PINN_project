@@ -1,5 +1,13 @@
 # PINN 优化路线
 
+## 2026-05-28 路线同步：21.2 internal defect training gate
+
+21.2 把 internal / buried defect 分支推进到第一个 training gate，但结论仍是“可学习性成立，泛化证据不足”。`comsol_internal_defect_pilot_pack_v1` 通过 registry/manifest 显式加载，模型输入只使用三轴 `delta_b/BxByBz`，labels 和 metadata 只用于 supervision/metrics；本轮没有运行 COMSOL，没有修改 NPZ，没有更新 `CURRENT_BASELINE.md`。
+
+结果分界点在这里：neural 的 shape classification 与 center_xyz 有信号，但 split 设计暴露出结构性 blocker。validation/test 都只包含 `internal_cuboid`，burial depth 也覆盖不完整，所以 shape accuracy `0.812500` 不能解释为三类 shape 泛化能力；同时 pure regression 上 selected feature baseline `svr_rbf_C10` 的 test total MAE `0.878883` 和 burial_depth MAE `0.922 mm` 仍优于 neural 的 `1.004271` 和 `1.947 mm`。
+
+路线判断：internal branch 不能升级 baseline，也不能和 surface RBC baseline 合并。下一步应扩展 internal dataset，并重做分层 split，让 train/val/test 都覆盖三类 shape、四档 burial depth、三档 size 和主要 aspect；之后再判断是否进入 internal formal training gate。当前 20.85 surface / near-surface true 3D RBC baseline 与 A2 liftoff companion 仍保持原角色。
+
 ## 2026-05-28 路线同步：21.1 internal defect pilot pack
 
 21.1 把 internal / buried defect 分支从 feasibility smoke 推进到 pilot pack。`comsol_internal_defect_pilot_pack_v1` 已生成并验证为 `pilot_generated`：96/96 COMSOL rows 成功，覆盖三种 shape、四档 burial depth、三档 size，并保留 `train/val/test=64/16/16`。它是 internal branch 的显式 training-gate 数据候选，不是 current baseline，也不替换 20.85 surface / near-surface true 3D RBC profile-depth baseline。

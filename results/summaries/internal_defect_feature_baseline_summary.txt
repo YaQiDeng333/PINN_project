@@ -1,0 +1,16 @@
+21.2 内部/埋藏缺陷 feature baseline 摘要
+
+dataset_id: comsol_internal_defect_pilot_pack_v1
+feature_source: 仅来自 delta_b/BxByBz
+feature_count: 110
+candidate_models: mean_baseline, ridge_alpha1, kernel_ridge_rbf, svr_rbf_C10, random_forest_cheap
+selected_model: svr_rbf_C10
+validation_selection_score: 0.947067
+test_total_normalized_mae: 0.878883
+test_LWD_mae_mm: 1.540 / 1.959 / 0.159
+test_burial_depth_mae_mm: 0.922
+test_center_xyz_mae_mm: 3.828
+test_shape_accuracy: 0.000000
+test_shape_macro_f1: 0.000000
+label_leakage: false；split/sample_id/shape/depth metadata 未作为特征输入。
+test_final_only: true

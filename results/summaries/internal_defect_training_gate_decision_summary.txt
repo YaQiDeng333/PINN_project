@@ -1,0 +1,26 @@
+21.2 内部/埋藏缺陷 training gate 决策摘要
+
+CURRENT_BASELINE: 未修改，仍为 surface/near-surface true 3D RBC baseline。
+internal_branch_status: 独立分支 training gate，不是 baseline replacement。
+selected_neural_test_total_normalized_mae: 1.004271
+selected_neural_test_LWD_mae_mm: 1.629 / 1.597 / 0.159
+selected_neural_test_burial_depth_mae_mm: 1.947
+selected_neural_test_center_xyz_mae_mm: 2.666
+selected_neural_test_shape_accuracy: 0.812500
+beat_mean_baseline: True
+beat_feature_baseline_composite_score: True
+beat_feature_baseline_regression_mae: False
+feature_selected_model: svr_rbf_C10
+feature_test_total_normalized_mae: 0.878883
+feature_test_burial_depth_mae_mm: 0.922
+LWD_learnable: False
+burial_depth_learnable: False
+center_xyz_learnable: True
+shape_type_classifiable: True
+split_shape_complete: False
+split_burial_complete: False
+split_shape_counts: {'train': {'internal_sphere': 24, 'internal_ellipsoid': 36, 'internal_cuboid': 4}, 'val': {'internal_cuboid': 16}, 'test': {'internal_cuboid': 16}}
+split_burial_counts: {'train': {'shallow': 19, 'medium': 15, 'deep': 15, 'deep_plus': 15}, 'val': {'shallow': 5, 'medium': 9, 'deep': 2}, 'test': {'deep': 7, 'deep_plus': 9}}
+N96_sufficiency: 不足；val/test shape 或 burial 覆盖不完整，需要扩展或重做分层 split。
+next_step: A_expand_internal_defect_dataset
+reason: val/test split 覆盖不完整，当前 gate 只能证明有可学习信号，不能支撑稳健 shape/depth 结论。

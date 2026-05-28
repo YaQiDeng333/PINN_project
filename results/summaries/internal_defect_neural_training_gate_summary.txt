@@ -1,0 +1,18 @@
+21.2 内部/埋藏缺陷 neural training gate 摘要
+
+dataset_id: comsol_internal_defect_pilot_pack_v1
+模型输入: 仅 delta_b/BxByBz，形状为 (N,9,201)。
+监督标签: L/W/D、burial_depth、center_xyz、shape_type，仅用于 loss 和 metrics。
+metadata_leakage: false；shape_type、burial_depth_bin、split、sample_id 未作为模型输入。
+selection_protocol: 每个 seed 用 validation 选 epoch，再用 validation score 选 seed；test final only。
+seeds: 42, 123, 2026
+selected_seed: 2026
+selected_best_epoch: 15
+selected_val_score: 0.665538
+test_total_normalized_mae: 1.004271
+test_LWD_mae_mm: 1.629 / 1.597 / 0.159
+test_burial_depth_mae_mm: 1.947
+test_center_xyz_mae_mm: 2.666
+test_shape_accuracy: 0.812500
+test_shape_macro_f1: 0.298851
+current_baseline_update: false

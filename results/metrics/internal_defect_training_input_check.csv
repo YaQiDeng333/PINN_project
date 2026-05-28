@@ -1,0 +1,18 @@
+check_name,pass,observed,expected,notes
+n_samples_96,True,96,96,
+split_counts,True,"{'train': 64, 'val': 16, 'test': 16}",64/16/16,
+delta_b_shape,True,"(96, 3, 3, 201)","(96,3,3,201)",
+x_channels_shape,True,"(96, 9, 201)","(96,9,201)",
+delta_b_finite,True,True,True,
+axis_names,True,"['Bx', 'By', 'Bz']","[Bx, By, Bz]",
+labels_present,True,"(96, 7)","(96,7)",
+shape_labels_present,True,"{np.str_('internal_sphere'): 24, np.str_('internal_ellipsoid'): 36, np.str_('internal_cuboid'): 36}",3 classes,
+burial_depth_coverage,True,"{np.str_('shallow'): 24, np.str_('medium'): 24, np.str_('deep'): 24, np.str_('deep_plus'): 24}",4 bins,
+split_shape_distribution_recorded,True,"{'train': {'internal_sphere': 24, 'internal_ellipsoid': 36, 'internal_cuboid': 4}, 'val': {'internal_cuboid': 16}, 'test': {'internal_cuboid': 16}}",audit only,val/test shape coverage affects classification reliability
+split_burial_distribution_recorded,True,"{'train': {'shallow': 19, 'medium': 15, 'deep': 15, 'deep_plus': 15}, 'val': {'shallow': 5, 'medium': 9, 'deep': 2}, 'test': {'deep': 7, 'deep_plus': 9}}",audit only,val/test burial coverage affects depth generalization reliability
+cavity_internal_true,True,"[True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]",True,
+train_only_normalization,True,computed from train split only,train split only,
+normalization_shapes,True,"mean=(1, 9, 1); std=(1, 9, 1)","(1,9,1)",
+no_label_as_input,True,"model input is delta_b reshaped to (N,9,201)",no labels/metadata as input,
+baseline_ready_false,True,False,False,
+current_baseline_unchanged_by_stage,True,21.2 input check does not write CURRENT_BASELINE.md,no baseline update,

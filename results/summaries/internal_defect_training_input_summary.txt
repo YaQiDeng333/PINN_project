@@ -1,0 +1,16 @@
+21.2 内部/埋藏缺陷 training 输入摘要
+
+dataset_id: comsol_internal_defect_pilot_pack_v1
+N: 96
+delta_b_shape: (96, 3, 3, 201)
+conv1d_input_shape: (96, 9, 201)
+split_counts: {'train': 64, 'val': 16, 'test': 16}
+shape_counts: {'internal_sphere': 24, 'internal_ellipsoid': 36, 'internal_cuboid': 36}
+burial_depth_counts: {'shallow': 24, 'medium': 24, 'deep': 24, 'deep_plus': 24}
+split_shape_counts: {'train': {'internal_sphere': 24, 'internal_ellipsoid': 36, 'internal_cuboid': 4}, 'val': {'internal_cuboid': 16}, 'test': {'internal_cuboid': 16}}
+split_burial_depth_counts: {'train': {'shallow': 19, 'medium': 15, 'deep': 15, 'deep_plus': 15}, 'val': {'shallow': 5, 'medium': 9, 'deep': 2}, 'test': {'deep': 7, 'deep_plus': 9}}
+size_counts: {'small': 32, 'medium': 32, 'large': 32}
+target_names: ['L_m', 'W_m', 'D_m', 'burial_depth_m', 'center_x_m', 'center_y_m', 'center_z_m']
+input_policy: 模型输入只使用 delta_b/BxByBz；labels 和 metadata 只用于 supervision/metrics。
+train_only_normalization: true
+stop_condition: registry/manifest/schema 任一 blocker 都会在训练前停止。

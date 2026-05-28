@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-05-28 after Stage 21.2 internal defect training gate
+
+下一步唯一建议：**扩展 internal defect dataset，并重做真正分层的 train/val/test split**。
+
+21.2 已证明 internal / buried defect 分支存在可学习信号：neural gate 在综合 score 上优于 mean baseline 和 selected feature baseline，center_xyz 与 shape_type 有明显信号。但现有 N=96 的 split 不能支撑稳健结论：val/test 都只有 `internal_cuboid`，burial_depth 也没有完整覆盖；同时纯回归 total MAE 和 burial_depth 上，`svr_rbf_C10` feature baseline 仍强于 neural。
+
+因此不要把 21.2 升级为 baseline，也不要继续只小修当前 Conv1D。下一阶段应生成更大的 internal pilot/formal pack，保证每个 split 同时覆盖 `internal_sphere/internal_ellipsoid/internal_cuboid`、四档 burial depth、三档 size 和主要 aspect，再重新跑 training gate。`CURRENT_BASELINE.md` 仍保持 surface / near-surface true 3D RBC baseline。
+
 ## 2026-05-28 after Stage 21.1 internal / buried defect pilot pack
 
 下一步唯一建议：**进入 21.2 internal defect training gate**。
