@@ -535,3 +535,11 @@ The next route is a manifest-only dry run before any real signal array is accept
 这次 dry run 的关键判断是：用户当前的“内部开缺陷铁块”不属于当前 true 3D RBC surface / near-surface baseline 的适用范围。manifest 已标记 `defect_location_type=internal_or_buried`，validator 因此给出 hard blocker；同时 `sensor_z_m`、三轴 `Bx/By/Bz`、no-defect reference、轴顺序、三条扫描线、201 点 `sensor_x_m`、单位、坐标系、传感器对齐状态、gain 状态和励磁设置都还未知，所以 `ready_for_inference=false`。
 
 路线结论：不要把 internal/buried defect 强行混入当前 surface RBC schema。下一步应先创建 internal defect feasibility schema，单独定义 burial depth / depth-to-surface、内部缺陷几何标签、no-defect reference、采集几何和真实数据 validator；当前 20.85 baseline 与 A2 liftoff companion 继续只服务 surface / near-surface RBC-style 分支。
+
+# 2026-05-28 Stage 20.99 route note
+
+20.99 建立了 internal / buried defect 的独立 feasibility schema，但没有执行 COMSOL、没有生成 data/NPZ、没有训练，也没有更新 `CURRENT_BASELINE.md`。
+
+真正的分界点是 `burial_depth_m`。surface RBC baseline 的输出语义是表面 profile/depth，而 internal defect 的核心标签是缺陷体尺寸、中心位置和到扫描表面的埋深；如果把内部缺陷强行套到 `L_m/W_m/D_m/wLD/wWD/wLW`，模型会把埋深变化误解释成 surface profile 或 curvature 变化。
+
+路线更新为：internal branch 先做 `shape_type + L/W/D + burial_depth + center_xyz` 的可行性 smoke。主输入仍应是三轴 `Bx/By/Bz`；Bz-only 只能作为低能力诊断分支。下一步只有在确认 no-defect reference、坐标系、`sensor_z_m`、试件几何、ground truth method 和埋深标签可采之后，才进入 6-12 sample internal COMSOL smoke pack。当前 surface RBC baseline 与 A2 liftoff companion 不扩展为 internal baseline。

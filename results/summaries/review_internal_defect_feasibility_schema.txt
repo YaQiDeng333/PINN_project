@@ -1,0 +1,13 @@
+20.99 internal / buried defect feasibility schema 只读 review
+
+必须修复：无。
+
+建议修复：无。提交前需要显式确认 `results/` 下 20.99 summary/metrics 使用 `git add -f`，因为这些文件通常被 `.gitignore` 忽略。
+
+可以接受：可以接受。脚本 `py_compile` 通过；未发现训练、COMSOL 运行、data/NPZ 修改、`CURRENT_BASELINE.md` 或 baseline docs 修改。
+
+internal schema 是否合格：合格。`INTERNAL_DEFECT_SCHEMA.md` 清楚区分 internal/buried defect 与 surface RBC baseline，定义了 `burial_depth_m` / `depth_to_surface_m`、`defect_center_xyz_m`、`shape_type`、ground truth method，并明确 current surface RBC baseline 不能直接使用。
+
+是否建议进入 internal COMSOL smoke pack：建议进入，但只在确认可采 metadata 后执行。当前设计的 12 sample smoke pack 覆盖 `internal_ellipsoid / internal_cuboid / sphere_like` 和 shallow / medium / deep / deep_plus，规模合理；`Bx/By/Bz` 作为主线，`Bz-only` 标为低能力诊断分支，口径正确。
+
+简短原因：20.99 文件把内部缺陷的核心差异落在埋深、体积/空腔语义和独立 ground truth 上，没有把它混入 surface RBC baseline；同时明确本轮只是 schema/plan，不训练、不跑 COMSOL、不生成数据。

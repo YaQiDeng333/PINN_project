@@ -1,0 +1,26 @@
+20.99 internal / buried defect feasibility schema preflight
+
+scope: 只读 preflight。未运行 COMSOL，未训练，未生成 data/NPZ，未修改 `CURRENT_BASELINE.md`。
+
+检查结果：
+- `REAL_DATA_INTAKE_SCHEMA.md`: present。
+- `results/manifests/real_data_internal_block_dry_run_manifest.json`: present。
+- `results/metrics/true_3d_rbc_real_data_manifest_dry_run_validation.csv`: present。
+- `results/metrics/true_3d_rbc_real_data_manifest_dry_run_decision_matrix.csv`: present。
+- `results/summaries/true_3d_rbc_real_data_manifest_dry_run_route_decision_summary.txt`: 当前仓库最新 cleanup 后不存在；20.99 使用仍存在的 dry-run manifest、validation CSV、decision matrix 和 route script 作为 20.98 证据，不回滚 cleanup。
+- `COMSOL_DATA_REGISTRY.md`: present。
+- `CURRENT_BASELINE.md`: present，保持 20.85 true 3D RBC surface / near-surface profile-depth baseline 口径。
+
+20.98 依赖结论：
+- `ready_for_inference=false`。
+- 用户当前铁块属于 `internal_or_buried`，不匹配当前 surface / near-surface RBC schema。
+- internal defect 需要独立定义 `burial_depth_m` / `depth_to_surface_m`、缺陷中心、shape_type、体积/空腔标签和 ground-truth method。
+
+stop conditions:
+- 如果后续发现需要真实信号数组、COMSOL 生成、NPZ 写入或训练，应停止并转入新阶段。
+- 如果无法定义 `burial_depth_m` 或 no-defect reference 规则，internal supervised training gate 不应启动。
+
+forbidden_artifact_check:
+- 本阶段不得提交 `data/`、NPZ、checkpoint、preview PNG、notes、baseline docs、`CURRENT_BASELINE.md`、`scripts/visualize_current_baseline.py`。
+
+preflight_status: pass_with_cleanup_limitation

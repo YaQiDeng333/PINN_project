@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-05-28 after Stage 20.99 internal / buried defect feasibility schema
+
+下一步唯一建议：**执行 internal COMSOL smoke pack 前，先确认可采 metadata 和 ground truth 定义**。
+
+20.99 已把 internal / buried defect 从当前 surface RBC baseline 中拆出来。当前 baseline 仍只适用于 surface / near-surface RBC-style 缺陷；内部缺陷必须单独定义 `burial_depth_m` / `depth_to_surface_m`、`defect_center_xyz_m`、`shape_type`、空腔尺寸或体素 mask、以及 ground truth method。
+
+推荐的下一步不是训练，也不是把现有铁块直接送进 20.96 runner，而是确认实验端能提供：三轴 `Bx/By/Bz`、匹配 no-defect reference、`sensor_z_m`、扫描坐标系、试件几何和埋深/缺陷中心标签。确认这些字段后，再执行 12-sample internal COMSOL smoke pack；如果只能提供 Bz，则只能走低能力诊断分支，不能宣称进入 true 3D internal baseline。
+
 ## 2026-05-28 after Stage 20.98 real-data manifest dry run
 
 下一步唯一建议：**C. create internal defect feasibility schema**。

@@ -1,0 +1,21 @@
+20.99 internal / buried defect feasibility route decision
+
+surface_rbc_direct_use: false
+need_independent_schema: true
+need_independent_comsol_generator: true
+recommended_first_output: shape_type + L/W/D + burial_depth + center_xyz
+recommended_smoke_pack_size: 12 samples
+minimum_smoke_pack_size: 6 samples
+need_Bx_By_Bz: true
+Bz_only_status: limited diagnostic branch only
+
+why:
+- internal / buried defect 的核心标签是 `burial_depth_m` / `depth_to_surface_m`，当前 surface RBC 六参数没有这个语义。
+- 如果直接使用 surface RBC baseline，模型会把埋深变化误解释成 surface profile / curvature 变化。
+- 三轴 `Bx/By/Bz` 是默认主线；只有 `Bz` 时可做低能力诊断，但不能宣称进入 true 3D internal baseline。
+
+next_unique_step: 生成 internal COMSOL smoke pack 之前先确认 schema 字段和实验可采 metadata；确认后再运行 COMSOL。
+COMSOL_run_this_stage: false
+training_run_this_stage: false
+data_npz_generation_this_stage: false
+CURRENT_BASELINE_update: false

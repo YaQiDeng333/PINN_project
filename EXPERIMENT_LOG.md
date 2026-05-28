@@ -2878,3 +2878,14 @@ Review agent 已完成只读复核，无 must-fix。review 建议把 audit/decis
 - main blockers: internal/buried defect branch mismatch, no real signal array, unknown tri-axis `Bx/By/Bz`, unknown no-defect reference, missing/unknown `sensor_z_m`, unknown `axis_order`, unknown three-line `scan_line_y_m`, unknown 201-point `sensor_x_m`, unknown unit, unknown coordinate system, unknown sensor alignment / gain calibration status, and unknown magnetization setup.
 - route decision: the current surface / near-surface RBC baseline must not be used for this internal defect block. The next step is `C. create internal defect feasibility schema`.
 - review: independent read-only review passed with no must-fix. One suggestion was adopted by unifying `ready_for_inference=false` casing and writing dry-run blocker text in Chinese.
+
+# 2026-05-28 Stage 20.99 internal / buried defect feasibility schema
+
+- scope: schema / label / data-generation design only. No COMSOL run, no training, no data/NPZ generation or mutation, no checkpoint/preview/notes artifact, and no `CURRENT_BASELINE.md` update.
+- schema document: `INTERNAL_DEFECT_SCHEMA.md`.
+- boundary: internal / buried defects are not surface RBC defects. Current 20.85 surface / near-surface RBC baseline and A2 liftoff companion remain limited to the surface RBC-style branch.
+- required labels: `L_m`, `W_m`, `D_m_or_cavity_size_m`, `burial_depth_m` / `depth_to_surface_m`, `defect_center_xyz_m`, `shape_type`, profile descriptor or cavity mask, and `ground_truth_method`.
+- hard blockers: missing burial depth, missing no-defect reference, Bz-only without a dedicated low-capability branch, unknown defect coordinates relative to the scan surface, missing ground truth, unknown `sensor_z_m`, unknown material/specimen geometry, unknown magnetization setup, or unknown alignment/gain status.
+- smoke pack plan: 12 planned COMSOL smoke samples, covering `internal_ellipsoid`, `internal_cuboid`, and `sphere_like`, each at shallow / medium / deep / deep_plus burial levels. This is a plan only; COMSOL was not run.
+- route decision: do not transfer directly from the surface RBC baseline. The recommended first output is `shape_type + L/W/D + burial_depth + center_xyz`; Bx/By/Bz is the main branch, while Bz-only is only a limited diagnostic branch.
+- review: independent read-only review passed with no must-fix.
