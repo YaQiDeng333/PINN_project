@@ -1,0 +1,25 @@
+20.96 liftoff-conditioned inference smoke summary
+
+dataset_id: comsol_true_3d_rbc_liftoff_aug_pack_v1
+baseline_artifact: true_3d_rbc_v3_240_seed42_20_77_baseline_inference_artifact
+a2_artifact: true_3d_rbc_a2_liftoff_adapter_seed2026_inference_artifact
+route_rule: auto uses baseline when abs(sensor_z_m-0.008)<0.0005; otherwise baseline_plus_adapter
+override_modes: force_baseline, force_adapter
+missing_sensor_z_behavior: ValueError; no guessing
+out_of_range_behavior: sensor_z_m outside [0.006,0.012] is flagged
+
+test auto metrics:
+  all profile_depth_rmse_m=0.000411175, dice=0.842773
+  nominal profile_depth_rmse_m=0.000333059, dice=0.843957
+  non_nominal profile_depth_rmse_m=0.000437214, dice=0.842378
+20.95 companion replay:
+  force_baseline non_nominal RMSE=0.000874310, dice=0.683351
+  force_adapter non_nominal RMSE=0.000437214, dice=0.842378
+  auto non_nominal equals adapter route: True
+route_used_accuracy_auto_test_all: 1.0
+COMSOL_run: false
+training_run: false
+NPZ_write: false
+checkpoint_write: false
+CURRENT_BASELINE_update: false
+outputs: results\metrics\true_3d_rbc_liftoff_conditioned_inference_smoke_metrics.csv, results\metrics\true_3d_rbc_liftoff_conditioned_inference_by_liftoff.csv, results\metrics\true_3d_rbc_liftoff_conditioned_inference_failure_cases.csv

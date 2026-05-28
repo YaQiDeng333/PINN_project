@@ -390,3 +390,11 @@ Only next step: run a liftoff-conditioned inference smoke stage. Verify the froz
 Stage 20.96a recovered the missing A2 inference artifact needed by the 20.96 smoke test. The ignored checkpoint and prediction artifact were exported under `checkpoints/true_3d_rbc_liftoff_adapter_artifacts/`, while the tracked manifest is `results/manifests/true_3d_rbc_a2_liftoff_adapter_inference_artifact_manifest.json`. Verification exactly reproduced the 20.94/20.95 A2 reference metrics: nominal RMSE `0.000335821 m`, non-nominal RMSE `0.000437214 m`, and non-nominal Dice `0.842378`.
 
 Only next step: return to 20.96 liftoff-conditioned inference smoke. Load the frozen 20.85 baseline plus A2 manifest, enforce required `sensor_z_m`, test auto / force-baseline / force-adapter routing, and keep `CURRENT_BASELINE.md` unchanged.
+
+## 2026-05-28 update after Stage 20.96
+
+Stage 20.96 completed the liftoff-conditioned inference smoke. The runner loads the frozen 20.85/20.77 baseline and the A2 liftoff companion adapter from tracked manifests, requires `sensor_z_m`, routes nominal `0.008 m` rows to the baseline, and routes non-nominal rows to baseline plus A2. It does not train, run COMSOL, write NPZ/data/checkpoints, or modify `CURRENT_BASELINE.md`.
+
+Smoke test result: auto test all-liftoff profile RMSE is `0.000411175 m` with Dice `0.842773`; nominal RMSE remains `0.000333059 m`; non-nominal RMSE is `0.000437214 m`, matching the 20.95 A2 companion result and improving over force-baseline non-nominal RMSE `0.000874310 m`. The `sensor_z_m` contract is now explicit: unit meters, validated range `[0.006, 0.012]`, missing value is an error, and out-of-range values are flagged.
+
+Only next step: move to real-data schema intake / acquisition metadata contract. Require `delta_b`, matched no-defect reference metadata, axis order, and `sensor_z_m` before any real-data inference claim. Internal/buried defect feasibility remains deferred.

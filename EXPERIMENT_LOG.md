@@ -2845,3 +2845,14 @@ Review agent 已完成只读复核，无 must-fix。review 建议把 audit/decis
 - tracked manifest: `results/manifests/true_3d_rbc_a2_liftoff_adapter_inference_artifact_manifest.json`.
 - verification: checkpoint reload passed with zero prediction/residual diff. Metrics reproduced 20.94/20.95: nominal profile RMSE `0.000335821 m`, non-nominal profile RMSE `0.000437214 m`, and non-nominal Dice `0.842378`.
 - review: independent read-only review passed with no must-fix; checkpoint and prediction artifact are ignored and uncommitted.
+
+# 2026-05-28 Stage 20.96 liftoff-conditioned true 3D RBC inference smoke
+
+- dataset_id: `comsol_true_3d_rbc_liftoff_aug_pack_v1`, explicitly loaded through `COMSOL_DATA_REGISTRY.md` and the tracked manifest.
+- scope: inference smoke only. No training, no COMSOL, no data/NPZ mutation, no checkpoint/preview artifact committed, and no `CURRENT_BASELINE.md` update.
+- artifacts loaded: the frozen 20.85/20.77 baseline via `results/manifests/true_3d_rbc_baseline_inference_artifact_manifest.json` and the A2 companion adapter via `results/manifests/true_3d_rbc_a2_liftoff_adapter_inference_artifact_manifest.json`.
+- runner: `scripts/run_true_3d_rbc_liftoff_conditioned_inference.py` supports `auto`, `force_baseline`, and `force_adapter`. In `auto`, nominal `sensor_z_m=0.008` uses the frozen baseline and non-nominal liftoff uses baseline plus A2 adapter.
+- smoke result: test auto all-liftoff profile RMSE `0.000411175 m`, Dice `0.842773`; nominal RMSE `0.000333059 m`, Dice `0.843957`; non-nominal RMSE `0.000437214 m`, Dice `0.842378`.
+- comparison: force-baseline non-nominal RMSE was `0.000874310 m`, while auto/A2 non-nominal RMSE was `0.000437214 m`, reproducing the 20.95 A2 companion behavior. Auto route accuracy on test was `1.0`.
+- metadata contract: `sensor_z_m` is mandatory in meters; supported range is `[0.006, 0.012]`; missing `sensor_z_m` raises an error; out-of-range values are flagged and not treated as validated.
+- review: independent read-only review passed after fixing the `0.012 m` boundary out-of-range flag. A2 remains a companion robustness module, not `CURRENT_BASELINE`.

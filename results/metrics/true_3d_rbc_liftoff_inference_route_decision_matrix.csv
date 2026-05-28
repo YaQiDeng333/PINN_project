@@ -1,0 +1,8 @@
+question,answer,evidence,decision
+inference_runner_available,True,20.96 smoke metrics generated,runner usable for dataset or batch evaluation
+auto_route_correct,True,auto test route_used_accuracy=1.0,sensor_z_m routing is deterministic and recorded
+nominal_preserved_by_auto,True,auto nominal RMSE=0.0003330594072394888; force_baseline nominal RMSE=0.0003330594072394888; delta_pct=0.000,auto route keeps 20.85 baseline at nominal liftoff
+non_nominal_replays_a2,True,auto non-nominal RMSE=0.00043721354465257417; force_adapter non-nominal RMSE=0.00043721354465257417,auto route reproduces A2 companion behavior on non-nominal liftoff
+non_nominal_improved_vs_baseline,True,force_baseline non-nominal RMSE=0.0008743096853625806; auto non-nominal RMSE=0.00043721354465257417; improvement_pct=49.993,A2 companion remains useful for non-nominal liftoff
+sensor_z_contract_sufficient_for_real_data_schema_intake,True,results\summaries\true_3d_rbc_liftoff_inference_metadata_contract.md,next stage should define real-data schema intake with mandatory sensor_z_m and no-defect reference metadata
+internal_defect_next,False,current contract is surface-breaking RBC-style only,internal defect remains deferred

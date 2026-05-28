@@ -512,3 +512,11 @@ The route status is now split deliberately: `CURRENT_BASELINE.md` remains the 20
 Stage 20.96a resolves the 20.96 blocker: A2 now has a loadable inference artifact. The recovered artifact uses the fixed 20.94 `A2_latent_residual_adapter` protocol and seed `2026`, with the 20.85 baseline frozen. The checkpoint and prediction artifact remain in ignored `checkpoints/` paths, and the tracked manifest records the model config, baseline manifest, normalization, input contract, and routing contract.
 
 Verification reproduced the formal A2 metrics: nominal RMSE `0.000335821 m`, non-nominal RMSE `0.000437214 m`, and non-nominal Dice `0.842378`. This does not update `CURRENT_BASELINE.md`; it only enables the next liftoff-conditioned inference smoke. The next route step is to exercise live routing: nominal `sensor_z_m≈0.008` uses the 20.85 baseline, non-nominal liftoff uses baseline + A2, and missing `sensor_z_m` must fail rather than being guessed.
+
+# 2026-05-28 Stage 20.96 route note
+
+Stage 20.96 turns the baseline plus A2 companion result into a usable inference path. The route is now explicit: `delta_b` plus mandatory `sensor_z_m` enters the runner; nominal `0.008 m` uses the frozen 20.85 baseline, and non-nominal liftoff uses the frozen baseline plus the A2 latent residual adapter. Override modes exist only for audit: `force_baseline` and `force_adapter`.
+
+The smoke result preserves the split baseline/companion role. Auto routing keeps nominal profile RMSE at `0.000333059 m` and reproduces A2 non-nominal RMSE `0.000437214 m`; force-baseline non-nominal RMSE remains `0.000874310 m`. `sensor_z_m` is now a required metadata field for multi-liftoff or real-data inference. Values outside `[0.006, 0.012]` are flagged, and missing liftoff is a hard error.
+
+This is not a baseline replacement. `CURRENT_BASELINE.md` remains the 20.85 nominal true 3D RBC profile-depth baseline, while A2 remains a liftoff robustness companion module. The next route should move to real-data schema intake and acquisition metadata definition before real-data claims; internal/buried defects remain deferred.
