@@ -98,3 +98,7 @@
 4. 新实验使用独立脚本和独立输出路径。
 5. 第 20.65 之后，除非用户明确要求，不再继续 2D profile-forward surrogate / refinement / observation 小修。
 6. COMSOL_Multiphysics_MCP 是外部 forward generation 工程；PINN_project 只接收、检查、训练和记录其输出数据。
+
+## 中文编写规则
+
+除代码标识、命令、路径、字段名、日志原文和必要英文专有名词外，需求说明、计划、总结、验收标准、路线文档、review 记录和最终回复默认使用中文编写。
