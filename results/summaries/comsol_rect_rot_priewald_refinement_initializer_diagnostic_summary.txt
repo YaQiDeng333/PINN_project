@@ -1,3 +1,0 @@
-COMSOL rect/rot Priewald refinement initializer diagnostic summary
-
-Stage C was skipped. No reusable dense/coarse prediction artifact was found, and retraining a dense baseline is outside the 20.52 scope.

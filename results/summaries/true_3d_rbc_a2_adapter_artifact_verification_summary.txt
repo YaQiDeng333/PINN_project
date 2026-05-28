@@ -1,7 +1,0 @@
-20.96a true 3D RBC A2 adapter artifact verification
-
-checkpoint_reloaded: True
-verification_pass: True
-failed_checks: []
-reference: 20.94/20.95 persisted A2 metrics
-mismatch_policy: stop if nominal/non-nominal RMSE or Dice exceeds tolerance

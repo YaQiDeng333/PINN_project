@@ -1,9 +1,0 @@
-true_3d_rbc profile-primary loss gallery summary
-
-dataset_id: comsol_true_3d_rbc_imported_watertight_pilot_v3_240
-profile_metrics_source: C:\Users\19166\Desktop\PINN_project\results\metrics\true_3d_rbc_v3_240_profile_primary_candidate_profile_metrics.csv
-preview_dir: C:\Users\19166\Desktop\PINN_project\results\previews\true_3d_rbc_profile_primary_loss_gallery
-png_count: 11
-selection_policy: best profile, worst profile, best Dice, and curvature-risk samples from held-out test rows.
-selection_boundary: gallery was not used for model or candidate selection.
-artifact_boundary: preview PNG files are local inspection artifacts and must not be committed.

@@ -1,8 +1,0 @@
-COMSOL multi-axis profile route decision summary
-
-recommendation: C. multi-direction excitation
-reason: same-liftoff Bx/By/Bz does not materially improve profile quality ordering.
-
-No-signal interpretation: same-liftoff Bx/By/Bz remains near random for profile quality ordering, so this is not a borderline pass.
-
-Decision options are recorded in the route decision matrix. This stage remains oracle-only and does not update baseline docs.

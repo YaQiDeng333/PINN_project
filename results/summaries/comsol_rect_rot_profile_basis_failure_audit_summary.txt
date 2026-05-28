@@ -1,8 +1,0 @@
-COMSOL rect/rot profile basis failure audit summary
-
-Selected lambda_forward: 0.0
-Forward helped without mask degradation: False
-20.58 profile forward-refined test IoU/Dice vs 20.57 rect/rot refined: 0.6620/0.7938 vs 0.6492/0.7829.
-20.58 profile forward-refined test IoU/Dice vs 20.54 extracted rotated-box geometry: 0.6620/0.7938 vs 0.6726/0.8017.
-If lambda_forward=0 wins, current S1 surrogate is not profile-compatible enough.
-If lambda_forward>0 wins but mismatch remains high, surrogate mismatch persists in profile space.

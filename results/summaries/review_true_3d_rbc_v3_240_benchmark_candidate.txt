@@ -1,7 +1,0 @@
-- 必须修复：无。
-- 建议修复：`true_3d_rbc_v3_240_benchmark_candidate_metrics.csv` 里 `decision.next_step=A_formal_true_3D_RBC_benchmark_candidate` 来自 20.77 结论，而 20.78 decision summary 的唯一下一步是 `B_model_refinement`；建议后续把前者标成 `prior_20_77_next_step`，避免读者误解。非阻塞。主控已按建议修正 metrics 字段名并重跑 summary/decision 输出。
-- 可以接受：可以接受。未发现 COMSOL run、数据/NPZ 修改、重新训练、baseline 更新、`CURRENT_BASELINE.md` 修改、COMSOL baseline docs 修改或 forbidden artifact staged。脚本只读 registry/manifest 和 20.77 metrics，没有 latest/newest NPZ 自动扫描。
-- 是否同意 v3_240 是 formal benchmark candidate：同意，但必须带 curvature risk。证据链是 neural test MAE `0.678014` beat feature `0.715395`，且 L/W/D、D_m、mask Dice、profile RMSE 相比 N=112 改善。
-- 是否同意不能称为 baseline：同意。`baseline_ready=False`，`exact_piao_rbc=False`，且 curvature 参数仍不稳定，不能替换 CURRENT_BASELINE。
-- 下一步更建议什么：`B_model_refinement`，重点做 curvature-aware model/head/loss 和 exact Piao/NLS-inspired feature diagnostic；不建议直接 expand to 480 作为第一步。
-- 简短原因：v3_240 已证明 true 3D / Piao-style route 可进入 formal candidate audit，但 `wLD/wWD/wLW` 在 boxy/sharp 上仍明显失败，说明问题主要在 curvature 表示/特征/模型，而不是单纯样本数。

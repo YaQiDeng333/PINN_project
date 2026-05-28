@@ -1,9 +1,0 @@
-20.74 true 3D RBC dataset 120 route decision summary
-
-topup_succeeded: True
-assembled_120_validates: True
-pack_status: pilot_generated
-train_ready_candidate: True
-baseline_ready: False
-registry_manifest_valid: True
-next_step: true 3D training gate on v2_120

@@ -1,5 +1,0 @@
-decision_option,selected,condition,observed,next_step
-A_variable_depth_pass,False,smooth continuous variable-depth closed solid plus forward/schema validation passes,high_layer_pass,generate 60-sample true 3D RBC pilot
-B_near_smooth_pass,False,near-smooth loft/import/interpolated approximation passes but is not exact smooth,high_layer_pass,consider pilot only with explicit approximation label
-C_high_layer_pass,True,12/16-layer high-layer approximation passes and improves beyond 20.66 five-layer smoke,high_layer_pass,ask for human confirmation before accepting approximation and expanding samples
-D_failed,False,"constant-depth only, geometry failure, field export failure, delta failure, or schema failure",high_layer_pass,fix COMSOL geometry builder before expanding or training

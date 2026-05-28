@@ -1,8 +1,0 @@
-20.74 true 3D RBC v2_120 registry validation summary
-
-registry_validation_pass: True
-dataset_ids_unique: True
-baseline_ready_all_false: True
-data_paths_untracked: True
-topup_manifest: C:\Users\19166\Desktop\PINN_project\results\manifests\comsol_true_3d_rbc_imported_watertight_pilot_v2_topup_20_74.manifest.json
-assembled_manifest: C:\Users\19166\Desktop\PINN_project\results\manifests\comsol_true_3d_rbc_imported_watertight_pilot_v2_120.manifest.json

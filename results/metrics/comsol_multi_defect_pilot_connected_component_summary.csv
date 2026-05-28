@@ -1,5 +1,0 @@
-group,split,sample_count,iou_mean,dice_mean,area_error_mean,center_error_mean,pred_area_mean,true_area_mean,pred_area_zero_sum,total_loss_mean,pred_connected_component_count_mean,predicted_component_count_is_2_rate,missed_component_rate,merged_component_rate,split_component_rate,component_recall_mean
-pred_connected_component_count=2,train,16,0.6787461427588459,0.8054649052308821,0.2038073836125854,1.8508642391286285,517.3125,521.3125,0,0.2822918966412544,2.0,1.0,0.0,0.0,0.0,1.0
-pred_connected_component_count=2,val,4,0.6938499772711502,0.816880811004323,0.06365107449664731,1.5528832330510887,540.75,547.75,0,0.2740120403468609,2.0,1.0,0.0,0.0,0.0,1.0
-pred_connected_component_count=2,test,4,0.5743351174065476,0.7246810711999385,0.2290117941857157,1.290451811278532,551.25,506.25,0,0.39566995203495026,2.0,1.0,0.0,0.0,0.0,1.0
-pred_connected_component_count=2,all,24,0.6638616109521803,0.7939035838546317,0.18464873385545078,1.7077986668073557,526.875,523.2083333333334,0,0.2998082631578048,2.0,1.0,0.0,0.0,0.0,1.0

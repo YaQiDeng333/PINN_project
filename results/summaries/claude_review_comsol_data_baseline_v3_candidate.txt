@@ -1,5 +1,0 @@
-﻿- **必须修复**：无。
-- **建议修复**：cc2（multi_defect_cc2）测试集 IoU 0.5598 / Dice 0.6996，相比 MULTI_BASELINE_TEST（IoU 0.6118 / Dice 0.7573）下降超过 0.03 阈值，且 cc2 的 pred_cc_is_2 仅 85.8%（< 90%）。这是模型容量或联合训练优化问题，不是脚本 bug。
-- **可以接受**：准备脚本正确合并三个源 pack（single pilot_v9 + cc2 pilot_v3 + cc3 pilot_v4），schema、component_count、connected_component_count、split 分布、坐标一致性全部验证通过，无样本重复。训练脚本仅使用 delta_bz 输入、train-only 归一化、val-only 选 epoch/threshold、test 仅最终评估，无 v3_complex 泄露，无 CURRENT_BASELINE 修改，无覆盖已有 baseline 文档。所有结果文件 seed/group/connected-component 指标自洽，失败审计合理。data/NPZ/checkpoint/preview 均在 .gitignore 中，未被提交。
-- **是否可以建立 COMSOL_DATA_BASELINE_V3**：否。
-- **简短原因**：cc2 联合训练后显著退化（IoU 差 0.052，Dice 差 0.058），且 cc2 component count 预测正确率仅 85.8%，未达 90% 门槛。训练脚本本身的 `document_baseline_v3` 判定逻辑也正确输出 `False`。
