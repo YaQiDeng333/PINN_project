@@ -1,0 +1,88 @@
+{
+  "allowed_use": [
+    "schema_validation",
+    "explicit_internal_training_gate"
+  ],
+  "aspect_counts": {
+    "compact": 48,
+    "elongated_x": 24,
+    "elongated_y": 24
+  },
+  "auto_discovery_allowed": false,
+  "axis_names": [
+    "Bx",
+    "By",
+    "Bz"
+  ],
+  "baseline_ready": false,
+  "burial_depth_counts": {
+    "deep": 24,
+    "deep_plus": 24,
+    "medium": 24,
+    "shallow": 24
+  },
+  "created_at": "2026-05-28T23:17:37",
+  "dataset_id": "comsol_internal_defect_pilot_pack_v1",
+  "dataset_role": "internal_defect_feasibility_pilot_pack",
+  "exact_piao_rbc": false,
+  "forbidden_use": [
+    "automatic_mainline_training",
+    "baseline_update",
+    "current_baseline_replacement",
+    "latest_newest_auto_discovery",
+    "direct_training_without_manifest_gate"
+  ],
+  "generator_script": "C:\\Users\\19166\\Desktop\\COMSOL_Multiphysics_MCP\\scripts\\generate_mfl_internal_defect_pilot_pack.py",
+  "geometry_method": "internal_cavity_comsol_solid",
+  "internal_surface_mixed": false,
+  "label_fields": [
+    "L_m",
+    "W_m",
+    "D_m",
+    "burial_depth_m",
+    "depth_to_surface_m",
+    "defect_center_xyz_m",
+    "shape_type",
+    "aspect_bin",
+    "ground_truth_method"
+  ],
+  "latest_newest_discovery_allowed": false,
+  "manifest_path": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\manifests\\comsol_internal_defect_pilot_pack_v1.manifest.json",
+  "n_samples": 96,
+  "npz_path": "C:\\Users\\19166\\Desktop\\PINN_project\\data\\comsol_mfl\\generated\\internal_defect_pilot_pack\\internal_defect_pilot_pack_v1.npz",
+  "npz_sha256": "ac48ae5bfe1f33d848bb3c07b96d8be822f8d79a4b50cbace915575025e65f0d",
+  "planned_samples": 96,
+  "rbc_style_approximation": false,
+  "route": "internal_buried_defect_feasibility",
+  "scan_line_y_m": [
+    -0.001,
+    0.0,
+    0.001
+  ],
+  "schema_version": "internal_defect_feasibility_v1",
+  "sensor_x_count": 201,
+  "sensor_z_m": 0.008,
+  "shape_counts": {
+    "internal_cuboid": 36,
+    "internal_ellipsoid": 36,
+    "internal_sphere": 24
+  },
+  "size_counts": {
+    "large": 32,
+    "medium": 32,
+    "small": 32
+  },
+  "source_dataset_ids": [
+    "comsol_internal_defect_smoke_pack_v1"
+  ],
+  "split_counts": {
+    "test": 16,
+    "train": 64,
+    "val": 16
+  },
+  "stage": "21.1",
+  "status": "pilot_generated",
+  "surface_rbc_baseline_update": false,
+  "train_ready_candidate": true,
+  "validation_script": "scripts/validate_internal_defect_pilot_pack.py"
+}

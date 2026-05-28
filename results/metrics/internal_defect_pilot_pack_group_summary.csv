@@ -1,0 +1,17 @@
+group_field,group_value,row_count,success_count,failure_count
+split,test,16,16,0
+split,train,64,64,0
+split,val,16,16,0
+shape_type,internal_cuboid,36,36,0
+shape_type,internal_ellipsoid,36,36,0
+shape_type,internal_sphere,24,24,0
+burial_depth_level,deep,24,24,0
+burial_depth_level,deep_plus,24,24,0
+burial_depth_level,medium,24,24,0
+burial_depth_level,shallow,24,24,0
+size_level,large,32,32,0
+size_level,medium,32,32,0
+size_level,small,32,32,0
+aspect_bin,compact,48,48,0
+aspect_bin,elongated_x,24,24,0
+aspect_bin,elongated_y,24,24,0

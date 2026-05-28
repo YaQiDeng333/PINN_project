@@ -1,0 +1,5 @@
+decision_option,recommended,status,evidence,next_action,notes
+A_enter_21_2_internal_training_gate,True,recommended,"status=pilot_generated; n_samples=96; train_ready=True; split={'test': 16, 'train': 64, 'val': 16}",进入 21.2 internal defect training gate,21.2 仍是显式 internal training gate，不是 baseline replacement。
+B_top_up_or_fix_pilot_pack,False,not_selected,status=pilot_generated; n_samples=96; failed_checks=[],补齐到 96 行或修复失败 shape/burial/size 组合,partial pilot 可用于初步训练 gate，但正式 benchmark 前应 top-up。
+C_block_internal_training,False,not_selected,status=pilot_generated; n_samples=96; failed_checks=[],先修复 Boolean/mesh/solve/schema blocker,不可训练，不可声明 internal baseline。
+D_real_data_deferred,True,active_constraint,internal branch 仍处于 COMSOL pilot / training-gate 前阶段,真实实验数据继续暂缓,真实 internal block 需要独立 schema、ground truth 和采集 metadata。

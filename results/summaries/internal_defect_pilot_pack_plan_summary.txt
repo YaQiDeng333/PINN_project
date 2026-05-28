@@ -1,0 +1,23 @@
+21.1 内部/埋藏缺陷 COMSOL pilot pack 计划
+
+dataset_id: comsol_internal_defect_pilot_pack_v1
+source_dataset_id: comsol_internal_defect_smoke_pack_v1
+scope: 只生成 internal/buried defect pilot pack；不训练，不更新 CURRENT_BASELINE，不混入 surface RBC baseline。
+target_samples: 96
+fallback_minimum_samples: 72
+fallback_split_minimum: train/val/test = 48/12/12
+sensor_z_m: 0.008
+scan_line_y_m: [-0.001, 0.0, 0.001]
+axis_order: ['Bx', 'By', 'Bz']
+sensor_x_count: 201
+
+shape_type_counts: {'internal_sphere': 24, 'internal_ellipsoid': 36, 'internal_cuboid': 36}
+burial_depth_counts: {'shallow': 24, 'medium': 24, 'deep': 24, 'deep_plus': 24}
+size_counts: {'small': 32, 'medium': 32, 'large': 32}
+aspect_counts: {'compact': 48, 'elongated_x': 24, 'elongated_y': 24}
+split_counts: {'train': 64, 'val': 16, 'test': 16}
+
+geometry_rule: top scan surface z=0，钢块内部 z<0；center_z_m = -(depth_to_surface_m + D_m/2)。
+internal_gate: 每个样本必须满足 depth_to_surface_m > 0 且 depth_to_surface_m + D_m <= 0.0056。
+train_ready_candidate_gate: 成功样本 >=72、schema validation 无 blocker、split 达到 fallback、registry/manifest 显式 gate 完整。
+plan_csv: C:\Users\19166\Desktop\PINN_project\results\metrics\internal_defect_pilot_pack_plan.csv

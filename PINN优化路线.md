@@ -1,5 +1,11 @@
 # PINN 优化路线
 
+## 2026-05-28 路线同步：21.1 internal defect pilot pack
+
+21.1 把 internal / buried defect 分支从 feasibility smoke 推进到 pilot pack。`comsol_internal_defect_pilot_pack_v1` 已生成并验证为 `pilot_generated`：96/96 COMSOL rows 成功，覆盖三种 shape、四档 burial depth、三档 size，并保留 `train/val/test=64/16/16`。它是 internal branch 的显式 training-gate 数据候选，不是 current baseline，也不替换 20.85 surface / near-surface true 3D RBC profile-depth baseline。
+
+路线边界继续保持清楚：surface RBC branch 学的是 surface profile/depth；internal branch 学的是内部空腔几何、中心位置和 `burial_depth_m/depth_to_surface_m`。如果把 internal defect 强行映射成 surface RBC 六参数，会把埋深变化误解释为表面 profile/curvature 变化。因此 21.2 应单独做 internal defect training gate，并继续使用 `COMSOL_DATA_REGISTRY.md + manifest + dataset_id` 显式加载；真实实验数据仍暂缓。
+
 ## 2026-05-27 路线同步：20.89 gain/amplitude calibration and augmentation gate
 
 20.89 把 20.88 暴露出的 gain / Bx-amplitude sensitivity 单独拆出来验证。路线边界保持不变：不运行 COMSOL，不生成或修改 data / NPZ，不更新 `CURRENT_BASELINE.md`；本轮只在固定 v3_240 和 20.88a frozen artifact 上测试输入校准与 in-memory augmentation gate。

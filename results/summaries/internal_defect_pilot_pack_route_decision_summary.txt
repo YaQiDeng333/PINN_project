@@ -1,0 +1,16 @@
+21.1 internal defect pilot pack route decision
+
+dataset_id: comsol_internal_defect_pilot_pack_v1
+status: pilot_generated
+successful_samples: 96
+train_ready_candidate: true
+shape_groups_with_success: 3
+burial_depth_groups_with_success: 4
+size_groups_with_success: 3
+split_counts: {'test': 16, 'train': 64, 'val': 16}
+failed_checks: none
+
+unique_next_step: 进入 21.2 internal defect training gate
+current_baseline_update: false
+surface_rbc_mixed: false
+real_data_alignment: deferred

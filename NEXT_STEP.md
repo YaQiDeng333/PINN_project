@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-05-28 after Stage 21.1 internal / buried defect pilot pack
+
+下一步唯一建议：**进入 21.2 internal defect training gate**。
+
+21.1 已把 21.0 smoke 扩展为 `comsol_internal_defect_pilot_pack_v1`：COMSOL planned/success `96/96`，覆盖 `internal_sphere/internal_ellipsoid/internal_cuboid`，四档 `burial_depth_level=shallow/medium/deep/deep_plus`，并固定 split `train/val/test=64/16/16`。Bx/By/Bz、`delta_b=b_defect-b_no_defect`、internal labels、registry/manifest validation 均通过，`train_ready_candidate=true`，但 `baseline_ready=false`。
+
+21.2 应只做显式 internal training gate：输入仍是三轴 `delta_b`，标签是 `shape_type + L/W/D + burial_depth + center_xyz` 等 internal schema 字段；不要更新 `CURRENT_BASELINE.md`，不要把 internal pilot 写成 surface RBC baseline，也不要接入真实实验数据。
+
 ## 2026-05-28 after Stage 21.0 internal / buried defect COMSOL smoke pack
 
 下一步唯一建议：**进入 21.1 internal defect pilot pack 设计与生成**。

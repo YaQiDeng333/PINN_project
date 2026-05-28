@@ -1,5 +1,16 @@
 # 实验工作日志
 
+## 2026-05-28 Stage 21.1 internal / buried defect pilot pack generation
+
+- scope: internal / buried defect pilot pack generation, schema validation, registry/manifest, and route decision only. No training, no `CURRENT_BASELINE.md` update, and no surface RBC baseline mixing.
+- source: 21.0 `comsol_internal_defect_smoke_pack_v1` had `smoke_generated` status with 12/12 successful COMSOL rows.
+- generated dataset: `comsol_internal_defect_pilot_pack_v1`, route `internal_buried_defect_feasibility`, status `pilot_generated`.
+- COMSOL result: planned/success `96/96`; shape coverage `internal_sphere=24`, `internal_ellipsoid=36`, `internal_cuboid=36`; burial coverage `shallow=24`, `medium=24`, `deep=24`, `deep_plus=24`; split `train/val/test=64/16/16`.
+- signal/schema: `Bx/By/Bz` exported with shape `(96,3,3,201)`; `delta_b=b_defect-b_no_defect` validation passed; labels include `L_m/W_m/D_m`, `burial_depth_m`, `depth_to_surface_m`, `defect_center_xyz_m`, `shape_type`, `aspect_bin`, and `ground_truth_method`.
+- registry/manifest: `results/manifests/comsol_internal_defect_pilot_pack_v1.manifest.json` created; `train_ready_candidate=true`, `baseline_ready=false`; latest/newest discovery remains forbidden.
+- decision: may enter 21.2 internal defect training gate. This is not a baseline transition; real experimental data remains deferred.
+- review: independent read-only review passed with no must-fix.
+
 ## 2026-05-27 更新：第 20.89 true 3D RBC gain/amplitude calibration and augmentation gate
 
 第 20.89 在固定 `dataset_id=comsol_true_3d_rbc_imported_watertight_pilot_v3_240` 和 20.88a baseline inference artifact 上完成 gain/amplitude robustness gate。本轮没有运行 COMSOL，没有生成或修改 data / NPZ，没有更新 `CURRENT_BASELINE.md`，也没有提交 checkpoint / preview / notes；所有扰动、校准和增强都只作用在内存中的 `delta_b` / BxByBz 输入上。

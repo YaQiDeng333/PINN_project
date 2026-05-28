@@ -1,0 +1,29 @@
+21.1 内部/埋藏缺陷 pilot pack preflight
+
+pinn_root: C:\Users\19166\Desktop\PINN_project
+pinn_git_root: C:/Users/19166/Desktop/PINN_project
+comsol_root: C:\Users\19166\Desktop\COMSOL_Multiphysics_MCP
+method_agent: 21.1 仍是 internal/buried 独立分支，不混入 surface RBC baseline。
+comsol_agent: 21.0 已证明 sphere/ellipsoid/cuboid 的 Boolean、mesh、solve、Bx/By/Bz 导出可跑通；21.1 复用同一建模链路。
+pinn_schema_agent: INTERNAL_DEFECT_SCHEMA.md 存在；registry/manifest 必须显式 dataset_id，不允许 latest/newest discovery。
+experiment_agent: target N=96，fallback N>=72；split 固定 train/val/test=64/16/16。
+safety_agent: 禁止提交 data/、NPZ、.mph、raw CSV、checkpoint、preview PNG、notes、temp STL；CURRENT_BASELINE.md 不修改。
+
+source_dataset_id: comsol_internal_defect_smoke_pack_v1
+source_status: smoke_generated
+source_n_samples: 12
+source_validation_script: scripts/validate_internal_defect_smoke_pack.py
+
+comsol_dirty_items_kept_unmodified:
+-  M src/tools/physics.py
+-  M src/tools/results.py
+-  M src/tools/study.py
+- ?? scripts/generate_mfl_internal_defect_pilot_pack.py
+- ?? scripts/generate_mfl_rectangular_sweep.py
+
+stop_conditions:
+- PINN_project root mismatch.
+- COMSOL_Multiphysics_MCP root mismatch.
+- 21.0 smoke manifest is missing or not smoke_generated.
+- Plan geometry cannot keep every cavity fully internal.
+- Generated data appears in git staging.

@@ -235,3 +235,32 @@ This registry records generated COMSOL dataset identities and allowed usage. It 
 - validation_script: `scripts/validate_internal_defect_smoke_pack.py`
 - npz_sha256: 29bdc339b8fc659d9cc888889a7d3f175630e28cc2e77cfa565c4599b0badb79
 - notes: Metadata only. Generated NPZ/data files are not committed and must be loaded only by explicit dataset_id + manifest.
+
+## comsol_internal_defect_pilot_pack_v1
+
+- dataset_role: internal_defect_feasibility_pilot_pack
+- status: pilot_generated
+- route: internal_buried_defect_feasibility
+- stage: 21.1
+- schema_version: internal_defect_feasibility_v1
+- geometry_method: internal_cavity_comsol_solid
+- exact_piao_rbc: false
+- rbc_style_approximation: false
+- path: `C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\generated\internal_defect_pilot_pack\internal_defect_pilot_pack_v1.npz`
+- manifest_path: `C:\Users\19166\Desktop\PINN_project\results\manifests\comsol_internal_defect_pilot_pack_v1.manifest.json`
+- n_samples: 96
+- planned_samples: 96
+- split_counts: {'train': 64, 'val': 16, 'test': 16}
+- shape_counts: {'internal_sphere': 24, 'internal_ellipsoid': 36, 'internal_cuboid': 36}
+- burial_depth_counts: {'shallow': 24, 'medium': 24, 'deep': 24, 'deep_plus': 24}
+- train_ready_candidate: true
+- baseline_ready: false
+- auto_discovery_allowed: false
+- latest_newest_discovery_allowed: false
+- allowed_use: schema_validation, explicit_internal_training_gate
+- forbidden_use: automatic_mainline_training, baseline_update, current_baseline_replacement, latest_newest_auto_discovery, direct_training_without_manifest_gate
+- source_dataset_ids: comsol_internal_defect_smoke_pack_v1
+- generator_script: `C:\Users\19166\Desktop\COMSOL_Multiphysics_MCP\scripts\generate_mfl_internal_defect_pilot_pack.py`
+- validation_script: `scripts/validate_internal_defect_pilot_pack.py`
+- npz_sha256: ac48ae5bfe1f33d848bb3c07b96d8be822f8d79a4b50cbace915575025e65f0d
+- notes: Metadata only. Generated NPZ/data files are not committed and must be loaded only by explicit dataset_id + manifest.
