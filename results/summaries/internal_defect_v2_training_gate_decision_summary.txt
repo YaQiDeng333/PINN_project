@@ -1,0 +1,21 @@
+21.4 internal defect v2_240 training gate 决策摘要
+CURRENT_BASELINE: 未修改，仍为 surface/near-surface true 3D RBC baseline。
+internal_branch_status: 独立分支 training gate，不是 baseline replacement。
+selected_neural_train_val_test_total_normalized_mae: 0.068995 / 0.236902 / 0.406366
+selected_neural_test_LWD_mae_mm: 0.761 / 0.947 / 0.093
+selected_neural_test_burial_depth_mae_mm: 0.595
+selected_neural_test_center_xyz_mae_mm: 1.380
+selected_neural_test_shape_accuracy: 1.000000
+selected_neural_test_shape_macro_f1: 1.000000
+beat_mean_baseline: True
+beat_feature_baseline: True
+feature_selected_model: svr_rbf_C10
+feature_test_total_normalized_mae: 0.416406
+feature_test_burial_depth_mae_mm: 0.472
+LWD_learnable: True
+burial_depth_learnable: True
+center_xyz_learnable: True
+shape_type_classifiable: True
+v2_240_sufficiency: 作为 training gate 足够；作为 baseline 仍不足，需要 formal benchmark 和更大独立验证。
+next_step: E_prepare_internal_benchmark_report
+reason: v2_240 neural gate 已超过 mean/feature baseline，且主要标签均可学习；下一步应整理为 formal benchmark/report，不直接升 baseline。

@@ -1,0 +1,16 @@
+21.4 internal defect v2_240 feature baseline 摘要
+dataset_id: comsol_internal_defect_pilot_pack_v2_240
+feature_source: 仅来自 delta_b/BxByBz
+feature_count: 110
+candidate_models: mean_baseline, ridge_alpha1, kernel_ridge_rbf, svr_rbf_C10, random_forest_cheap
+selected_model: svr_rbf_C10
+validation_selection_score: 0.248151
+test_total_normalized_mae: 0.416406
+test_LWD_mae_mm: 0.757 / 1.151 / 0.108
+test_burial_depth_mae_mm: 0.472
+test_center_xyz_mae_mm: 1.560
+test_shape_accuracy: 0.950000
+test_shape_macro_f1: 0.950549
+label_leakage: false; split/sample_id/shape/depth/size/aspect metadata 未作为特征输入。
+selection_protocol: validation-only model selection; test final only.
+current_baseline_update: false

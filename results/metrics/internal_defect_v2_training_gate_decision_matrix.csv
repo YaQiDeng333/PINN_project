@@ -1,0 +1,10 @@
+question,answer,evidence,decision
+模型是否能 fit train,是,train_total_normalized_mae=0.068995; train_shape_accuracy=1.000000,train_fit_check
+neural 是否 beat mean baseline,是,neural_score=0.406366; mean_score=1.095617; neural_shape_acc=1.000000; mean_shape_acc=0.325000,mean_baseline_comparison
+neural 是否 beat feature baseline,是,neural_score=0.406366; feature_score=0.433906; neural_total_mae=0.406366; feature_total_mae=0.416406; feature_model=svr_rbf_C10,feature_baseline_comparison
+L/W/D 是否可学习,是,neural=0.761/0.947/0.093 mm; mean=1.578/1.960/0.135 mm,dimension_learnability
+burial_depth 是否可学习,是,neural=0.595 mm; mean=1.150 mm,burial_depth_learnability
+center_xyz 是否可学习,是,neural=1.380 mm; mean=6.150 mm,center_learnability
+shape_type 是否可分类,是,"neural_acc=1.000000; mean_acc=0.325000; feature_acc=0.950000; split_shape_counts={'train': {'internal_sphere': 54, 'internal_ellipsoid': 53, 'internal_cuboid': 53}, 'val': {'internal_sphere': 13, 'internal_ellipsoid': 14, 'internal_cuboid': 13}, 'test': {'internal_sphere': 13, 'internal_ellipsoid': 13, 'internal_cuboid': 14}}",shape_classification
+v2_240 是否足够,作为 training gate 足够；作为 baseline 仍不足，需要 formal benchmark 和更大独立验证。,"split_shape_complete=True; split_burial_complete=True; split_shape_counts={'train': {'internal_sphere': 54, 'internal_ellipsoid': 53, 'internal_cuboid': 53}, 'val': {'internal_sphere': 13, 'internal_ellipsoid': 14, 'internal_cuboid': 13}, 'test': {'internal_sphere': 13, 'internal_ellipsoid': 13, 'internal_cuboid': 14}}; split_burial_counts={'train': {'shallow': 40, 'medium': 40, 'deep': 40, 'deep_plus': 40}, 'val': {'medium': 10, 'deep': 10, 'deep_plus': 10, 'shallow': 10}, 'test': {'shallow': 10, 'deep': 10, 'deep_plus': 10, 'medium': 10}}",dataset_scale
+下一步唯一建议,E_prepare_internal_benchmark_report,v2_240 neural gate 已超过 mean/feature baseline，且主要标签均可学习；下一步应整理为 formal benchmark/report，不直接升 baseline。,route

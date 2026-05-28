@@ -474,6 +474,14 @@ feature-fusion 的设计边界是：20.77 neural encoder 继续负责 raw `delta
 
 20.83 tested the R1 route: keep the six RBC-style parameters as outputs, but train with profile-primary loss. The experiment did not pass the upgrade gate. It improved projected mask Dice but worsened the primary 3D profile reconstruction metric relative to 20.77.
 
+# 2026-05-29 Stage 21.4 route note
+
+21.4 在 `comsol_internal_defect_pilot_pack_v2_240` 上完成 internal/buried defect training gate。v2_240 修复了 21.2 的 split blocker，因此这次结果可以作为 internal branch 的正向 training-gate 证据：三轴 `Bx/By/Bz delta_b` 能学习尺寸、中心位置和 shape_type，burial_depth 也有信号。
+
+关键结果是 neural selected seed `42` 的 test total normalized MAE 为 `0.406366`，优于 selected feature baseline `0.416406`；shape accuracy/F1 为 `1.000000 / 1.000000`，L/W/D MAE 为 `0.761 / 0.947 / 0.093 mm`，center_xyz MAE 为 `1.380 mm`。同时必须保留一个风险判断：burial_depth 单项上 feature baseline 更强，`0.472 mm` 优于 neural 的 `0.595 mm`，说明下一步不能只看 total score。
+
+路线状态：internal branch 已从 feasibility smoke / pilot pack 进入 positive training gate，但仍不是 baseline。下一步应做 formal benchmark/report，复核 seed stability、feature-vs-neural trade-off 和 burial_depth 风险；不要更新 `CURRENT_BASELINE.md`，不要把 internal defect 混入 surface / near-surface RBC baseline。
+
 # 2026-05-29 Stage 21.3b route note
 
 21.3b 把 internal defect 数据分支从 21.2 的 split blocker 推进到可训练的数据包状态。`comsol_internal_defect_pilot_pack_v2_240` 由 v1 source N=96 和 top-up selected N=144 组装而成；COMSOL top-up 168/168 成功，assembled N=240，split=`160/40/40`。

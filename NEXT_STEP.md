@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-05-29 after Stage 21.4 internal defect v2_240 training gate
+
+下一步唯一建议：**进入 internal defect v2_240 formal benchmark/report，不要直接升 baseline**。
+
+21.4 已证明 v2_240 上三轴 `Bx/By/Bz delta_b` 对 internal/buried defect 的主要标签有可学习信号：selected neural seed `42` 的 test total normalized MAE 为 `0.406366`，略优于 selected feature baseline `0.416406`；shape accuracy/F1 达到 `1.000000 / 1.000000`；L/W/D MAE 为 `0.761 / 0.947 / 0.093 mm`，center_xyz MAE 为 `1.380 mm`。但 burial_depth 单项仍是 feature baseline 更强：`0.472 mm` vs neural `0.595 mm`。
+
+因此下一步不是继续扩数据，也不是把 internal defect 写成 `CURRENT_BASELINE`。更稳的路线是 formal benchmark/report：复核 seed 稳定性、分组误差、feature-vs-neural trade-off 和 burial_depth 单项风险，再决定是否做 shape-conditioned / feature-fusion internal model。`CURRENT_BASELINE.md` 继续保持 surface / near-surface true 3D RBC baseline。
+
 ## 2026-05-29 after Stage 21.3b internal defect dataset v2_240 pack generation
 
 下一步唯一建议：**进入 21.4 internal defect v2_240 training gate**。

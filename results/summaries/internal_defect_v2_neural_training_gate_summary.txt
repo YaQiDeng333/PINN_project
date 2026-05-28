@@ -1,0 +1,20 @@
+21.4 internal defect v2_240 neural training gate 摘要
+dataset_id: comsol_internal_defect_pilot_pack_v2_240
+model_input: only delta_b/BxByBz, shape=(N,9,201)
+supervision_labels: L/W/D, burial_depth, center_xyz, shape_type; labels only used for loss/metrics.
+metadata_leakage: false; shape_type/burial_depth_bin/size_bin/aspect_bin/split/sample_id 未作为模型输入。
+selection_protocol: validation-only epoch selection and validation-only seed selection; test final only.
+seeds: 42, 123, 2026
+selected_seed: 42
+selected_best_epoch: 293
+selected_val_score: 0.236902
+train_total_normalized_mae: 0.068995
+val_total_normalized_mae: 0.236902
+test_total_normalized_mae: 0.406366
+test_LWD_mae_mm: 0.761 / 0.947 / 0.093
+test_burial_depth_mae_mm: 0.595
+test_center_xyz_mae_mm: 1.380
+test_shape_accuracy: 1.000000
+test_shape_macro_f1: 1.000000
+checkpoint_saved: false
+current_baseline_update: false

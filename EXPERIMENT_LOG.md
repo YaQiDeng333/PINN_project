@@ -2869,6 +2869,19 @@ Review agent 已完成只读复核，无 must-fix。review 建议把 audit/decis
 - decision: A2 is a liftoff robustness candidate and should enter a formal liftoff benchmark. This is not a baseline replacement; `CURRENT_BASELINE.md` remains the nominal 20.85 baseline.
 - review: independent read-only review passed with no must-fix. Two provenance/input-boundary suggestions were adopted.
 
+# 2026-05-29 Stage 21.4 internal defect v2_240 training gate
+
+- dataset_id: `comsol_internal_defect_pilot_pack_v2_240`, explicitly loaded through `COMSOL_DATA_REGISTRY.md` and `results/manifests/comsol_internal_defect_pilot_pack_v2_240.manifest.json`.
+- scope: internal/buried defect training gate only. No COMSOL run, no data/NPZ mutation, no checkpoint/preview artifact committed, no `CURRENT_BASELINE.md` update, and no baseline creation.
+- input gate: passed. N=`240`, split=`160/40/40`, `delta_b` shape `(240,3,3,201)`, Conv1D input `(240,9,201)`, axis names `Bx/By/Bz`.
+- coverage: each split covers `internal_sphere/internal_ellipsoid/internal_cuboid`, `shallow/medium/deep/deep_plus`, and `small/medium/large`; aspect coverage is available for ellipsoid/cuboid.
+- feature baseline: validation selected `svr_rbf_C10`; test total normalized MAE `0.416406`; L/W/D MAE `0.757 / 1.151 / 0.108 mm`; burial_depth MAE `0.472 mm`; center_xyz MAE `1.560 mm`; shape accuracy/F1 `0.950000 / 0.950549`.
+- neural gate: small Conv1D multitask, seeds `42/123/2026`; validation selected seed `42`, best epoch `293`.
+- selected neural metrics: train/val/test total normalized MAE `0.068995 / 0.236902 / 0.406366`; L/W/D MAE `0.761 / 0.947 / 0.093 mm`; burial_depth MAE `0.595 mm`; center_xyz MAE `1.380 mm`; shape accuracy/F1 `1.000000 / 1.000000`.
+- comparison: neural beat mean baseline and selected feature baseline on composite score and total normalized MAE; feature baseline remains stronger on burial_depth single metric (`0.472 mm` vs neural `0.595 mm`).
+- decision: v2_240 is sufficient for a positive internal training gate, but not baseline-ready. Next step is `E_prepare_internal_benchmark_report`, not baseline transition.
+- review: independent read-only review passed with no must-fix.
+
 # 2026-05-29 Stage 21.3b internal defect dataset v2_240 pack generation
 
 - scope: internal/buried defect dataset generation, assembly, validation, registry/manifest, and route decision only. No training, no `CURRENT_BASELINE.md` update, and no internal defect baseline creation.
