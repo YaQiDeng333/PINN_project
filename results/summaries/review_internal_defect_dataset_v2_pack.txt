@@ -1,0 +1,11 @@
+21.3b internal defect dataset v2_240 review
+
+必须修复：无。
+
+建议修复：提交前注意 results/ 下 summary/metrics/inventory 可能是 ignored，需要只用白名单路径显式 staging；当前没有任何 staged 文件，所以没有 forbidden artifact staged。
+
+可以接受：可以接受。
+
+是否可进入 21.4：可以。v2_240 已达到 N=240、split=160/40/40，三类 shape_type、四档 burial_depth、三档 size 都覆盖；val/test 不再是单一 cuboid，registry/manifest 标记 train_ready_candidate=true、baseline_ready=false。
+
+简短原因：未发现训练、CURRENT_BASELINE.md 修改、data/NPZ/checkpoint/preview 等 staged 风险；COMSOL 既有无关 dirty items 仍未 staged，21.3b 产物边界清楚，可以进入 21.4 training gate。

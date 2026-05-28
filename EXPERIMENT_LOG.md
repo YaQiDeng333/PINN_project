@@ -2869,6 +2869,19 @@ Review agent 已完成只读复核，无 must-fix。review 建议把 audit/decis
 - decision: A2 is a liftoff robustness candidate and should enter a formal liftoff benchmark. This is not a baseline replacement; `CURRENT_BASELINE.md` remains the nominal 20.85 baseline.
 - review: independent read-only review passed with no must-fix. Two provenance/input-boundary suggestions were adopted.
 
+# 2026-05-29 Stage 21.3b internal defect dataset v2_240 pack generation
+
+- scope: internal/buried defect dataset generation, assembly, validation, registry/manifest, and route decision only. No training, no `CURRENT_BASELINE.md` update, and no internal defect baseline creation.
+- source dataset: `comsol_internal_defect_pilot_pack_v1`, source rows `96`.
+- top-up COMSOL pack: planned/success `168/168`; selected top-up rows `144`; buffer rows `24`; no failed rows.
+- assembled dataset: `comsol_internal_defect_pilot_pack_v2_240`, assembled rows `240`.
+- split: train/val/test `160/40/40`; v1 original split was discarded and recomputed for v2.
+- coverage: `internal_sphere/internal_ellipsoid/internal_cuboid = 80/80/80`; `shallow/medium/deep/deep_plus = 60/60/60/60`; `small/medium/large = 80/80/80`; aspect counts `compact=134`, `elongated_x=54`, `elongated_y=52`.
+- validation: Bx/By/Bz finite, `delta_b=b_defect-b_no_defect` passed, every split covers all three shape types, all four burial levels, all three size levels, and ellipsoid/cuboid aspect coverage.
+- registry/manifest: created `results/manifests/comsol_internal_defect_pilot_pack_v2_240.manifest.json`; `train_ready_candidate=true`, `baseline_ready=false`, and latest/newest auto-discovery remains forbidden.
+- route decision: enter 21.4 internal v2_240 training gate. Internal branch remains separate and is not mixed into the surface/near-surface RBC baseline.
+- review: independent read-only review passed with no must-fix.
+
 # 2026-05-28 Stage 20.95 formal liftoff benchmark for A2 residual adapter
 
 - dataset_id: `comsol_true_3d_rbc_liftoff_aug_pack_v1`, explicitly loaded through `COMSOL_DATA_REGISTRY.md` and `results/manifests/comsol_true_3d_rbc_liftoff_aug_pack_v1.manifest.json`.

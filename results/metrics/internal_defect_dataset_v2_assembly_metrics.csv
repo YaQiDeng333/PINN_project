@@ -1,0 +1,10 @@
+metric,value,expected,pass
+source_rows,96,96,True
+topup_available_rows,168,>=144,True
+selected_topup_rows,144,144,True
+assembled_rows,240,240,True
+missing_selected_topup_rows,0,0,True
+split_counts,"{""test"": 40, ""train"": 160, ""val"": 40}","{""test"": 40, ""train"": 160, ""val"": 40}",True
+shape_counts,"{""internal_cuboid"": 80, ""internal_ellipsoid"": 80, ""internal_sphere"": 80}",80 each,True
+burial_counts,"{""deep"": 60, ""deep_plus"": 60, ""medium"": 60, ""shallow"": 60}",60 each,True
+size_counts,"{""large"": 80, ""medium"": 80, ""small"": 80}",80 each,True

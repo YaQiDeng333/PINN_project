@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-05-29 after Stage 21.3b internal defect dataset v2_240 pack generation
+
+下一步唯一建议：**进入 21.4 internal defect v2_240 training gate**。
+
+21.3b 已生成并验证 `comsol_internal_defect_pilot_pack_v2_240`：source N=96，top-up COMSOL planned/success `168/168`，按 quota 选 144 行进入 assembled pack，最终 N=240，split=`160/40/40`。新的 split 已解决 21.2 的 blocker：train/val/test 都覆盖 `internal_sphere/internal_ellipsoid/internal_cuboid`、`shallow/medium/deep/deep_plus`、`small/medium/large`，ellipsoid/cuboid 在每个 split 内也覆盖 compact / elongated_x / elongated_y。
+
+21.4 才做训练。当前 v2_240 只是 internal/buried defect 独立分支的 `train_ready_candidate=true` 数据包，`baseline_ready=false`；不要更新 `CURRENT_BASELINE.md`，不要把 internal defect 混入 surface / near-surface RBC baseline。
+
 ## 2026-05-29 after Stage 21.3 internal defect dataset expansion plan
 
 下一步唯一建议：**执行 21.3b internal defect top-up COMSOL pack generation，然后 assemble/validate `comsol_internal_defect_pilot_pack_v2_240`**。

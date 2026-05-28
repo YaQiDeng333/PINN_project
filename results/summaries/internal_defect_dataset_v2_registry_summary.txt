@@ -1,0 +1,8 @@
+21.3b registry / manifest summary
+dataset_id: comsol_internal_defect_pilot_pack_v2_240
+registry_path: C:\Users\19166\Desktop\PINN_project\COMSOL_DATA_REGISTRY.md
+manifest_path: C:\Users\19166\Desktop\PINN_project\results\manifests\comsol_internal_defect_pilot_pack_v2_240.manifest.json
+status: pilot_generated
+train_ready_candidate: true
+forbidden_use: automatic_mainline_training, baseline_update, current_baseline_replacement, latest_newest_auto_discovery, direct_training_without_manifest_gate
+说明：registry 仅允许 schema_validation / explicit_internal_training_gate，禁止 automatic_mainline_training / baseline_update / current_baseline_replacement。

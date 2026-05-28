@@ -474,6 +474,14 @@ feature-fusion 的设计边界是：20.77 neural encoder 继续负责 raw `delta
 
 20.83 tested the R1 route: keep the six RBC-style parameters as outputs, but train with profile-primary loss. The experiment did not pass the upgrade gate. It improved projected mask Dice but worsened the primary 3D profile reconstruction metric relative to 20.77.
 
+# 2026-05-29 Stage 21.3b route note
+
+21.3b 把 internal defect 数据分支从 21.2 的 split blocker 推进到可训练的数据包状态。`comsol_internal_defect_pilot_pack_v2_240` 由 v1 source N=96 和 top-up selected N=144 组装而成；COMSOL top-up 168/168 成功，assembled N=240，split=`160/40/40`。
+
+路线上的关键变化是：internal/buried defect 现在有了更可信的 train/val/test 覆盖。每个 split 都覆盖三类 shape、四档 burial depth、三档 size，ellipsoid/cuboid 的三类 aspect 也在每个 split 内出现。这直接修复了 21.2 中 val/test 只有 `internal_cuboid`、burial 覆盖不完整的问题。
+
+下一步只能是 21.4 internal v2_240 training gate。该数据包 `train_ready_candidate=true`，但仍是 internal branch 的显式训练 gate 数据，不是 baseline，`baseline_ready=false`，也不改变 surface / near-surface true 3D RBC `CURRENT_BASELINE`。
+
 Current route state:
 - `wLD / wWD / wLW` remain auxiliary diagnostics, not headline pass/fail metrics.
 - `profile_depth_rmse_m` / Er-like profile reconstruction are the right main metrics for the true 3D RBC-style branch.

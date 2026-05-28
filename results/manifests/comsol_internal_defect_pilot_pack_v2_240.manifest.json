@@ -1,0 +1,75 @@
+{
+  "allowed_use": [
+    "schema_validation",
+    "explicit_internal_training_gate"
+  ],
+  "aspect_counts": {
+    "compact": 134,
+    "elongated_x": 54,
+    "elongated_y": 52
+  },
+  "auto_discovery_allowed": false,
+  "axis_names": [
+    "Bx",
+    "By",
+    "Bz"
+  ],
+  "baseline_ready": false,
+  "burial_depth_counts": {
+    "deep": 60,
+    "deep_plus": 60,
+    "medium": 60,
+    "shallow": 60
+  },
+  "created_at": "2026-05-29T01:21:33",
+  "dataset_id": "comsol_internal_defect_pilot_pack_v2_240",
+  "dataset_role": "internal_defect_feasibility_pilot_pack_v2_240",
+  "failed_blockers": [],
+  "forbidden_use": [
+    "automatic_mainline_training",
+    "baseline_update",
+    "current_baseline_replacement",
+    "latest_newest_auto_discovery",
+    "direct_training_without_manifest_gate"
+  ],
+  "geometry_method": "internal_cavity_comsol_solid",
+  "internal_surface_mixed": false,
+  "latest_newest_discovery_allowed": false,
+  "manifest_path": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\manifests\\comsol_internal_defect_pilot_pack_v2_240.manifest.json",
+  "n_samples": 240,
+  "npz_path": "C:\\Users\\19166\\Desktop\\PINN_project\\data\\comsol_mfl\\generated\\internal_defect_pilot_pack_v2_240\\comsol_internal_defect_pilot_pack_v2_240.npz",
+  "npz_sha256": "73118397dc810a4e11eb67acb0b31f8155e0c6150d472d9e7a567a5b77329404",
+  "route": "internal_buried_defect_feasibility",
+  "scan_line_y_m": [
+    -0.001,
+    0.0,
+    0.001
+  ],
+  "schema_version": "internal_defect_feasibility_v2",
+  "sensor_x_count": 201,
+  "sensor_z_m": 0.008,
+  "shape_counts": {
+    "internal_cuboid": 80,
+    "internal_ellipsoid": 80,
+    "internal_sphere": 80
+  },
+  "size_counts": {
+    "large": 80,
+    "medium": 80,
+    "small": 80
+  },
+  "source_dataset_ids": [
+    "comsol_internal_defect_pilot_pack_v1",
+    "comsol_internal_defect_dataset_topup_pack_v1"
+  ],
+  "split_counts": {
+    "test": 40,
+    "train": 160,
+    "val": 40
+  },
+  "stage": "21.3b",
+  "status": "pilot_generated",
+  "surface_rbc_baseline_update": false,
+  "train_ready_candidate": true,
+  "validation_script": "scripts/validate_internal_defect_dataset_v2_pack.py"
+}

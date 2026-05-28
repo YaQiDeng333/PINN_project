@@ -1,0 +1,13 @@
+21.3b internal defect v2_240 route decision summary
+dataset_id: comsol_internal_defect_pilot_pack_v2_240
+status: pilot_generated
+train_ready_candidate: true
+n_samples: 240
+split_counts: {'test': 40, 'train': 160, 'val': 40}
+shape_counts: {'internal_cuboid': 80, 'internal_ellipsoid': 80, 'internal_sphere': 80}
+burial_depth_counts: {'deep': 60, 'deep_plus': 60, 'medium': 60, 'shallow': 60}
+size_counts: {'large': 80, 'medium': 80, 'small': 80}
+aspect_counts: {'compact': 134, 'elongated_x': 54, 'elongated_y': 52}
+next_step: 进入 21.4 internal v2_240 training gate
+
+判断：v2_240 只属于 internal/buried defect 独立分支，baseline_ready=false，不替换 CURRENT_BASELINE，也不混入 surface RBC baseline。

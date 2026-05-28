@@ -1,0 +1,32 @@
+21.3b internal defect dataset v2_240 pack preflight summary
+
+结论：preflight 通过，可以执行 top-up COMSOL generation、v2 assemble、validation、registry/manifest。
+
+只读检查结果：
+- PINN repo: C:\Users\19166\Desktop\PINN_project
+- COMSOL repo: C:\Users\19166\Desktop\COMSOL_Multiphysics_MCP
+- source dataset_id: comsol_internal_defect_pilot_pack_v1
+- source status: pilot_generated
+- source n_samples: 96
+- source train_ready_candidate: true
+- 21.3 expansion plan: results/metrics/internal_defect_dataset_expansion_plan.csv
+- planned top-up rows: 168
+- selected_quota rows: 144
+- buffer rows: 24
+- target assembled dataset_id: comsol_internal_defect_pilot_pack_v2_240
+- target split: train/val/test = 160/40/40
+
+Subagent-style preflight summary:
+- Method: 21.2 的 blocker 是 split 覆盖偏差，不是 COMSOL 几何失败；v2_240 应重分配 source+top-up split。
+- COMSOL: 21.1 generator 已验证 internal_sphere/internal_ellipsoid/internal_cuboid 的 Boolean、mesh、solve、Bx/By/Bz export；21.3b 可复用该链路。
+- PINN schema: INTERNAL_DEFECT_SCHEMA.md、source manifest、registry 规则存在；v2 必须保持 baseline_ready=false。
+- Experiment: 168 planned top-up 目标用于保证 144 selected successes；assemble 后目标 N=240。
+- Safety: 本轮不训练、不更新 CURRENT_BASELINE，不提交 data/NPZ/.mph/raw CSV/checkpoint/preview PNG/notes/temp STL。COMSOL repo 既有 dirty files 保持不动。
+
+Stop conditions:
+- source manifest 或 source NPZ 缺失；
+- top-up success rows <144；
+- assembled N 或 split 不达标；
+- 任一 split 缺 shape_type/burial_depth/size 覆盖；
+- ellipsoid/cuboid 在任一 split 缺 compact/elongated_x/elongated_y；
+- data/NPZ/.mph/checkpoint/preview/notes 被 staged。

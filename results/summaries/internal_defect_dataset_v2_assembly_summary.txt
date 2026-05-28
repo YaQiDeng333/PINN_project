@@ -1,0 +1,18 @@
+21.3b internal defect v2_240 assembly summary
+source_dataset_id: comsol_internal_defect_pilot_pack_v1
+topup_dataset_id: comsol_internal_defect_dataset_topup_pack_v1
+assembled_dataset_id: comsol_internal_defect_pilot_pack_v2_240
+source_npz: C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\generated\internal_defect_pilot_pack\internal_defect_pilot_pack_v1.npz
+topup_npz: C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\generated\internal_defect_dataset_topup_pack\internal_defect_dataset_topup_pack_v1.npz
+assembled_npz: C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\generated\internal_defect_pilot_pack_v2_240\comsol_internal_defect_pilot_pack_v2_240.npz
+source_rows: 96
+selected_topup_rows: 144
+assembled_rows: 240
+split_counts: {'train': 160, 'test': 40, 'val': 40}
+shape_counts: {'internal_sphere': 80, 'internal_ellipsoid': 80, 'internal_cuboid': 80}
+burial_counts: {'shallow': 60, 'medium': 60, 'deep': 60, 'deep_plus': 60}
+size_counts: {'small': 80, 'medium': 80, 'large': 80}
+aspect_counts: {'compact': 134, 'elongated_x': 54, 'elongated_y': 52}
+missing_selected_topup_rows: 0
+
+说明：v1 原 split 已废弃，v2 split 由 21.3 deterministic quota 重新分配；本脚本未训练、未运行 COMSOL、未更新 CURRENT_BASELINE。

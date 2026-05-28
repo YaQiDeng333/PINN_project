@@ -264,3 +264,31 @@ This registry records generated COMSOL dataset identities and allowed usage. It 
 - validation_script: `scripts/validate_internal_defect_pilot_pack.py`
 - npz_sha256: ac48ae5bfe1f33d848bb3c07b96d8be822f8d79a4b50cbace915575025e65f0d
 - notes: Metadata only. Generated NPZ/data files are not committed and must be loaded only by explicit dataset_id + manifest.
+
+## comsol_internal_defect_pilot_pack_v2_240
+
+- dataset_role: internal_defect_feasibility_pilot_pack_v2_240
+- status: pilot_generated
+- route: internal_buried_defect_feasibility
+- stage: 21.3b
+- schema_version: internal_defect_feasibility_v2
+- geometry_method: internal_cavity_comsol_solid
+- internal_surface_mixed: false
+- path: `C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\generated\internal_defect_pilot_pack_v2_240\comsol_internal_defect_pilot_pack_v2_240.npz`
+- manifest_path: `C:\Users\19166\Desktop\PINN_project\results\manifests\comsol_internal_defect_pilot_pack_v2_240.manifest.json`
+- n_samples: 240
+- split_counts: {'train': 160, 'test': 40, 'val': 40}
+- shape_counts: {'internal_sphere': 80, 'internal_ellipsoid': 80, 'internal_cuboid': 80}
+- burial_depth_counts: {'shallow': 60, 'medium': 60, 'deep': 60, 'deep_plus': 60}
+- size_counts: {'small': 80, 'medium': 80, 'large': 80}
+- aspect_counts: {'compact': 134, 'elongated_x': 54, 'elongated_y': 52}
+- train_ready_candidate: true
+- baseline_ready: false
+- auto_discovery_allowed: false
+- latest_newest_discovery_allowed: false
+- allowed_use: schema_validation, explicit_internal_training_gate
+- forbidden_use: automatic_mainline_training, baseline_update, current_baseline_replacement, latest_newest_auto_discovery, direct_training_without_manifest_gate
+- source_dataset_ids: comsol_internal_defect_pilot_pack_v1, comsol_internal_defect_dataset_topup_pack_v1
+- validation_script: `scripts/validate_internal_defect_dataset_v2_pack.py`
+- npz_sha256: 73118397dc810a4e11eb67acb0b31f8155e0c6150d472d9e7a567a5b77329404
+- notes: Generated NPZ/data files are not committed. Use only explicit dataset_id + manifest; not a baseline.
