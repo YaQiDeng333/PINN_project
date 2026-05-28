@@ -1,0 +1,18 @@
+20.96a true 3D RBC A2 liftoff adapter artifact recovery preflight
+
+dataset_id: comsol_true_3d_rbc_liftoff_aug_pack_v1
+manifest_path: results\manifests\comsol_true_3d_rbc_liftoff_aug_pack_v1.manifest.json
+baseline_artifact_manifest: results\manifests\true_3d_rbc_baseline_inference_artifact_manifest.json
+rows: 192
+base_count: 48
+paired_liftoff_complete: True
+base_split_leakage: []
+missing_reference_files: []
+selected_a2_reference_ok: True
+a2_training_class_available: True
+forbidden_staged_files: []
+CURRENT_BASELINE_dirty: False
+COMSOL_run: false
+data_or_npz_write: false
+CURRENT_BASELINE_update: false
+protocol: fixed 20.94 A2 seed=2026, validation-only selection, test-final verification

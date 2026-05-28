@@ -2833,3 +2833,15 @@ Review agent 已完成只读复核，无 must-fix。review 建议把 audit/decis
 - metadata contract: `sensor_z_m` is required for multi-liftoff / real-experimental inference using the companion module.
 - artifact boundary: 20.95 uses persisted 20.94 aggregate metrics; per-sample A2 failure ranking was not recomputed because no per-sample A2 prediction artifact was available.
 - review: independent read-only review passed after the review file was saved; no experimental or route must-fix remained.
+
+# 2026-05-28 Stage 20.96a A2 liftoff adapter inference artifact recovery
+
+- dataset_id: `comsol_true_3d_rbc_liftoff_aug_pack_v1`, explicitly loaded through `COMSOL_DATA_REGISTRY.md` and the tracked manifest.
+- scope: artifact recovery for 20.96 inference smoke. No COMSOL, no new data generation, no NPZ modification, no `CURRENT_BASELINE.md` update, and no checkpoint/prediction artifact committed.
+- fixed protocol: `A2_latent_residual_adapter`, seed `2026`, frozen 20.85/20.77 baseline, base-grouped split, train-only normalization, validation-only selection, and test-final verification. No hyperparameter tuning or model change.
+- exported ignored artifacts:
+  - checkpoint: `checkpoints/true_3d_rbc_liftoff_adapter_artifacts/true_3d_rbc_liftoff_a2_adapter_seed2026.pt`
+  - prediction artifact: `checkpoints/true_3d_rbc_liftoff_adapter_artifacts/true_3d_rbc_liftoff_a2_adapter_seed2026_predictions.npz`
+- tracked manifest: `results/manifests/true_3d_rbc_a2_liftoff_adapter_inference_artifact_manifest.json`.
+- verification: checkpoint reload passed with zero prediction/residual diff. Metrics reproduced 20.94/20.95: nominal profile RMSE `0.000335821 m`, non-nominal profile RMSE `0.000437214 m`, and non-nominal Dice `0.842378`.
+- review: independent read-only review passed with no must-fix; checkpoint and prediction artifact are ignored and uncommitted.

@@ -384,3 +384,9 @@ Only next step: run a formal liftoff benchmark for the A2 robustness candidate. 
 Stage 20.95 completed the formal liftoff benchmark for `A2_latent_residual_adapter` using persisted 20.94 metrics and explicit `comsol_true_3d_rbc_liftoff_aug_pack_v1` registry/manifest loading. A2 is accepted as a `CURRENT_BASELINE` companion robustness module: nominal RMSE is preserved within `+0.829%`, while non-nominal RMSE improves by `49.993%` and non-nominal Dice rises to `0.842378`.
 
 Only next step: run a liftoff-conditioned inference smoke stage. Verify the frozen 20.85 baseline + A2 companion loading path, require `sensor_z_m` metadata, and keep `CURRENT_BASELINE.md` unchanged before real-data alignment or internal-defect feasibility.
+
+## 2026-05-28 update after Stage 20.96a
+
+Stage 20.96a recovered the missing A2 inference artifact needed by the 20.96 smoke test. The ignored checkpoint and prediction artifact were exported under `checkpoints/true_3d_rbc_liftoff_adapter_artifacts/`, while the tracked manifest is `results/manifests/true_3d_rbc_a2_liftoff_adapter_inference_artifact_manifest.json`. Verification exactly reproduced the 20.94/20.95 A2 reference metrics: nominal RMSE `0.000335821 m`, non-nominal RMSE `0.000437214 m`, and non-nominal Dice `0.842378`.
+
+Only next step: return to 20.96 liftoff-conditioned inference smoke. Load the frozen 20.85 baseline plus A2 manifest, enforce required `sensor_z_m`, test auto / force-baseline / force-adapter routing, and keep `CURRENT_BASELINE.md` unchanged.

@@ -1,0 +1,7 @@
+check_name,pass,observed,reference,abs_delta,tolerance
+checkpoint_reloaded,True,C:\Users\19166\Desktop\PINN_project\checkpoints\true_3d_rbc_liftoff_adapter_artifacts\true_3d_rbc_liftoff_a2_adapter_seed2026.pt,,,
+prediction_norm_max_abs_diff_after_reload,True,0.0,0.0,0.0,1e-08
+residual_norm_max_abs_diff_after_reload,True,0.0,0.0,0.0,1e-08
+nominal_0p008_profile_depth_rmse_m_matches_20_94,True,0.0003358208914505667,0.0003358208914505667,0.0,5e-06
+non_nominal_profile_depth_rmse_m_matches_20_94,True,0.0004372135417725076,0.0004372135417725076,0.0,5e-06
+non_nominal_projected_mask_dice_matches_20_94,True,0.8423780087179069,0.8423780087179069,0.0,0.001

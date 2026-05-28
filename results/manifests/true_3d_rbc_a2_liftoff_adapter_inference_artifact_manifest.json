@@ -1,0 +1,98 @@
+{
+  "artifact_id": "true_3d_rbc_a2_liftoff_adapter_seed2026_inference_artifact",
+  "stage": "20.96a_a2_liftoff_adapter_artifact_recovery",
+  "dataset_id": "comsol_true_3d_rbc_liftoff_aug_pack_v1",
+  "route": "true_3d_piao_style_liftoff_robustness",
+  "exact_piao_rbc": false,
+  "rbc_style_approximation": true,
+  "purpose": "Enable 20.96 liftoff-conditioned inference smoke without retraining.",
+  "baseline_manifest": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\manifests\\true_3d_rbc_baseline_inference_artifact_manifest.json",
+  "adapter_type": "A2_latent_residual_adapter",
+  "seed": 2026,
+  "model_class": "ResidualAdapter",
+  "model_config": {
+    "name": "A2_latent_residual_adapter",
+    "kind": "latent_residual",
+    "description": "frozen baseline latent + baseline six params + sensor_z embedding -> residual",
+    "profile_weight": 1.0,
+    "dimension_weight": 0.35,
+    "curvature_aux_weight": 0.05,
+    "nominal_zero_weight": 0.75,
+    "paired_consistency_weight": 0.1,
+    "bound_weight": 0.02,
+    "input_dim": 519
+  },
+  "checkpoint_path": "C:\\Users\\19166\\Desktop\\PINN_project\\checkpoints\\true_3d_rbc_liftoff_adapter_artifacts\\true_3d_rbc_liftoff_a2_adapter_seed2026.pt",
+  "checkpoint_sha256": "0444164b88c658e5a30ccec0ac27b8de0c5eeb5ef8f921a337e6b099118b3f28",
+  "prediction_artifact_path": "C:\\Users\\19166\\Desktop\\PINN_project\\checkpoints\\true_3d_rbc_liftoff_adapter_artifacts\\true_3d_rbc_liftoff_a2_adapter_seed2026_predictions.npz",
+  "prediction_artifact_sha256": "c011a0a6d5b19392ff50721d17bc9aad070b8888f72a299b22f7c81e8780ccb7",
+  "checkpoint_committed": false,
+  "prediction_artifact_committed": false,
+  "artifact_paths_are_ignored": true,
+  "normalization": {
+    "sensor_z_mean": [
+      [
+        0.008999999612569809
+      ]
+    ],
+    "sensor_z_std": [
+      [
+        0.0022360680159181356
+      ]
+    ],
+    "y_mean_shape": [
+      1,
+      6
+    ],
+    "y_std_shape": [
+      1,
+      6
+    ],
+    "fit_scope": "train_split_only"
+  },
+  "split_policy": {
+    "split_by": "base_sample_id",
+    "train_val_test_base_count": [
+      32,
+      8,
+      8
+    ],
+    "train_val_test_row_count": [
+      128,
+      32,
+      32
+    ]
+  },
+  "selected_metrics": {
+    "nominal_profile_depth_rmse_m": 0.0003358208914505667,
+    "non_nominal_profile_depth_rmse_m": 0.0004372135417725076,
+    "non_nominal_projected_mask_dice": 0.8423780087179069,
+    "reference_nominal_profile_depth_rmse_m": 0.0003358208914505667,
+    "reference_non_nominal_profile_depth_rmse_m": 0.0004372135417725076,
+    "reference_non_nominal_projected_mask_dice": 0.8423780087179069
+  },
+  "input_contract": {
+    "allowed_model_input_fields": [
+      "delta_b",
+      "sensor_z_m",
+      "frozen_baseline_latent",
+      "frozen_baseline_prediction"
+    ],
+    "forbidden_model_input_fields": [
+      "rbc_params",
+      "projected_mask_2d",
+      "profile_depth_grid_m",
+      "curvature_template",
+      "depth_bin",
+      "aspect_bin",
+      "sample_id"
+    ]
+  },
+  "inference_routing": {
+    "nominal_sensor_z_m": 0.008,
+    "nominal_tolerance_m": 0.0005,
+    "default_nominal_route": "baseline",
+    "default_non_nominal_route": "baseline_plus_adapter",
+    "requires_sensor_z_m": true
+  }
+}

@@ -1,0 +1,31 @@
+20.96a independent read-only review: A2 liftoff adapter inference artifact recovery
+
+- 必须修复；
+  - 无。
+
+- 建议修复；
+  - 提交前继续保持显式白名单 staging；当前暂存区为空，只有 `scripts/export_true_3d_rbc_liftoff_adapter_artifact.py` 未跟踪。
+  - 后续 20.96 使用 prediction artifact 时，要确保 `sample_id / split / template / depth_bin / aspect_bin` 只用于输出/分组，不作为模型输入。
+
+- 可以接受；
+  - 工作目录正确：`C:\Users\19166\Desktop\PINN_project`。
+  - `CURRENT_BASELINE.md` 无 diff。
+  - 复用了 `comsol_true_3d_rbc_liftoff_aug_pack_v1` registry/manifest。
+  - 复用了 20.85 baseline artifact manifest。
+  - A2 协议固定为 `A2_latent_residual_adapter`、seed `2026`、baseline frozen、train-only normalization、validation-only selection、test-final verification。
+  - checkpoint 与 prediction artifact 位于 ignored `checkpoints/` 路径，存在且未 tracked / 未 staged。
+  - manifest 包含 checkpoint path、prediction path、baseline manifest、normalization、model config、input contract、routing contract，足够 20.96 加载。
+  - verification 复现 20.94/20.95：nominal RMSE `0.000335821`，non-nominal RMSE `0.000437214`，non-nominal Dice `0.842378`。
+  - 暂存区为空，未发现 forbidden staged files。
+
+- 是否认为 A2 artifact 可用于 20.96 inference smoke；
+  - 是。
+
+- 是否确认 checkpoint/prediction artifact 未提交；
+  - 确认，二者均被 `.gitignore:33 checkpoints/` 忽略，且未 staged。
+
+- 下一步更建议什么；
+  - 回到 20.96，做 liftoff-conditioned inference smoke，验证 `sensor_z_m` 路由和 baseline + A2 adapter 加载链路。
+
+- 简短原因；
+  - artifact manifest 与 verification 已闭环，A2 指标精确复现参考值，且没有 CURRENT_BASELINE / data / NPZ / checkpoint 提交风险。

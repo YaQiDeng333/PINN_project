@@ -506,3 +506,9 @@ This forms a liftoff robustness candidate, not a baseline replacement. The curre
 Stage 20.95 formalizes the 20.94 A2 result as a companion robustness path. `A2_latent_residual_adapter` seed `2026` preserves the nominal `0.008 m` operating point (`0.000333059 m -> 0.000335821 m`, `+0.829%`) and improves non-nominal liftoff profile RMSE (`0.000874310 m -> 0.000437214 m`, `-49.993%`) with non-nominal Dice rising from `0.683351` to `0.842378`.
 
 The route status is now split deliberately: `CURRENT_BASELINE.md` remains the 20.85 nominal true 3D RBC profile-depth baseline, while A2 is accepted only as its liftoff companion module. `sensor_z_m` is a required metadata field for multi-liftoff or real-experimental inference. Internal/buried defect feasibility remains deferred; the next route step is a liftoff-conditioned inference smoke stage that verifies baseline + A2 loading and the `sensor_z_m` metadata contract.
+
+# 2026-05-28 Stage 20.96a route note
+
+Stage 20.96a resolves the 20.96 blocker: A2 now has a loadable inference artifact. The recovered artifact uses the fixed 20.94 `A2_latent_residual_adapter` protocol and seed `2026`, with the 20.85 baseline frozen. The checkpoint and prediction artifact remain in ignored `checkpoints/` paths, and the tracked manifest records the model config, baseline manifest, normalization, input contract, and routing contract.
+
+Verification reproduced the formal A2 metrics: nominal RMSE `0.000335821 m`, non-nominal RMSE `0.000437214 m`, and non-nominal Dice `0.842378`. This does not update `CURRENT_BASELINE.md`; it only enables the next liftoff-conditioned inference smoke. The next route step is to exercise live routing: nominal `sensor_z_m≈0.008` uses the 20.85 baseline, non-nominal liftoff uses baseline + A2, and missing `sensor_z_m` must fail rather than being guessed.
