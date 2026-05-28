@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-05-29 after Stage 21.3 internal defect dataset expansion plan
+
+下一步唯一建议：**执行 21.3b internal defect top-up COMSOL pack generation，然后 assemble/validate `comsol_internal_defect_pilot_pack_v2_240`**。
+
+21.3 已把 21.2 的 split blocker 固化成扩展方案：复用 source N=96，但丢弃旧 split；计划生成 top-up N=168，其中按 quota 选 144 行进入 v2_240，最终 assembled N=240，split=`160/40/40`。新的 split 必须让 train/val/test 都覆盖 `internal_sphere/internal_ellipsoid/internal_cuboid`、四档 burial depth、三档 size，并让 ellipsoid/cuboid 的三种 aspect 在每个 split 都出现。
+
+21.3b 只负责 COMSOL top-up generation、v2 assembly、schema validation、registry/manifest 和 route decision；仍不训练、不更新 `CURRENT_BASELINE.md`。21.4 才能在 v2_240 上重新跑 internal defect training gate。
+
 ## 2026-05-28 after Stage 21.2 internal defect training gate
 
 下一步唯一建议：**扩展 internal defect dataset，并重做真正分层的 train/val/test split**。

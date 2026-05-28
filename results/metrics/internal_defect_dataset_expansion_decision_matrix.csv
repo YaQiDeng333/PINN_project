@@ -1,0 +1,8 @@
+question,answer,evidence,decision
+是否需要扩到 240,是,current_missing_strata=29; val/test shape/burial coverage incomplete=True,expand_to_240
+是否需要重做 split,是,21.2 val/test 都只有 internal_cuboid，test burial 只覆盖 deep/deep_plus。,resplit_required
+是否能复用 N=96,是，但旧 split 不复用,source N=96 schema valid；v2 assembly 重新分配 split。,reuse_source_rows
+top-up 是否必须跑 COMSOL,是,新增 internal cavity 几何必须有 Bx/By/Bz forward 和 delta_b=b_defect-b_no_defect。,comsol_required_for_21_3b
+21.3 plan 是否可进入 21.3b,是,"planned_topup=168; selected_topup=144; buffer=24; selected_shape={'internal_sphere': 56, 'internal_ellipsoid': 44, 'internal_cuboid': 44}; selected_burial={'shallow': 36, 'medium': 36, 'deep': 36, 'deep_plus': 36}; selected_size={'small': 48, 'medium': 48, 'large': 48}; selected_split={'train': 96, 'val': 24, 'test': 24}; expected_failures=0",enter_21_3b_generation
+21.4 是否才做 training gate,是,21.3 是 plan-only；21.3b 生成/assemble/validate v2_240；21.4 才训练。,training_deferred_to_21_4
+下一步唯一建议,进入 21.3b pack generation,目标 N=240、top-up N=168、selected top-up N=144 和 split 160/40/40 方案已经固定。,route

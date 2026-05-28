@@ -1,0 +1,81 @@
+audit,group_field,group_value,split,count,expected,pass,notes
+split_coverage,shape_type,internal_sphere,train,24,>0,True,每个 split 至少覆盖三类 shape
+split_coverage,shape_type,internal_ellipsoid,train,36,>0,True,每个 split 至少覆盖三类 shape
+split_coverage,shape_type,internal_cuboid,train,4,>0,True,每个 split 至少覆盖三类 shape
+split_coverage,shape_type,internal_sphere,val,0,>0,False,每个 split 至少覆盖三类 shape
+split_coverage,shape_type,internal_ellipsoid,val,0,>0,False,每个 split 至少覆盖三类 shape
+split_coverage,shape_type,internal_cuboid,val,16,>0,True,每个 split 至少覆盖三类 shape
+split_coverage,shape_type,internal_sphere,test,0,>0,False,每个 split 至少覆盖三类 shape
+split_coverage,shape_type,internal_ellipsoid,test,0,>0,False,每个 split 至少覆盖三类 shape
+split_coverage,shape_type,internal_cuboid,test,16,>0,True,每个 split 至少覆盖三类 shape
+split_coverage,burial_depth_level,shallow,train,19,>0,True,每个 split 至少覆盖四档 burial depth
+split_coverage,burial_depth_level,medium,train,15,>0,True,每个 split 至少覆盖四档 burial depth
+split_coverage,burial_depth_level,deep,train,15,>0,True,每个 split 至少覆盖四档 burial depth
+split_coverage,burial_depth_level,deep_plus,train,15,>0,True,每个 split 至少覆盖四档 burial depth
+split_coverage,burial_depth_level,shallow,val,5,>0,True,每个 split 至少覆盖四档 burial depth
+split_coverage,burial_depth_level,medium,val,9,>0,True,每个 split 至少覆盖四档 burial depth
+split_coverage,burial_depth_level,deep,val,2,>0,True,每个 split 至少覆盖四档 burial depth
+split_coverage,burial_depth_level,deep_plus,val,0,>0,False,每个 split 至少覆盖四档 burial depth
+split_coverage,burial_depth_level,shallow,test,0,>0,False,每个 split 至少覆盖四档 burial depth
+split_coverage,burial_depth_level,medium,test,0,>0,False,每个 split 至少覆盖四档 burial depth
+split_coverage,burial_depth_level,deep,test,7,>0,True,每个 split 至少覆盖四档 burial depth
+split_coverage,burial_depth_level,deep_plus,test,9,>0,True,每个 split 至少覆盖四档 burial depth
+split_coverage,size_level,small,train,23,>0,True,每个 split 至少覆盖三档 size
+split_coverage,size_level,medium,train,21,>0,True,每个 split 至少覆盖三档 size
+split_coverage,size_level,large,train,20,>0,True,每个 split 至少覆盖三档 size
+split_coverage,size_level,small,val,5,>0,True,每个 split 至少覆盖三档 size
+split_coverage,size_level,medium,val,5,>0,True,每个 split 至少覆盖三档 size
+split_coverage,size_level,large,val,6,>0,True,每个 split 至少覆盖三档 size
+split_coverage,size_level,small,test,4,>0,True,每个 split 至少覆盖三档 size
+split_coverage,size_level,medium,test,6,>0,True,每个 split 至少覆盖三档 size
+split_coverage,size_level,large,test,6,>0,True,每个 split 至少覆盖三档 size
+split_coverage,aspect_bin,compact,train,38,>0,True,每个 split 至少覆盖 compact/elongated_x/elongated_y
+split_coverage,aspect_bin,elongated_x,train,13,>0,True,每个 split 至少覆盖 compact/elongated_x/elongated_y
+split_coverage,aspect_bin,elongated_y,train,13,>0,True,每个 split 至少覆盖 compact/elongated_x/elongated_y
+split_coverage,aspect_bin,compact,val,5,>0,True,每个 split 至少覆盖 compact/elongated_x/elongated_y
+split_coverage,aspect_bin,elongated_x,val,6,>0,True,每个 split 至少覆盖 compact/elongated_x/elongated_y
+split_coverage,aspect_bin,elongated_y,val,5,>0,True,每个 split 至少覆盖 compact/elongated_x/elongated_y
+split_coverage,aspect_bin,compact,test,5,>0,True,每个 split 至少覆盖 compact/elongated_x/elongated_y
+split_coverage,aspect_bin,elongated_x,test,5,>0,True,每个 split 至少覆盖 compact/elongated_x/elongated_y
+split_coverage,aspect_bin,elongated_y,test,6,>0,True,每个 split 至少覆盖 compact/elongated_x/elongated_y
+shape_by_burial_split,shape_type_x_burial_depth_level,internal_sphere|shallow,train,6,>0 preferred,True,shape 和 burial 的交叉覆盖决定 21.4 是否能判断内部缺陷泛化。
+shape_by_burial_split,shape_type_x_burial_depth_level,internal_sphere|medium,train,6,>0 preferred,True,shape 和 burial 的交叉覆盖决定 21.4 是否能判断内部缺陷泛化。
+shape_by_burial_split,shape_type_x_burial_depth_level,internal_sphere|deep,train,6,>0 preferred,True,shape 和 burial 的交叉覆盖决定 21.4 是否能判断内部缺陷泛化。
+shape_by_burial_split,shape_type_x_burial_depth_level,internal_sphere|deep_plus,train,6,>0 preferred,True,shape 和 burial 的交叉覆盖决定 21.4 是否能判断内部缺陷泛化。
+shape_by_burial_split,shape_type_x_burial_depth_level,internal_ellipsoid|shallow,train,9,>0 preferred,True,shape 和 burial 的交叉覆盖决定 21.4 是否能判断内部缺陷泛化。
+shape_by_burial_split,shape_type_x_burial_depth_level,internal_ellipsoid|medium,train,9,>0 preferred,True,shape 和 burial 的交叉覆盖决定 21.4 是否能判断内部缺陷泛化。
+shape_by_burial_split,shape_type_x_burial_depth_level,internal_ellipsoid|deep,train,9,>0 preferred,True,shape 和 burial 的交叉覆盖决定 21.4 是否能判断内部缺陷泛化。
+shape_by_burial_split,shape_type_x_burial_depth_level,internal_ellipsoid|deep_plus,train,9,>0 preferred,True,shape 和 burial 的交叉覆盖决定 21.4 是否能判断内部缺陷泛化。
+shape_by_burial_split,shape_type_x_burial_depth_level,internal_cuboid|shallow,train,4,>0 preferred,True,shape 和 burial 的交叉覆盖决定 21.4 是否能判断内部缺陷泛化。
+shape_by_burial_split,shape_type_x_burial_depth_level,internal_cuboid|medium,train,0,>0 preferred,False,shape 和 burial 的交叉覆盖决定 21.4 是否能判断内部缺陷泛化。
+shape_by_burial_split,shape_type_x_burial_depth_level,internal_cuboid|deep,train,0,>0 preferred,False,shape 和 burial 的交叉覆盖决定 21.4 是否能判断内部缺陷泛化。
+shape_by_burial_split,shape_type_x_burial_depth_level,internal_cuboid|deep_plus,train,0,>0 preferred,False,shape 和 burial 的交叉覆盖决定 21.4 是否能判断内部缺陷泛化。
+shape_by_burial_split,shape_type_x_burial_depth_level,internal_sphere|shallow,val,0,>0 preferred,False,shape 和 burial 的交叉覆盖决定 21.4 是否能判断内部缺陷泛化。
+shape_by_burial_split,shape_type_x_burial_depth_level,internal_sphere|medium,val,0,>0 preferred,False,shape 和 burial 的交叉覆盖决定 21.4 是否能判断内部缺陷泛化。
+shape_by_burial_split,shape_type_x_burial_depth_level,internal_sphere|deep,val,0,>0 preferred,False,shape 和 burial 的交叉覆盖决定 21.4 是否能判断内部缺陷泛化。
+shape_by_burial_split,shape_type_x_burial_depth_level,internal_sphere|deep_plus,val,0,>0 preferred,False,shape 和 burial 的交叉覆盖决定 21.4 是否能判断内部缺陷泛化。
+shape_by_burial_split,shape_type_x_burial_depth_level,internal_ellipsoid|shallow,val,0,>0 preferred,False,shape 和 burial 的交叉覆盖决定 21.4 是否能判断内部缺陷泛化。
+shape_by_burial_split,shape_type_x_burial_depth_level,internal_ellipsoid|medium,val,0,>0 preferred,False,shape 和 burial 的交叉覆盖决定 21.4 是否能判断内部缺陷泛化。
+shape_by_burial_split,shape_type_x_burial_depth_level,internal_ellipsoid|deep,val,0,>0 preferred,False,shape 和 burial 的交叉覆盖决定 21.4 是否能判断内部缺陷泛化。
+shape_by_burial_split,shape_type_x_burial_depth_level,internal_ellipsoid|deep_plus,val,0,>0 preferred,False,shape 和 burial 的交叉覆盖决定 21.4 是否能判断内部缺陷泛化。
+shape_by_burial_split,shape_type_x_burial_depth_level,internal_cuboid|shallow,val,5,>0 preferred,True,shape 和 burial 的交叉覆盖决定 21.4 是否能判断内部缺陷泛化。
+shape_by_burial_split,shape_type_x_burial_depth_level,internal_cuboid|medium,val,9,>0 preferred,True,shape 和 burial 的交叉覆盖决定 21.4 是否能判断内部缺陷泛化。
+shape_by_burial_split,shape_type_x_burial_depth_level,internal_cuboid|deep,val,2,>0 preferred,True,shape 和 burial 的交叉覆盖决定 21.4 是否能判断内部缺陷泛化。
+shape_by_burial_split,shape_type_x_burial_depth_level,internal_cuboid|deep_plus,val,0,>0 preferred,False,shape 和 burial 的交叉覆盖决定 21.4 是否能判断内部缺陷泛化。
+shape_by_burial_split,shape_type_x_burial_depth_level,internal_sphere|shallow,test,0,>0 preferred,False,shape 和 burial 的交叉覆盖决定 21.4 是否能判断内部缺陷泛化。
+shape_by_burial_split,shape_type_x_burial_depth_level,internal_sphere|medium,test,0,>0 preferred,False,shape 和 burial 的交叉覆盖决定 21.4 是否能判断内部缺陷泛化。
+shape_by_burial_split,shape_type_x_burial_depth_level,internal_sphere|deep,test,0,>0 preferred,False,shape 和 burial 的交叉覆盖决定 21.4 是否能判断内部缺陷泛化。
+shape_by_burial_split,shape_type_x_burial_depth_level,internal_sphere|deep_plus,test,0,>0 preferred,False,shape 和 burial 的交叉覆盖决定 21.4 是否能判断内部缺陷泛化。
+shape_by_burial_split,shape_type_x_burial_depth_level,internal_ellipsoid|shallow,test,0,>0 preferred,False,shape 和 burial 的交叉覆盖决定 21.4 是否能判断内部缺陷泛化。
+shape_by_burial_split,shape_type_x_burial_depth_level,internal_ellipsoid|medium,test,0,>0 preferred,False,shape 和 burial 的交叉覆盖决定 21.4 是否能判断内部缺陷泛化。
+shape_by_burial_split,shape_type_x_burial_depth_level,internal_ellipsoid|deep,test,0,>0 preferred,False,shape 和 burial 的交叉覆盖决定 21.4 是否能判断内部缺陷泛化。
+shape_by_burial_split,shape_type_x_burial_depth_level,internal_ellipsoid|deep_plus,test,0,>0 preferred,False,shape 和 burial 的交叉覆盖决定 21.4 是否能判断内部缺陷泛化。
+shape_by_burial_split,shape_type_x_burial_depth_level,internal_cuboid|shallow,test,0,>0 preferred,False,shape 和 burial 的交叉覆盖决定 21.4 是否能判断内部缺陷泛化。
+shape_by_burial_split,shape_type_x_burial_depth_level,internal_cuboid|medium,test,0,>0 preferred,False,shape 和 burial 的交叉覆盖决定 21.4 是否能判断内部缺陷泛化。
+shape_by_burial_split,shape_type_x_burial_depth_level,internal_cuboid|deep,test,7,>0 preferred,True,shape 和 burial 的交叉覆盖决定 21.4 是否能判断内部缺陷泛化。
+shape_by_burial_split,shape_type_x_burial_depth_level,internal_cuboid|deep_plus,test,9,>0 preferred,True,shape 和 burial 的交叉覆盖决定 21.4 是否能判断内部缺陷泛化。
+metric_credibility,21_2_metric,center_xyz,test,0,可信但需要更大 val/test 复核,True,center_xyz MAE 明显优于 mean baseline。
+metric_credibility,21_2_metric,cuboid_only_shape_signal,test,0,局部可信,True,val/test 只有 internal_cuboid，shape accuracy 不能代表三类 shape 泛化。
+metric_credibility,21_2_metric,three_shape_generalization,test,0,不可信,False,val/test 缺 internal_sphere 和 internal_ellipsoid。
+metric_credibility,21_2_metric,burial_depth_generalization,test,0,不可信,False,val/test burial coverage 不完整，test 只含 deep/deep_plus。
+metric_credibility,21_2_metric,baseline_or_candidate_upgrade,test,0,不可信,False,21.2 是 training gate，不是 baseline gate。

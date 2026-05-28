@@ -1,0 +1,72 @@
+scope,group_field,group_value,split,source_count,selected_topup_count,assembled_expected_count,target_count,pass,notes
+total,row_count,all,all,96,144,240,240,True,assembled v2 target
+split,split,train,train,64,96,160,160,True,v2 split quota
+split,split,val,val,16,24,40,40,True,v2 split quota
+split,split,test,test,16,24,40,40,True,v2 split quota
+total,shape_type,internal_sphere,all,24,56,80,80,True,v2 total shape_type balance
+total,shape_type,internal_ellipsoid,all,36,44,80,80,True,v2 total shape_type balance
+total,shape_type,internal_cuboid,all,36,44,80,80,True,v2 total shape_type balance
+total,burial_depth_level,shallow,all,24,36,60,60,True,v2 total burial_depth_level balance
+total,burial_depth_level,medium,all,24,36,60,60,True,v2 total burial_depth_level balance
+total,burial_depth_level,deep,all,24,36,60,60,True,v2 total burial_depth_level balance
+total,burial_depth_level,deep_plus,all,24,36,60,60,True,v2 total burial_depth_level balance
+total,size_level,small,all,32,48,80,80,True,v2 total size_level balance
+total,size_level,medium,all,32,48,80,80,True,v2 total size_level balance
+total,size_level,large,all,32,48,80,80,True,v2 total size_level balance
+split,shape_type,internal_cuboid,train,24,29,53,53,True,v2 split hard quota
+split,shape_type,internal_cuboid,val,6,7,13,13,True,v2 split hard quota
+split,shape_type,internal_cuboid,test,6,8,14,14,True,v2 split hard quota
+split,shape_type,internal_ellipsoid,train,24,29,53,53,True,v2 split hard quota
+split,shape_type,internal_ellipsoid,val,6,8,14,14,True,v2 split hard quota
+split,shape_type,internal_ellipsoid,test,6,7,13,13,True,v2 split hard quota
+split,shape_type,internal_sphere,train,16,38,54,54,True,v2 split hard quota
+split,shape_type,internal_sphere,val,4,9,13,13,True,v2 split hard quota
+split,shape_type,internal_sphere,test,4,9,13,13,True,v2 split hard quota
+split,burial_depth_level,deep,train,16,24,40,40,True,v2 split hard quota
+split,burial_depth_level,deep,val,4,6,10,10,True,v2 split hard quota
+split,burial_depth_level,deep,test,4,6,10,10,True,v2 split hard quota
+split,burial_depth_level,deep_plus,train,16,24,40,40,True,v2 split hard quota
+split,burial_depth_level,deep_plus,val,4,6,10,10,True,v2 split hard quota
+split,burial_depth_level,deep_plus,test,4,6,10,10,True,v2 split hard quota
+split,burial_depth_level,medium,train,16,24,40,40,True,v2 split hard quota
+split,burial_depth_level,medium,val,4,6,10,10,True,v2 split hard quota
+split,burial_depth_level,medium,test,4,6,10,10,True,v2 split hard quota
+split,burial_depth_level,shallow,train,16,24,40,40,True,v2 split hard quota
+split,burial_depth_level,shallow,val,4,6,10,10,True,v2 split hard quota
+split,burial_depth_level,shallow,test,4,6,10,10,True,v2 split hard quota
+split,size_level,large,train,21,32,53,53,True,v2 split hard quota
+split,size_level,large,val,5,8,13,13,True,v2 split hard quota
+split,size_level,large,test,6,8,14,14,True,v2 split hard quota
+split,size_level,medium,train,21,32,53,53,True,v2 split hard quota
+split,size_level,medium,val,6,8,14,14,True,v2 split hard quota
+split,size_level,medium,test,5,8,13,13,True,v2 split hard quota
+split,size_level,small,train,22,32,54,54,True,v2 split hard quota
+split,size_level,small,val,5,8,13,13,True,v2 split hard quota
+split,size_level,small,test,5,8,13,13,True,v2 split hard quota
+split,aspect_bin,compact,train,32,58,90,90,True,v2 split must retain aspect coverage; exact aspect balance is not global because sphere is compact only
+split,aspect_bin,compact,val,8,14,22,22,True,v2 split must retain aspect coverage; exact aspect balance is not global because sphere is compact only
+split,aspect_bin,compact,test,8,14,22,22,True,v2 split must retain aspect coverage; exact aspect balance is not global because sphere is compact only
+split,aspect_bin,elongated_x,train,16,20,36,36,True,v2 split must retain aspect coverage; exact aspect balance is not global because sphere is compact only
+split,aspect_bin,elongated_x,val,4,5,9,9,True,v2 split must retain aspect coverage; exact aspect balance is not global because sphere is compact only
+split,aspect_bin,elongated_x,test,4,5,9,9,True,v2 split must retain aspect coverage; exact aspect balance is not global because sphere is compact only
+split,aspect_bin,elongated_y,train,16,18,34,34,True,v2 split must retain aspect coverage; exact aspect balance is not global because sphere is compact only
+split,aspect_bin,elongated_y,val,4,5,9,9,True,v2 split must retain aspect coverage; exact aspect balance is not global because sphere is compact only
+split,aspect_bin,elongated_y,test,4,5,9,9,True,v2 split must retain aspect coverage; exact aspect balance is not global because sphere is compact only
+split_coverage_gate,shape_type_x_aspect_bin,internal_ellipsoid|compact,train,,10,10,>=1,True,ellipsoid/cuboid 每个 split 必须覆盖 compact、elongated_x、elongated_y；sphere 固定 compact，不参与该 gate
+split_coverage_gate,shape_type_x_aspect_bin,internal_ellipsoid|compact,val,,3,3,>=1,True,ellipsoid/cuboid 每个 split 必须覆盖 compact、elongated_x、elongated_y；sphere 固定 compact，不参与该 gate
+split_coverage_gate,shape_type_x_aspect_bin,internal_ellipsoid|compact,test,,2,2,>=1,True,ellipsoid/cuboid 每个 split 必须覆盖 compact、elongated_x、elongated_y；sphere 固定 compact，不参与该 gate
+split_coverage_gate,shape_type_x_aspect_bin,internal_ellipsoid|elongated_x,train,,10,10,>=1,True,ellipsoid/cuboid 每个 split 必须覆盖 compact、elongated_x、elongated_y；sphere 固定 compact，不参与该 gate
+split_coverage_gate,shape_type_x_aspect_bin,internal_ellipsoid|elongated_x,val,,3,3,>=1,True,ellipsoid/cuboid 每个 split 必须覆盖 compact、elongated_x、elongated_y；sphere 固定 compact，不参与该 gate
+split_coverage_gate,shape_type_x_aspect_bin,internal_ellipsoid|elongated_x,test,,2,2,>=1,True,ellipsoid/cuboid 每个 split 必须覆盖 compact、elongated_x、elongated_y；sphere 固定 compact，不参与该 gate
+split_coverage_gate,shape_type_x_aspect_bin,internal_ellipsoid|elongated_y,train,,9,9,>=1,True,ellipsoid/cuboid 每个 split 必须覆盖 compact、elongated_x、elongated_y；sphere 固定 compact，不参与该 gate
+split_coverage_gate,shape_type_x_aspect_bin,internal_ellipsoid|elongated_y,val,,2,2,>=1,True,ellipsoid/cuboid 每个 split 必须覆盖 compact、elongated_x、elongated_y；sphere 固定 compact，不参与该 gate
+split_coverage_gate,shape_type_x_aspect_bin,internal_ellipsoid|elongated_y,test,,3,3,>=1,True,ellipsoid/cuboid 每个 split 必须覆盖 compact、elongated_x、elongated_y；sphere 固定 compact，不参与该 gate
+split_coverage_gate,shape_type_x_aspect_bin,internal_cuboid|compact,train,,10,10,>=1,True,ellipsoid/cuboid 每个 split 必须覆盖 compact、elongated_x、elongated_y；sphere 固定 compact，不参与该 gate
+split_coverage_gate,shape_type_x_aspect_bin,internal_cuboid|compact,val,,2,2,>=1,True,ellipsoid/cuboid 每个 split 必须覆盖 compact、elongated_x、elongated_y；sphere 固定 compact，不参与该 gate
+split_coverage_gate,shape_type_x_aspect_bin,internal_cuboid|compact,test,,3,3,>=1,True,ellipsoid/cuboid 每个 split 必须覆盖 compact、elongated_x、elongated_y；sphere 固定 compact，不参与该 gate
+split_coverage_gate,shape_type_x_aspect_bin,internal_cuboid|elongated_x,train,,10,10,>=1,True,ellipsoid/cuboid 每个 split 必须覆盖 compact、elongated_x、elongated_y；sphere 固定 compact，不参与该 gate
+split_coverage_gate,shape_type_x_aspect_bin,internal_cuboid|elongated_x,val,,2,2,>=1,True,ellipsoid/cuboid 每个 split 必须覆盖 compact、elongated_x、elongated_y；sphere 固定 compact，不参与该 gate
+split_coverage_gate,shape_type_x_aspect_bin,internal_cuboid|elongated_x,test,,3,3,>=1,True,ellipsoid/cuboid 每个 split 必须覆盖 compact、elongated_x、elongated_y；sphere 固定 compact，不参与该 gate
+split_coverage_gate,shape_type_x_aspect_bin,internal_cuboid|elongated_y,train,,9,9,>=1,True,ellipsoid/cuboid 每个 split 必须覆盖 compact、elongated_x、elongated_y；sphere 固定 compact，不参与该 gate
+split_coverage_gate,shape_type_x_aspect_bin,internal_cuboid|elongated_y,val,,3,3,>=1,True,ellipsoid/cuboid 每个 split 必须覆盖 compact、elongated_x、elongated_y；sphere 固定 compact，不参与该 gate
+split_coverage_gate,shape_type_x_aspect_bin,internal_cuboid|elongated_y,test,,2,2,>=1,True,ellipsoid/cuboid 每个 split 必须覆盖 compact、elongated_x、elongated_y；sphere 固定 compact，不参与该 gate

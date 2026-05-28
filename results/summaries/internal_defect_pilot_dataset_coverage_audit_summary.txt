@@ -1,0 +1,15 @@
+21.3 internal defect pilot dataset coverage audit
+
+dataset_id: comsol_internal_defect_pilot_pack_v1
+N: 96
+split_counts: {'train': 64, 'val': 16, 'test': 16}
+shape_by_split: {'train': {'internal_sphere': 24, 'internal_ellipsoid': 36, 'internal_cuboid': 4}, 'val': {'internal_cuboid': 16}, 'test': {'internal_cuboid': 16}}
+burial_by_split: {'train': {'shallow': 19, 'medium': 15, 'deep': 15, 'deep_plus': 15}, 'val': {'shallow': 5, 'medium': 9, 'deep': 2}, 'test': {'deep': 7, 'deep_plus': 9}}
+size_by_split: {'train': {'small': 23, 'medium': 21, 'large': 20}, 'val': {'medium': 5, 'large': 6, 'small': 5}, 'test': {'small': 4, 'medium': 6, 'large': 6}}
+aspect_by_split: {'train': {'compact': 38, 'elongated_x': 13, 'elongated_y': 13}, 'val': {'elongated_x': 6, 'elongated_y': 5, 'compact': 5}, 'test': {'elongated_y': 6, 'compact': 5, 'elongated_x': 5}}
+main_blocker: val/test 都只有 internal_cuboid；test 只覆盖 deep/deep_plus burial depth。
+trusted_metrics: center_xyz 可学习信号、cuboid-only shape signal 可参考。
+untrusted_metrics: 三类 shape 泛化、完整 burial depth 泛化、baseline 级结论不可信。
+missing_strata_rows: 29
+21_2_decision_rows_available: 10
+recommended_action: 复用 N=96 source rows，但在 v2 assembly 中重做 stratified split，并用 COMSOL top-up 扩展到 N=240。

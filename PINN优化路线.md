@@ -1,5 +1,13 @@
 # PINN 优化路线
 
+## 2026-05-29 路线同步：21.3 internal defect dataset expansion plan
+
+21.3 不是训练阶段，而是把 internal / buried defect 分支的数据覆盖问题收口成可执行的扩展方案。`comsol_internal_defect_pilot_pack_v1` 的 N=96 可以复用，但旧 split 不能复用：val/test 都只有 `internal_cuboid`，test burial 只覆盖 `deep/deep_plus`，所以 21.2 的 shape accuracy 只能说明 cuboid-only 局部信号，不能说明三类 shape 泛化。
+
+下一阶段的分界点是 split 质量而不是模型结构。21.3 规划 `comsol_internal_defect_pilot_pack_v2_240`，目标 assembled N=240，source N=96，selected top-up N=144，planned top-up N=168；v2 split 重新固定为 `160/40/40`，并要求每个 split 都覆盖三类 shape、四档 burial depth、三档 size，以及 ellipsoid/cuboid 的三种 aspect。
+
+路线判断：先执行 21.3b 生成 top-up COMSOL pack，并完成 v2 assembly/validation；21.4 才重新做 internal training gate。internal branch 仍然独立于 surface / near-surface RBC baseline，`CURRENT_BASELINE.md` 保持不变。
+
 ## 2026-05-28 路线同步：21.2 internal defect training gate
 
 21.2 把 internal / buried defect 分支推进到第一个 training gate，但结论仍是“可学习性成立，泛化证据不足”。`comsol_internal_defect_pilot_pack_v1` 通过 registry/manifest 显式加载，模型输入只使用三轴 `delta_b/BxByBz`，labels 和 metadata 只用于 supervision/metrics；本轮没有运行 COMSOL，没有修改 NPZ，没有更新 `CURRENT_BASELINE.md`。

@@ -1,5 +1,16 @@
 # 实验工作日志
 
+## 2026-05-29 Stage 21.3 internal defect dataset expansion plan
+
+- 范围：只做 internal / buried defect dataset expansion plan。未运行 COMSOL，未训练，未生成或修改 data/NPZ，未更新 `CURRENT_BASELINE.md`，未创建 baseline。
+- preflight：确认 `comsol_internal_defect_pilot_pack_v1` manifest、21.1 validation、21.2 metrics/decision、`INTERNAL_DEFECT_SCHEMA.md` 和 COMSOL pilot generator 可用；COMSOL repo 既有 dirty items 只记录，不纳入本轮。
+- coverage audit：当前 N=96 的 split blocker 明确成立。train 有 `internal_sphere=24/internal_ellipsoid=36/internal_cuboid=4`，但 val/test 都只有 `internal_cuboid=16`；test burial 只覆盖 `deep=7/deep_plus=9`。
+- metric trust：21.2 的 center_xyz 可学习信号和 cuboid-only shape signal 可参考；三类 shape 泛化、完整 burial depth 泛化和 baseline 级结论不可信。
+- expansion target：v2 assembled dataset 固定为 `comsol_internal_defect_pilot_pack_v2_240`，source N=96，selected top-up N=144，planned top-up N=168，assembled N=240。
+- split target：v2 split 固定为 `train/val/test=160/40/40`，重新分配 source + selected top-up rows，不沿用 v1 split。每个 split 都覆盖三类 shape、四档 burial depth、三档 size；ellipsoid/cuboid 在每个 split 都覆盖 compact / elongated_x / elongated_y。
+- route decision：下一步进入 21.3b top-up COMSOL pack generation；21.4 才做 internal training gate。internal branch 继续独立，不混入 surface RBC baseline。
+- review：独立只读 review 通过。初次 review 要求确认中文 UTF-8 和 aspect gate；已补 18 行 `shape_type_x_aspect_bin` coverage gate 并复审通过。
+
 ## 2026-05-28 Stage 21.2 internal defect training gate
 
 - 范围：只在 `comsol_internal_defect_pilot_pack_v1` 上执行 internal defect training gate；未运行 COMSOL，未生成或修改 data/NPZ，未更新 `CURRENT_BASELINE.md`，未创建 baseline。

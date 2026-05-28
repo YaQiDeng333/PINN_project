@@ -1,0 +1,30 @@
+split,group_field,group_value,missing_reason,impact
+val,shape_type,internal_sphere,val split lacks internal_sphere,21.2 不能证明该 strata 的泛化能力。
+val,shape_type,internal_ellipsoid,val split lacks internal_ellipsoid,21.2 不能证明该 strata 的泛化能力。
+test,shape_type,internal_sphere,test split lacks internal_sphere,21.2 不能证明该 strata 的泛化能力。
+test,shape_type,internal_ellipsoid,test split lacks internal_ellipsoid,21.2 不能证明该 strata 的泛化能力。
+val,burial_depth_level,deep_plus,val split lacks deep_plus,21.2 不能证明该 strata 的泛化能力。
+test,burial_depth_level,shallow,test split lacks shallow,21.2 不能证明该 strata 的泛化能力。
+test,burial_depth_level,medium,test split lacks medium,21.2 不能证明该 strata 的泛化能力。
+train,shape_type_x_burial_depth_level,internal_cuboid|medium,train split lacks internal_cuboid|medium,shape/burial 交叉泛化不可判定。
+train,shape_type_x_burial_depth_level,internal_cuboid|deep,train split lacks internal_cuboid|deep,shape/burial 交叉泛化不可判定。
+train,shape_type_x_burial_depth_level,internal_cuboid|deep_plus,train split lacks internal_cuboid|deep_plus,shape/burial 交叉泛化不可判定。
+val,shape_type_x_burial_depth_level,internal_sphere|shallow,val split lacks internal_sphere|shallow,shape/burial 交叉泛化不可判定。
+val,shape_type_x_burial_depth_level,internal_sphere|medium,val split lacks internal_sphere|medium,shape/burial 交叉泛化不可判定。
+val,shape_type_x_burial_depth_level,internal_sphere|deep,val split lacks internal_sphere|deep,shape/burial 交叉泛化不可判定。
+val,shape_type_x_burial_depth_level,internal_sphere|deep_plus,val split lacks internal_sphere|deep_plus,shape/burial 交叉泛化不可判定。
+val,shape_type_x_burial_depth_level,internal_ellipsoid|shallow,val split lacks internal_ellipsoid|shallow,shape/burial 交叉泛化不可判定。
+val,shape_type_x_burial_depth_level,internal_ellipsoid|medium,val split lacks internal_ellipsoid|medium,shape/burial 交叉泛化不可判定。
+val,shape_type_x_burial_depth_level,internal_ellipsoid|deep,val split lacks internal_ellipsoid|deep,shape/burial 交叉泛化不可判定。
+val,shape_type_x_burial_depth_level,internal_ellipsoid|deep_plus,val split lacks internal_ellipsoid|deep_plus,shape/burial 交叉泛化不可判定。
+val,shape_type_x_burial_depth_level,internal_cuboid|deep_plus,val split lacks internal_cuboid|deep_plus,shape/burial 交叉泛化不可判定。
+test,shape_type_x_burial_depth_level,internal_sphere|shallow,test split lacks internal_sphere|shallow,shape/burial 交叉泛化不可判定。
+test,shape_type_x_burial_depth_level,internal_sphere|medium,test split lacks internal_sphere|medium,shape/burial 交叉泛化不可判定。
+test,shape_type_x_burial_depth_level,internal_sphere|deep,test split lacks internal_sphere|deep,shape/burial 交叉泛化不可判定。
+test,shape_type_x_burial_depth_level,internal_sphere|deep_plus,test split lacks internal_sphere|deep_plus,shape/burial 交叉泛化不可判定。
+test,shape_type_x_burial_depth_level,internal_ellipsoid|shallow,test split lacks internal_ellipsoid|shallow,shape/burial 交叉泛化不可判定。
+test,shape_type_x_burial_depth_level,internal_ellipsoid|medium,test split lacks internal_ellipsoid|medium,shape/burial 交叉泛化不可判定。
+test,shape_type_x_burial_depth_level,internal_ellipsoid|deep,test split lacks internal_ellipsoid|deep,shape/burial 交叉泛化不可判定。
+test,shape_type_x_burial_depth_level,internal_ellipsoid|deep_plus,test split lacks internal_ellipsoid|deep_plus,shape/burial 交叉泛化不可判定。
+test,shape_type_x_burial_depth_level,internal_cuboid|shallow,test split lacks internal_cuboid|shallow,shape/burial 交叉泛化不可判定。
+test,shape_type_x_burial_depth_level,internal_cuboid|medium,test split lacks internal_cuboid|medium,shape/burial 交叉泛化不可判定。

@@ -1,0 +1,20 @@
+21.3 internal defect dataset expansion plan summary
+
+target_dataset_id: comsol_internal_defect_pilot_pack_v2_240
+source_dataset_id: comsol_internal_defect_pilot_pack_v1
+source_rows_reused: 96
+selected_topup_target_rows: 144
+planned_topup_rows: 168
+assembled_target_rows: 240
+assembled_split_target: train/val/test = 160/40/40
+selected_topup_shape_counts: {'internal_sphere': 56, 'internal_ellipsoid': 44, 'internal_cuboid': 44}
+selected_topup_burial_counts: {'shallow': 36, 'medium': 36, 'deep': 36, 'deep_plus': 36}
+selected_topup_size_counts: {'small': 48, 'medium': 48, 'large': 48}
+planned_topup_shape_counts: {'internal_sphere': 64, 'internal_ellipsoid': 52, 'internal_cuboid': 52}
+old_v1_split_reused: false
+v2_split_policy: source rows are re-split together with selected top-up rows by deterministic stratified quotas.
+comsol_run: false
+training_run: false
+data_npz_mutation: false
+current_baseline_update: false
+next_stage: 21.3b generate top-up COMSOL pack, then assemble and validate v2_240.
