@@ -1,0 +1,13 @@
+22.0 内部缺陷 B2 failure-driven audit
+test_sample_count: 40
+total_abs_normalized_error 的 mean/median/p95/max: 0.395 / 0.429 / 0.881 / 0.913
+burial_depth_error_mm 的 mean/median/p95/max: 0.413 / 0.260 / 1.266 / 1.674
+center_xyz_error_mm 的 mean/median/p95/max: 3.096 / 3.033 / 8.309 / 8.785
+catastrophic_failure_count: 5
+geometry_branch_failure_count: 1
+cuboid_to_ellipsoid_misclassification_count: 1
+cuboid_to_ellipsoid_geometry_branch_failure_count: 1
+worst_center: internal_topup_045, true=internal_cuboid, pred=internal_cuboid, center=8.785mm, burial=1.533mm, tags=center_outlier|burial_outlier|full_shift_failure|visual_suspect
+worst_burial: internal_pilot_091, true=internal_cuboid, pred=internal_ellipsoid, center=4.306mm, burial=1.674mm, tags=center_outlier|burial_outlier|shape_misclassified|full_shift_failure|geometry_branch_failure|visual_suspect
+feature_baseline_per_sample_comparison: 不可用；当前可追踪的 feature baseline 只有 aggregate/group metrics。
+benchmark_status: B2 仍是 internal benchmark candidate，但不是 stable inference model。

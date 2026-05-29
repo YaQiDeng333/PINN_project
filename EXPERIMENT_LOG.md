@@ -3024,3 +3024,15 @@ Review agent 已完成只读复核，无 must-fix。review 建议把 audit/decis
 - verification：checkpoint reload max prediction diff `0`，shape diff count `0`；test total normalized MAE `0.395256`，L/W/D MAE `0.849 / 0.985 / 0.090 mm`，burial_depth MAE `0.413 mm`，center_xyz MAE `1.466 mm`，shape accuracy/F1 `0.975000 / 0.975309`，逐项复现 21.7/21.8。
 - artifact policy：checkpoint 和 prediction artifact 均未提交；只提交 manifest、summary/metrics 和脚本。
 - review：独立只读 review 通过，无 must-fix；已将 preflight summary 重写为 UTF-8 可读中文。
+
+## 2026-05-29 Stage 22.0 internal defect B2 failure-driven inference audit
+
+- 范围：基于 21.9 `B2_feature_fusion_burial_head` artifact 做 test split replay、failure-driven audit、failure gallery index 和 route decision；未训练，未运行 COMSOL，未生成或修改 data/NPZ，未更新 `CURRENT_BASELINE.md`。
+- 数据入口：显式引用 `dataset_id=comsol_internal_defect_pilot_pack_v2_240`、`COMSOL_DATA_REGISTRY.md`、`results/manifests/comsol_internal_defect_pilot_pack_v2_240.manifest.json` 和 `results/manifests/internal_defect_b2_inference_artifact_manifest.json`；禁止 latest/newest scan。
+- B2 replay：test total normalized error 的 mean/median/p95/max 为 `0.395 / 0.429 / 0.881 / 0.913`；burial_depth error 为 `0.413 / 0.260 / 1.266 / 1.674 mm`；center_xyz error 为 `3.096 / 3.033 / 8.309 / 8.785 mm`。
+- failure tags：`catastrophic_failure=5/40`，`geometry_branch_failure=1/40`，`shape_misclassified=1/40`；geometry branch failure 定义为 shape 错分且 center error > `3.0 mm` 且 burial error > `1.0 mm`。
+- worst cases：worst center 是 `internal_topup_045`，true/pred 都是 `internal_cuboid`，center error `8.785 mm`，burial error `1.533 mm`，属于 full_shift_failure；worst burial / geometry branch 是 `internal_pilot_091`，true `internal_cuboid`、pred `internal_ellipsoid`，burial error `1.674 mm`，center error `4.306 mm`。
+- 分组判断：cuboid -> ellipsoid 不是系统性大面积错分，目前只有 1 例，但它是严重 geometry branch failure；catastrophic full-shift 更集中在 compact、large/medium、shallow/deep_plus tail cases，不是单一 shape 独有。
+- gallery/index：生成 `results/metrics/internal_defect_b2_failure_gallery_index.csv`，PNG 只生成到 ignored `results/previews/internal_defect_b2_failure_gallery/`，未提交。
+- decision：B2 仍可称 internal benchmark candidate，但不能称 stable inference model，也不是 baseline。下一步唯一建议是 `B_shape_conditioned_two_stage_internal_model`，真实 internal inference smoke 暂缓。
+- review：独立只读 review 通过，无 must-fix；确认 checkpoint/prediction artifact 和 preview PNG 未提交，`CURRENT_BASELINE.md` 未修改。

@@ -1,0 +1,6 @@
+22.0 内部缺陷 B2 failure gallery
+index_rows: 23
+unique_png_generated: 23
+preview_dir: C:\Users\19166\Desktop\PINN_project\results\previews\internal_defect_b2_failure_gallery
+png_committed: false
+selection_buckets: total error 最好 3 个、median 3 个、center 最差 5 个、burial 最差 5 个、全部 shape_misclassified、全部 full_shift_failure、全部 geometry_branch_failure。

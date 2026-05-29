@@ -1,0 +1,13 @@
+22.0 内部缺陷 B2 failure audit 路线决策
+test_sample_count: 40
+catastrophic_failure_count: 5
+catastrophic_failure_rate: 0.125
+geometry_branch_failure_count: 1
+geometry_branch_failure_rate: 0.025
+stable_inference_model: false
+benchmark_candidate_status: 保留 B2 作为 internal benchmark candidate，但不是 baseline。
+current_baseline_update: false
+worst_case_for_route: internal_topup_045 true=internal_cuboid pred=internal_cuboid center=8.785mm burial=1.533mm
+unique_next_step: B_shape_conditioned_two_stage_internal_model
+reason: geometry_branch_failure 集中在 internal_cuboid 且出现 cuboid->ellipsoid，说明需要先分 shape branch 或 two-stage routing。
+real_internal_inference_smoke: 暂缓，先处理 geometry branch 和 center/burial tail risk。

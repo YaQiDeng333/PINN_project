@@ -1,0 +1,7 @@
+option,decision,reason,requires_training,requires_comsol,updates_current_baseline
+A_targeted_internal_hard_case_top_up,secondary,如果后续确认 cuboid/deep_plus/medium/compact 样本不足，可补 hard cases；但当前更直接的是 shape/two-stage 建模。,False,True,False
+B_shape_conditioned_two_stage_internal_model,recommended,当前唯一 geometry_branch_failure 是 internal_cuboid -> internal_ellipsoid，属于 geometry branch confusion。,True,False,False
+C_center_burial_focused_model_refinement,candidate,5/40 full-shift failures 表明 center/burial tail risk 仍需处理。,True,False,False
+D_revise_internal_output_labels,defer,当前 failure 更像 branch/center-burial coupling，而非标签 schema 全局错误。,False,False,False
+E_internal_inference_smoke_acceptable,reject,存在 full-shift failures 和 geometry branch failure，真实 internal inference smoke 不应直接推进。,False,False,False
+F_pause_internal_branch,reject,B2 仍是 benchmark candidate，问题可诊断，不需要暂停。,False,False,False

@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-05-29 after Stage 22.0 internal defect B2 failure audit
+
+下一步唯一建议：**B. shape-conditioned / two-stage internal model**。
+
+22.0 证明 B2 不能直接当作 stable inference model 使用。它仍是 internal benchmark candidate，但 test split 的 tail failure 很重：`catastrophic_failure=5/40`，`geometry_branch_failure=1/40`，center_xyz error 的 mean/median/p95/max 为 `3.096 / 3.033 / 8.309 / 8.785 mm`，burial_depth error 为 `0.413 / 0.260 / 1.266 / 1.674 mm`。最关键的坏样本是 `internal_pilot_091`：true `internal_cuboid` 被预测成 `internal_ellipsoid`，同时 burial 和 center 都明显偏移。
+
+因此下一步不要直接进入真实 internal inference smoke，也不要把 B2 写成 baseline。先做 shape-conditioned / two-stage internal model：先稳定 shape branch，再让 center/burial head 在对应 shape 分支内回归；center/burial focused refinement 可以作为 secondary ablation。`CURRENT_BASELINE.md` 继续保持 surface / near-surface true 3D RBC baseline，internal defect 仍是独立 benchmark branch。
+
 ## 2026-05-29 after Stage 21.5 internal defect benchmark report
 
 下一步唯一建议：**B. improve burial-depth head/model**。

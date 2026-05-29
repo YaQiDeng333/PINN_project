@@ -1,0 +1,12 @@
+22.0 内部缺陷 B2 推理 replay
+dataset_id: comsol_internal_defect_pilot_pack_v2_240
+artifact_manifest: C:\Users\19166\Desktop\PINN_project\results\manifests\internal_defect_b2_inference_artifact_manifest.json
+prediction_path: C:\Users\19166\Desktop\PINN_project\checkpoints\internal_defect_b2_artifacts\internal_defect_b2_feature_fusion_seed2026_predictions.npz
+输入规则: 只复用 21.9 由 delta_b/BxByBz 和 delta_b 派生特征生成的预测，不把标签作为输入。
+test_mean_total_abs_normalized_error: 0.395256
+test_mean_burial_depth_error_mm: 0.413
+test_mean_center_xyz_error_mm: 3.096
+test_shape_accuracy: 0.975000
+checkpoint_written: false
+npz_written: false
+current_baseline_update: false

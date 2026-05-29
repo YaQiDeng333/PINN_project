@@ -626,3 +626,11 @@ The next route is a manifest-only dry run before any real signal array is accept
 路线上的变化是：internal branch 已具备做 per-sample inference smoke / gallery 的条件。此前效果图需要临时复现模型，现在可以通过 `results/manifests/internal_defect_b2_inference_artifact_manifest.json` 定位 ignored checkpoint 和 prediction artifact，直接生成 true vs pred 内部空腔图、best/worst 样本索引和 failure gallery。
 
 这仍不是 baseline transition。`CURRENT_BASELINE.md` 继续保持 surface / near-surface true 3D RBC baseline，internal defect 仍是独立 benchmark branch；checkpoint 和 prediction artifact 只留在 ignored `checkpoints/`，不提交。后续真实 internal 样本接入仍需要 schema/metadata alignment。
+
+## 2026-05-29 路线同步：22.0 internal B2 failure-driven audit
+
+22.0 把 internal branch 从平均指标汇报推进到 failure-driven 推理审计。B2_feature_fusion_burial_head 仍复现 21.7/21.9 的平均能力，但 tail error 暴露出不能直接进入真实样本 inference smoke：test 40 个样本中有 `5` 个 full-shift catastrophic failure，`1` 个 geometry_branch_failure。
+
+真正的机制问题是 shape branch 与 center/burial 回归耦合。最严重的 geometry branch case 是 `internal_pilot_091`：true `internal_cuboid` 被预测成 `internal_ellipsoid`，burial_depth error `1.674 mm`，center_xyz error `4.306 mm`。最差 center case `internal_topup_045` 虽然 shape 仍是 cuboid，但 center error 达到 `8.785 mm`，说明问题不只是分类错一类，而是内部几何分支和空间定位会一起漂移。
+
+路线结论：B2 保留为 internal benchmark candidate，但不能称为 stable inference model，更不能写入 `CURRENT_BASELINE.md`。下一步优先做 shape-conditioned / two-stage internal model：先让模型稳定判定 shape branch，再在对应分支内回归 L/W/D、burial_depth 和 center_xyz；center/burial focused refinement 只作为次级 ablation。真实 internal sample inference smoke 暂缓。

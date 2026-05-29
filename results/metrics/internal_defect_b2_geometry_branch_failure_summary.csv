@@ -1,0 +1,9 @@
+summary_key,value,notes
+geometry_branch_failure_count,1,shape_misclassified AND center_xyz_error_mm>3 AND burial_depth_error_mm>1
+shape_misclassification_count,1,internal_cuboid->internal_ellipsoid:1
+geometry_branch_failure_pairs,1,internal_cuboid->internal_ellipsoid:1
+geometry_branch_failure_by_true_shape_type,1,internal_cuboid:1
+geometry_branch_failure_by_burial_depth_level,1,deep_plus:1
+geometry_branch_failure_by_size_level,1,medium:1
+geometry_branch_failure_by_aspect_bin,1,compact:1
+geometry_branch_failure_by_center_region,1,x_pos_y_neg:1
