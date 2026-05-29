@@ -595,3 +595,10 @@ The next route is a manifest-only dry run before any real signal array is accept
 真正的分界点是 `burial_depth_m`。surface RBC baseline 的输出语义是表面 profile/depth，而 internal defect 的核心标签是缺陷体尺寸、中心位置和到扫描表面的埋深；如果把内部缺陷强行套到 `L_m/W_m/D_m/wLD/wWD/wLW`，模型会把埋深变化误解释成 surface profile 或 curvature 变化。
 
 路线更新为：internal branch 先做 `shape_type + L/W/D + burial_depth + center_xyz` 的可行性 smoke。主输入仍应是三轴 `Bx/By/Bz`；Bz-only 只能作为低能力诊断分支。下一步只有在确认 no-defect reference、坐标系、`sensor_z_m`、试件几何、ground truth method 和埋深标签可采之后，才进入 6-12 sample internal COMSOL smoke pack。当前 surface RBC baseline 与 A2 liftoff companion 不扩展为 internal baseline。
+## 2026-05-29 路线同步：21.6 internal defect burial-depth refinement
+
+21.6 把 internal branch 的主要短板从“能否学习内部缺陷”推进到“如何让 burial_depth head 吃到更合适的物理信号”。21.5 的判断是 neural candidate 在 total、center_xyz、shape_type 上更强，但 burial_depth 弱于 feature baseline；21.6 证明这个短板不是 label/schema blocker，而是模型头和输入表征问题。
+
+路线上的关键变化是：B2_feature_fusion_burial_head 可以作为 internal refinement candidate。它只在 Bx/By/Bz delta_b 上额外计算 peak、energy、gradient、width、cross-axis ratio、line-to-line shift 等派生特征，没有把 true shape_type、burial bin、size/aspect、split 或 sample_id 作为输入。multi-seed validation 选择 seed `2026` 后，test burial_depth MAE 为 `0.413 mm`，优于 21.4 neural `0.595 mm` 和 feature baseline `0.472 mm`，同时 total normalized MAE 改善到 `0.395256`。
+
+下一步路线应进入 internal benchmark rerun / candidate upgrade，而不是 baseline transition。`CURRENT_BASELINE.md` 继续是 surface / near-surface true 3D RBC baseline；internal defect 仍是独立分支。后续 benchmark 需要重点复核 B2 的 center_xyz / shape 轻微代价、分组失败样本和 feature-fusion 泛化风险。

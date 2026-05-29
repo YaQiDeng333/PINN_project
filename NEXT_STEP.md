@@ -478,3 +478,10 @@ Stage 20.97 defined the real-data intake schema without training, COMSOL, data/N
 The validator can run without real data files and checks the manifest/schema first. The included template is intentionally not inference-ready until placeholders such as specimen material and magnetization setup are replaced. Bz-only data is a blocker for this route, and internal/buried defects remain a separate schema.
 
 Only next step: perform a real-data manifest dry run. Start with metadata only: fill `results/templates/real_data_intake_manifest_template.json` or an equivalent manifest with actual `sensor_z_m`, no-defect reference, axis order, units, alignment, gain, specimen, and magnetization fields before attaching real signal arrays.
+## 2026-05-29 after Stage 21.6 internal defect burial-depth refinement
+
+下一步唯一建议：**A. internal benchmark rerun / candidate upgrade**。
+
+21.6 证明 burial_depth 短板可以通过合法的 delta_b-derived feature fusion 改善。B2_feature_fusion_burial_head 在 multi-seed 中由 validation-only 选择 seed `2026`，test burial_depth MAE 从 21.4 neural 的 `0.595 mm` 降到 `0.413 mm`，并且优于 selected feature baseline 的 `0.472 mm`；test total normalized MAE 也从 `0.406366` 改善到 `0.395256`。代价是 center_xyz 从 `1.380 mm` 到 `1.466 mm`，shape F1 从 `1.000000` 到 `0.975309`，但没有触发 secondary metric collapse。
+
+因此不要继续盲目加权 burial loss，也不要扩数据或改 schema。下一步应做 internal benchmark rerun / candidate upgrade：固定 B2 feature-fusion burial head，复核 seed stability、分组失败样本、feature-fusion 风险和与 21.4 neural / feature baseline 的正式比较。`CURRENT_BASELINE.md` 继续保持 surface / near-surface true 3D RBC baseline；internal defect 仍是独立 branch，不写成 baseline。

@@ -1,0 +1,17 @@
+21.6 internal defect burial-depth refined multi-seed
+dataset_id: comsol_internal_defect_pilot_pack_v2_240
+selected_candidate_from_screen: B2_feature_fusion_burial_head
+seeds: 42, 123, 2026
+selected_seed: 2026
+selected_best_epoch: 277
+selection_protocol: validation-only seed/model selection; test final only.
+test_total_normalized_mae: 0.395256
+test_LWD_mae_mm: 0.849 / 0.985 / 0.090
+test_burial_depth_mae_mm: 0.413
+test_center_xyz_mae_mm: 1.466
+test_shape_accuracy: 0.975000
+test_shape_macro_f1: 0.975309
+burial_delta_vs_21_4_neural_mm: -0.182
+burial_delta_vs_feature_baseline_mm: -0.058
+checkpoint_saved: false
+current_baseline_update: false

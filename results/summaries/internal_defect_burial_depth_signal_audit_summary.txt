@@ -1,0 +1,13 @@
+21.6 internal defect burial-depth signal audit
+dataset_id: comsol_internal_defect_pilot_pack_v2_240
+registry_manifest_loading: explicit dataset_id + manifest; n=240; split={train:160, val:40, test:40}
+data_mutation: false; comsol_run: false; training_run: false
+feature_source: only delta_b/BxByBz derived peak/energy/gradient/width/cross-axis/line features
+top_train_burial_correlated_features: energy_bx_bz_ratio, a0_l0_half_width, a2_l0_std, a2_l0_energy, a0_l1_half_width, a2_l1_std, a0_l2_half_width, a2_l1_energy
+main_diagnostic: feature baseline 的 burial_depth 优势主要来自幅值/能量/线宽类 delta_b-derived 特征；21.4 neural 在 total/center/shape 上更强，但 burial head 没充分利用这些显式物理统计量。
+test_shallow_burial_delta_neural_minus_feature_mm: 0.378
+test_elongated_x_burial_delta_neural_minus_feature_mm: 0.419
+test_internal_cuboid_burial_delta_neural_minus_feature_mm: 0.211
+risk_groups: shallow, elongated_x, internal_cuboid, large/medium size show the clearest neural burial-depth gap versus feature baseline.
+per_sample_limitation: 21.5 did not preserve a committed per-sample neural prediction artifact; this audit therefore records group-level feature-vs-neural differences and feature-signal correlations, not fabricated per-sample neural errors.
+next_training_implication: B2_feature_fusion_burial_head should be tested first; B3_shape_conditioned_burial_head is secondary and must use predicted shape logits, not true shape labels.

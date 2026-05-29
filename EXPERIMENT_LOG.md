@@ -2975,3 +2975,15 @@ Review agent 已完成只读复核，无 must-fix。review 建议把 audit/decis
 - smoke pack plan: 12 planned COMSOL smoke samples, covering `internal_ellipsoid`, `internal_cuboid`, and `sphere_like`, each at shallow / medium / deep / deep_plus burial levels. This is a plan only; COMSOL was not run.
 - route decision: do not transfer directly from the surface RBC baseline. The recommended first output is `shape_type + L/W/D + burial_depth + center_xyz`; Bx/By/Bz is the main branch, while Bz-only is only a limited diagnostic branch.
 - review: independent read-only review passed with no must-fix.
+## 2026-05-29 Stage 21.6 internal defect burial-depth focused refinement
+
+- 范围：只在 `comsol_internal_defect_pilot_pack_v2_240` 上做 burial-depth model diagnostic / controlled training；未运行 COMSOL，未生成或修改 data/NPZ，未更新 `CURRENT_BASELINE.md`，未创建 baseline。
+- 数据入口：通过 `COMSOL_DATA_REGISTRY.md` 和 `results/manifests/comsol_internal_defect_pilot_pack_v2_240.manifest.json` 显式加载，禁止 latest/newest NPZ scan。
+- 信号审计：feature baseline 的 burial_depth 优势主要来自 delta_b-derived 的幅值、能量、线宽、跨轴比例等统计量；21.4 neural 在 total/center/shape 上更强，但 burial head 对这些物理统计量利用不足。风险组包括 `shallow`、`elongated_x`、`internal_cuboid` 和 large/medium size。
+- candidate screen：B0 是 21.4 neural reference；B1 提高 burial loss weight；B2 使用 Conv1D latent + delta_b-derived feature MLP 进入 burial head；B3 使用 predicted shape logits 条件化 burial head。true shape_type 没有作为模型输入。
+- selection：seed=42 screen 按 validation burial_depth MAE 和 total/center/shape guard 选择 B2；非 selected candidate 的 test 指标只作诊断，不参与选择。
+- multi-seed：B2 在 seeds `42/123/2026` 上复跑，validation-only 选择 seed `2026`，best epoch `277`。
+- selected result：test total normalized MAE `0.395256`；L/W/D MAE `0.849 / 0.985 / 0.090 mm`；burial_depth MAE `0.413 mm`；center_xyz MAE `1.466 mm`；shape accuracy/F1 `0.975000 / 0.975309`。
+- 对比：burial_depth MAE 优于 21.4 neural `0.595 mm`，也优于 selected feature baseline `0.472 mm`；total MAE 也优于 21.4 neural `0.406366` 和 feature baseline `0.416406`。center_xyz 和 shape 相比 21.4 neural 有轻微代价，但未触发 secondary metric collapse。
+- decision：B2_feature_fusion_burial_head 形成 internal refinement candidate。下一步唯一建议是 internal benchmark rerun / candidate upgrade；仍不更新 `CURRENT_BASELINE.md`，internal defect 继续作为独立分支。
+- review：独立只读 review 通过，无 must-fix；已补充说明非 selected candidate test 指标只作诊断。

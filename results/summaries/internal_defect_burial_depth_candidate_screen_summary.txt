@@ -1,0 +1,13 @@
+21.6 internal defect burial-depth candidate screen
+dataset_id: comsol_internal_defect_pilot_pack_v2_240
+input_policy: B0/B1/B3 use only delta_b/BxByBz; B2 additionally uses train-normalized delta_b-derived features.
+forbidden_inputs: labels, true shape_type, burial_depth_bin, size_bin, aspect_bin, split, sample_id.
+selection_protocol: seed=42 screen; validation-only candidate selection; test final only after validation selection.
+reference_B0_val_burial_depth_mae_mm: 0.243
+B1_burial_weighted_loss: valid_for_multiseed=False; best_epoch=248; val_burial=0.260mm; test_burial=0.511mm; test_total=0.412985; test_shape_f1=0.975309.
+B2_feature_fusion_burial_head: valid_for_multiseed=True; best_epoch=279; val_burial=0.194mm; test_burial=0.399mm; test_total=0.396518; test_shape_f1=1.000000.
+B3_shape_conditioned_burial_head: valid_for_multiseed=True; best_epoch=246; val_burial=0.237mm; test_burial=0.507mm; test_total=0.366521; test_shape_f1=1.000000.
+selected_candidate: B2_feature_fusion_burial_head
+stage_d_allowed: true
+current_baseline_update: false
+note: 非 selected candidate 的 test 指标只作为诊断记录；candidate 选择只使用 validation burial_depth MAE 及 total/center/shape guard，没有用 test 反选。

@@ -1,0 +1,8 @@
+decision_item,status,evidence,decision,notes
+registry_manifest_gate,pass,dataset_id=comsol_internal_defect_pilot_pack_v2_240; n=240; split=160/40/40,使用显式 registry/manifest 加载,未使用 latest/newest scan
+burial_depth_improved_vs_neural,pass,refined=0.413mm; 21.4_neural=0.595mm,improved,主验收项
+beat_feature_burial_baseline,pass,refined=0.413mm; feature=0.472mm,beat_feature,feature baseline 仍是 burial_depth 关键 comparator
+secondary_metrics_guard,pass,total=0.395256; center=1.466mm; shape_f1=0.975309,no_material_collapse,防止只改善 burial_depth 却牺牲 total/center/shape
+feature_fusion_value,pass,selected_candidate=B2_feature_fusion_burial_head,feature_fusion_supported,B2 只使用 delta_b-derived features
+shape_conditioned_value,warn,selected_candidate=B2_feature_fusion_burial_head,secondary_ablation,B3 使用 predicted shape logits，未使用 true shape_type 输入
+next_step,pass,burial_depth beats the feature baseline without material secondary collapse.,A_internal_benchmark_rerun_candidate_upgrade,internal branch only; no CURRENT_BASELINE update

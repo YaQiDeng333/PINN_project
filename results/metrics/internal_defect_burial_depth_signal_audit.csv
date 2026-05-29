@@ -1,0 +1,74 @@
+record_type,split,group_field,group_value,sample_count,feature_name,correlation_with_burial_depth,abs_correlation,neural_burial_depth_mae_mm,feature_burial_depth_mae_mm,burial_delta_neural_minus_feature,winner_burial,notes
+feature_correlation,train,,,160,energy_bx_bz_ratio,0.4797742496535369,0.4797742496535369,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,train,,,160,a0_l0_half_width,0.4314253329822621,0.4314253329822621,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,train,,,160,a2_l0_std,-0.3993350909038724,0.3993350909038724,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,train,,,160,a2_l0_energy,-0.3969091917581424,0.3969091917581424,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,train,,,160,a0_l1_half_width,0.3968621672681751,0.3968621672681751,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,train,,,160,a2_l1_std,-0.3961878728391393,0.3961878728391393,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,train,,,160,a0_l2_half_width,0.39593874079640984,0.39593874079640984,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,train,,,160,a2_l1_energy,-0.3946476007933767,0.3946476007933767,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,train,,,160,axis_2_energy,-0.3901338154427648,0.3901338154427648,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,train,,,160,a2_l2_energy,-0.3763849700978782,0.3763849700978782,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,train,,,160,a2_l2_std,-0.3762957800538657,0.3762957800538657,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,train,,,160,a2_l0_min,0.36264336130255775,0.36264336130255775,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,train,,,160,a2_l1_min,0.34597161549593564,0.34597161549593564,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,train,,,160,a2_l0_ptp,-0.33218842660404707,0.33218842660404707,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,train,,,160,a2_l0_abs_peak,-0.31572301882549114,0.31572301882549114,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,train,,,160,a2_l1_abs_peak,-0.31416139976959917,0.31416139976959917,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,train,,,160,a2_l1_ptp,-0.3139602842888545,0.3139602842888545,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,train,,,160,a0_l0_min,0.31075488453278216,0.31075488453278216,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,train,,,160,a0_l0_abs_peak,-0.31031621359289224,0.31031621359289224,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,train,,,160,a0_l2_min,0.2981244324915646,0.2981244324915646,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,val,,,40,energy_bx_bz_ratio,0.590406677224805,0.590406677224805,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,val,,,40,a2_l2_energy,-0.46946032208802724,0.46946032208802724,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,val,,,40,a2_l1_energy,-0.46898946782423534,0.46898946782423534,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,val,,,40,a2_l1_std,-0.463679134017345,0.463679134017345,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,val,,,40,a2_l2_std,-0.46358060212064117,0.46358060212064117,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,val,,,40,axis_2_energy,-0.46340234520839785,0.46340234520839785,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,val,,,40,a0_l0_half_width,0.4513722815443992,0.4513722815443992,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,val,,,40,a2_l0_energy,-0.449914225249072,0.449914225249072,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,val,,,40,a2_l0_std,-0.44425215462326917,0.44425215462326917,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,val,,,40,energy_by_bz_ratio,0.4277065268789381,0.4277065268789381,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,val,,,40,a2_l1_min,0.4179742592963949,0.4179742592963949,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,val,,,40,a0_l0_std,-0.41593904926846786,0.41593904926846786,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,val,,,40,a0_l1_half_width,0.4095340781284799,0.4095340781284799,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,val,,,40,a0_l1_std,-0.40867439947723533,0.40867439947723533,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,val,,,40,a0_l2_std,-0.40601332534353646,0.40601332534353646,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,val,,,40,a2_l1_abs_peak,-0.40435896928686915,0.40435896928686915,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,val,,,40,a2_l1_ptp,-0.4034683674112939,0.4034683674112939,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,val,,,40,a0_l2_ptp,-0.38657013051045125,0.38657013051045125,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,val,,,40,a2_l0_ptp,-0.385962308908351,0.385962308908351,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,val,,,40,a2_l0_min,0.3847907703011099,0.3847907703011099,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,test,,,40,a0_l1_min,0.6133722976436682,0.6133722976436682,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,test,,,40,a0_l1_abs_peak,-0.6133722976436682,0.6133722976436682,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,test,,,40,a0_l0_abs_peak,-0.6067175673649527,0.6067175673649527,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,test,,,40,a0_l0_min,0.605226322871653,0.605226322871653,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,test,,,40,a0_l2_min,0.6004037443409582,0.6004037443409582,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,test,,,40,a0_l2_abs_peak,-0.6004037443409582,0.6004037443409582,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,test,,,40,a0_l1_std,-0.5981941935571811,0.5981941935571811,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,test,,,40,a0_l0_std,-0.5890135101357793,0.5890135101357793,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,test,,,40,a0_l2_std,-0.5888600071964323,0.5888600071964323,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,test,,,40,a2_l0_std,-0.5570134638186413,0.5570134638186413,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,test,,,40,a0_l2_energy,-0.5559793352343136,0.5559793352343136,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,test,,,40,a2_l1_std,-0.5519314054048747,0.5519314054048747,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,test,,,40,a2_l0_energy,-0.5517786358169847,0.5517786358169847,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,test,,,40,a0_l1_energy,-0.5517610816920155,0.5517610816920155,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,test,,,40,axis_0_energy,-0.5477943579108022,0.5477943579108022,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,test,,,40,a2_l1_energy,-0.5460656879971246,0.5460656879971246,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,test,,,40,axis_2_energy,-0.5448790740577336,0.5448790740577336,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,test,,,40,a2_l2_std,-0.5376950408210059,0.5376950408210059,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,test,,,40,line_1_energy,-0.5363277467601186,0.5363277467601186,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+feature_correlation,test,,,40,line_2_energy,-0.5335411702310041,0.5335411702310041,,,,,feature 仅由 delta_b/BxByBz 计算；标准化只使用 train split
+group_neural_vs_feature,test,shape_type,internal_cuboid,14,,,,0.803986668586731,0.593463122844696,0.2105235457420349,feature,正值表示 neural burial_depth MAE 高于 feature baseline
+group_neural_vs_feature,test,shape_type,internal_ellipsoid,13,,,,0.5823289155960083,0.5729396343231201,0.009389281272888184,feature,正值表示 neural burial_depth MAE 高于 feature baseline
+group_neural_vs_feature,test,shape_type,internal_sphere,13,,,,0.3841460347175598,0.23876991868019104,0.14537611603736877,feature,正值表示 neural burial_depth MAE 高于 feature baseline
+group_neural_vs_feature,test,burial_depth_level,deep,10,,,,0.44906145334243774,0.3471645414829254,0.10189691185951233,feature,正值表示 neural burial_depth MAE 高于 feature baseline
+group_neural_vs_feature,test,burial_depth_level,deep_plus,10,,,,0.6311966776847839,0.6194187998771667,0.011777877807617188,feature,正值表示 neural burial_depth MAE 高于 feature baseline
+group_neural_vs_feature,test,burial_depth_level,medium,10,,,,0.503727376461029,0.4990138113498688,0.004713565111160278,feature,正值表示 neural burial_depth MAE 高于 feature baseline
+group_neural_vs_feature,test,burial_depth_level,shallow,10,,,,0.7980133891105652,0.420473575592041,0.37753981351852417,feature,正值表示 neural burial_depth MAE 高于 feature baseline
+group_neural_vs_feature,test,size_level,large,14,,,,0.7435662150382996,0.5822975039482117,0.1612687110900879,feature,正值表示 neural burial_depth MAE 高于 feature baseline
+group_neural_vs_feature,test,size_level,medium,13,,,,0.6867876648902893,0.5288501381874084,0.15793752670288086,feature,正值表示 neural burial_depth MAE 高于 feature baseline
+group_neural_vs_feature,test,size_level,small,13,,,,0.34475547075271606,0.29488399624824524,0.049871474504470825,feature,正值表示 neural burial_depth MAE 高于 feature baseline
+group_neural_vs_feature,test,aspect_bin,compact,22,,,,0.6069205403327942,0.4710763692855835,0.1358441710472107,feature,正值表示 neural burial_depth MAE 高于 feature baseline
+group_neural_vs_feature,test,aspect_bin,elongated_x,4,,,,0.7617009282112122,0.3424423038959503,0.41925862431526184,feature,正值表示 neural burial_depth MAE 高于 feature baseline
+group_neural_vs_feature,test,aspect_bin,elongated_y,14,,,,0.5300666093826294,0.5090899467468262,0.020976662635803223,feature,正值表示 neural burial_depth MAE 高于 feature baseline
