@@ -634,3 +634,11 @@ The next route is a manifest-only dry run before any real signal array is accept
 真正的机制问题是 shape branch 与 center/burial 回归耦合。最严重的 geometry branch case 是 `internal_pilot_091`：true `internal_cuboid` 被预测成 `internal_ellipsoid`，burial_depth error `1.674 mm`，center_xyz error `4.306 mm`。最差 center case `internal_topup_045` 虽然 shape 仍是 cuboid，但 center error 达到 `8.785 mm`，说明问题不只是分类错一类，而是内部几何分支和空间定位会一起漂移。
 
 路线结论：B2 保留为 internal benchmark candidate，但不能称为 stable inference model，更不能写入 `CURRENT_BASELINE.md`。下一步优先做 shape-conditioned / two-stage internal model：先让模型稳定判定 shape branch，再在对应分支内回归 L/W/D、burial_depth 和 center_xyz；center/burial focused refinement 只作为次级 ablation。真实 internal sample inference smoke 暂缓。
+
+## 2026-05-30 路线同步：22.1 shape-conditioned internal model
+
+22.1 验证了一个关键判断：22.0 的 tail failure 不能只靠把 regression head 条件化到 predicted shape 上解决。T3_shape_specific_heads 的平均指标确实更好，test total normalized MAE 从 B2 的 `0.395256` 降到 `0.357371`，center p95 也从 `8.309 mm` 降到 `5.999 mm`；但 hard failure 没有被真正消除，catastrophic failure 仍是 `5/40`，geometry_branch_failure 仍是 `1/40`，且 center max 升到 `10.468 mm`。
+
+路线上的分界点是：shape branch conditioning 可以改善均值和部分 tail，但现有 v2_240 对 hard cases 的覆盖不足以把模型训练成 stable inference candidate。继续只调 head 结构会有 test tail 偶然波动风险，也容易把 validation 上的 tail 改善误当成稳定泛化。
+
+下一步路线转为 targeted internal hard-case top-up。补样应围绕 compact、large/medium、shallow/deep_plus、cuboid/ellipsoid 易混，以及 center/burial 同时大偏移的组合；之后再训练更强 two-stage branch。internal defect 仍是独立 benchmark branch，不进入 `CURRENT_BASELINE.md`，真实 internal inference smoke 继续暂缓。

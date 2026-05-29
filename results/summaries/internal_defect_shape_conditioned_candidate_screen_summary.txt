@@ -1,0 +1,15 @@
+22.1 shape-conditioned / two-stage internal defect candidate screen
+dataset_id: comsol_internal_defect_pilot_pack_v2_240
+seed: 42
+输入规则: 正式候选只使用 delta_b/BxByBz 和 train-normalized delta_b-derived features。
+禁止输入: true shape_type、burial_bin、size/aspect、split、sample_id。
+selection_protocol: validation-only candidate selection；screen 中的 test 指标只作诊断记录，不参与选择。
+B2_val_catastrophic_failure_count: 1
+B2_val_center_p95_mm: 5.362
+T1_shape_latent_conditioned: role=official_candidate; valid_for_multiseed=False; best_epoch=122; test_total=0.354890; test_catastrophic=5; test_geometry_branch=1; test_center_p95=5.129mm; test_burial_p95=1.562mm.
+T2_two_stage_soft_shape: role=official_candidate; valid_for_multiseed=False; best_epoch=196; test_total=0.354412; test_catastrophic=3; test_geometry_branch=1; test_center_p95=4.945mm; test_burial_p95=1.406mm.
+T3_shape_specific_heads: role=official_candidate; valid_for_multiseed=True; best_epoch=198; test_total=0.344094; test_catastrophic=5; test_geometry_branch=1; test_center_p95=6.935mm; test_burial_p95=1.436mm.
+T4_oracle_true_shape_diagnostic: role=oracle_diagnostic; valid_for_multiseed=False; best_epoch=99; test_total=0.374910; test_catastrophic=6; test_geometry_branch=0; test_center_p95=6.716mm; test_burial_p95=1.209mm.
+selected_candidate: T3_shape_specific_heads
+stage_d_allowed: true
+current_baseline_update: false

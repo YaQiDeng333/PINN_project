@@ -3036,3 +3036,15 @@ Review agent 已完成只读复核，无 must-fix。review 建议把 audit/decis
 - gallery/index：生成 `results/metrics/internal_defect_b2_failure_gallery_index.csv`，PNG 只生成到 ignored `results/previews/internal_defect_b2_failure_gallery/`，未提交。
 - decision：B2 仍可称 internal benchmark candidate，但不能称 stable inference model，也不是 baseline。下一步唯一建议是 `B_shape_conditioned_two_stage_internal_model`，真实 internal inference smoke 暂缓。
 - review：独立只读 review 通过，无 must-fix；确认 checkpoint/prediction artifact 和 preview PNG 未提交，`CURRENT_BASELINE.md` 未修改。
+
+## 2026-05-30 Stage 22.1 shape-conditioned / two-stage internal defect model
+
+- 范围：在 `comsol_internal_defect_pilot_pack_v2_240` 上训练 shape-conditioned / two-stage internal candidates，目标是降低 22.0 暴露的 center/burial tail failure；未运行 COMSOL，未生成或修改 data/NPZ，未更新 `CURRENT_BASELINE.md`，未创建 baseline。
+- 数据入口：仍通过 `COMSOL_DATA_REGISTRY.md` 与 `results/manifests/comsol_internal_defect_pilot_pack_v2_240.manifest.json` 显式加载；禁止 latest/newest scan。
+- 输入边界：正式候选只使用 `delta_b/BxByBz` 和 delta_b-derived features；true `shape_type`、burial bin、size/aspect、split、sample_id 均未作为正式模型输入。`T4_oracle_true_shape_diagnostic` 仅作 oracle 诊断，未参与正式选择。
+- B2 reference：test total error mean/median/p95/max `0.395 / 0.429 / 0.881 / 0.913`；burial p95/max `1.266 / 1.674 mm`；center p95/max `8.309 / 8.785 mm`；catastrophic failure `5/40`；geometry_branch_failure `1/40`。
+- candidate screen：seed `42` 下 T3_shape_specific_heads 是唯一 validation-eligible 正式候选；T1/T2 未过 validation tail gate，T4 是 oracle diagnostic。
+- multi-seed：T3 在 seeds `42/123/2026` 上复跑，validation-only 选择 seed `123`，best epoch `283`；test total normalized MAE `0.357371`，L/W/D MAE `0.735 / 0.992 / 0.086 mm`，burial_depth MAE `0.457 mm`，center component MAE `1.143 mm`，shape accuracy/F1 `0.950000 / 0.950549`。
+- tail result：T3 test center p95 从 B2 `8.309 mm` 降到 `5.999 mm`，但 center max 升到 `10.468 mm`；burial p95/max 退化到 `1.690 / 1.848 mm`；catastrophic failure 仍是 `5/40`，geometry_branch_failure 仍是 `1/40`。
+- decision：22.1 不是 stable inference candidate upgrade。T3 是有用的 shape-specific heads 诊断，但没有通过 tail gate；下一步唯一建议是 targeted internal hard-case top-up，或在 top-up 后重新设计更强 two-stage branch。internal defect 仍不是 baseline。
+- review：独立只读 review 通过，无 must-fix；确认没有 true shape label leakage、没有 test 反选、没有 forbidden artifacts staged。

@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-05-30 after Stage 22.1 shape-conditioned internal model
+
+下一步唯一建议：**targeted internal hard-case top-up**。
+
+22.1 说明单纯把 B2 改成 shape-conditioned / shape-specific heads 还不够稳定。T3_shape_specific_heads 由 validation-only 选中 seed `123`，test total normalized MAE 从 B2 的 `0.395256` 降到 `0.357371`，center p95 从 `8.309 mm` 降到 `5.999 mm`；但 hard gate 没过：catastrophic failure 仍是 `5/40`，geometry_branch_failure 仍是 `1/40`，center max 还升到 `10.468 mm`，burial p95/max 也退化到 `1.690 / 1.848 mm`。
+
+因此不要把 T3 作为 stable inference model，也不要进入真实 internal inference smoke。下一步应围绕 22.0/22.1 的 hard cases 做 targeted COMSOL top-up：优先覆盖 compact、large/medium、shallow/deep_plus、cuboid/ellipsoid 易混和 center 远偏样本，然后再回到更强 two-stage branch。`CURRENT_BASELINE.md` 继续保持 surface / near-surface true 3D RBC baseline。
+
 ## 2026-05-29 after Stage 22.0 internal defect B2 failure audit
 
 下一步唯一建议：**B. shape-conditioned / two-stage internal model**。

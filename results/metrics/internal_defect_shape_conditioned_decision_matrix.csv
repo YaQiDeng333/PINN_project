@@ -1,0 +1,6 @@
+option,decision,reason,requires_training,requires_comsol,updates_current_baseline
+A_shape_conditioned_two_stage_model,partial,selected=T3_shape_specific_heads; catastrophic=5; geometry_branch=1,True,False,False
+B_targeted_internal_hard_case_top_up,candidate,如果 shape-conditioned model 仍保留 hard tail，则针对 compact/large/deep_plus/cuboid-like cases 补样。,False,True,False
+C_center_burial_focused_refinement,candidate,center/burial tail 仍是稳定推理的直接风险。,True,False,False
+D_revise_internal_output_labels,defer,当前失败更像 model routing/tail 问题，而不是 schema 全局错误。,False,False,False
+E_internal_inference_smoke_after_contract,defer,只有 stable tail gate 通过后，才进入真实 internal inference smoke。,False,False,False

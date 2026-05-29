@@ -1,0 +1,15 @@
+22.1 shape-conditioned / two-stage internal defect route decision
+selected_candidate: T3_shape_specific_heads
+stable_inference_candidate: false
+current_baseline_update: false
+baseline_status: internal branch 仍不是 CURRENT_BASELINE。
+unique_next_step: B_targeted_internal_hard_case_top_up
+reason: shape-conditioned/two-stage 仍未充分降低 catastrophic tail，后续需要 hard-case 数据或更强分支模型。
+test_total_normalized_mae: 0.357371
+test_burial_depth_mae_mm: 0.457
+test_center_component_mae_mm: 1.143
+test_shape_accuracy_f1: 0.950000 / 0.950549
+test_center_p95_max_mm: 5.999 / 10.468
+test_burial_p95_max_mm: 1.690 / 1.848
+test_catastrophic_failure_count: 5
+test_geometry_branch_failure_count: 1

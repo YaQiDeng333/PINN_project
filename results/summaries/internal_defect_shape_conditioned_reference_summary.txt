@@ -1,0 +1,12 @@
+22.1 shape-conditioned internal model 的 B2 failure reference
+dataset_id: comsol_internal_defect_pilot_pack_v2_240
+artifact_manifest: C:\Users\19166\Desktop\PINN_project\results\manifests\internal_defect_b2_inference_artifact_manifest.json
+reference_model: B2_feature_fusion_burial_head
+test_total_error_mean_median_p95_max: 0.395 / 0.429 / 0.881 / 0.913
+test_burial_depth_error_mean_median_p95_max_mm: 0.413 / 0.260 / 1.266 / 1.674
+test_center_xyz_error_mean_median_p95_max_mm: 3.096 / 3.033 / 8.309 / 8.785
+test_catastrophic_failure_count: 5
+test_geometry_branch_failure_count: 1
+worst_center_sample_id: internal_topup_045
+worst_burial_sample_id: internal_pilot_091
+current_baseline_update: false
