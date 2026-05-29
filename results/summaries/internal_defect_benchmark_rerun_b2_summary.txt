@@ -1,0 +1,22 @@
+21.7 internal defect B2 formal benchmark rerun
+dataset_id: comsol_internal_defect_pilot_pack_v2_240
+candidate: B2_feature_fusion_burial_head
+input_policy: delta_b/BxByBz plus train-normalized delta_b-derived features only.
+forbidden_inputs: true shape_type, burial_bin, size_bin, aspect_bin, split, sample_id.
+selection_protocol: validation-only epoch and seed selection; test final only.
+seeds: 42, 123, 2026
+selected_seed: 2026
+selected_best_epoch: 277
+train_total_normalized_mae: 0.055742
+val_total_normalized_mae: 0.234877
+test_total_normalized_mae: 0.395256
+test_LWD_mae_mm: 0.849 / 0.985 / 0.090
+test_burial_depth_mae_mm: 0.413
+test_center_xyz_mae_mm: 1.466
+test_shape_accuracy: 0.975000
+test_shape_macro_f1: 0.975309
+all_seed_test_burial_depth_mae_mm: 0.399, 0.428, 0.413
+burial_vs_21_4_neural_delta_mm: -0.182
+burial_vs_feature_baseline_delta_mm: -0.058
+checkpoint_saved: false
+current_baseline_update: false

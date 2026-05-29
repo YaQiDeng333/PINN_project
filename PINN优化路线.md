@@ -602,3 +602,11 @@ The next route is a manifest-only dry run before any real signal array is accept
 路线上的关键变化是：B2_feature_fusion_burial_head 可以作为 internal refinement candidate。它只在 Bx/By/Bz delta_b 上额外计算 peak、energy、gradient、width、cross-axis ratio、line-to-line shift 等派生特征，没有把 true shape_type、burial bin、size/aspect、split 或 sample_id 作为输入。multi-seed validation 选择 seed `2026` 后，test burial_depth MAE 为 `0.413 mm`，优于 21.4 neural `0.595 mm` 和 feature baseline `0.472 mm`，同时 total normalized MAE 改善到 `0.395256`。
 
 下一步路线应进入 internal benchmark rerun / candidate upgrade，而不是 baseline transition。`CURRENT_BASELINE.md` 继续是 surface / near-surface true 3D RBC baseline；internal defect 仍是独立分支。后续 benchmark 需要重点复核 B2 的 center_xyz / shape 轻微代价、分组失败样本和 feature-fusion 泛化风险。
+
+## 2026-05-29 路线同步：21.7 internal defect benchmark candidate
+
+21.7 把 21.6 的 B2_feature_fusion_burial_head 从 refinement candidate 固定为 internal benchmark candidate。固定协议是 `delta_b/BxByBz` 加 delta_b-derived features，禁止 true `shape_type`、burial bin、size/aspect、split、sample_id 进入模型输入；selection 仍是 train-only normalization、validation-only selection、test final only。
+
+路线上的判断是：B2 已稳定优于 21.4 neural 和 feature baseline。selected seed `2026` 的 test total normalized MAE 为 `0.395256`，burial_depth MAE 为 `0.413 mm`，优于 21.4 neural `0.595 mm` 和 feature baseline `0.472 mm`；三 seed burial_depth MAE 也都低于两个 reference。因此 burial_depth 不再是 primary shortfall。
+
+但这仍不是 baseline transition。internal defect 数据仍是 COMSOL 仿真，shape 只覆盖 internal_sphere / internal_ellipsoid / internal_cuboid，真实 internal sample 还未验证；`CURRENT_BASELINE.md` 继续是 surface / near-surface true 3D RBC baseline。下一步路线是 internal report / visualization package，先固化报告、分组失败样本和效果图，再决定真实 internal schema alignment 或更大 shape 扩展。

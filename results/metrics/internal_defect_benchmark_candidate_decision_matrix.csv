@@ -1,0 +1,8 @@
+decision_item,status,evidence,decision,notes
+registry_manifest_gate,pass,dataset_id=comsol_internal_defect_pilot_pack_v2_240; n=240; split=160/40/40,explicit_dataset_id_manifest,latest/newest discovery remains forbidden
+stable_burial_vs_21_4_neural,pass,"all_seed_burial=0.399,0.428,0.413mm; neural=0.595mm",stable_better_than_neural,seed-level gate
+stable_burial_vs_feature_baseline,pass,"all_seed_burial=0.399,0.428,0.413mm; feature=0.472mm",stable_better_than_feature,feature baseline remains key comparator
+total_mae,pass,"B2=0.395256; neural=0.406366; feature=0.416406; all_seed_total=0.396518,0.396479,0.395256",B2_best_total,composite benchmark check
+burial_depth_shortfall,pass,B2=0.413mm; neural=0.595mm; feature=0.472mm,not_primary_shortfall,center/shape and real-data validation remain risks
+baseline_status,pass,CURRENT_BASELINE.md unchanged; dataset baseline_ready=false,not_baseline,internal branch is independent from surface RBC baseline
+next_step,pass,B2 is stable across seeds and beats both 21.4 neural and feature baseline on burial_depth.,A_internal_report_visualization_package,prepare report / visualization package before real-data smoke

@@ -485,3 +485,11 @@ Only next step: perform a real-data manifest dry run. Start with metadata only: 
 21.6 证明 burial_depth 短板可以通过合法的 delta_b-derived feature fusion 改善。B2_feature_fusion_burial_head 在 multi-seed 中由 validation-only 选择 seed `2026`，test burial_depth MAE 从 21.4 neural 的 `0.595 mm` 降到 `0.413 mm`，并且优于 selected feature baseline 的 `0.472 mm`；test total normalized MAE 也从 `0.406366` 改善到 `0.395256`。代价是 center_xyz 从 `1.380 mm` 到 `1.466 mm`，shape F1 从 `1.000000` 到 `0.975309`，但没有触发 secondary metric collapse。
 
 因此不要继续盲目加权 burial loss，也不要扩数据或改 schema。下一步应做 internal benchmark rerun / candidate upgrade：固定 B2 feature-fusion burial head，复核 seed stability、分组失败样本、feature-fusion 风险和与 21.4 neural / feature baseline 的正式比较。`CURRENT_BASELINE.md` 继续保持 surface / near-surface true 3D RBC baseline；internal defect 仍是独立 branch，不写成 baseline。
+
+## 2026-05-29 after Stage 21.7 internal defect benchmark candidate
+
+下一步唯一建议：**A. internal report / visualization package**。
+
+21.7 固定 B2_feature_fusion_burial_head 做 formal rerun 后，validation-only 仍选择 seed `2026`，test total normalized MAE 为 `0.395256`，burial_depth MAE 为 `0.413 mm`，shape accuracy/F1 为 `0.975000 / 0.975309`。三 seed burial_depth MAE `0.399 / 0.428 / 0.413 mm` 均优于 21.4 neural `0.595 mm` 和 feature baseline `0.472 mm`，说明 B2 的 burial_depth 改善不是单 seed 偶然。
+
+因此下一步不应直接 baseline transition，也不应立刻扩数据。应先做 internal report / visualization package：整理 by-shape、by-burial、by-size/aspect、failure cases 和可视化，解释 B2 在 center_xyz / shape 上的轻微代价，并明确 internal defect 仍是独立 benchmark candidate。`CURRENT_BASELINE.md` 继续保持 surface / near-surface true 3D RBC baseline。

@@ -1,4 +1,4 @@
-role,model,split,total_normalized_mae,L_mae_mm,W_mae_mm,D_mae_mm,burial_depth_mae_mm,center_xyz_mae_mm,shape_accuracy,shape_macro_f1,notes
-mean_baseline,mean_baseline,test,0.8593667149543762,1.5777500867843628,1.9599529504776,0.1354375034570694,1.1499998569488525,6.150312423706055,0.325,0.16352201257861637,test-final metrics; no baseline transition
-feature_selected_svr_rbf_C10,svr_rbf_C10,test,0.416405588388443,0.7570649981498718,1.1507278680801392,0.10785912722349167,0.47151774168014526,1.5601974725723267,0.95,0.9505494505494506,test-final metrics; no baseline transition
-neural_selected_seed42,internal_v2_conv1d_multitask,test,0.40636563301086426,0.7610000967979431,0.9470643997192383,0.09293656051158905,0.5954996347427368,1.3799970149993896,1.0,1.0,test-final metrics; no baseline transition
+model,source,selected,role,split,sample_count,total_normalized_mae,L_mae_mm,W_mae_mm,D_mae_mm,burial_depth_mae_mm,center_xyz_mae_mm,shape_accuracy,shape_macro_f1,notes
+B0_reference_neural,21.4_neural_reference,False,previous neural benchmark candidate,test,40,0.40636563301086426,0.7610000967979431,0.9470643997192383,0.09293656051158905,0.5954996347427368,1.3799970149993896,1.0,1.0,not CURRENT_BASELINE; internal branch only
+svr_rbf_C10,21.4_feature_baseline,False,delta_b-derived feature comparator,test,40,0.416405588388443,0.7570649981498718,1.1507278680801392,0.10785912722349167,0.47151774168014526,1.5601974725723267,0.95,0.9505494505494506,not CURRENT_BASELINE; internal branch only
+B2_feature_fusion_burial_head,21.7_B2_formal_rerun,True,21.7 B2 benchmark candidate rerun,test,40,0.3952564597129822,0.8486037850379944,0.9846186637878418,0.08997005224227905,0.4132470190525055,1.4663500785827637,0.975,0.9753086419753086,not CURRENT_BASELINE; internal branch only

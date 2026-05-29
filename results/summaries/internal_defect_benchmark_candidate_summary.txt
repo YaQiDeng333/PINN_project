@@ -1,0 +1,15 @@
+21.7 internal defect benchmark candidate report
+dataset_id: comsol_internal_defect_pilot_pack_v2_240
+dataset_identity: N=240; split=160/40/40; shape_counts={'internal_cuboid': 80, 'internal_ellipsoid': 80, 'internal_sphere': 80}; burial_counts={'deep': 60, 'deep_plus': 60, 'medium': 60, 'shallow': 60}; size_counts={'large': 80, 'medium': 80, 'small': 80}; aspect_counts={'compact': 134, 'elongated_x': 54, 'elongated_y': 52}
+task_definition: Bx/By/Bz delta_b -> internal cavity L/W/D, burial_depth, center_xyz, and shape_type.
+model_chain: delta_b (N,3,3,201) -> Conv1D encoder (N,9,201) plus delta_b-derived feature MLP -> B2 multitask heads.
+input_boundary: no true shape_type, burial bin, size/aspect, split, or sample_id as model input.
+feature_baseline: total=0.416406; L/W/D=0.757/1.151/0.108 mm; burial=0.472 mm; center=1.560 mm; shape acc/F1=0.950000/0.950549.
+21.4_neural_reference: total=0.406366; L/W/D=0.761/0.947/0.093 mm; burial=0.595 mm; center=1.380 mm; shape acc/F1=1.000000/1.000000.
+21.7_B2_candidate: total=0.395256; L/W/D=0.849/0.985/0.090 mm; burial=0.413 mm; center=1.466 mm; shape acc/F1=0.975000/0.975309.
+by_shape_type: internal_cuboid total=0.450, burial=0.474mm, shape_acc=0.929; internal_ellipsoid total=0.518, burial=0.488mm, shape_acc=1.000; internal_sphere total=0.213, burial=0.274mm, shape_acc=1.000
+by_burial_depth: deep total=0.438, burial=0.339mm, shape_acc=1.000; deep_plus total=0.402, burial=0.524mm, shape_acc=0.900; medium total=0.308, burial=0.337mm, shape_acc=1.000; shallow total=0.432, burial=0.453mm, shape_acc=1.000
+by_size: large total=0.478, burial=0.454mm, shape_acc=1.000; medium total=0.416, burial=0.617mm, shape_acc=0.923; small total=0.285, burial=0.165mm, shape_acc=1.000
+by_aspect: compact total=0.290, burial=0.424mm, shape_acc=0.955; elongated_x total=0.468, burial=0.193mm, shape_acc=1.000; elongated_y total=0.539, burial=0.460mm, shape_acc=1.000
+limitations: COMSOL simulation domain only; internal shapes currently limited to sphere/ellipsoid/cuboid; no real experimental validation; not CURRENT_BASELINE.
+candidate_status: internal benchmark candidate, not baseline.

@@ -1,0 +1,35 @@
+21.7 internal defect benchmark rerun preflight
+
+working_directory: C:\Users\19166\Desktop\PINN_project
+dataset_id: comsol_internal_defect_pilot_pack_v2_240
+registry_manifest_gate: pass
+manifest_path: C:\Users\19166\Desktop\PINN_project\results\manifests\comsol_internal_defect_pilot_pack_v2_240.manifest.json
+dataset_status: pilot_generated
+train_ready_candidate: true
+baseline_ready: false
+allowed_use: schema_validation, explicit_internal_training_gate
+forbidden_use: automatic_mainline_training, baseline_update, current_baseline_replacement, latest_newest_auto_discovery, direct_training_without_manifest_gate
+
+reference_materials:
+- 21.4 neural metrics: available
+- 21.4 feature baseline metrics: available
+- 21.5 benchmark report metrics: available
+- 21.6 B2 refinement metrics and decision: available
+- B2 scripts: available
+
+fixed_candidate:
+- B2_feature_fusion_burial_head
+- input: delta_b/BxByBz plus delta_b-derived features only
+- forbidden inputs: true shape_type, burial_bin, size_bin, aspect_bin, split, sample_id
+- labels use: supervision and metrics only
+- normalization: train-only
+- selection: validation-only
+- final evaluation: test final only
+
+safety:
+- comsol_run: false
+- data_npz_mutation: false
+- current_baseline_update: false
+- baseline_doc_creation: false
+- checkpoint_output: false
+- forbidden_artifacts_staged: false

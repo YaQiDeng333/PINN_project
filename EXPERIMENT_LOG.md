@@ -2987,3 +2987,16 @@ Review agent 已完成只读复核，无 must-fix。review 建议把 audit/decis
 - 对比：burial_depth MAE 优于 21.4 neural `0.595 mm`，也优于 selected feature baseline `0.472 mm`；total MAE 也优于 21.4 neural `0.406366` 和 feature baseline `0.416406`。center_xyz 和 shape 相比 21.4 neural 有轻微代价，但未触发 secondary metric collapse。
 - decision：B2_feature_fusion_burial_head 形成 internal refinement candidate。下一步唯一建议是 internal benchmark rerun / candidate upgrade；仍不更新 `CURRENT_BASELINE.md`，internal defect 继续作为独立分支。
 - review：独立只读 review 通过，无 must-fix；已补充说明非 selected candidate test 指标只作诊断。
+
+## 2026-05-29 Stage 21.7 internal defect benchmark rerun / candidate upgrade
+
+- 范围：固定 `comsol_internal_defect_pilot_pack_v2_240` 和 `B2_feature_fusion_burial_head` 做 formal rerun / candidate upgrade；未运行 COMSOL，未生成或修改 data/NPZ，未更新 `CURRENT_BASELINE.md`，未创建 baseline。
+- 数据入口：通过 `COMSOL_DATA_REGISTRY.md` 和 `results/manifests/comsol_internal_defect_pilot_pack_v2_240.manifest.json` 显式加载，禁止 latest/newest NPZ scan。
+- 输入边界：模型只使用 `delta_b/BxByBz` 和 train-normalized delta_b-derived features；true `shape_type`、burial bin、size/aspect、split、sample_id 均未作为输入。
+- rerun 协议：seeds `42/123/2026`，train-only normalization，validation-only epoch/seed selection，test final only；不调新超参，不做 test 反选。
+- selected result：validation 选择 seed `2026`，best epoch `277`；train/val/test total normalized MAE `0.055742 / 0.234877 / 0.395256`。
+- test metrics：L/W/D MAE `0.849 / 0.985 / 0.090 mm`；burial_depth MAE `0.413 mm`；center_xyz MAE `1.466 mm`；shape accuracy/F1 `0.975000 / 0.975309`。
+- 稳定性：三 seed test burial_depth MAE 为 `0.399 / 0.428 / 0.413 mm`，均优于 21.4 neural `0.595 mm` 和 feature baseline `0.472 mm`。
+- 对比结论：B2 test total normalized MAE `0.395256` 优于 21.4 neural `0.406366` 和 feature baseline `0.416406`；burial_depth 短板已不再是 primary blocker，但 center_xyz 和 shape 仍需在报告/可视化中持续审计。
+- decision：B2 形成 internal benchmark candidate，但不是 baseline；`CURRENT_BASELINE.md` 继续保持 surface / near-surface true 3D RBC baseline，internal defect 仍是独立分支。
+- review：独立只读 review 通过，无 must-fix；已按建议补充 metrics 的 `selected` 兼容列。
