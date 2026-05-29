@@ -493,3 +493,11 @@ Only next step: perform a real-data manifest dry run. Start with metadata only: 
 21.7 固定 B2_feature_fusion_burial_head 做 formal rerun 后，validation-only 仍选择 seed `2026`，test total normalized MAE 为 `0.395256`，burial_depth MAE 为 `0.413 mm`，shape accuracy/F1 为 `0.975000 / 0.975309`。三 seed burial_depth MAE `0.399 / 0.428 / 0.413 mm` 均优于 21.4 neural `0.595 mm` 和 feature baseline `0.472 mm`，说明 B2 的 burial_depth 改善不是单 seed 偶然。
 
 因此下一步不应直接 baseline transition，也不应立刻扩数据。应先做 internal report / visualization package：整理 by-shape、by-burial、by-size/aspect、failure cases 和可视化，解释 B2 在 center_xyz / shape 上的轻微代价，并明确 internal defect 仍是独立 benchmark candidate。`CURRENT_BASELINE.md` 继续保持 surface / near-surface true 3D RBC baseline。
+
+## 2026-05-29 after Stage 21.8 internal defect benchmark report package
+
+下一步唯一建议：**A. internal real-data schema alignment**。
+
+21.8 已把 B2 internal benchmark candidate 的指标、分组风险和限制整理成报告包。B2 的 test total normalized MAE 为 `0.395256`，burial_depth MAE 为 `0.413 mm`，shape accuracy/F1 为 `0.975000 / 0.975309`；弱势分组集中在 `elongated_y`、`internal_ellipsoid`、`large`、`internal_cuboid`，以及 `deep_plus` 的 center/shape 风险。
+
+当前真正缺口不再是继续扩仿真数据，而是真实 internal 样本能否满足 schema/metadata：缺陷中心和埋深 ground truth、no-defect reference、Bx/By/Bz、sensor_z_m、坐标系、单位、扫描线、sensor_x 对齐和 gain 状态。下一步先做 internal real-data schema alignment；如果要做 gallery 或 inference smoke，则先恢复 B2 inference artifact。`CURRENT_BASELINE.md` 不变，internal defect 仍是独立 benchmark branch。

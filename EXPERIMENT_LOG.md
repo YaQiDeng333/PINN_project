@@ -3000,3 +3000,15 @@ Review agent 已完成只读复核，无 must-fix。review 建议把 audit/decis
 - 对比结论：B2 test total normalized MAE `0.395256` 优于 21.4 neural `0.406366` 和 feature baseline `0.416406`；burial_depth 短板已不再是 primary blocker，但 center_xyz 和 shape 仍需在报告/可视化中持续审计。
 - decision：B2 形成 internal benchmark candidate，但不是 baseline；`CURRENT_BASELINE.md` 继续保持 surface / near-surface true 3D RBC baseline，internal defect 仍是独立分支。
 - review：独立只读 review 通过，无 must-fix；已按建议补充 metrics 的 `selected` 兼容列。
+
+## 2026-05-29 Stage 21.8 internal defect benchmark report / visualization package
+
+- 范围：基于 21.7 B2 formal rerun 生成 internal defect benchmark report package、group-level failure audit、visual asset index 和 route decision；未训练，未运行 COMSOL，未生成或修改 data/NPZ，未更新 `CURRENT_BASELINE.md`。
+- 报告包：`results/summaries/internal_defect_benchmark_report_package_summary.txt`、`results/metrics/internal_defect_benchmark_report_package_metrics.csv`、`results/metrics/internal_defect_benchmark_candidate_comparison_matrix.csv`。
+- candidate 口径：`B2_feature_fusion_burial_head` 是 internal benchmark candidate；输入边界仍是 `delta_b/BxByBz` + delta_b-derived features，不使用 true `shape_type`、burial bin、size/aspect、split 或 sample_id。
+- 核心指标：selected seed `2026`，best epoch `277`；train/val/test total normalized MAE `0.055742 / 0.234877 / 0.395256`；L/W/D MAE `0.849 / 0.985 / 0.090 mm`；burial_depth MAE `0.413 mm`；center_xyz MAE `1.466 mm`；shape accuracy/F1 `0.975000 / 0.975309`。
+- group audit：弱势分组包括 `aspect_bin=elongated_y`、`shape_type=internal_ellipsoid`、`size_level=large` 和 `shape_type=internal_cuboid`；worst burial group 是 `size_level=medium`，burial_depth MAE `0.617 mm`；worst center group 是 `burial_depth_level=deep_plus`，center_xyz MAE `1.966 mm`；shape risk group 是 `deep_plus`，shape accuracy `0.900`。
+- visual asset 状态：21.7 没有 per-sample B2 prediction/profile artifact，本轮只生成 visual assets index 和 missing 说明；没有生成或提交 PNG，也没有伪造 best/worst 单样本图。
+- 限制：仍是 COMSOL 仿真域；shape 只覆盖 internal_sphere / internal_ellipsoid / internal_cuboid；真实 internal 数据未验证；不是 `CURRENT_BASELINE`。
+- route decision：下一步唯一建议是 `A_internal_real_data_schema_alignment`；如果要做 gallery 或 inference smoke，需要先恢复 B2 inference artifact。
+- review：独立只读 review 通过，无 must-fix；已按建议在 failure cases CSV 中增加 `artifact_scope=group_level_only` / `aggregate_only`。

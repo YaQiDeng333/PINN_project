@@ -1,0 +1,8 @@
+21.8 internal defect benchmark visual failure audit
+artifact_scope: group-level audit only; no per-sample B2 prediction/profile artifact was available.
+best_burial_groups: size_level=small(0.165mm), aspect_bin=elongated_x(0.193mm), shape_type=internal_sphere(0.274mm)
+worst_burial_group: size_level=medium, burial_depth_mae=0.617 mm
+worst_center_group: burial_depth_level=deep_plus, center_xyz_mae=1.966 mm
+shape_risk_group: burial_depth_level=deep_plus, shape_accuracy=0.900
+feature_vs_B2: only aggregate comparison is available in 21.7; B2 beats feature baseline on total MAE and burial_depth MAE.
+visualization_implication: generate real per-sample prediction artifacts before making best/worst image panels.

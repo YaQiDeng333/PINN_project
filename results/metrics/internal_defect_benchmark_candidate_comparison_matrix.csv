@@ -1,0 +1,4 @@
+role,model,source,selected,test_total_normalized_mae,test_L_mae_mm,test_W_mae_mm,test_D_mae_mm,test_burial_depth_mae_mm,test_center_xyz_mae_mm,test_shape_accuracy,test_shape_macro_f1,baseline_status
+21.4 neural reference,B0_reference_neural,21.4_neural_reference,False,0.40636563301086426,0.7610000967979431,0.9470643997192383,0.09293656051158905,0.5954996347427368,1.3799970149993896,1.0,1.0,not_current_baseline
+21.4 feature baseline,svr_rbf_C10,21.4_feature_baseline,False,0.416405588388443,0.7570649981498718,1.1507278680801392,0.10785912722349167,0.47151774168014526,1.5601974725723267,0.95,0.9505494505494506,not_current_baseline
+21.7 B2 benchmark candidate,B2_feature_fusion_burial_head,21.7_B2_formal_rerun,True,0.3952564597129822,0.8486037850379944,0.9846186637878418,0.08997005224227905,0.4132470190525055,1.4663500785827637,0.975,0.9753086419753086,not_current_baseline

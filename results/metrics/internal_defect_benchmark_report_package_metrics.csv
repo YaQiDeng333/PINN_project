@@ -1,0 +1,6 @@
+metric,value,unit,interpretation
+selected_seed,2026,seed,validation-only selected B2 rerun seed
+test_total_normalized_mae,0.3952564597129822,normalized,B2 beats 21.4 neural and feature baseline on composite score
+test_burial_depth_mae_mm,0.4132470190525055,mm,B2 beats 21.4 neural 0.595 mm and feature baseline 0.472 mm
+test_center_xyz_mae_mm,1.4663500785827637,mm,"minor trade-off vs 21.4 neural, still better than feature baseline"
+test_shape_macro_f1,0.9753086419753086,f1,"minor trade-off vs 21.4 neural, still above feature baseline"

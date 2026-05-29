@@ -1,0 +1,28 @@
+21.8 internal defect benchmark report / visualization read-only review
+
+必须修复：无。
+
+建议修复：
+- `internal_defect_benchmark_visual_failure_cases.csv` 实际是 group-level best/worst，不是 per-sample failure cases；summary 已写清缺少 per-sample B2 prediction artifact，但文件名容易让人误读。主控已增加 `artifact_scope=group_level_only` / `aggregate_only` 列。
+
+可以接受：
+- 可以接受。
+- 工作目录正确。
+- 未发现训练、COMSOL、data/NPZ mutation、`CURRENT_BASELINE.md` 修改。
+- 当前无 forbidden artifacts staged。
+- 21.8 脚本通过 registry/manifest 显式引用 `comsol_internal_defect_pilot_pack_v2_240`，未发现 latest/newest scan。
+
+是否认为 21.8 report package 可接受：
+- 可接受。21.7 指标准确：B2、seed=2026、epoch=277、train/val/test MAE `0.055742/0.234877/0.395256`，L/W/D `0.849/0.985/0.090 mm`，burial `0.413 mm`，center `1.466 mm`，shape acc/F1 `0.975000/0.975309`。
+
+是否同意 visual assets missing 处理：
+- 同意。当前没有 per-sample prediction/profile artifact，所以只生成 visual assets index 并写明 missing，没有伪造 best/worst PNG，也没有提交 PNG。
+
+是否同意不能称 baseline：
+- 同意。文档明确 internal defect 只是 independent benchmark candidate，`CURRENT_BASELINE.md` 仍是 surface/near-surface true 3D RBC baseline。
+
+下一步建议：
+- 走 `internal real-data schema alignment`，随后做真实 internal 样本 metadata dry run；如果要做 gallery 或 inference smoke，先恢复 B2 inference artifact。
+
+简短原因：
+- 21.8 把 B2 benchmark candidate 的指标、分组风险和限制讲清楚了；主要缺口不是继续扩数据，而是真实 internal 样本的 metadata/schema 和可加载推理 artifact。

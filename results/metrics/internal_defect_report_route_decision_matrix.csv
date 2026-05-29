@@ -1,0 +1,6 @@
+option,decision,reason,requires_training,requires_comsol,updates_current_baseline
+A_internal_real_data_schema_alignment,recommended,B2 已形成 internal benchmark candidate；下一步应把真实 internal 样本 metadata/schema 对齐到该分支，而不是继续盲目扩数据。,False,False,False
+B_internal_real_sample_metadata_dry_run,next_substep_after_schema_alignment,如果用户已有 internal block 元数据，可用 dry run 先查 sensor_z、reference、axis、unit、coordinate、ground truth blockers。,False,False,False
+C_internal_shape_extension_dataset,defer,当前短板不是数据量或 shape 扩展；B2 已稳定优于 reference，先做真实样本对齐。,False,True,False
+D_internal_inference_smoke,blocked_until_artifact_recovery,21.7 没有可加载的 B2 inference artifact；需要先 recover/export artifact 才能做 inference smoke 或 gallery。,False,False,False
+E_pause_internal_branch,reject,B2 candidate 有稳定正结果，暂停没有必要。,False,False,False

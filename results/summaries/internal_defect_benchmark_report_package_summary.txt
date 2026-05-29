@@ -1,0 +1,25 @@
+21.8 internal defect benchmark report package
+
+任务定义：internal / buried defect branch 预测内部缺陷的 L/W/D、burial_depth、center_xyz 和 shape_type；它不是 surface RBC profile baseline。
+dataset_id: comsol_internal_defect_pilot_pack_v2_240
+coverage: N=240; split={'test': 40, 'train': 160, 'val': 40}; shape={'internal_cuboid': 80, 'internal_ellipsoid': 80, 'internal_sphere': 80}; burial_depth={'deep': 60, 'deep_plus': 60, 'medium': 60, 'shallow': 60}; size={'large': 80, 'medium': 80, 'small': 80}; aspect={'compact': 134, 'elongated_x': 54, 'elongated_y': 52}
+model_chain: Bx/By/Bz delta_b -> Conv1D encoder + delta_b-derived feature MLP -> L/W/D, burial_depth, center_xyz, shape_type heads.
+B2 input policy: delta_b/BxByBz and delta_b-derived features only; no true shape_type, burial bin, size/aspect, split, or sample_id as model input.
+selected_seed: 2026; best_epoch: 277
+train/val/test total MAE: 0.05574171990156174 / 0.23487666249275208 / 0.3952564597129822
+test L/W/D MAE: 0.8486037850379944 / 0.9846186637878418 / 0.08997005224227905 mm
+test burial_depth MAE: 0.4132470190525055 mm
+test center_xyz MAE: 1.4663500785827637 mm
+test shape accuracy/F1: 0.975 / 0.9753086419753086
+comparison: B2 total=0.3952564597129822, 21.4 neural total=0.40636563301086426, feature baseline total=0.416405588388443
+burial_depth comparison: B2=0.4132470190525055 mm, 21.4 neural=0.5954996347427368 mm, feature baseline=0.47151774168014526 mm
+learnable_outputs: L/W/D, burial_depth, center_xyz, shape_type all show learnable signal in v2_240.
+limitations: COMSOL simulation only; shapes limited to internal_sphere/internal_ellipsoid/internal_cuboid; no real data validation; not CURRENT_BASELINE.
+branch_boundary: CURRENT_BASELINE remains the surface / near-surface true 3D RBC baseline; internal defect is an independent benchmark candidate branch.
+
+弱势分组（按 test total_normalized_mae 排序）：
+- aspect_bin=elongated_y: total=0.539, burial=0.460 mm, center=1.808 mm, shape_acc=1.000
+- shape_type=internal_ellipsoid: total=0.518, burial=0.488 mm, center=1.624 mm, shape_acc=1.000
+- size_level=large: total=0.478, burial=0.454 mm, center=1.485 mm, shape_acc=1.000
+- aspect_bin=elongated_x: total=0.468, burial=0.193 mm, center=0.974 mm, shape_acc=1.000
+- shape_type=internal_cuboid: total=0.450, burial=0.474 mm, center=1.674 mm, shape_acc=0.929

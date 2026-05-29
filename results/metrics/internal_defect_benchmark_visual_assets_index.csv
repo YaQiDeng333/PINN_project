@@ -1,0 +1,5 @@
+asset_type,path,exists,tracked_policy,usable_for_gallery,notes
+prediction_or_gallery_artifact,C:\Users\19166\Desktop\PINN_project\checkpoints\internal_defect_benchmark_b2_predictions.npz,False,do_not_commit_binary_or_png,False,existing artifact only; this script does not generate images
+prediction_or_gallery_artifact,C:\Users\19166\Desktop\PINN_project\checkpoints\internal_defect_benchmark_artifacts\internal_defect_b2_predictions.npz,False,do_not_commit_binary_or_png,False,existing artifact only; this script does not generate images
+prediction_or_gallery_artifact,C:\Users\19166\Desktop\PINN_project\results\metrics\internal_defect_benchmark_b2_per_sample_predictions.csv,False,do_not_commit_binary_or_png,False,existing artifact only; this script does not generate images
+prediction_or_gallery_artifact,C:\Users\19166\Desktop\PINN_project\results\previews\internal_defect_benchmark_gallery,False,do_not_commit_binary_or_png,False,existing artifact only; this script does not generate images

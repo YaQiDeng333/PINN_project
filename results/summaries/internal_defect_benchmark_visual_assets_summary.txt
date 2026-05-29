@@ -1,0 +1,6 @@
+21.8 internal defect benchmark visual assets index
+generation_policy: no PNG generated; no NPZ/checkpoint/data written.
+existing_candidate_artifacts: 0
+visual_assets_available: false
+reason: 21.7 produced formal aggregate/group metrics but did not persist a per-sample B2 prediction/profile artifact.
+next_visual_step: recover/export internal B2 inference artifact first, then generate best/worst gallery without committing PNG.

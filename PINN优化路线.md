@@ -610,3 +610,11 @@ The next route is a manifest-only dry run before any real signal array is accept
 路线上的判断是：B2 已稳定优于 21.4 neural 和 feature baseline。selected seed `2026` 的 test total normalized MAE 为 `0.395256`，burial_depth MAE 为 `0.413 mm`，优于 21.4 neural `0.595 mm` 和 feature baseline `0.472 mm`；三 seed burial_depth MAE 也都低于两个 reference。因此 burial_depth 不再是 primary shortfall。
 
 但这仍不是 baseline transition。internal defect 数据仍是 COMSOL 仿真，shape 只覆盖 internal_sphere / internal_ellipsoid / internal_cuboid，真实 internal sample 还未验证；`CURRENT_BASELINE.md` 继续是 surface / near-surface true 3D RBC baseline。下一步路线是 internal report / visualization package，先固化报告、分组失败样本和效果图，再决定真实 internal schema alignment 或更大 shape 扩展。
+
+## 2026-05-29 路线同步：21.8 internal defect report package
+
+21.8 收口了 internal defect benchmark candidate 的报告层。B2_feature_fusion_burial_head 的角色从“需要复核的候选”变成“可汇报的 internal benchmark candidate”，但没有进入 `CURRENT_BASELINE.md`，也不替代 surface / near-surface true 3D RBC baseline。
+
+路线上的关键判断是：继续盲目扩 internal COMSOL 数据不是当前优先项。21.7/21.8 已经说明 B2 在 v2_240 上稳定优于 21.4 neural 和 feature baseline，主要风险转为真实样本对齐和可解释的分组失败：`elongated_y`、`internal_ellipsoid`、`large`、`internal_cuboid`、`deep_plus` 需要在报告和后续样本设计中重点观察。
+
+下一步路线应进入 internal real-data schema alignment：先确认真实内部缺陷样本是否能提供 no-defect reference、三轴 Bx/By/Bz、sensor_z_m、坐标系、单位、扫描线、sensor_x 对齐、gain 状态，以及 L/W/D、center_xyz、burial_depth 的 ground truth。若要做 internal inference smoke 或效果图，需要先恢复 B2 inference artifact；缺 artifact 时不得伪造 per-sample gallery。

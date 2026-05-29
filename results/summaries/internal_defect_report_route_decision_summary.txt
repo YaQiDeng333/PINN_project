@@ -1,0 +1,7 @@
+21.8 internal defect report route decision
+B2_candidate_confirmed: true
+visual_artifacts_available: false
+unique_next_step: A_internal_real_data_schema_alignment
+reason: B2 已经是 internal benchmark candidate；下一步应对齐真实 internal 样本的 schema/metadata，而不是继续盲目扩数据或把 internal 写成 CURRENT_BASELINE。
+artifact_note: internal inference smoke / gallery 需要先恢复 B2 inference artifact。
+baseline_decision: not baseline; no CURRENT_BASELINE update; internal branch remains independent.
