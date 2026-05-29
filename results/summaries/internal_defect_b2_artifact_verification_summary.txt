@@ -1,0 +1,6 @@
+21.9 internal defect B2 artifact verification
+checkpoint_reload: pass
+reload_max_prediction_diff: 0
+reload_shape_diff_count: 0
+reference_metric_match: pass
+matches_21_7_21_8: true

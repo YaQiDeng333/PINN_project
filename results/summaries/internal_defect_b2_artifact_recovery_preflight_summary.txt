@@ -1,0 +1,45 @@
+21.9 internal defect B2 inference artifact recovery preflight
+
+工作目录：
+- `C:\Users\19166\Desktop\PINN_project`
+
+数据身份：
+- dataset_id = `comsol_internal_defect_pilot_pack_v2_240`
+- registry = `COMSOL_DATA_REGISTRY.md`
+- manifest = `results/manifests/comsol_internal_defect_pilot_pack_v2_240.manifest.json`
+- status = `pilot_generated`
+- train_ready_candidate = true
+- baseline_ready = false
+- forbidden_use 包含 `automatic_mainline_training`、`baseline_update`、`current_baseline_replacement`、`latest_newest_auto_discovery`、`direct_training_without_manifest_gate`
+
+已检查材料：
+- 21.7 rerun summary: `results/summaries/internal_defect_benchmark_rerun_b2_summary.txt`
+- 21.7 seed metrics: `results/metrics/internal_defect_benchmark_rerun_b2_seed_summary.csv`
+- 21.8 report package: `results/summaries/internal_defect_benchmark_report_package_summary.txt`
+- B2 model class / training helper: `scripts/train_internal_defect_burial_depth_candidates.py`
+- delta_b-derived feature helper: `scripts/train_internal_defect_feature_baselines.py`
+- explicit dataset loader: `scripts/load_internal_defect_pilot_dataset.py`
+
+固定协议：
+- model = `B2_feature_fusion_burial_head`
+- seed = `2026`
+- epochs = `300`
+- expected best epoch = `277`
+- split = train/val/test `160/40/40`
+- input = `delta_b/BxByBz` + train-normalized delta_b-derived features
+- labels 只用于 supervision / metrics
+- train-only normalization
+- validation-only checkpoint selection
+- test final only
+
+边界：
+- 不运行 COMSOL。
+- 不生成或修改 data/NPZ。
+- 不更新 `CURRENT_BASELINE.md`。
+- checkpoint / prediction artifact 只写入 ignored `checkpoints/internal_defect_b2_artifacts/`，不提交。
+- 本轮可提交的只有脚本、manifest、summary/metrics 和路线 Markdown。
+
+forbidden artifact check:
+- 初始 `data/`、`checkpoints/`、`results/previews/`、`notes/`、`CURRENT_BASELINE.md`、`scripts/visualize_current_baseline.py` 无 staged 风险。
+
+preflight_result = pass

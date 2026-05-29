@@ -1,0 +1,16 @@
+21.9 internal defect B2 inference artifact recovery
+dataset_id: comsol_internal_defect_pilot_pack_v2_240
+model: B2_feature_fusion_burial_head
+seed: 2026
+best_epoch: 277
+checkpoint_path: C:\Users\19166\Desktop\PINN_project\checkpoints\internal_defect_b2_artifacts\internal_defect_b2_feature_fusion_seed2026.pt
+prediction_path: C:\Users\19166\Desktop\PINN_project\checkpoints\internal_defect_b2_artifacts\internal_defect_b2_feature_fusion_seed2026_predictions.npz
+manifest_path: C:\Users\19166\Desktop\PINN_project\results\manifests\internal_defect_b2_inference_artifact_manifest.json
+checkpoint_committed: false
+prediction_artifact_committed: false
+current_baseline_update: false
+test_total_normalized_mae: 0.395256
+test_LWD_mae_mm: 0.849 / 0.985 / 0.090
+test_burial_depth_mae_mm: 0.413
+test_center_xyz_mae_mm: 1.466
+test_shape_accuracy_f1: 0.975000 / 0.975309

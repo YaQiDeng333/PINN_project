@@ -618,3 +618,11 @@ The next route is a manifest-only dry run before any real signal array is accept
 路线上的关键判断是：继续盲目扩 internal COMSOL 数据不是当前优先项。21.7/21.8 已经说明 B2 在 v2_240 上稳定优于 21.4 neural 和 feature baseline，主要风险转为真实样本对齐和可解释的分组失败：`elongated_y`、`internal_ellipsoid`、`large`、`internal_cuboid`、`deep_plus` 需要在报告和后续样本设计中重点观察。
 
 下一步路线应进入 internal real-data schema alignment：先确认真实内部缺陷样本是否能提供 no-defect reference、三轴 Bx/By/Bz、sensor_z_m、坐标系、单位、扫描线、sensor_x 对齐、gain 状态，以及 L/W/D、center_xyz、burial_depth 的 ground truth。若要做 internal inference smoke 或效果图，需要先恢复 B2 inference artifact；缺 artifact 时不得伪造 per-sample gallery。
+
+## 2026-05-29 路线同步：21.9 internal B2 inference artifact
+
+21.9 解决了 21.8 的展示和推理阻塞：B2_feature_fusion_burial_head 现在有可加载 checkpoint、prediction artifact 和 tracked manifest。artifact 按 21.7 固定协议恢复，seed `2026`、best epoch `277`、train-only normalization、validation-only selection、test final only，输入仍只来自 `delta_b/BxByBz` 和 delta_b-derived features。
+
+路线上的变化是：internal branch 已具备做 per-sample inference smoke / gallery 的条件。此前效果图需要临时复现模型，现在可以通过 `results/manifests/internal_defect_b2_inference_artifact_manifest.json` 定位 ignored checkpoint 和 prediction artifact，直接生成 true vs pred 内部空腔图、best/worst 样本索引和 failure gallery。
+
+这仍不是 baseline transition。`CURRENT_BASELINE.md` 继续保持 surface / near-surface true 3D RBC baseline，internal defect 仍是独立 benchmark branch；checkpoint 和 prediction artifact 只留在 ignored `checkpoints/`，不提交。后续真实 internal 样本接入仍需要 schema/metadata alignment。

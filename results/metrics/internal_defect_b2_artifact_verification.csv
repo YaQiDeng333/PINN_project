@@ -1,0 +1,11 @@
+check_name,pass,observed,expected,abs_diff,tolerance,notes
+test_total_normalized_mae,True,0.3952564597129822,0.3952564597129822,0.0,1e-07,21.7 selected B2 reference
+test_L_mae_mm,True,0.8486037850379944,0.8486037850379944,0.0,1e-06,21.7 selected B2 reference
+test_W_mae_mm,True,0.9846186637878418,0.9846186637878418,0.0,1e-06,21.7 selected B2 reference
+test_D_mae_mm,True,0.08997005224227905,0.08997005224227905,0.0,1e-06,21.7 selected B2 reference
+test_burial_depth_mae_mm,True,0.4132470190525055,0.4132470190525055,0.0,1e-06,21.7 selected B2 reference
+test_center_xyz_mae_mm,True,1.4663500785827637,1.4663500785827637,0.0,1e-06,21.7 selected B2 reference
+test_shape_accuracy,True,0.975,0.975,0.0,1e-09,21.7 selected B2 reference
+test_shape_macro_f1,True,0.9753086419753086,0.9753086419753086,0.0,1e-09,21.7 selected B2 reference
+checkpoint_reload_max_prediction_diff,True,0.0,0.0,0.0,1e-07,same model state reloaded from ignored checkpoint
+checkpoint_reload_shape_diff_count,True,0,0,0,0,shape predictions should reload exactly

@@ -3012,3 +3012,15 @@ Review agent 已完成只读复核，无 must-fix。review 建议把 audit/decis
 - 限制：仍是 COMSOL 仿真域；shape 只覆盖 internal_sphere / internal_ellipsoid / internal_cuboid；真实 internal 数据未验证；不是 `CURRENT_BASELINE`。
 - route decision：下一步唯一建议是 `A_internal_real_data_schema_alignment`；如果要做 gallery 或 inference smoke，需要先恢复 B2 inference artifact。
 - review：独立只读 review 通过，无 must-fix；已按建议在 failure cases CSV 中增加 `artifact_scope=group_level_only` / `aggregate_only`。
+
+## 2026-05-29 Stage 21.9 internal defect B2 inference artifact recovery
+
+- 范围：按 21.7 固定协议恢复 `B2_feature_fusion_burial_head` inference artifact；未运行 COMSOL，未生成或修改 data/NPZ，未更新 `CURRENT_BASELINE.md`。
+- 数据入口：通过 `COMSOL_DATA_REGISTRY.md` 和 `results/manifests/comsol_internal_defect_pilot_pack_v2_240.manifest.json` 显式加载 `comsol_internal_defect_pilot_pack_v2_240`，禁止 latest/newest scan。
+- 固定协议：seed `2026`，best epoch `277`，split `160/40/40`，train-only normalization，validation-only checkpoint selection，test final only；输入只使用 `delta_b/BxByBz` 和 delta_b-derived features。
+- ignored checkpoint: `checkpoints/internal_defect_b2_artifacts/internal_defect_b2_feature_fusion_seed2026.pt`。
+- ignored prediction artifact: `checkpoints/internal_defect_b2_artifacts/internal_defect_b2_feature_fusion_seed2026_predictions.npz`。
+- tracked manifest: `results/manifests/internal_defect_b2_inference_artifact_manifest.json`，记录 checkpoint/prediction path、sha256、model_config、feature_config、normalization 和 selected metrics。
+- verification：checkpoint reload max prediction diff `0`，shape diff count `0`；test total normalized MAE `0.395256`，L/W/D MAE `0.849 / 0.985 / 0.090 mm`，burial_depth MAE `0.413 mm`，center_xyz MAE `1.466 mm`，shape accuracy/F1 `0.975000 / 0.975309`，逐项复现 21.7/21.8。
+- artifact policy：checkpoint 和 prediction artifact 均未提交；只提交 manifest、summary/metrics 和脚本。
+- review：独立只读 review 通过，无 must-fix；已将 preflight summary 重写为 UTF-8 可读中文。

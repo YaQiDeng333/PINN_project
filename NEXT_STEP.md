@@ -501,3 +501,11 @@ Only next step: perform a real-data manifest dry run. Start with metadata only: 
 21.8 已把 B2 internal benchmark candidate 的指标、分组风险和限制整理成报告包。B2 的 test total normalized MAE 为 `0.395256`，burial_depth MAE 为 `0.413 mm`，shape accuracy/F1 为 `0.975000 / 0.975309`；弱势分组集中在 `elongated_y`、`internal_ellipsoid`、`large`、`internal_cuboid`，以及 `deep_plus` 的 center/shape 风险。
 
 当前真正缺口不再是继续扩仿真数据，而是真实 internal 样本能否满足 schema/metadata：缺陷中心和埋深 ground truth、no-defect reference、Bx/By/Bz、sensor_z_m、坐标系、单位、扫描线、sensor_x 对齐和 gain 状态。下一步先做 internal real-data schema alignment；如果要做 gallery 或 inference smoke，则先恢复 B2 inference artifact。`CURRENT_BASELINE.md` 不变，internal defect 仍是独立 benchmark branch。
+
+## 2026-05-29 after Stage 21.9 internal B2 artifact recovery
+
+下一步唯一建议：**internal inference smoke / visualization gallery**。
+
+21.9 已恢复可加载的 B2 inference artifact。checkpoint 位于 ignored `checkpoints/internal_defect_b2_artifacts/internal_defect_b2_feature_fusion_seed2026.pt`，prediction artifact 位于同目录的 `_predictions.npz`，tracked manifest 是 `results/manifests/internal_defect_b2_inference_artifact_manifest.json`。verification 逐项复现 21.7/21.8：test total normalized MAE `0.395256`，burial_depth MAE `0.413 mm`，shape accuracy/F1 `0.975000 / 0.975309`，checkpoint reload diff 为 `0`。
+
+因此现在可以做真正的 per-sample gallery / inference smoke，而不必再临时复训。下一步应读取 artifact manifest，生成 good/bad/failure/risk 样本图和逐样本索引；checkpoint/prediction artifact 继续不提交，`CURRENT_BASELINE.md` 继续不变。

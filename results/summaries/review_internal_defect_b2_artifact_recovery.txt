@@ -1,0 +1,29 @@
+21.9 internal defect B2 inference artifact recovery read-only review
+
+必须修复：无。
+
+建议修复：
+- `results/summaries/internal_defect_b2_artifact_recovery_preflight_summary.txt` 在 PowerShell 读取时出现中文乱码；不影响 artifact 正确性。主控已重写为 UTF-8 可读中文。
+
+可以接受：
+- 可以接受。
+- 工作目录正确。
+- 未发现 COMSOL 运行痕迹、data/NPZ 修改、`CURRENT_BASELINE.md` 修改。
+- dataset 通过 `COMSOL_DATA_REGISTRY.md` + `results/manifests/comsol_internal_defect_pilot_pack_v2_240.manifest.json` 显式加载，loader 明确禁止 latest/newest scan。
+- B2 协议固定为 seed=`2026`、best epoch=`277`、split=`160/40/40`、train-only normalization、validation-only selection、test final only。
+- 输入只来自 `delta_b/BxByBz` 和 delta_b-derived features。
+
+artifact 是否可用于后续 inference/gallery：
+- 可以。manifest 记录了 checkpoint path、prediction path、model_config、feature_config、normalization、metrics、sha256，足够后续定位和加载。
+
+是否复现 21.7/21.8：
+- 是。verification 全部通过：test total=`0.395256`，L/W/D=`0.849/0.985/0.090 mm`，burial=`0.413 mm`，center=`1.466 mm`，shape acc/F1=`0.975000/0.975309`，checkpoint reload max diff=`0`。
+
+是否同意 checkpoint/prediction 不提交：
+- 同意。两者位于 ignored `checkpoints/internal_defect_b2_artifacts/`，未 staged forbidden artifacts。
+
+下一步建议：
+- 进入 internal inference smoke / visualization gallery，用这个 artifact 生成 per-sample true vs pred 图和失败样本索引。
+
+简短原因：
+- 21.9 已恢复可加载 B2 artifact，并严格复现 21.7 指标；当前剩下的是展示和推理流程验证，不是模型或数据问题。
