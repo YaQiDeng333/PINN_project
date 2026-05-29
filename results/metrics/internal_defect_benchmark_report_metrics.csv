@@ -1,0 +1,21 @@
+metric,value,notes
+dataset_id,comsol_internal_defect_pilot_pack_v2_240,explicit registry/manifest dataset
+n_samples,240,internal/buried defect v2_240
+split_counts,"{'test': 40, 'train': 160, 'val': 40}",train/val/test
+shape_counts,"{'internal_cuboid': 80, 'internal_ellipsoid': 80, 'internal_sphere': 80}",balanced 80/80/80
+burial_depth_counts,"{'deep': 60, 'deep_plus': 60, 'medium': 60, 'shallow': 60}",balanced 60 each
+feature_selected_model,svr_rbf_C10,validation selected
+feature_test_total_normalized_mae,0.416405588388443,test final only
+feature_test_LWD_mae_mm,0.757/1.151/0.108,actual 21.4 CSV value
+feature_test_burial_depth_mae_mm,0.47151774168014526,feature remains better on burial
+feature_test_center_xyz_mae_mm,1.5601974725723267,
+feature_test_shape_accuracy_f1,0.950000/0.950549,
+neural_selected_seed,42,validation selected
+neural_train_val_test_total_normalized_mae,0.068995/0.236902/0.406366,
+neural_test_LWD_mae_mm,0.761/0.947/0.093,
+neural_test_burial_depth_mae_mm,0.5954996347427368,risk: worse than feature
+neural_test_center_xyz_mae_mm,1.3799970149993896,
+neural_test_shape_accuracy_f1,1.000000/1.000000,
+beat_mean_baseline,是,
+beat_feature_baseline,是,
+baseline_ready,False,must stay false

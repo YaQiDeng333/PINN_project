@@ -1,0 +1,24 @@
+21.5 internal defect benchmark report preflight summary
+
+结论：preflight 通过，可以生成 internal / buried defect benchmark candidate report。
+
+检查项：
+- dataset_id: comsol_internal_defect_pilot_pack_v2_240
+- manifest: results/manifests/comsol_internal_defect_pilot_pack_v2_240.manifest.json exists
+- registry: COMSOL_DATA_REGISTRY.md contains dataset_id and forbids latest/newest auto discovery
+- schema: INTERNAL_DEFECT_SCHEMA.md exists
+- 21.4 feature metrics: results/metrics/internal_defect_v2_feature_baseline_metrics.csv exists
+- 21.4 neural metrics: results/metrics/internal_defect_v2_neural_metrics.csv exists
+- 21.4 comparison metrics: results/metrics/internal_defect_v2_vs_feature_baseline.csv exists
+- 21.4 decision summary: results/summaries/internal_defect_v2_training_gate_decision_summary.txt exists
+
+Boundary:
+- training: false
+- COMSOL run: false
+- data/NPZ mutation: false
+- CURRENT_BASELINE update: false
+- baseline transition: false
+- latest/newest scan: false
+
+Known metric note:
+- 21.4 CSV source records selected feature L/W/D MAE as 0.757 / 1.151 / 0.108 mm. If external notes say W=1.510 mm, the tracked CSV/report source of truth is W=1.151 mm.

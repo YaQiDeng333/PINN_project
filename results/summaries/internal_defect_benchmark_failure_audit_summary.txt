@@ -1,0 +1,9 @@
+21.5 internal defect benchmark failure / group audit
+audit_scope: group-level only; 21.4 did not persist per-sample predictions/checkpoints.
+group_rows_compared: 13
+total_metric_feature_wins: 7
+burial_metric_feature_wins: 13
+center_metric_neural_wins: 10
+worst_neural_burial_group: shape_type=internal_cuboid; burial_mae=0.804 mm; feature=0.593 mm
+worst_neural_center_group: burial_depth_level=shallow; center_mae=1.613 mm; feature=1.276 mm
+risk: burial_depth remains the clearest feature-baseline advantage and should drive the next model diagnostic.

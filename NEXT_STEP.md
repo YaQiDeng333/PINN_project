@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-05-29 after Stage 21.5 internal defect benchmark report
+
+下一步唯一建议：**B. improve burial-depth head/model**。
+
+21.5 已把 internal v2_240 的候选角色收口：neural candidate 是正向 benchmark candidate，test total normalized MAE `0.406366`，略优于 selected feature baseline `0.416406`，并且 shape accuracy/F1 为 `1.000000 / 1.000000`，center_xyz MAE `1.380 mm` 也优于 feature baseline `1.560 mm`。但真正的下一步 blocker 是 burial_depth：feature baseline `0.472 mm` 明确优于 neural `0.595 mm`，group-level audit 中 burial_depth 也是 feature baseline 系统性更强。
+
+因此不要直接 baseline transition，也不要先扩数据或接真实实验。下一步应做 burial-depth focused diagnostic：例如 burial-depth head/loss、feature-fusion、shape-conditioned burial head 或把 delta_b-derived physical features 作为辅助分支；shape-conditioned model 作为第二优先级。`CURRENT_BASELINE.md` 继续保持 surface / near-surface true 3D RBC baseline，internal defect 仍是独立 branch。
+
 ## 2026-05-29 after Stage 21.4 internal defect v2_240 training gate
 
 下一步唯一建议：**进入 internal defect v2_240 formal benchmark/report，不要直接升 baseline**。

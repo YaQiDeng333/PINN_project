@@ -1,0 +1,8 @@
+question,answer,evidence,decision
+是否完成 internal benchmark candidate consolidation,是,21.4 feature/neural/mean metrics consolidated in report matrix,A 已完成，不作为下一步
+是否应改进 burial-depth head/model,是,feature_burial=0.472 mm; neural_burial=0.595 mm; group_feature_burial_wins=13,B
+是否应 add shape-conditioned model,作为次优 ablation,neural_shape_accuracy=1.000000; feature_shape_accuracy=0.950000,C secondary
+是否需要继续 expand internal dataset,暂不优先,v2_240 已解决 split/coverage blocker，当前 blocker 是 burial-depth modeling trade-off,D later
+是否进入 internal real-data schema/smoke,暂缓,simulation benchmark candidate 尚未 formalized，burial-depth 风险未收口,E later
+是否 pause internal branch,否,neural_total<0.416405588388443? True; center_better=True; shape_better=True,continue
+下一步唯一建议,B_improve_burial_depth_head_model,feature baseline still beats neural on burial_depth while neural is stronger on total/shape/center.,route

@@ -1,0 +1,11 @@
+21.5 internal / buried defect benchmark candidate report
+dataset_id: comsol_internal_defect_pilot_pack_v2_240
+task_definition: Bx/By/Bz delta_b -> internal cavity labels: L/W/D, burial_depth, center_xyz, shape_type.
+dataset_identity: N=240; split={'test': 40, 'train': 160, 'val': 40}; shape={'internal_cuboid': 80, 'internal_ellipsoid': 80, 'internal_sphere': 80}; burial={'deep': 60, 'deep_plus': 60, 'medium': 60, 'shallow': 60}; size={'large': 80, 'medium': 80, 'small': 80}; aspect={'compact': 134, 'elongated_x': 54, 'elongated_y': 52}
+relation_to_CURRENT_BASELINE: independent internal branch; does not replace surface/near-surface true 3D RBC CURRENT_BASELINE.
+feature_baseline: svr_rbf_C10 test total MAE=0.416406; L/W/D=0.757/1.151/0.108 mm; burial=0.472 mm; center=1.560 mm; shape acc/F1=0.950000/0.950549.
+neural_candidate: seed=42 test total MAE=0.406366; L/W/D=0.761/0.947/0.093 mm; burial=0.595 mm; center=1.380 mm; shape acc/F1=1.000000/1.000000.
+learnable_params: L/W/D、center_xyz、shape_type 明确可学习；burial_depth 有信号但仍是风险项。
+burial_depth_risk: feature baseline better than neural (0.472 mm vs 0.595 mm).
+why_not_baseline: v2_240 是 training-gate / benchmark-candidate evidence，不是 formal baseline；仍缺 formal benchmark rerun、真实实验验证和 burial-depth-focused follow-up。
+route_note: neural beats mean baseline and composite feature baseline, but feature baseline remains an important burial-depth comparator.

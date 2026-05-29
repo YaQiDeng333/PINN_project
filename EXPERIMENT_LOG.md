@@ -2869,6 +2869,18 @@ Review agent 已完成只读复核，无 must-fix。review 建议把 audit/decis
 - decision: A2 is a liftoff robustness candidate and should enter a formal liftoff benchmark. This is not a baseline replacement; `CURRENT_BASELINE.md` remains the nominal 20.85 baseline.
 - review: independent read-only review passed with no must-fix. Two provenance/input-boundary suggestions were adopted.
 
+# 2026-05-29 Stage 21.5 internal defect benchmark report / candidate consolidation
+
+- scope: benchmark report, group-level failure/risk audit, candidate comparison, and route decision only. No training, no COMSOL, no data/NPZ mutation, no checkpoint/preview artifact, no `CURRENT_BASELINE.md` update, and no baseline transition.
+- dataset_id: `comsol_internal_defect_pilot_pack_v2_240`, explicitly referenced through `COMSOL_DATA_REGISTRY.md` and manifest.
+- candidate roles: mean baseline remains the trivial comparator; `svr_rbf_C10` remains the selected delta_b feature baseline; `internal_v2_conv1d_multitask` seed `42` remains the selected neural benchmark candidate from 21.4.
+- feature baseline: test total normalized MAE `0.416406`; L/W/D MAE `0.757 / 1.151 / 0.108 mm`; burial_depth MAE `0.472 mm`; center_xyz MAE `1.560 mm`; shape accuracy/F1 `0.950000 / 0.950549`.
+- neural candidate: test total normalized MAE `0.406366`; L/W/D MAE `0.761 / 0.947 / 0.093 mm`; burial_depth MAE `0.595 mm`; center_xyz MAE `1.380 mm`; shape accuracy/F1 `1.000000 / 1.000000`.
+- learnability: L/W/D, center_xyz, and shape_type are positive; burial_depth has signal but remains the main risk because feature baseline is stronger.
+- failure audit: group-level only because 21.4 did not persist per-sample predictions/checkpoints. Feature wins burial_depth in all compared test groups; neural wins center_xyz in most groups and total/shape overall.
+- decision: no baseline transition. Next step is `B_improve_burial_depth_head_model`, with shape-conditioned model as secondary ablation.
+- review: independent read-only review passed with no must-fix.
+
 # 2026-05-29 Stage 21.4 internal defect v2_240 training gate
 
 - dataset_id: `comsol_internal_defect_pilot_pack_v2_240`, explicitly loaded through `COMSOL_DATA_REGISTRY.md` and `results/manifests/comsol_internal_defect_pilot_pack_v2_240.manifest.json`.

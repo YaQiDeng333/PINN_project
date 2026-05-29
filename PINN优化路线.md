@@ -474,6 +474,12 @@ feature-fusion 的设计边界是：20.77 neural encoder 继续负责 raw `delta
 
 20.83 tested the R1 route: keep the six RBC-style parameters as outputs, but train with profile-primary loss. The experiment did not pass the upgrade gate. It improved projected mask Dice but worsened the primary 3D profile reconstruction metric relative to 20.77.
 
+# 2026-05-29 Stage 21.5 route note
+
+21.5 把 internal / buried defect 分支的当前角色收口为 benchmark candidate，而不是 baseline。`internal_v2_conv1d_multitask` seed `42` 是当前 neural candidate：total normalized MAE `0.406366`，优于 selected feature baseline `0.416406`；shape_type 和 center_xyz 也更强。但 burial_depth 是最清楚的风险项，feature baseline `0.472 mm` 优于 neural `0.595 mm`，group-level audit 也显示 feature 在 burial_depth 上系统性更强。
+
+这说明 internal branch 已经不是“能不能学”的问题，而是“埋深如何更稳地学”的问题。下一步应聚焦 burial-depth head/model：可以做 feature-fusion burial diagnostic、shape-conditioned burial head、或调整 burial-depth loss/selection；shape-conditioned model 是次优 ablation。不要直接 baseline transition，不要把 internal defect 写进 surface / near-surface `CURRENT_BASELINE`。
+
 # 2026-05-29 Stage 21.4 route note
 
 21.4 在 `comsol_internal_defect_pilot_pack_v2_240` 上完成 internal/buried defect training gate。v2_240 修复了 21.2 的 split blocker，因此这次结果可以作为 internal branch 的正向 training-gate 证据：三轴 `Bx/By/Bz delta_b` 能学习尺寸、中心位置和 shape_type，burial_depth 也有信号。
