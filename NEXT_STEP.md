@@ -585,3 +585,11 @@ Only next step: perform a real-data manifest dry run. Start with metadata only: 
 22.8 的判断是，22.7 的高拒判率不是单纯模型阈值问题，而是当前观测配置可能信息不足。risk gate 能抓住 catastrophic / geometry branch，但 coverage retained 只有 `0.283`；failure cases 集中在 deep_plus、large、compact/elongated_y，以及 cuboid/ellipsoid hard cases。
 
 22.9 第一轮只做 R0/R1/R2 diagnostic pack：30 个 base geometry，每个 base 6 个 paired variants，总计 180 rows；fallback 是 24 base / 144 rows。R1_more_y_lines 用来验证 center/lateral tail，R2_multi_liftoff 用来验证 burial/size 混淆。R3 multi-scan-direction 暂作第二优先级，R4 multi-magnetization 暂缓。不要在 22.9 里训练或接真实样品。
+
+## 2026-05-30 after Stage 22.9 internal richer-observation pack generation
+
+下一步唯一建议：进入 **23.0 richer-observation evaluation gate**。
+
+22.9 已完成 COMSOL diagnostic pack generation：planned/success `180/180`，30 个 base 全部具备 6 个 paired variants，scan line 覆盖 `3/5/9`，liftoff 覆盖 `0.006/0.008/0.010/0.012 m`。新数据集 `comsol_internal_defect_richer_observation_pack_v1` 已通过 registry/manifest 显式注册，`validation_passed=true`，`status=diagnostic_pack_generated`，但 `train_ready_candidate=false`、`baseline_ready=false`。
+
+23.0 不应直接训练，也不应直接接真实样品；应先比较 R0/R1/R2 是否真的降低 center/burial tail、geometry branch risk 和 abstention rate。`CURRENT_BASELINE.md` 继续保持 surface / near-surface true 3D RBC baseline，internal defect 仍是独立 diagnostic branch。

@@ -1,0 +1,7 @@
+question,answer,evidence,decision
+pack 是否 full/partial 可用,full,status=diagnostic_pack_generated; success_rows=180; complete_base_count=30,可用
+paired richer-observation variants 是否完整,yes,"complete_base_count=30; expected variants={'R0_3line_z0p008': 30, 'R1_5line_z0p008': 30, 'R1_9line_z0p008': 30, 'R2_5line_z0p006': 30, 'R2_5line_z0p010': 30, 'R2_5line_z0p012': 30}",满足 23.0 paired diagnostic
+scan_line / liftoff coverage 是否达标,yes,"scan_line_counts={'3': 30, '5': 120, '9': 30}; sensor_z=[0.006, 0.008, 0.01, 0.012]",R0/R1/R2 可比较
+是否可进入 23.0 richer-observation evaluation,yes,validation_passed=True; failed_blockers=[],进入 23.0 评估，不训练
+是否需要 top-up,no,full_pack=True; partial_pack=False,无需 top-up
+是否可训练或更新 baseline,no,train_ready_candidate=false; baseline_ready=false,训练和 CURRENT_BASELINE 更新继续暂缓

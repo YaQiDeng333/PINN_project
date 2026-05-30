@@ -1,0 +1,20 @@
+22.9 internal richer-observation pack validation summary
+dataset_id: comsol_internal_defect_richer_observation_pack_v1
+status: diagnostic_pack_generated
+validation_passed: true
+planned_rows: 180
+success_rows: 180
+base_count: 30
+complete_base_count: 30
+observation_variants: {'R0_3line_z0p008': 30, 'R1_5line_z0p008': 30, 'R1_9line_z0p008': 30, 'R2_5line_z0p006': 30, 'R2_5line_z0p010': 30, 'R2_5line_z0p012': 30}
+scan_line_counts: {'3': 30, '5': 120, '9': 30}
+sensor_z_levels_m: [0.006, 0.008, 0.01, 0.012]
+shape_counts: {'internal_cuboid': 78, 'internal_ellipsoid': 60, 'internal_sphere': 42}
+burial_depth_counts: {'deep': 30, 'deep_plus': 96, 'shallow': 42, 'medium': 12}
+size_counts: {'large': 90, 'medium': 72, 'small': 18}
+aspect_counts: {'compact': 108, 'elongated_y': 60, 'elongated_x': 12}
+max_delta_error: 1.1641532182693481e-10
+failed_blockers: []
+baseline_update: false
+train_ready_candidate: false
+结论：该数据包只用于 richer-observation schema/diagnostic，不能自动训练，不能替换 CURRENT_BASELINE。

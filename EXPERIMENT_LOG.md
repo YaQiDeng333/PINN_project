@@ -3133,3 +3133,15 @@ Review agent 已完成只读复核，无 must-fix。review 建议把 audit/decis
 - 第一轮 diagnostic pack plan：target `30` base geometries / `180` rows，fallback `24` / `144`。每个 base 都有 6 个 paired variants：`R0_3line_z0p008`、`R1_5line_z0p008`、`R1_9line_z0p008`、`R2_5line_z0p006`、`R2_5line_z0p010`、`R2_5line_z0p012`。
 - route decision：唯一下一步是 `22.9_richer_observation_COMSOL_diagnostic_pack_generation`；仍不进入训练或真实样品推理。
 - review：独立只读 review 通过，无 must-fix；确认 plan-only、安全边界和 180-row plan gate 均满足要求。
+
+## 2026-05-30 Stage 22.9 internal richer-observation COMSOL diagnostic pack
+
+- 范围：执行 22.8 设计的 internal richer-observation COMSOL diagnostic pack；没有训练，没有更新 `CURRENT_BASELINE.md`，没有把 internal defect 写成 baseline。
+- 数据包：新增 `dataset_id=comsol_internal_defect_richer_observation_pack_v1`，通过 `COMSOL_DATA_REGISTRY.md` 和 `results/manifests/comsol_internal_defect_richer_observation_pack_v1.manifest.json` 显式引用，禁止 latest/newest discovery。
+- COMSOL 结果：planned/success `180/180`，base count `30`，complete paired base count `30`，失败 `0`。
+- paired variants：每个 base 都有 `R0_3line_z0p008`、`R1_5line_z0p008`、`R1_9line_z0p008`、`R2_5line_z0p006`、`R2_5line_z0p010`、`R2_5line_z0p012` 六个观测版本。
+- 观测覆盖：scan line count 覆盖 `3/5/9`，liftoff 覆盖 `0.006/0.008/0.010/0.012 m`；NPZ 使用 padded `(N,3,9,201)` 并记录 `scan_line_count` 和 `scan_line_mask`。
+- validation：`validation_passed=true`，`failed_blockers=[]`，`delta_b=b_defect-b_no_defect` 校验通过，Bx/By/Bz finite，shape/burial/size/aspect 覆盖满足 diagnostic 目标。
+- registry：`status=diagnostic_pack_generated`，`train_ready_candidate=false`，`baseline_ready=false`，allowed use 仅为 `schema_validation, explicit_richer_observation_diagnostic`。
+- route decision：可进入 23.0 richer-observation evaluation gate；训练、真实样品推理和 `CURRENT_BASELINE.md` 更新继续暂缓。
+- review：独立只读复审通过，无 must-fix；COMSOL 既有无关 dirty items 保持未 staged、未回滚、未提交。

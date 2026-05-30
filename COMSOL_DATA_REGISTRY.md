@@ -320,3 +320,34 @@ This registry records generated COMSOL dataset identities and allowed usage. It 
 - source_dataset_ids: comsol_internal_defect_pilot_pack_v2_240, comsol_internal_defect_hard_case_topup_pack_v1
 - npz_sha256: 0664a64c38b27938f0af34083697f7169a001b662341a81566706b9cb56d53ac
 - notes: Hard-case augmented internal branch pack; generated NPZ/data files are not committed; not a baseline.
+
+## comsol_internal_defect_richer_observation_pack_v1
+
+- dataset_role: internal_defect_richer_observation_diagnostic_pack
+- status: diagnostic_pack_generated
+- route: internal_buried_defect_richer_observation
+- stage: 22.9
+- schema_version: internal_defect_richer_observation_v1
+- internal_surface_mixed: false
+- path: `C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\generated\internal_richer_observation_pack\comsol_internal_defect_richer_observation_pack_v1.npz`
+- manifest_path: `C:\Users\19166\Desktop\PINN_project\results\manifests\comsol_internal_defect_richer_observation_pack_v1.manifest.json`
+- n_samples: 180
+- planned_rows: 180
+- complete_base_count: 30
+- observation_variants: {'R0_3line_z0p008': 30, 'R1_5line_z0p008': 30, 'R1_9line_z0p008': 30, 'R2_5line_z0p006': 30, 'R2_5line_z0p010': 30, 'R2_5line_z0p012': 30}
+- scan_line_counts: {'3': 30, '5': 120, '9': 30}
+- sensor_z_levels_m: [0.006, 0.008, 0.01, 0.012]
+- shape_counts: {'internal_cuboid': 78, 'internal_ellipsoid': 60, 'internal_sphere': 42}
+- burial_depth_counts: {'deep': 30, 'deep_plus': 96, 'shallow': 42, 'medium': 12}
+- size_counts: {'large': 90, 'medium': 72, 'small': 18}
+- aspect_counts: {'compact': 108, 'elongated_y': 60, 'elongated_x': 12}
+- train_ready_candidate: false
+- baseline_ready: false
+- auto_discovery_allowed: false
+- latest_newest_discovery_allowed: false
+- allowed_use: schema_validation, explicit_richer_observation_diagnostic
+- forbidden_use: automatic_mainline_training, baseline_update, current_baseline_replacement, latest_newest_auto_discovery, direct_training_without_manifest_gate
+- source_dataset_ids: comsol_internal_defect_pilot_pack_v3_hardcase
+- validation_script: `scripts/validate_internal_richer_observation_pack.py`
+- npz_sha256: 936d62b88436115177e989fbdacc1b39ca30b917a6e1cdcd8df16287c8155b75
+- notes: Richer-observation diagnostic pack only; generated NPZ/data files are not committed; not a baseline.

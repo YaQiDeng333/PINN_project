@@ -1,0 +1,10 @@
+22.9 internal richer-observation registry summary
+dataset_id: comsol_internal_defect_richer_observation_pack_v1
+registry_path: C:\Users\19166\Desktop\PINN_project\COMSOL_DATA_REGISTRY.md
+manifest_path: C:\Users\19166\Desktop\PINN_project\results\manifests\comsol_internal_defect_richer_observation_pack_v1.manifest.json
+status: diagnostic_pack_generated
+allowed_use: schema_validation, explicit_richer_observation_diagnostic
+forbidden_use: automatic_mainline_training, baseline_update, current_baseline_replacement, latest_newest_auto_discovery, direct_training_without_manifest_gate
+baseline_ready: false
+train_ready_candidate: false
+latest_newest_discovery_allowed: false

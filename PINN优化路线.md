@@ -702,3 +702,11 @@ The next route is a manifest-only dry run before any real signal array is accept
 failure-to-observation 映射已经明确：center/lateral tail 优先需要更多 y-lines；burial/size 混淆优先需要 multi-liftoff；cuboid/ellipsoid 和 elongated aspect confusion 后续可能需要 multi-scan-direction。现有 COMSOL internal generator 已支持 `scan_line_y_m` 和 `sensor_z_m`，所以 R1/R2 是低成本第一轮；R3/R4 暂不作为默认执行项。
 
 路线更新为：22.9 执行 richer-observation COMSOL diagnostic pack，不训练、不接真实样品。第一轮固定 R0/R1/R2 paired comparison，target 30 base / 180 rows，先判断增加观测能否降低 center/burial tail 和拒判率；internal branch 仍不是 baseline，`CURRENT_BASELINE.md` 不变。
+
+## 2026-05-30 路线同步：22.9 richer-observation diagnostic pack
+
+22.9 已把 22.8 的观测扩展设想落成可评估数据包。COMSOL 生成 `180/180` 行成功，30 个 base 每个都有 `R0_3line_z0p008`、`R1_5line_z0p008`、`R1_9line_z0p008`、`R2_5line_z0p006`、`R2_5line_z0p010`、`R2_5line_z0p012` 六个 paired variants；scan line count 覆盖 `3/5/9`，sensor_z_m 覆盖 `0.006/0.008/0.010/0.012 m`。
+
+路线状态变为：`comsol_internal_defect_richer_observation_pack_v1` 是 explicit richer-observation diagnostic pack，`status=diagnostic_pack_generated`，可以进入 23.0 evaluation gate；它不是训练集 baseline，`train_ready_candidate=false`、`baseline_ready=false`，也不替换 surface / near-surface `CURRENT_BASELINE.md`。
+
+23.0 的关键判断不是继续加数据或调模型，而是先量化 R1_more_y_lines 和 R2_multi_liftoff 是否相对 R0_current_reference 降低 center/burial tail、geometry branch failure 和 risk-gate abstention。只有 richer observation 证明有效后，才讨论新的输入协议、loader/model 改造和后续训练。
