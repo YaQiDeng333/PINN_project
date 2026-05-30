@@ -1,0 +1,22 @@
+# 20.30 COMSOL multi-defect pilot 完成复核
+
+复核时间：2026-05-31
+
+## 复核结论
+
+复核通过。
+
+## 检查项
+
+- 是否重新生成 true same-model two-component COMSOL pilot：通过，24 / 24 成功。
+- 是否生成并验证 NPZ：通过，NPZ 可读，delta_bz shape 为 (24, 3, 201)，mask shape 为 (24, 64, 128)。
+- 是否运行 PINN training gate：通过，train / val / test split 为 16 / 4 / 4，test Dice 为 0.711852，test component recall 为 1.0。
+- 是否训练成 baseline：否，本轮只恢复 20.30 pilot gate 证据。
+- 是否更新 CURRENT_BASELINE：否。
+- 是否提交 data / NPZ / .mph / raw CSV / checkpoint / preview PNG / notes / temp STL：否，相关生成物保留在 ignored 路径。
+- 是否使用 latest / newest scan 作为数据入口：否，训练脚本读取固定 20.30 NPZ 路径。
+- 是否触碰无关 COMSOL dirty items：否，`src/tools/physics.py`、`src/tools/results.py`、`src/tools/study.py`、`scripts/generate_mfl_rectangular_sweep.py` 未纳入本轮 staging。
+
+## 风险和限制
+
+20.30 样本数只有 24，且 component type 只覆盖 rectangular_notch 与 rotated_rect。它可以证明 multi-defect COMSOL -> NPZ -> mask training gate 链路成立，但不能代表稳定泛化能力。

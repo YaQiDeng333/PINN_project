@@ -1,0 +1,48 @@
+# 20.30 COMSOL multi-defect pilot 完成审计
+
+审计时间：2026-05-31
+
+## 范围
+
+本次只恢复并验证 20.30 true multi-defect COMSOL MFL multi-line pilot。它不是 baseline，不更新 CURRENT_BASELINE，不替换后续 surface / internal defect 路线。
+
+## COMSOL 生成结果
+
+- generator：C:\Users\19166\Desktop\COMSOL_Multiphysics_MCP\scripts\generate_mfl_multi_defect_pilot.py
+- 命令：C:\Users\19166\anaconda3\envs\comsol_mcp\python.exe scripts\generate_mfl_multi_defect_pilot.py --max-samples 24 --overwrite
+- 成功样本：24 / 24
+- 失败样本：0
+- component_count：全部为 2
+- component type 组合：rectangular_notch+rectangular_notch = 8，rectangular_notch+rotated_rect = 8，rotated_rect+rotated_rect = 8
+- split：train = 16，val = 4，test = 4
+- scan_line_y_m：[-0.001, 0.0, 0.001]
+- delta_bz shape：(24, 3, 201)
+- mask shape：(24, 64, 128)
+- delta_bz = bz_defect - bz_no_defect：通过
+- NPZ：C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\prepared\comsol_multi_defect_multiline_forward_pack_v1_pilot.npz
+- NPZ 提交策略：留在 ignored data 路径，不提交
+
+## PINN training gate
+
+- script：C:\Users\19166\Desktop\PINN_project\scripts\train_comsol_multi_defect_pilot_gate.py
+- 命令：C:\Users\19166\anaconda3\envs\pinn_mfl\python.exe scripts\train_comsol_multi_defect_pilot_gate.py --epochs 200 --batch-size 4 --seed 42
+- seed：42
+- best epoch：38
+- selected threshold：0.6
+- train loss decreased：True
+- can fit 16 train samples：True
+- test IoU：0.557733
+- test Dice：0.711852
+- test area error：0.236399
+- test center error：1.786181
+- test component recall：1.0
+- missed second component count：0
+- merged one-blob count：0
+- extra fragment count：5
+- hardest component combination：rotated_rect+rotated_rect
+
+## 结论
+
+20.30 当前工作树已经具备可复现的 COMSOL pilot 数据、NPZ ingest 证据和 PINN training gate 证据。结论仍是 pilot gate only：它证明 true same-model two-component COMSOL 链路可跑通，但 24 样本太小，不能作为 baseline，也不能替换任何 CURRENT_BASELINE。
+
+下一步口径保持历史结论：若继续该分支，应扩展 multi_defect pilot_v2，而不是从 20.30 直接做 baseline transition。
