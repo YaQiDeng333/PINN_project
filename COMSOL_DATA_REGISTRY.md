@@ -292,3 +292,31 @@ This registry records generated COMSOL dataset identities and allowed usage. It 
 - validation_script: `scripts/validate_internal_defect_dataset_v2_pack.py`
 - npz_sha256: 73118397dc810a4e11eb67acb0b31f8155e0c6150d472d9e7a567a5b77329404
 - notes: Generated NPZ/data files are not committed. Use only explicit dataset_id + manifest; not a baseline.
+
+## comsol_internal_defect_pilot_pack_v3_hardcase
+
+- dataset_role: internal_defect_hardcase_augmented_pack
+- status: hardcase_pack_generated
+- route: internal_buried_defect_hardcase
+- stage: 22.2b
+- schema_version: internal_defect_feasibility_v3_hardcase
+- internal_surface_mixed: false
+- path: `C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\generated\internal_defect_pilot_pack_v3_hardcase\comsol_internal_defect_pilot_pack_v3_hardcase.npz`
+- manifest_path: `C:\Users\19166\Desktop\PINN_project\results\manifests\comsol_internal_defect_pilot_pack_v3_hardcase.manifest.json`
+- n_samples: 360
+- source_rows: 240
+- topup_rows: 120
+- split_counts: {'train': 240, 'test': 60, 'val': 60}
+- shape_counts: {'internal_sphere': 95, 'internal_ellipsoid': 130, 'internal_cuboid': 135}
+- burial_depth_counts: {'shallow': 103, 'medium': 77, 'deep': 79, 'deep_plus': 101}
+- size_counts: {'small': 80, 'medium': 126, 'large': 154}
+- aspect_counts: {'compact': 212, 'elongated_x': 68, 'elongated_y': 80}
+- train_ready_candidate: true
+- baseline_ready: false
+- auto_discovery_allowed: false
+- latest_newest_discovery_allowed: false
+- allowed_use: schema_validation, explicit_internal_training_gate
+- forbidden_use: automatic_mainline_training, baseline_update, current_baseline_replacement, latest_newest_auto_discovery, direct_training_without_manifest_gate
+- source_dataset_ids: comsol_internal_defect_pilot_pack_v2_240, comsol_internal_defect_hard_case_topup_pack_v1
+- npz_sha256: 0664a64c38b27938f0af34083697f7169a001b662341a81566706b9cb56d53ac
+- notes: Hard-case augmented internal branch pack; generated NPZ/data files are not committed; not a baseline.

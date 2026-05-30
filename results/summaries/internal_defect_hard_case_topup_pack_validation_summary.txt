@@ -1,0 +1,12 @@
+22.2b internal defect hard-case top-up pack validation summary
+
+dataset_id: comsol_internal_defect_hard_case_topup_pack_v1
+status: pass
+planned_rows: 120
+success_rows: 120
+npz_rows: 120
+npz_path_ignored: C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\generated\internal_defect_hard_case_topup_pack\internal_defect_hard_case_topup_pack_v1.npz
+forbidden_staged: none
+forbidden_worktree: none
+
+结论：hard-case top-up pack 只用于 internal branch schema/training gate；不是 baseline，不更新 CURRENT_BASELINE。

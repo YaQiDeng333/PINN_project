@@ -1,0 +1,16 @@
+22.2b internal defect hard-case augmented pack assembly summary
+
+source_dataset_id: comsol_internal_defect_pilot_pack_v2_240
+topup_dataset_id: comsol_internal_defect_hard_case_topup_pack_v1
+assembled_dataset_id: comsol_internal_defect_pilot_pack_v3_hardcase
+source_rows: 240
+topup_rows: 120
+assembled_rows: 360
+split_counts: {'train': 240, 'test': 60, 'val': 60}
+shape_counts: {'internal_sphere': 95, 'internal_ellipsoid': 130, 'internal_cuboid': 135}
+burial_counts: {'shallow': 103, 'medium': 77, 'deep': 79, 'deep_plus': 101}
+size_counts: {'small': 80, 'medium': 126, 'large': 154}
+aspect_counts: {'compact': 212, 'elongated_x': 68, 'elongated_y': 80}
+train_ready_candidate: true
+
+说明：v2_240 原 split 已保留，top-up 使用 22.2 plan split_hint；未训练、未运行 COMSOL、未更新 CURRENT_BASELINE。

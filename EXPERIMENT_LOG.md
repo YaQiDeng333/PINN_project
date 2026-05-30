@@ -3058,3 +3058,11 @@ Review agent 已完成只读复核，无 must-fix。review 建议把 audit/decis
 - target quota：9 个 target 的实际计划行数与推荐配额完全一致：`24/20/18/16/14/10/10/4/4`，总计 120；coverage gate 通过。
 - route decision：唯一下一步是 `22.2b targeted COMSOL hard-case top-up pack generation`。继续模型 refinement 和真实 internal inference smoke 都暂缓；当前不改 schema。
 - review：独立只读复审通过；确认 plan-only、安全边界、target quota、hard-case evidence 和 route decision 均满足要求。
+## 2026-05-30 Stage 22.2b internal defect hard-case top-up pack generation
+
+- 范围：执行 22.2 hard-case top-up 计划，只生成 internal/buried defect hard-case COMSOL top-up、schema validation、v3_hardcase assembly、registry/manifest 和 route decision；未训练，未更新 `CURRENT_BASELINE.md`，未把 internal defect 写成 baseline。
+- COMSOL 结果：计划 `120` 行，成功 `120/120`，失败 `0`。成功覆盖 `internal_cuboid=55`、`internal_ellipsoid=50`、`internal_sphere=15`；覆盖 shallow/deep_plus、compact、medium/large、center-region neighbor、cuboid/ellipsoid confusion 和 full-shift catastrophic target strata。
+- 数据边界：top-up NPZ 写入 ignored `data/comsol_mfl/generated/internal_defect_hard_case_topup_pack/internal_defect_hard_case_topup_pack_v1.npz`，v3_hardcase assembled NPZ 写入 ignored `data/comsol_mfl/generated/internal_defect_pilot_pack_v3_hardcase/comsol_internal_defect_pilot_pack_v3_hardcase.npz`，均未提交。
+- assembled dataset：`dataset_id=comsol_internal_defect_pilot_pack_v3_hardcase`，source rows `240`，top-up rows `120`，assembled rows `360`，split=`train 240 / val 60 / test 60`，`train_ready_candidate=true`，`baseline_ready=false`。
+- registry/manifest：已新增 `results/manifests/comsol_internal_defect_pilot_pack_v3_hardcase.manifest.json` 和 `COMSOL_DATA_REGISTRY.md` 条目；禁止 latest/newest discovery、automatic mainline training、baseline update、current baseline replacement。
+- route decision：可以进入 `22.3 hard-case augmented internal training gate`；真实 internal inference smoke 和 baseline transition 继续暂缓。

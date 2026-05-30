@@ -533,3 +533,10 @@ Only next step: perform a real-data manifest dry run. Start with metadata only: 
 21.9 已恢复可加载的 B2 inference artifact。checkpoint 位于 ignored `checkpoints/internal_defect_b2_artifacts/internal_defect_b2_feature_fusion_seed2026.pt`，prediction artifact 位于同目录的 `_predictions.npz`，tracked manifest 是 `results/manifests/internal_defect_b2_inference_artifact_manifest.json`。verification 逐项复现 21.7/21.8：test total normalized MAE `0.395256`，burial_depth MAE `0.413 mm`，shape accuracy/F1 `0.975000 / 0.975309`，checkpoint reload diff 为 `0`。
 
 因此现在可以做真正的 per-sample gallery / inference smoke，而不必再临时复训。下一步应读取 artifact manifest，生成 good/bad/failure/risk 样本图和逐样本索引；checkpoint/prediction artifact 继续不提交，`CURRENT_BASELINE.md` 继续不变。
+## 2026-05-30 after Stage 22.2b internal hard-case top-up generation
+
+下一步唯一建议：进入 **22.3 hard-case augmented internal training gate**。
+
+22.2b 已按 22.2 hard-case plan 执行 COMSOL top-up：计划 `120` 行，成功 `120/120`，覆盖 cuboid/ellipsoid confusion、full-shift catastrophic、worst center、worst burial、compact medium/large、shallow/deep_plus 和 center-region neighbor targets。生成的 top-up NPZ 与 v3_hardcase assembled NPZ 都留在 ignored `data/` 路径，未提交；`CURRENT_BASELINE.md` 不变，internal defect 仍是独立分支。
+
+新 assembled dataset 为 `comsol_internal_defect_pilot_pack_v3_hardcase`：source rows `240`，top-up rows `120`，assembled rows `360`，split=`240/60/60`，`train_ready_candidate=true`，`baseline_ready=false`。22.3 只应在该显式 manifest 上做 hard-case augmented training gate，不应进入真实 internal inference smoke 或 baseline transition。

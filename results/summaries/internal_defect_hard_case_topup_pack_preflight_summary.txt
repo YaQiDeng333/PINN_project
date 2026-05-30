@@ -1,0 +1,31 @@
+22.2b internal defect hard-case top-up pack preflight summary
+
+repo_root_pinn: C:\Users\19166\Desktop\PINN_project
+repo_root_comsol: C:\Users\19166\Desktop\COMSOL_Multiphysics_MCP
+status: pass
+
+checked_inputs:
+- hard-case top-up plan exists: results/metrics/internal_defect_hard_case_topup_plan.csv
+- plan rows: 120
+- v2_240 manifest exists: results/manifests/comsol_internal_defect_pilot_pack_v2_240.manifest.json
+- v2_240 source NPZ exists in ignored data path
+- INTERNAL_DEFECT_SCHEMA.md exists
+- 22.0/22.1 failure metrics exist
+- reusable COMSOL internal pilot/top-up generator exists
+
+plan_coverage:
+- shape_type: internal_cuboid=55, internal_ellipsoid=50, internal_sphere=15
+- burial_depth_level: shallow=43, medium=17, deep=19, deep_plus=41
+- size_level: medium=46, large=74
+- aspect_bin: compact=78, elongated_x=14, elongated_y=28
+- split_hint: train=80, val=20, test=20
+- target strata include cuboid/ellipsoid confusion, full-shift catastrophic cases, worst center regions, worst burial depth, compact medium/large, shallow edge, deep_plus edge, and center-region neighbor cases.
+
+safety:
+- no COMSOL has been run at preflight time
+- no training has been run
+- no data/NPZ/checkpoint/preview artifact is staged by preflight
+- CURRENT_BASELINE.md is not modified
+- COMSOL repo has existing unrelated dirty files; this round must not revert or stage them
+
+decision: proceed to 22.2b COMSOL hard-case top-up generation.

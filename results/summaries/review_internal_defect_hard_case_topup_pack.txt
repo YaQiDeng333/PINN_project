@@ -1,0 +1,22 @@
+22.2b internal defect hard-case top-up pack read-only review
+
+review_status: passed
+review_agent: independent read-only subagent
+
+must_fix_findings: none
+
+minor_findings:
+- validation safety gate originally checked staged artifacts only. Fixed by adding a second non-ignored worktree artifact check and rerunning validation.
+- COMSOL repo has unrelated pre-existing dirty files: src/tools/physics.py, src/tools/results.py, src/tools/study.py, and scripts/generate_mfl_rectangular_sweep.py. They were not reverted and must not be staged for this round.
+
+verified_requirements:
+- no training was run.
+- CURRENT_BASELINE.md was not modified.
+- generated data/NPZ artifacts remain under ignored data paths and are not staged.
+- COMSOL generated planned/success rows = 120/120 with 0 failures.
+- target strata include cuboid/ellipsoid confusion, full-shift catastrophic, worst center, worst burial, compact medium/large, shallow edge, deep_plus edge, and center-region neighbor cases.
+- manifest results/manifests/comsol_internal_defect_pilot_pack_v3_hardcase.manifest.json records baseline_ready=false, train_ready_candidate=true, internal_surface_mixed=false, and surface_rbc_baseline_update=false.
+- COMSOL_DATA_REGISTRY.md records explicit dataset_id comsol_internal_defect_pilot_pack_v3_hardcase and forbids latest/newest discovery, automatic mainline training, baseline update, and current baseline replacement.
+- route decision to enter 22.3 hard-case augmented internal training gate is reasonable.
+
+decision: review passed; proceed to Markdown sync and explicit whitelist commits.

@@ -1,0 +1,9 @@
+metric,value,expected,pass
+source_rows,240,240,True
+topup_rows,120,>=72 target 120,True
+assembled_rows,360,240+120,True
+duplicate_sample_ids,0,0,True
+train_ready_candidate,True,True,True
+split_counts,"{""test"": 60, ""train"": 240, ""val"": 60}",v2 split preserved plus top-up split_hint,True
+shape_counts,"{""internal_cuboid"": 135, ""internal_ellipsoid"": 130, ""internal_sphere"": 95}",source plus hard-case top-up,True
+burial_counts,"{""deep"": 79, ""deep_plus"": 101, ""medium"": 77, ""shallow"": 103}",source plus hard-case top-up,True

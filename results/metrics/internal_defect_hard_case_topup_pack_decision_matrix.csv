@@ -1,0 +1,6 @@
+decision_item,observed,decision,rationale
+topup_success_target,120,pass,22.2b minimum usable hard-case top-up is 72 rows; target is 120.
+target_strata_coverage,validation metrics,pass,"Validation checks cuboid/ellipsoid confusion, compact, medium/large, shallow/deep_plus, and center neighbor targets."
+assembled_dataset,360,pass,"v3_hardcase must be registered through explicit manifest, not latest/newest discovery."
+train_ready_candidate,true,pass,Train-ready means schema validation and assembly pass; it still is not a baseline.
+next_step,22.3 hard-case augmented internal training gate,enter_22_3,Do not continue model refinement or real internal smoke until hard-case data is available.

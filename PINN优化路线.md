@@ -650,3 +650,10 @@ The next route is a manifest-only dry run before any real signal array is accept
 本阶段只做 plan：没有运行 COMSOL，没有训练，没有生成或修改 data/NPZ，也没有更新 `CURRENT_BASELINE.md`。hard-case top-up 设计目标 N=`120`，minimum usable N=`72`，围绕 cuboid/ellipsoid confusion、compact、medium/large、shallow/deep_plus 和 center-region neighbor cases 生成 matched neighbor samples。9 个 target 的配额已经逐项对齐为 `24/20/18/16/14/10/10/4/4`。
 
 下一步路线是 22.2b targeted COMSOL hard-case top-up pack generation。22.2b 只应生成 hard-case COMSOL pack、inventory、validation 和 registry/manifest；在 top-up pack 验证前，继续暂缓 further model refinement 和真实 internal inference smoke。internal defect 仍是独立 benchmark branch，不进入 surface / near-surface `CURRENT_BASELINE.md`。
+## 2026-05-30 路线同步：22.2b internal hard-case top-up pack
+
+22.2b 把 22.0/22.1 暴露的 internal tail failure 转成了可训练的数据补充：COMSOL hard-case top-up 计划 `120` 行，实际成功 `120/120`，重点覆盖 cuboid/ellipsoid 混淆、center+burial 同时偏移、compact、medium/large、shallow/deep_plus 和 center-region neighbor cases。
+
+路线状态变为：`comsol_internal_defect_pilot_pack_v3_hardcase` 已注册，source `v2_240` 的 `240` 行加上 hard-case top-up `120` 行，assembled `N=360`，split=`train 240 / val 60 / test 60`，`train_ready_candidate=true`，`baseline_ready=false`。这仍然不是 `CURRENT_BASELINE.md` 的候选；当前 baseline 继续是 surface / near-surface true 3D RBC 分支，internal defect 继续独立。
+
+下一步应做 22.3 hard-case augmented internal training gate：比较 v2_240 B2/T3 参考与 v3_hardcase 训练后的 tail metrics，重点看 catastrophic failure、geometry_branch_failure、center p95/max 和 burial p95/max 是否真正下降。真实 internal sample inference smoke 继续暂缓。
