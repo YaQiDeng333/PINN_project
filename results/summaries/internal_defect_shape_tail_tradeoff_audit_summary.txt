@@ -1,0 +1,18 @@
+22.4 internal defect shape/tail trade-off audit
+scope: analysis artifact generator；只读取既有 metrics，写出审计 summary/CSV；没有训练，没有 COMSOL，没有 data/NPZ mutation，没有 CURRENT_BASELINE 更新。
+selected_model: H2_B2_hardcase_tail_weighted seed=42 best_epoch=294
+h2_total_mae: 0.421782
+h2_shape_acc_f1: 0.766667 / 0.778163
+old_b2_shape_acc_f1: 0.833333 / 0.841143
+h2_catastrophic_geometry: 9/60 / 2/60
+h2_center_p95_max_mm: 8.886 / 14.608
+h2_burial_p95_max_mm: 1.599 / 2.861
+shape_error_by_true_shape: {'internal_ellipsoid': 5, 'internal_cuboid': 6, 'internal_sphere': 3}
+catastrophic_by_shape: {'internal_ellipsoid': 5, 'internal_cuboid': 3, 'internal_sphere': 1}
+catastrophic_by_burial: {'deep_plus': 7, 'deep': 1, 'shallow': 1}
+catastrophic_by_size: {'medium': 5, 'large': 4}
+catastrophic_by_aspect: {'elongated_y': 2, 'compact': 7}
+group_tail_by_shape: internal_cuboid:n=22,shape_err=6,cat=3,center_p95=9.929,burial_p95=1.535 | internal_ellipsoid:n=20,shape_err=5,cat=5,center_p95=7.241,burial_p95=1.950 | internal_sphere:n=18,shape_err=3,cat=1,center_p95=7.466,burial_p95=0.836
+group_tail_by_burial: deep:n=12,shape_err=0,cat=1,center_p95=9.386,burial_p95=0.962 | deep_plus:n=22,shape_err=7,cat=7,center_p95=8.813,burial_p95=1.901 | medium:n=10,shape_err=2,cat=0,center_p95=4.646,burial_p95=0.987 | shallow:n=16,shape_err=5,cat=1,center_p95=7.869,burial_p95=1.064
+diagnosis: H2 的 hard-case weighting 降低了部分 center tail，但破坏 shape branch，并使 burial max 退化。
+strategy_implication: 下一步应先保护 shape classifier/shared encoder，再做 center/burial tail regression；不要继续直接 H2 tail weighting。

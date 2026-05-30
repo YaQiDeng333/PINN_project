@@ -1,0 +1,7 @@
+option,decision,evidence,requires_training,requires_comsol,updates_current_baseline,next_stage
+A_train_freeze_shape_then_tail_regression_model,recommended,H2 降低 center tail 但 shape F1 从旧 B2 0.841143 降到 0.778163；下一步必须保护 shape branch 后再优化 tail。,True,False,False,22.5 freeze-shape then tail-regression internal model
+B_train_shape_confidence_router,secondary_after_A,当前 prediction artifact 没有 shape logits/probability；router 需要下一训练阶段导出 calibrated shape confidence。,True,False,False,after freeze-shape candidate or as inference safety ablation
+C_second_targeted_hard_case_top_up,defer,failure 有 deep_plus/compact/medium-large 倾向，但不是单一 strata；盲目第二轮 top-up 不是首选。,False,True,False,only if A still leaves concentrated strata failure
+D_add_uncertainty_abstention_output,future_safety_layer,可降低误用风险，但不能替代模型修复；需要 shape confidence 或 tail risk score。,False,False,False,after stable candidate metrics are available
+E_revise_internal_labels_output,not_recommended,22.4 证据指向训练策略破坏 shape branch，不是 label/schema 字段缺失。,False,False,False,none
+F_pause_internal_branch,not_recommended,hard-case 数据和 B2/H2 对比已有明确下一步，不需要暂停。,False,False,False,none

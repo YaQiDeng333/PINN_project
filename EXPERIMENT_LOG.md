@@ -3077,3 +3077,14 @@ Review agent 已完成只读复核，无 must-fix。review 建议把 audit/decis
 - tail result：catastrophic failure 从 old B2 `12/60` 降到 `9/60`，geometry_branch_failure 从 `3/60` 降到 `2/60`，center p95/max 从 `12.077 / 22.544 mm` 降到 `8.886 / 14.608 mm`；burial p95 从 `1.693 mm` 降到 `1.599 mm`，但 burial max 从 `2.096 mm` 升到 `2.861 mm`，shape F1 明显下降。
 - decision：hard-case top-up 有效降低部分 mean/tail risk，但没有达到 stable inference gate；catastrophic rate `15%` 仍高于目标 `<=5%`，geometry branch 仍非零。internal branch 仍只能称 benchmark candidate，不是 stable inference model，更不是 baseline。下一步唯一建议是第二轮 hard-case top-up 或 tail-specific refinement，真实 internal inference smoke 继续暂缓。
 - review：独立只读 review 通过，0 个 must-fix；2 个 should-fix 已修复：summary 明确 H2 的 train-only sample weighting，input validator 增加了 `delta_b.reshape` 和 delta_b-derived feature source 检查。
+## 2026-05-30 Stage 22.4 shape-preserving internal defect tail strategy
+
+- 范围：只做 analysis artifact generation、trade-off audit、strategy design 和 route decision；没有训练，没有运行 COMSOL，没有生成或修改 data/NPZ，没有提交 checkpoint/preview/notes，也没有修改 `CURRENT_BASELINE.md`。
+- 输入证据：显式使用 `comsol_internal_defect_pilot_pack_v3_hardcase` manifest、22.3 hard-case selected predictions、old B2 reference comparison、22.0/22.1 reference metrics 和 22.3 failure cases。
+- 22.3 H2 复核：`H2_B2_hardcase_tail_weighted` seed `42` 的 test total normalized MAE 是 `0.421782`，shape acc/F1 是 `0.766667 / 0.778163`，catastrophic failure 是 `9/60`，geometry_branch_failure 是 `2/60`，center p95/max 是 `8.886 / 14.608 mm`，burial p95/max 是 `1.599 / 2.861 mm`。
+- 机制判断：H2 的 hard-case weighting 确实把旧 B2 的 center p95/max 从 `12.077 / 22.544 mm` 降到 `8.886 / 14.608 mm`，但 shape branch 被破坏，shape F1 从旧 B2 的 `0.841143` 降到 `0.778163`，并且 burial max 从 `2.096 mm` 退化到 `2.861 mm`。
+- failure 分布：catastrophic failure 有 deep_plus、compact、medium/large 倾向，但不是单一 strata；继续盲目 second top-up 不是首选。
+- 策略设计：S1-S5 全部列入策略矩阵，唯一主推荐是 `S3_two_stage_freeze_shape_then_tail_regress`，即先保护 shape classifier / shared encoder，再训练 center/burial tail heads。
+- route decision：唯一下一步是 `A_train_freeze_shape_then_tail_regression_model`；shape-confidence router 作为后续推理安全层，第二轮 hard-case top-up 只在 freeze-shape 后仍有集中 strata failure 时考虑。
+- baseline 状态：H2 不是 stable inference model，internal defect 仍是独立 benchmark branch，不是 `CURRENT_BASELINE`，不混入 surface / near-surface RBC baseline。
+- review：独立只读 review 通过，无 must-fix；已按 should-fix 将三个脚本明确标注为 analysis artifact generator。

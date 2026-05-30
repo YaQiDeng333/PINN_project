@@ -1,0 +1,9 @@
+22.4 shape-preserving tail reduction strategy design
+scope：analysis artifact generator；只读取 22.4 audit 证据并写出策略 summary/CSV，不训练，不运行 COMSOL，不生成或修改 data/NPZ。
+核心判断：H2 的 hard-case sample weighting 降低部分 center tail，但明显牺牲 shape branch，并使 burial max 退化。
+唯一推荐下一步：S3_two_stage_freeze_shape_then_tail_regress。
+执行含义：下一训练阶段先保护 shape classifier/shared encoder，再只训练 center/burial tail heads；不要继续直接 H2 tail weighting。
+shape-confidence router：作为后续推理安全层或次级 ablation，不作为下一步主训练路线。
+新 COMSOL：本策略不需要；只有 S3 后仍有集中 strata failure 时，才考虑第二轮 hard-case top-up。
+baseline_status：internal defect 仍是独立 branch，不是 CURRENT_BASELINE，不混入 surface/near-surface RBC baseline。
+acceptance：shape F1 不低于旧 B2 过多；catastrophic failure 低于 9/60 且目标 <=5%；geometry_branch_failure 目标 0；center/burial p95/max 不退化。

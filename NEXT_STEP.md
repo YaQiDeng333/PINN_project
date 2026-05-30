@@ -547,3 +547,10 @@ Only next step: perform a real-data manifest dry run. Start with metadata only: 
 22.3 在 `comsol_internal_defect_pilot_pack_v3_hardcase` 上完成 hard-case augmented training gate。旧 B2 在 v3_hardcase test 上的 catastrophic failure 是 `12/60`，geometry_branch_failure 是 `3/60`；validation-only 选择的 `H2_B2_hardcase_tail_weighted` seed `42` 将 catastrophic failure 降到 `9/60`，geometry_branch_failure 降到 `2/60`，center p95/max 从 `12.077 / 22.544 mm` 降到 `8.886 / 14.608 mm`。
 
 真正的分界点是 stable inference gate 仍未通过：catastrophic rate 仍为 `15%`，高于目标 `<=5%`，geometry branch 仍非零，burial max 从 `2.096 mm` 升到 `2.861 mm`，shape F1 从旧 B2 的 `0.841143` 降到 `0.778163`。internal defect 仍只能称为 benchmark branch，不是 stable inference model，也不是 `CURRENT_BASELINE.md`。
+## 2026-05-30 after Stage 22.4 shape-preserving internal tail strategy
+
+下一步唯一建议：训练 `A_train_freeze_shape_then_tail_regression_model`，不要继续直接做 H2 tail weighting。
+
+22.4 的关键判断是，H2 不是单纯“还不够强”，而是优化方向把 shape branch 拉坏了。它把 center p95/max 从旧 B2 的 `12.077 / 22.544 mm` 降到 `8.886 / 14.608 mm`，但 shape F1 从 `0.841143` 降到 `0.778163`，burial max 从 `2.096 mm` 退化到 `2.861 mm`，所以继续加 hard-case 权重会继续在 shape 与 tail 之间拉扯。
+
+下一阶段应先保护 shape classifier / shared encoder，再单独训练 center/burial tail heads；shape-confidence router 可以作为后续安全层，第二轮 hard-case top-up 只在 freeze-shape 后仍发现集中 strata failure 时再考虑。internal defect 仍是独立 benchmark branch，不是 stable inference model，也不是 `CURRENT_BASELINE.md`。

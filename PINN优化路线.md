@@ -664,3 +664,10 @@ The next route is a manifest-only dry run before any real signal array is accept
 本轮只在 `comsol_internal_defect_pilot_pack_v3_hardcase` 上训练和评估，没有运行 COMSOL，没有生成或修改 data/NPZ，没有提交 checkpoint/preview/notes，也没有修改 `CURRENT_BASELINE.md`。正式模型输入仍然只包含 `delta_b/BxByBz` 和 delta_b-derived features；shape、burial、size、aspect、split、sample_id、hard-case target 都没有进入模型输入。H2 只在 train split 用 `row_origin=hardcase_topup_v1` 做样本加权，这属于训练采样策略，不是推理输入。
 
 路线结论是：H2 相比旧 B2 有进步，但没有过稳定推理门槛。test total normalized MAE 从 `0.515047` 降到 `0.421782`，center p95/max 从 `12.077 / 22.544 mm` 降到 `8.886 / 14.608 mm`，catastrophic failure 从 `12/60` 降到 `9/60`，geometry_branch_failure 从 `3/60` 降到 `2/60`；但 catastrophic rate 仍是 `15%`，burial max 退化到 `2.861 mm`，shape F1 降到 `0.778163`。因此下一步不进入真实 internal sample smoke，也不写 baseline；应继续围绕残余 tail failure 做第二轮 hard-case top-up 或 tail-specific refinement。
+## 2026-05-30 路线同步：22.4 shape-preserving internal tail strategy
+
+22.4 把 22.3 的结果从“tail 有一点改善”拆成了更准确的机制判断：H2 通过 hard-case sample weighting 改善了一部分 center tail，但代价是 shape branch 明显退化。真正的问题不是继续加权不够狠，而是共享 encoder/head 在 tail loss 下把 shape 判别能力牺牲掉了。
+
+证据很直接：H2 test total normalized MAE 是 `0.421782`，catastrophic failure 是 `9/60`，geometry_branch_failure 是 `2/60`；center p95/max 从旧 B2 的 `12.077 / 22.544 mm` 降到 `8.886 / 14.608 mm`。但 shape F1 从旧 B2 的 `0.841143` 降到 `0.778163`，burial max 从 `2.096 mm` 升到 `2.861 mm`。这说明 H2 不是 stable inference model，也不能作为 internal baseline。
+
+路线更新为：下一步训练 freeze-shape then tail-regression model。先固定或保护 shape classifier / shared encoder，再训练 center/burial tail heads；shape-confidence router 作为后续推理安全层，不作为主路线；第二轮 hard-case top-up 只有在 freeze-shape 后仍出现集中 strata failure 时才考虑。`CURRENT_BASELINE.md` 继续保持 surface / near-surface true 3D RBC baseline，internal defect 仍是独立 benchmark branch。

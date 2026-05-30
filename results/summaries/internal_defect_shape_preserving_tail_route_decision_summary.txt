@@ -1,0 +1,12 @@
+22.4 shape-preserving internal defect tail route decision
+scope: analysis artifact generator；只读取 22.4 audit/strategy CSV 并写 route decision summary/CSV，不训练，不运行 COMSOL，不生成或修改 data/NPZ。
+unique_next_step: A_train_freeze_shape_then_tail_regression_model
+reason: H2 的 hard-case tail weighting 改善 center tail，但 shape branch 明显退化，burial max 也退化；直接继续 H2 tail weighting 不可取。
+shape_evidence: test shape error count=14/60; confusion={'internal_ellipsoid': 5, 'internal_cuboid': 6, 'internal_sphere': 3}
+center_evidence: center p95/max old->H2: 12.077/22.544 -> 8.886/14.608 mm
+burial_evidence: burial p95/max old->H2: 1.693/2.096 -> 1.599/2.861 mm
+requires_training: true
+requires_new_comsol: false
+current_baseline_update: false
+stable_inference_status: false; internal branch 仍是 benchmark branch，不是 stable inference model。
+deferred: real internal inference smoke, baseline transition, direct H2 tail weighting, blind second top-up。
