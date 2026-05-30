@@ -686,3 +686,11 @@ The next route is a manifest-only dry run before any real signal array is accept
 本轮 risk gate 只使用推理时可得信号：跨模型 shape disagreement、center/burial disagreement、F2 预测范围异常和 delta_b-derived anomaly；真实 shape、burial/size/aspect、split、sample_id 只用于 target/metrics，不进入 gate 输入。validation-only 选择 `random_forest_small` 后，test catastrophic 和 geometry_branch recall 都是 `1.000`，false alarm `0.417`，coverage `0.283`。accepted subset 的 center/burial tail 明显下降，但 abstain 面积较大。
 
 路线更新为：可以做 internal inference smoke with abstention，但不能称 stable inference model。高风险样本必须输出 `risk_score` 和 `abstain_need_review`，不输出确定 center/burial 结论；真实 internal 样本仍需先完成 metadata/schema alignment。internal defect 继续是独立 branch，不进入 `CURRENT_BASELINE.md`。
+
+## 2026-05-30 路线同步：22.7 internal inference smoke with abstention
+
+22.7 证明 internal branch 可以进入“带拒判的推理流程”，但不能进入“稳定自动推理”。关键不是平均指标，而是风险门控能否在输出前截住灾难性 center/burial 漂移。
+
+本轮 runner 显式加载 v3_hardcase、B2 artifact 和 22.6 risk gate。risk gate 按固定协议恢复到 ignored checkpoints，并由 tracked manifest 记录；threshold 固定为 `0.07046389`，没有用 test 重新选择。test 上 catastrophic recall 和 geometry_branch recall 都是 `1.000`，false alarm `0.381`，coverage `0.283`。accepted subset 的 center/burial tail 大幅下降，但可接受样本只有 17/60。
+
+路线更新为：下一步可以做真实 internal 样品 metadata alignment with abstention。也就是说，先检查真实样品是否具备 Bx/By/Bz、no-defect reference、sensor_z_m、坐标系、单位、scan geometry、ground truth，再决定是否跑带 `risk_score` 的 smoke；不能直接给真实样品稳定几何结论。internal defect 仍是独立 branch，不进入 `CURRENT_BASELINE.md`。

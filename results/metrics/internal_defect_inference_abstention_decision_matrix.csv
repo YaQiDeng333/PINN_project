@@ -1,0 +1,7 @@
+decision_item,result,evidence
+runner_available,True,run_internal_defect_inference_with_abstention.py completed
+tail_failures_captured,True,cat_recall=1.000; geo_recall=1.000
+accepted_subset_more_stable,True,center_p95 12.077->4.832; burial_p95 1.693->0.605
+coverage_low,True,coverage=0.283; false_alarm=0.381
+direct_real_sample_inference_paused,True,只能进入 metadata alignment；真实推理仍必须先做 schema validation 和 abstention。
+unique_next_step,A_internal_real_sample_metadata_alignment_with_abstention,runner 能捕获 catastrophic/geometry tail，accepted subset 明显降低 center/burial tail；下一步可做真实样品 metadata alignment，但仍必须带 abstention。

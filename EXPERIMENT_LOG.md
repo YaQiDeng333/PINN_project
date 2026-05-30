@@ -3110,3 +3110,15 @@ Review agent 已完成只读复核，无 must-fix。review 建议把 audit/decis
 - 合同：新增 `results/summaries/internal_defect_uncertainty_inference_contract.md`，明确 high-risk 样本只能输出 `abstain_need_review`，不得给出确定 center/burial 结论。
 - route decision：可以进入 `A_internal_inference_smoke_with_abstention`，但只能作为带风险门控的 smoke；internal branch 仍不是 stable inference model，更不是 baseline。
 - review：独立只读 review 通过，无 must-fix；确认无 label leakage、validation-only threshold、test final only、forbidden artifacts 干净。
+
+## 2026-05-30 Stage 22.7 internal defect inference smoke with abstention
+
+- 范围：打通 internal defect 的带拒判推理流程；没有训练 internal 主模型，没有运行 COMSOL，没有生成或修改 data/NPZ，没有更新 `CURRENT_BASELINE.md`，也没有提交 checkpoint/preview/notes。
+- 数据入口：显式使用 `dataset_id=comsol_internal_defect_pilot_pack_v3_hardcase`、registry/manifest、`results/manifests/internal_defect_b2_inference_artifact_manifest.json` 和 22.6 risk gate contract；禁止 latest/newest scan。
+- risk gate artifact：22.6 只有 contract，没有可加载 sklearn 模型。本轮按固定协议确定性恢复 `random_forest_small` risk gate，pickle 写入 ignored `checkpoints/internal_defect_tail_risk_gate_artifacts/internal_defect_tail_risk_gate_random_forest_v22_6.pkl`，只提交 manifest `results/manifests/internal_defect_tail_risk_gate_artifact_manifest.json`。
+- runner：新增 `scripts/run_internal_defect_inference_with_abstention.py`。推理输出包含 raw B2 prediction、`risk_score`、`inference_status`；`risk_score >= 0.07046389` 时 status=`abstain_need_review`，不得给稳定 center/burial 结论。
+- smoke：v3_hardcase test split `60` 行，accepted `17`，abstained `43`，coverage retained `0.283`。catastrophic recall `1.000`，geometry_branch recall `1.000`，false alarm `0.381`。
+- no-abstention B2 对比：full-set center p95/max `12.077 / 22.544 mm`，accepted subset 降到 `4.832 / 4.962 mm`；full-set burial p95/max `1.693 / 2.096 mm`，accepted subset 降到 `0.605 / 1.106 mm`；accepted shape accuracy/F1 `0.941 / 0.915`。
+- contract：新增 `results/summaries/internal_defect_inference_abstention_contract.md`，明确 internal inference 不是 stable all-sample predictor，高风险样本只能输出 raw prediction + warning。
+- route decision：唯一下一步是 `A_internal_real_sample_metadata_alignment_with_abstention`；可以做真实样品 metadata alignment，但仍暂缓直接真实样品推理。
+- review：独立只读 review 通过，无 must-fix；确认 risk gate 无 label leakage、threshold 未用 test 重选、checkpoint artifact 未 staged。

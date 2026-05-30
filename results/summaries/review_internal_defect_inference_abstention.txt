@@ -1,0 +1,13 @@
+22.7 internal defect inference smoke with abstention 只读 review
+
+结论：PASS，未发现 must-fix。
+
+检查项：
+- py_compile：3 个 22.7 脚本均通过。
+- 无 COMSOL / data mutation：runner 只加载 v3_hardcase、B2 artifact 和 22.6 risk gate；未运行 COMSOL，未生成或修改 data/NPZ，未训练 internal 主模型。
+- risk gate artifact：按 22.6 固定 contract 确定性恢复，pickle 位于 ignored `checkpoints/internal_defect_tail_risk_gate_artifacts/internal_defect_tail_risk_gate_random_forest_v22_6.pkl`，未 staged；tracked manifest 为 `results/manifests/internal_defect_tail_risk_gate_artifact_manifest.json`。
+- label leakage：risk score 只从 `RISK_FEATURE_COLUMNS` 构造；sample_id、split、true_shape_type、burial_depth_level、size_level、aspect_bin 只用于输出/metrics，不进入 risk gate inference input。
+- threshold：固定使用 22.6 validation-selected `0.07046389`，没有 test 重新选择。
+- abstention 口径：abstained subset 全部 `inference_status=abstain_need_review`，全部 `stable_prediction_claim=False`；accepted subset 单独输出。
+- metrics：full / gate / accepted / abstained 四类指标已分开。test coverage `0.283`，high-risk `43/60`，catastrophic recall `1.000`，geometry recall `1.000`，false alarm `0.381`。
+- forbidden artifacts：`data/`、NPZ、checkpoint、preview PNG、notes、`CURRENT_BASELINE.md`、`scripts/visualize_current_baseline.py` 均未 staged；`CURRENT_BASELINE.md` 未修改。

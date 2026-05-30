@@ -569,3 +569,11 @@ Only next step: perform a real-data manifest dry run. Start with metadata only: 
 22.6 已验证一个可用的安全门控：`random_forest_small` risk gate 在 test split 上捕获了 `100%` catastrophic failure 和 `100%` geometry_branch_failure，false alarm rate 为 `0.417`，coverage retained 为 `0.283`。accept 后的 tail 明显收缩：center p95/max 从 `8.940 / 22.017 mm` 降到 `4.569 / 5.290 mm`，burial p95/max 从 `1.841 / 2.490 mm` 降到 `0.590 / 0.911 mm`。
 
 真正的口径是：internal model 仍不能盲目输出稳定 center/burial；下一步只允许做带 `risk_score` 和 `abstain_need_review` 的 inference smoke。高风险样本不给确定几何结论，真实 internal sample 仍需先满足 metadata/schema。`CURRENT_BASELINE.md` 继续保持 surface / near-surface true 3D RBC baseline。
+
+## 2026-05-30 after Stage 22.7 internal inference smoke with abstention
+
+下一步唯一建议：做 **internal real-sample metadata alignment with abstention**，不是直接真实样品推理。
+
+22.7 已打通带拒判的 internal inference smoke。B2 full-set test center p95/max 是 `12.077 / 22.544 mm`，burial p95/max 是 `1.693 / 2.096 mm`；使用 22.6 risk gate 后，accepted subset 的 center p95/max 降到 `4.832 / 4.962 mm`，burial p95/max 降到 `0.605 / 1.106 mm`。catastrophic 和 geometry_branch failure 都被捕获，false alarm 为 `0.381`，coverage retained 为 `0.283`。
+
+真正的取舍是 coverage 很低：60 个 test 样本只有 17 个可 accept，所以这不是 stable all-sample predictor。下一步只能对真实 internal 样品先做 metadata/schema alignment，并且保留 `risk_score` / `abstain_need_review` 机制；缺 no-defect reference、Bx/By/Bz、sensor_z_m、坐标系、单位或 ground truth 时仍停止。

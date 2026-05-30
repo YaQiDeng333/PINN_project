@@ -1,0 +1,10 @@
+22.7 internal defect inference with abstention smoke 摘要
+
+- risk gate：random_forest_small，threshold=0.07046389。
+- test coverage retained=0.283，high-risk count=43/60。
+- catastrophic recall=1.000，geometry_branch recall=1.000，false alarm=0.381。
+- no_abstention B2 center p95/max=12.077/22.544 mm；accepted subset=4.832/4.962 mm。
+- no_abstention B2 burial p95/max=1.693/2.096 mm；accepted subset=0.605/1.106 mm。
+- accepted shape accuracy/F1=0.941/0.915。
+
+结论：runner 可用，但只能作为带 abstention 的 smoke。高风险样本只输出 raw prediction + risk flag，不给稳定 center/burial 结论。

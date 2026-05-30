@@ -1,0 +1,22 @@
+{
+  "artifact_type": "internal_defect_tail_risk_gate",
+  "stage": "22.7",
+  "source_stage": "22.6",
+  "dataset_id": "comsol_internal_defect_pilot_pack_v3_hardcase",
+  "model_type": "random_forest_small",
+  "threshold": 0.07046389,
+  "artifact_path": "C:\\Users\\19166\\Desktop\\PINN_project\\checkpoints\\internal_defect_tail_risk_gate_artifacts\\internal_defect_tail_risk_gate_random_forest_v22_6.pkl",
+  "artifact_sha256": "4cc91a5d49b76d5d5d191ead44a66797f855acedf895e746f70187fce8e658ae",
+  "risk_contract_path": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\metrics\\internal_defect_tail_risk_gate_model_contract.json",
+  "risk_signal_audit_csv": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\metrics\\internal_defect_tail_risk_signal_audit.csv",
+  "selection_protocol": "train fit, validation threshold/model selection, test final only in 22.6",
+  "labels_as_inference_input": false,
+  "allowed_use": [
+    "internal_inference_smoke_with_abstention"
+  ],
+  "forbidden_use": [
+    "baseline_update",
+    "current_baseline_replacement",
+    "stable_all_sample_inference_claim"
+  ]
+}

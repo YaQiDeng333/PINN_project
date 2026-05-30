@@ -1,0 +1,11 @@
+22.7 internal defect inference abstention route decision
+
+- runner available：True。
+- catastrophic recall=1.000，geometry_branch recall=1.000，false alarm=0.381，coverage=0.283。
+- accepted center p95=4.832 mm，full-set center p95=12.077 mm。
+- accepted burial p95=0.605 mm，full-set burial p95=1.693 mm。
+- coverage 是否过低：True。
+- 唯一下一步：A_internal_real_sample_metadata_alignment_with_abstention。
+- 理由：runner 能捕获 catastrophic/geometry tail，accepted subset 明显降低 center/burial tail；下一步可做真实样品 metadata alignment，但仍必须带 abstention。
+
+口径：可以做带 abstention 的 real-sample metadata alignment，但仍暂缓直接真实样品推理；internal branch 不是 baseline。

@@ -1,0 +1,12 @@
+22.7 internal defect inference with abstention 预检
+
+- 工作目录：C:\Users\19166\Desktop\PINN_project
+- dataset_id：comsol_internal_defect_pilot_pack_v3_hardcase
+- v3_hardcase manifest：C:\Users\19166\Desktop\PINN_project\results\manifests\comsol_internal_defect_pilot_pack_v3_hardcase.manifest.json
+- B2 artifact manifest：C:\Users\19166\Desktop\PINN_project\results\manifests\internal_defect_b2_inference_artifact_manifest.json
+- risk gate manifest：C:\Users\19166\Desktop\PINN_project\results\manifests\internal_defect_tail_risk_gate_artifact_manifest.json
+- risk gate artifact：C:\Users\19166\Desktop\PINN_project\checkpoints\internal_defect_tail_risk_gate_artifacts\internal_defect_tail_risk_gate_random_forest_v22_6.pkl
+- risk gate artifact recovery：已存在并通过 sha256
+- 本阶段未训练 internal 主模型，未运行 COMSOL，未写 data/NPZ，未更新 CURRENT_BASELINE.md。
+
+预检结论：abstention inference smoke 可以执行。
