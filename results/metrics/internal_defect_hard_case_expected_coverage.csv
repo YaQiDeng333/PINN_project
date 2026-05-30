@@ -1,0 +1,53 @@
+scope,group_field,group_value,split_hint,count,minimum_expected,pass,notes
+hard_case_topup_plan,shape_type,internal_cuboid,all,55,36,True,重点 hard-case coverage
+hard_case_topup_plan,shape_type,internal_ellipsoid,all,50,36,True,重点 hard-case coverage
+hard_case_topup_plan,shape_type,internal_sphere,all,15,1,True,重点 hard-case coverage
+hard_case_topup_plan,burial_depth_level,deep,all,19,1,True,重点 hard-case coverage
+hard_case_topup_plan,burial_depth_level,deep_plus,all,41,24,True,重点 hard-case coverage
+hard_case_topup_plan,burial_depth_level,medium,all,17,1,True,重点 hard-case coverage
+hard_case_topup_plan,burial_depth_level,shallow,all,43,24,True,重点 hard-case coverage
+hard_case_topup_plan,size_level,large,all,74,36,True,重点 hard-case coverage
+hard_case_topup_plan,size_level,medium,all,46,36,True,重点 hard-case coverage
+hard_case_topup_plan,aspect_bin,compact,all,78,50,True,重点 hard-case coverage
+hard_case_topup_plan,aspect_bin,elongated_x,all,14,1,True,重点 hard-case coverage
+hard_case_topup_plan,aspect_bin,elongated_y,all,28,1,True,重点 hard-case coverage
+hard_case_topup_plan,center_region,central,all,18,1,True,重点 hard-case coverage
+hard_case_topup_plan,center_region,x_neg_y_neg,all,7,1,True,重点 hard-case coverage
+hard_case_topup_plan,center_region,x_neg_y_pos,all,31,1,True,重点 hard-case coverage
+hard_case_topup_plan,center_region,x_pos_y_neg,all,24,1,True,重点 hard-case coverage
+hard_case_topup_plan,center_region,x_pos_y_pos,all,40,1,True,重点 hard-case coverage
+hard_case_topup_plan,neighbor_strategy,center_burial_tradeoff,all,20,1,True,重点 hard-case coverage
+hard_case_topup_plan,neighbor_strategy,compact_medium_large_pair,all,14,1,True,重点 hard-case coverage
+hard_case_topup_plan,neighbor_strategy,cuboid_ellipsoid_pair,all,24,1,True,重点 hard-case coverage
+hard_case_topup_plan,neighbor_strategy,same_burial_varied_shape,all,20,1,True,重点 hard-case coverage
+hard_case_topup_plan,neighbor_strategy,same_shape_varied_burial,all,16,1,True,重点 hard-case coverage
+hard_case_topup_plan,neighbor_strategy,same_size_aspect_varied_center,all,26,1,True,重点 hard-case coverage
+hard_case_topup_plan,split_hint,test,all,20,18,True,重点 hard-case coverage
+hard_case_topup_plan,split_hint,train,all,80,72,True,重点 hard-case coverage
+hard_case_topup_plan,split_hint,val,all,20,18,True,重点 hard-case coverage
+split_hint_coverage,shape_type,internal_cuboid,train,38,1,True,每个 split_hint 均保留 shape/burial/size coverage
+split_hint_coverage,shape_type,internal_ellipsoid,train,34,1,True,每个 split_hint 均保留 shape/burial/size coverage
+split_hint_coverage,shape_type,internal_sphere,train,8,1,True,每个 split_hint 均保留 shape/burial/size coverage
+split_hint_coverage,burial_depth_level,deep,train,14,1,True,每个 split_hint 均保留 shape/burial/size coverage
+split_hint_coverage,burial_depth_level,deep_plus,train,26,1,True,每个 split_hint 均保留 shape/burial/size coverage
+split_hint_coverage,burial_depth_level,medium,train,14,1,True,每个 split_hint 均保留 shape/burial/size coverage
+split_hint_coverage,burial_depth_level,shallow,train,26,1,True,每个 split_hint 均保留 shape/burial/size coverage
+split_hint_coverage,size_level,large,train,50,1,True,每个 split_hint 均保留 shape/burial/size coverage
+split_hint_coverage,size_level,medium,train,30,1,True,每个 split_hint 均保留 shape/burial/size coverage
+split_hint_coverage,shape_type,internal_cuboid,val,9,1,True,每个 split_hint 均保留 shape/burial/size coverage
+split_hint_coverage,shape_type,internal_ellipsoid,val,9,1,True,每个 split_hint 均保留 shape/burial/size coverage
+split_hint_coverage,shape_type,internal_sphere,val,2,1,True,每个 split_hint 均保留 shape/burial/size coverage
+split_hint_coverage,burial_depth_level,deep,val,3,1,True,每个 split_hint 均保留 shape/burial/size coverage
+split_hint_coverage,burial_depth_level,deep_plus,val,3,1,True,每个 split_hint 均保留 shape/burial/size coverage
+split_hint_coverage,burial_depth_level,medium,val,3,1,True,每个 split_hint 均保留 shape/burial/size coverage
+split_hint_coverage,burial_depth_level,shallow,val,11,1,True,每个 split_hint 均保留 shape/burial/size coverage
+split_hint_coverage,size_level,large,val,12,1,True,每个 split_hint 均保留 shape/burial/size coverage
+split_hint_coverage,size_level,medium,val,8,1,True,每个 split_hint 均保留 shape/burial/size coverage
+split_hint_coverage,shape_type,internal_cuboid,test,8,1,True,每个 split_hint 均保留 shape/burial/size coverage
+split_hint_coverage,shape_type,internal_ellipsoid,test,7,1,True,每个 split_hint 均保留 shape/burial/size coverage
+split_hint_coverage,shape_type,internal_sphere,test,5,1,True,每个 split_hint 均保留 shape/burial/size coverage
+split_hint_coverage,burial_depth_level,deep,test,2,1,True,每个 split_hint 均保留 shape/burial/size coverage
+split_hint_coverage,burial_depth_level,deep_plus,test,12,1,True,每个 split_hint 均保留 shape/burial/size coverage
+split_hint_coverage,burial_depth_level,shallow,test,6,1,True,每个 split_hint 均保留 shape/burial/size coverage
+split_hint_coverage,size_level,large,test,12,1,True,每个 split_hint 均保留 shape/burial/size coverage
+split_hint_coverage,size_level,medium,test,8,1,True,每个 split_hint 均保留 shape/burial/size coverage

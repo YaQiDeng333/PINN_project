@@ -1,0 +1,19 @@
+22.2 内部/埋藏缺陷 hard-case strata audit
+dataset_id: comsol_internal_defect_pilot_pack_v2_240
+stage_scope: plan_only; no_COMSOL=true; no_training=true; no_data_or_npz_mutation=true; current_baseline_update=false
+manifest_path: C:\Users\19166\Desktop\PINN_project\results\manifests\comsol_internal_defect_pilot_pack_v2_240.manifest.json
+test_failure_rows: 40
+catastrophic_failure_count: 5 / 40
+geometry_branch_failure_count: 1 / 40
+B2_total_error_tail: mean=0.395, median=0.429, p95=0.881, max=0.913
+B2_burial_depth_tail_mm: mean=0.413, median=0.260, p95=1.266, max=1.674
+B2_center_xyz_tail_mm: mean=3.096, median=3.033, p95=8.309, max=8.785
+T3_burial_depth_tail_mm: mean=0.457, median=0.168, p95=1.690, max=1.848
+T3_center_xyz_tail_mm: mean=2.415, median=1.443, p95=5.999, max=10.468
+worst_center_sample: internal_topup_045 true=internal_cuboid pred=internal_cuboid center=8.785mm burial=1.533mm tags=center_outlier|burial_outlier|full_shift_failure|visual_suspect
+worst_burial_sample: internal_pilot_091 true=internal_cuboid pred=internal_ellipsoid burial=1.674mm center=4.306mm tags=center_outlier|burial_outlier|shape_misclassified|full_shift_failure|geometry_branch_failure|visual_suspect
+shape_confusion_pairs: internal_cuboid->internal_ellipsoid:1
+hard_case_strata: internal_cuboid/internal_ellipsoid confusion; compact; medium/large; shallow/deep_plus; x_pos_y_pos/x_neg_y_pos/x_pos_y_neg center regions
+model_status: B2 和 22.1 shape-conditioned/T3 都不是 stable inference model；继续调模型收益有限，下一步应补 hard-case COMSOL 数据。
+topup_targets_csv: C:\Users\19166\Desktop\PINN_project\results\metrics\internal_defect_hard_case_topup_targets.csv
+strata_audit_csv: C:\Users\19166\Desktop\PINN_project\results\metrics\internal_defect_hard_case_strata_audit.csv

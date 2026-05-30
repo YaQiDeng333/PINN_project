@@ -1,0 +1,21 @@
+22.2 内部/埋藏缺陷 hard-case top-up plan
+source_dataset_id: comsol_internal_defect_pilot_pack_v2_240
+future_topup_dataset_id: comsol_internal_defect_hard_case_topup_pack_v1
+stage_scope: plan_only; no_COMSOL=true; no_training=true; no_data_or_npz_mutation=true; current_baseline_update=false
+target_topup_rows: 120
+minimum_usable_rows_for_22_2b: 72
+sensor_z_m: 0.008
+liftoff_variation: false
+surface_rbc_mix: false
+shape_counts: {'internal_cuboid': 55, 'internal_ellipsoid': 50, 'internal_sphere': 15}
+burial_depth_counts: {'deep_plus': 41, 'shallow': 43, 'medium': 17, 'deep': 19}
+size_counts: {'medium': 46, 'large': 74}
+aspect_counts: {'compact': 78, 'elongated_y': 28, 'elongated_x': 14}
+center_region_counts: {'x_pos_y_neg': 24, 'x_pos_y_pos': 40, 'x_neg_y_pos': 31, 'central': 18, 'x_neg_y_neg': 7}
+neighbor_strategy_counts: {'cuboid_ellipsoid_pair': 24, 'center_burial_tradeoff': 20, 'same_size_aspect_varied_center': 26, 'same_shape_varied_burial': 16, 'compact_medium_large_pair': 14, 'same_burial_varied_shape': 20}
+split_hint_counts: {'train': 80, 'val': 20, 'test': 20}
+key_focus_gate: {'cuboid_ellipsoid': True, 'compact': True, 'medium_large': True, 'shallow_deep_plus': True, 'center_neighbors': True}
+planned_strategy: matched neighbor samples around 22.0/22.1 failures: same shape varied burial, same burial varied shape, same size/aspect varied center, and cuboid/ellipsoid paired variants.
+plan_csv: C:\Users\19166\Desktop\PINN_project\results\metrics\internal_defect_hard_case_topup_plan.csv
+expected_coverage_csv: C:\Users\19166\Desktop\PINN_project\results\metrics\internal_defect_hard_case_expected_coverage.csv
+plan_gate: pass

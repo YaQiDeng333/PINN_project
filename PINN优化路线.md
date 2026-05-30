@@ -642,3 +642,11 @@ The next route is a manifest-only dry run before any real signal array is accept
 路线上的分界点是：shape branch conditioning 可以改善均值和部分 tail，但现有 v2_240 对 hard cases 的覆盖不足以把模型训练成 stable inference candidate。继续只调 head 结构会有 test tail 偶然波动风险，也容易把 validation 上的 tail 改善误当成稳定泛化。
 
 下一步路线转为 targeted internal hard-case top-up。补样应围绕 compact、large/medium、shallow/deep_plus、cuboid/ellipsoid 易混，以及 center/burial 同时大偏移的组合；之后再训练更强 two-stage branch。internal defect 仍是独立 benchmark branch，不进入 `CURRENT_BASELINE.md`，真实 internal inference smoke 继续暂缓。
+
+## 2026-05-30 路线同步：22.2 targeted internal hard-case top-up plan
+
+22.2 把 22.0/22.1 暴露的 tail failure 固化成数据补充路线，而不是继续无数据地调模型。B2 与 T3 都不是 stable inference model：catastrophic failure 仍为 `5/40`，geometry_branch_failure 仍为 `1/40`，说明当前 internal v2_240 对 hard-case geometry/center/burial 组合覆盖不足。
+
+本阶段只做 plan：没有运行 COMSOL，没有训练，没有生成或修改 data/NPZ，也没有更新 `CURRENT_BASELINE.md`。hard-case top-up 设计目标 N=`120`，minimum usable N=`72`，围绕 cuboid/ellipsoid confusion、compact、medium/large、shallow/deep_plus 和 center-region neighbor cases 生成 matched neighbor samples。9 个 target 的配额已经逐项对齐为 `24/20/18/16/14/10/10/4/4`。
+
+下一步路线是 22.2b targeted COMSOL hard-case top-up pack generation。22.2b 只应生成 hard-case COMSOL pack、inventory、validation 和 registry/manifest；在 top-up pack 验证前，继续暂缓 further model refinement 和真实 internal inference smoke。internal defect 仍是独立 benchmark branch，不进入 surface / near-surface `CURRENT_BASELINE.md`。

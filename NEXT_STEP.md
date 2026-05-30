@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-05-30 after Stage 22.2 targeted internal hard-case top-up plan
+
+下一步唯一建议：**执行 22.2b targeted COMSOL hard-case top-up pack generation**。
+
+22.2 已把 22.0/22.1 的 tail failure 转成可执行数据矩阵：目标 top-up N=`120`，minimum usable N=`72`，重点覆盖 `internal_cuboid/internal_ellipsoid` confusion、`compact`、`medium/large`、`shallow/deep_plus` 和 center-region neighbor cases。9 个 target 的计划配额已经逐项对齐为 `24/20/18/16/14/10/10/4/4`，route decision 也明确检查逐 target quota 和 minimum。
+
+不要在 22.2b 之前继续模型 refinement，也不要进入真实 internal inference smoke。当前问题更像 hard-case coverage 不足，而不是 schema 定义错误；22.2b 应只生成 targeted COMSOL top-up pack、inventory、validation 和 registry/manifest，仍不更新 `CURRENT_BASELINE.md`，internal defect 仍是独立 benchmark branch。
+
 ## 2026-05-30 after Stage 22.1 shape-conditioned internal model
 
 下一步唯一建议：**targeted internal hard-case top-up**。

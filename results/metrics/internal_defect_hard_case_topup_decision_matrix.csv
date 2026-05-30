@@ -1,0 +1,6 @@
+option,decision,requires_comsol,requires_training,requires_schema_change,updates_current_baseline,reason,next_step
+A_targeted_internal_hard_case_topup,recommended,True,False,False,False,22.0/22.1 的 catastrophic failure 仍为 5/40，geometry_branch_failure 仍为 1/40；模型继续微调没有解决 tail，需要 targeted COMSOL hard-case pack。,22.2b_targeted_internal_hard_case_topup_generation
+B_further_model_refinement_now,defer,False,True,False,False,22.1 shape-conditioned/T3 改善均值但 tail 未改善，继续不补数据地调模型收益有限。,defer_until_hard_case_pack_available
+C_real_internal_inference_smoke_now,defer,False,False,False,False,B2 与 T3 都不是 stable inference model，center/burial full-shift 风险仍高。,wait_for_22_2b_and_22_3
+D_revise_internal_schema_now,reject,False,False,True,False,当前 failure 证据指向 hard-case coverage 不足，而不是 burial_depth/center label 定义缺失或不一致。,keep_schema_for_22_2b
+E_pause_internal_branch,reject,False,False,False,False,internal branch 已有 benchmark candidate 和明确 failure strata，适合继续 targeted data route。,22.2b_targeted_internal_hard_case_topup_generation

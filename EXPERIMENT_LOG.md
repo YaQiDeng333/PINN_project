@@ -3048,3 +3048,13 @@ Review agent 已完成只读复核，无 must-fix。review 建议把 audit/decis
 - tail result：T3 test center p95 从 B2 `8.309 mm` 降到 `5.999 mm`，但 center max 升到 `10.468 mm`；burial p95/max 退化到 `1.690 / 1.848 mm`；catastrophic failure 仍是 `5/40`，geometry_branch_failure 仍是 `1/40`。
 - decision：22.1 不是 stable inference candidate upgrade。T3 是有用的 shape-specific heads 诊断，但没有通过 tail gate；下一步唯一建议是 targeted internal hard-case top-up，或在 top-up 后重新设计更强 two-stage branch。internal defect 仍不是 baseline。
 - review：独立只读 review 通过，无 must-fix；确认没有 true shape label leakage、没有 test 反选、没有 forbidden artifacts staged。
+
+## 2026-05-30 Stage 22.2 targeted internal hard-case top-up plan
+
+- 范围：只做 hard-case top-up 设计；未运行 COMSOL，未训练，未生成或修改 data/NPZ，未更新 `CURRENT_BASELINE.md`，internal defect 仍是独立 benchmark branch。
+- 输入证据：显式引用 `comsol_internal_defect_pilot_pack_v2_240` manifest、22.0 B2 failure audit、22.1 shape-conditioned tail metrics 和 `INTERNAL_DEFECT_SCHEMA.md`。
+- hard-case audit：B2 与 T3 都不是 stable inference model；catastrophic failure 仍为 `5/40`，geometry_branch_failure 仍为 `1/40`。重点 strata 固定为 cuboid/ellipsoid confusion、compact、medium/large、shallow/deep_plus，以及 x/y center-region neighbor cases。
+- top-up plan：生成 `results/metrics/internal_defect_hard_case_topup_plan.csv`，目标 N=`120`，minimum usable N=`72`，`sensor_z_m=0.008`，不引入 liftoff variation，不混入 surface RBC baseline。
+- target quota：9 个 target 的实际计划行数与推荐配额完全一致：`24/20/18/16/14/10/10/4/4`，总计 120；coverage gate 通过。
+- route decision：唯一下一步是 `22.2b targeted COMSOL hard-case top-up pack generation`。继续模型 refinement 和真实 internal inference smoke 都暂缓；当前不改 schema。
+- review：独立只读复审通过；确认 plan-only、安全边界、target quota、hard-case evidence 和 route decision 均满足要求。
