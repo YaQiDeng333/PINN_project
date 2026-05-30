@@ -1,0 +1,29 @@
+22.6 tail-risk 信号审计摘要
+
+- 样本数：全量 360，test 60。
+- F2 test tail：bad_tail=36/60，catastrophic=11/60，geometry_branch=4/60。
+- test 中 model shape disagreement 命中 bad_tail：12 个；center_pairwise_max 中位数/95分位：3.245/7.738 mm。
+- shape probability entropy / top1-top2 margin：现有 B2/H2/F2 prediction artifact 未保存 logits/probability，因此本轮用跨模型 shape disagreement 作为可部署代理信号。
+- feature baseline per-sample prediction：当前未保存，无法形成 feature-vs-neural per-sample disagreement；本轮使用 delta_b-derived feature anomaly 作为替代。
+
+bad_tail_target 相关性最高的推理信号：
+- h2_f2_center_disagreement_mm: r=0.619
+- center_pairwise_mean_mm: r=0.512
+- center_pairwise_max_mm: r=0.483
+- burial_pairwise_mean_mm: r=0.465
+- burial_pairwise_max_mm: r=0.465
+
+catastrophic_failure 相关性最高的推理信号：
+- h2_f2_burial_disagreement_mm: r=0.360
+- h2_f2_center_disagreement_mm: r=0.303
+- burial_pairwise_mean_mm: r=0.272
+- burial_pairwise_max_mm: r=0.272
+- center_pairwise_mean_mm: r=0.235
+
+分组 tail 证据：
+- true_shape_type: internal_cuboid=17/22, internal_ellipsoid=15/20, internal_sphere=4/18
+- burial_depth_level: deep=8/12, deep_plus=16/22, medium=5/10, shallow=7/16
+- size_level: large=18/26, medium=15/21, small=3/13
+- aspect_bin: compact=18/36, elongated_x=2/5, elongated_y=16/19
+
+结论：tail-risk 需要用跨模型 disagreement、预测范围异常和 delta_b feature anomaly 联合判断，单一 shape 分支信号不足。

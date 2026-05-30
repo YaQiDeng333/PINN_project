@@ -3100,3 +3100,13 @@ Review agent 已完成只读复核，无 must-fix。review 建议把 audit/decis
 - 结论：freeze-shape 确实避免了 H2 式 shape collapse，shape F1 从 H2 `0.778163` 回升到 `0.824172`，但没有解决 tail failure；center max 接近 B2，burial p95/max 仍退化，catastrophic 和 geometry branch 都劣于 H2。
 - route decision：不是 stable internal inference candidate，也不是 stronger benchmark candidate；下一步唯一建议是 tail-specific refinement plus uncertainty/output gate，不进入真实 internal inference smoke，不更新 baseline。
 - review：独立只读 review 通过，无 must-fix；已补注释说明 group metadata 只用于 reporting，不进入模型输入。
+
+## 2026-05-30 Stage 22.6 internal defect tail-risk / uncertainty gate
+
+- 范围：基于 `comsol_internal_defect_pilot_pack_v3_hardcase`、B2/H2/F2 既有 prediction CSV 和 delta_b-derived features 做 tail-risk / abstention gate；没有训练主模型，没有运行 COMSOL，没有生成或修改 data/NPZ，没有提交 checkpoint/preview/notes，也没有修改 `CURRENT_BASELINE.md`。
+- 输入边界：risk gate 只使用推理时可得信号，包括跨模型 shape disagreement、center/burial/LWD disagreement、F2 预测参数范围异常、delta_b amplitude/energy、feature z-score anomaly；true shape、burial/size/aspect、split、sample_id 只用于 target/分组审计，不进入 gate 输入。
+- selected gate：validation-only 选择 `random_forest_small`，threshold=`0.07046389`；train-only scaler 已记录到 `results/metrics/internal_defect_tail_risk_gate_model_contract.json`，并补齐 `f2_pred_train_range_violation_count` 所需 train label range 常量。
+- test 结果：catastrophic failure recall `1.000`，geometry_branch_failure recall `1.000`，false alarm rate `0.417`，coverage retained `0.283`。accepted subset 的 center p95/max 从 `8.940 / 22.017 mm` 降到 `4.569 / 5.290 mm`，burial p95/max 从 `1.841 / 2.490 mm` 降到 `0.590 / 0.911 mm`。
+- 合同：新增 `results/summaries/internal_defect_uncertainty_inference_contract.md`，明确 high-risk 样本只能输出 `abstain_need_review`，不得给出确定 center/burial 结论。
+- route decision：可以进入 `A_internal_inference_smoke_with_abstention`，但只能作为带风险门控的 smoke；internal branch 仍不是 stable inference model，更不是 baseline。
+- review：独立只读 review 通过，无 must-fix；确认无 label leakage、validation-only threshold、test final only、forbidden artifacts 干净。

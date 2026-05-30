@@ -1,0 +1,6 @@
+decision_item,result,evidence
+tail_failures_detectable,True,cat_recall=1.000; geo_recall=1.000; center_p95_reduction=4.372mm
+false_alarm_acceptable,True,false_alarm=0.417; coverage=0.283; high_risk_count=43
+enter_internal_inference_smoke_with_abstention,True,A_internal_inference_smoke_with_abstention
+pause_stable_inference_claim,True,internal branch 仍不是 baseline；abstention 只是风险门控。
+unique_next_step,A_internal_inference_smoke_with_abstention,risk gate 能捕获主要 catastrophic/geometry tail，且 accepted subset 的 center p95 有下降；下一步可以只做带 abstention 的 internal inference smoke。

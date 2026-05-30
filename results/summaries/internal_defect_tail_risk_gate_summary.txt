@@ -1,0 +1,10 @@
+22.6 internal defect tail-risk gate 摘要
+
+- 选择方式：只用 validation split 选择模型和阈值；test 只做最终评估。
+- selected risk gate：random_forest_small，threshold=0.070464。
+- validation：catastrophic recall=1.000，geometry recall=1.000，false alarm=0.432，coverage=0.367。
+- test：catastrophic recall=1.000，geometry recall=1.000，false alarm=0.417，coverage=0.283。
+- test accepted center p95/max：4.569/5.290 mm，原始为 8.940/22.017 mm。
+- test accepted burial p95/max：0.590/0.911 mm，原始为 1.841/2.490 mm。
+
+结论：risk gate 只给出高风险/abstain 标记，不把 F2 或 internal branch 升级为 baseline。

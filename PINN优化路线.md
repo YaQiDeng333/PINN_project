@@ -678,3 +678,11 @@ The next route is a manifest-only dry run before any real signal array is accept
 具体结果是：F2 seed `42` test total normalized MAE `0.510008`，L/W/D MAE `1.014 / 1.327 / 0.109 mm`，burial_depth MAE `0.587 mm`，center_xyz component MAE `1.970 mm`；center p95/max `8.940 / 22.017 mm`，burial p95/max `1.841 / 2.490 mm`，catastrophic failure `11/60`，geometry_branch_failure `4/60`。它比 H2 更保 shape，但 tail 明显不如 H2，不能称为 stable inference candidate。
 
 路线应转为 tail-specific refinement plus uncertainty/output gate：一边重新设计 center/burial tail objective，一边为高风险 internal 样本输出 unstable/abstain 或风险分数，避免把不可靠预测包装成稳定推理。internal branch 仍是独立 benchmark branch，`CURRENT_BASELINE.md` 继续保持 surface / near-surface true 3D RBC baseline。
+
+## 2026-05-30 路线同步：22.6 internal tail-risk / uncertainty gate
+
+22.6 把 internal branch 的方向从“继续硬改回归头”切到“先识别不可靠推理”。这是必要分界：F2/B2/H2 都存在 center/burial tail failure，继续把所有样本都输出为确定几何会误导真实 internal smoke。
+
+本轮 risk gate 只使用推理时可得信号：跨模型 shape disagreement、center/burial disagreement、F2 预测范围异常和 delta_b-derived anomaly；真实 shape、burial/size/aspect、split、sample_id 只用于 target/metrics，不进入 gate 输入。validation-only 选择 `random_forest_small` 后，test catastrophic 和 geometry_branch recall 都是 `1.000`，false alarm `0.417`，coverage `0.283`。accepted subset 的 center/burial tail 明显下降，但 abstain 面积较大。
+
+路线更新为：可以做 internal inference smoke with abstention，但不能称 stable inference model。高风险样本必须输出 `risk_score` 和 `abstain_need_review`，不输出确定 center/burial 结论；真实 internal 样本仍需先完成 metadata/schema alignment。internal defect 继续是独立 branch，不进入 `CURRENT_BASELINE.md`。

@@ -561,3 +561,11 @@ Only next step: perform a real-data manifest dry run. Start with metadata only: 
 22.5 验证了一个关键点：freeze-shape 能保住 shape branch，但不能自动解决 center/burial tail。F2 selected seed `42` 的 shape F1 是 `0.824172`，比 H2 的 `0.778163` 明显恢复，说明冻结 B2 shape/encoder 方向是对的；但 catastrophic failure 是 `11/60`，geometry_branch_failure 是 `4/60`，center p95/max 是 `8.940 / 22.017 mm`，burial p95/max 是 `1.841 / 2.490 mm`，都没有过 stable gate。
 
 路线分界点是：问题已经不是“shape 被训练破坏”，而是 tail correction head 本身对最坏 center/burial case 不够可靠。下一步应改成更明确的 tail-specific objective 和 uncertainty/output gate：对高风险样本输出 unstable/abstain 或风险分数，同时重新设计 tail loss；不要把 F2 称为 stable inference model，也不要更新 `CURRENT_BASELINE.md`。
+
+## 2026-05-30 after Stage 22.6 internal tail-risk gate
+
+下一步唯一建议：进入 **internal inference smoke with abstention**，但不能声称 stable inference。
+
+22.6 已验证一个可用的安全门控：`random_forest_small` risk gate 在 test split 上捕获了 `100%` catastrophic failure 和 `100%` geometry_branch_failure，false alarm rate 为 `0.417`，coverage retained 为 `0.283`。accept 后的 tail 明显收缩：center p95/max 从 `8.940 / 22.017 mm` 降到 `4.569 / 5.290 mm`，burial p95/max 从 `1.841 / 2.490 mm` 降到 `0.590 / 0.911 mm`。
+
+真正的口径是：internal model 仍不能盲目输出稳定 center/burial；下一步只允许做带 `risk_score` 和 `abstain_need_review` 的 inference smoke。高风险样本不给确定几何结论，真实 internal sample 仍需先满足 metadata/schema。`CURRENT_BASELINE.md` 继续保持 surface / near-surface true 3D RBC baseline。
