@@ -1,0 +1,19 @@
+22.3 old B2 reference replay on hard-case augmented dataset
+dataset_id: comsol_internal_defect_pilot_pack_v3_hardcase
+artifact_manifest: C:\Users\19166\Desktop\PINN_project\results\manifests\internal_defect_b2_inference_artifact_manifest.json
+model: 21.9 B2_feature_fusion_burial_head checkpoint, no retraining
+input_policy: delta_b/BxByBz plus delta_b-derived features only
+test_total_normalized_mae: 0.515047
+test_LWD_mae_mm: 0.915 / 1.308 / 0.111
+test_burial_depth_mae_mm: 0.558
+test_center_xyz_component_mae_mm: 2.174
+test_shape_accuracy_f1: 0.833333 / 0.841143
+test_catastrophic_failure_count_rate: 12 / 0.200000
+test_geometry_branch_failure_count_rate: 3 / 0.050000
+test_center_p95_max_mm: 12.077 / 22.544
+test_burial_p95_max_mm: 1.693 / 2.096
+test_source_v2_total_mae: 0.399235
+test_hardcase_topup_total_mae: 0.746671
+checkpoint_written: false
+npz_written: false
+current_baseline_update: false

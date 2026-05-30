@@ -1,0 +1,6 @@
+decision_item,status,evidence,threshold_or_rule,decision
+hard_case_topup_effective,False,"cat_rate=0.150000, geometry=2, center_p95=8.886, burial_p95=1.599","must improve catastrophic, geometry branch, center p95 and burial p95 vs old B2",not_enough
+stable_internal_inference_candidate,False,"cat_rate=0.150000, geometry=2, shape_f1=0.778163","catastrophic <=5%, geometry_branch=0, shape_f1>=0.95",benchmark_candidate_only
+second_hard_case_topup_needed,True,"cat_rate=0.150000, geometry=2",needed if tail remains above stable gate,second_topup
+revise_output_labels_needed,False,22.3 uses existing L/W/D + burial + center + shape labels consistently; no label inconsistency detected by this gate.,revise only if failure evidence points to label/schema mismatch,not_needed
+internal_inference_smoke_or_real_alignment,False,stable_candidate=False,only after stable candidate gate passes,defer_real_sample_alignment

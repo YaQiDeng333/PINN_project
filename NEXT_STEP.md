@@ -540,3 +540,10 @@ Only next step: perform a real-data manifest dry run. Start with metadata only: 
 22.2b 已按 22.2 hard-case plan 执行 COMSOL top-up：计划 `120` 行，成功 `120/120`，覆盖 cuboid/ellipsoid confusion、full-shift catastrophic、worst center、worst burial、compact medium/large、shallow/deep_plus 和 center-region neighbor targets。生成的 top-up NPZ 与 v3_hardcase assembled NPZ 都留在 ignored `data/` 路径，未提交；`CURRENT_BASELINE.md` 不变，internal defect 仍是独立分支。
 
 新 assembled dataset 为 `comsol_internal_defect_pilot_pack_v3_hardcase`：source rows `240`，top-up rows `120`，assembled rows `360`，split=`240/60/60`，`train_ready_candidate=true`，`baseline_ready=false`。22.3 只应在该显式 manifest 上做 hard-case augmented training gate，不应进入真实 internal inference smoke 或 baseline transition。
+## 2026-05-30 after Stage 22.3 internal hard-case augmented training
+
+下一步唯一建议：先做第二轮 hard-case top-up 或 tail-specific refinement，不进入真实 internal inference smoke。
+
+22.3 在 `comsol_internal_defect_pilot_pack_v3_hardcase` 上完成 hard-case augmented training gate。旧 B2 在 v3_hardcase test 上的 catastrophic failure 是 `12/60`，geometry_branch_failure 是 `3/60`；validation-only 选择的 `H2_B2_hardcase_tail_weighted` seed `42` 将 catastrophic failure 降到 `9/60`，geometry_branch_failure 降到 `2/60`，center p95/max 从 `12.077 / 22.544 mm` 降到 `8.886 / 14.608 mm`。
+
+真正的分界点是 stable inference gate 仍未通过：catastrophic rate 仍为 `15%`，高于目标 `<=5%`，geometry branch 仍非零，burial max 从 `2.096 mm` 升到 `2.861 mm`，shape F1 从旧 B2 的 `0.841143` 降到 `0.778163`。internal defect 仍只能称为 benchmark branch，不是 stable inference model，也不是 `CURRENT_BASELINE.md`。

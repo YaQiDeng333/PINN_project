@@ -3066,3 +3066,14 @@ Review agent 已完成只读复核，无 must-fix。review 建议把 audit/decis
 - assembled dataset：`dataset_id=comsol_internal_defect_pilot_pack_v3_hardcase`，source rows `240`，top-up rows `120`，assembled rows `360`，split=`train 240 / val 60 / test 60`，`train_ready_candidate=true`，`baseline_ready=false`。
 - registry/manifest：已新增 `results/manifests/comsol_internal_defect_pilot_pack_v3_hardcase.manifest.json` 和 `COMSOL_DATA_REGISTRY.md` 条目；禁止 latest/newest discovery、automatic mainline training、baseline update、current baseline replacement。
 - route decision：可以进入 `22.3 hard-case augmented internal training gate`；真实 internal inference smoke 和 baseline transition 继续暂缓。
+
+## 2026-05-30 Stage 22.3 internal defect hard-case augmented training gate
+
+- 范围：在 `comsol_internal_defect_pilot_pack_v3_hardcase` 上训练和评估 hard-case augmented internal model；未运行 COMSOL，未生成或修改 data/NPZ，未提交 checkpoint/preview/notes，未修改 `CURRENT_BASELINE.md`。
+- 数据入口：通过 `COMSOL_DATA_REGISTRY.md` 和 `results/manifests/comsol_internal_defect_pilot_pack_v3_hardcase.manifest.json` 显式加载，禁止 latest/newest scan。数据为 `N=360`，split=`train 240 / val 60 / test 60`，source v2=`240`，hard-case top-up=`120`。
+- old B2 reference：21.9 B2 artifact 在 v3_hardcase test 上 total normalized MAE `0.515047`，L/W/D MAE `0.915 / 1.308 / 0.111 mm`，burial_depth MAE `0.558 mm`，center component MAE `2.174 mm`，shape accuracy/F1 `0.833333 / 0.841143`；catastrophic failure `12/60`，geometry_branch_failure `3/60`，center p95/max `12.077 / 22.544 mm`，burial p95/max `1.693 / 2.096 mm`。
+- training gate：固定 21.7 B2 feature-fusion architecture；H1 为标准 hard-case augmented training，H2 只在 train split 使用 `row_origin=hardcase_topup_v1` 做轻量 sample weighting。正式模型输入仍只包含 `delta_b/BxByBz` 和 delta_b-derived features；shape/burial/size/aspect/split/sample_id/hard-case target 均未作为模型输入。
+- selected result：validation-only 选择 `H2_B2_hardcase_tail_weighted` seed `42`，best epoch `294`。test total normalized MAE `0.421782`，L/W/D MAE `0.792 / 1.038 / 0.080 mm`，burial_depth MAE `0.531 mm`，center component MAE `1.709 mm`，shape accuracy/F1 `0.766667 / 0.778163`。
+- tail result：catastrophic failure 从 old B2 `12/60` 降到 `9/60`，geometry_branch_failure 从 `3/60` 降到 `2/60`，center p95/max 从 `12.077 / 22.544 mm` 降到 `8.886 / 14.608 mm`；burial p95 从 `1.693 mm` 降到 `1.599 mm`，但 burial max 从 `2.096 mm` 升到 `2.861 mm`，shape F1 明显下降。
+- decision：hard-case top-up 有效降低部分 mean/tail risk，但没有达到 stable inference gate；catastrophic rate `15%` 仍高于目标 `<=5%`，geometry branch 仍非零。internal branch 仍只能称 benchmark candidate，不是 stable inference model，更不是 baseline。下一步唯一建议是第二轮 hard-case top-up 或 tail-specific refinement，真实 internal inference smoke 继续暂缓。
+- review：独立只读 review 通过，0 个 must-fix；2 个 should-fix 已修复：summary 明确 H2 的 train-only sample weighting，input validator 增加了 `delta_b.reshape` 和 delta_b-derived feature source 检查。

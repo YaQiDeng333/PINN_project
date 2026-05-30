@@ -1,0 +1,15 @@
+22.3 hard-case augmented internal defect failure re-audit
+prediction_source: C:\Users\19166\Desktop\PINN_project\results\metrics\internal_defect_hardcase_selected_predictions.csv
+test_count: 60
+catastrophic_failure_count: 9
+geometry_branch_failure_count: 2
+cuboid_ellipsoid_confusion_count: 11
+center_mean_p95_max_mm: 3.593 / 8.886 / 14.608
+burial_mean_p95_max_mm: 0.531 / 1.599 / 2.861
+catastrophic_by_shape: {'internal_ellipsoid': 5, 'internal_cuboid': 3, 'internal_sphere': 1}
+catastrophic_by_burial: {'deep_plus': 7, 'deep': 1, 'shallow': 1}
+catastrophic_by_size: {'medium': 5, 'large': 4}
+catastrophic_by_aspect: {'elongated_y': 2, 'compact': 7}
+geometry_branch_cases: ['internal_hard_topup_109', 'internal_hard_topup_110']
+hardcase_topup_effect: see internal_defect_hardcase_vs_b2_reference.csv and group summary.
+current_baseline_update: false

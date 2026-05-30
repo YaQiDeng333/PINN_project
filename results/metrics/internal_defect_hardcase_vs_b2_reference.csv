@@ -1,0 +1,14 @@
+metric,old_B2_reference,hardcase_augmented,delta_augmented_minus_b2,passes_gate,notes
+total_normalized_mae,0.5150468945503235,0.4217822849750519,-0.0932646095752716,True,mean total should not clearly regress
+L_mae_mm,0.9150260090827942,0.7921104431152344,-0.12291556596755981,True,L MAE guard
+W_mae_mm,1.3080086708068848,1.0381202697753906,-0.26988840103149414,True,W MAE guard
+D_mae_mm,0.11060803383588791,0.07965001463890076,-0.030958019196987152,True,D MAE guard
+burial_depth_mae_mm,0.5575736165046692,0.5313616991043091,-0.026211917400360107,True,burial mean guard
+center_xyz_component_mae_mm,2.1744518280029297,1.7092565298080444,-0.46519529819488525,True,center component MAE guard
+shape_accuracy,0.8333333333333334,0.7666666666666667,-0.06666666666666665,False,shape should not clearly regress
+catastrophic_failure_rate,0.2,0.15,-0.05000000000000002,False,target <=5%
+geometry_branch_failure_count,3,2,-1.0,True,target below old B2
+center_xyz_error_p95_mm,12.077329635620117,8.886297225952148,-3.1910324096679688,True,tail center p95 lower
+center_xyz_error_max_mm,22.544387817382812,14.608484268188477,-7.935903549194336,True,tail center max lower
+burial_depth_error_p95_mm,1.6929956674575806,1.5986099243164062,-0.09438574314117432,True,tail burial p95 lower
+burial_depth_error_max_mm,2.096271514892578,2.8612265586853027,0.7649550437927246,False,tail burial max lower

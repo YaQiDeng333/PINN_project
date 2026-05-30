@@ -1,0 +1,26 @@
+22.3 hard-case augmented internal defect training gate preflight
+
+repo_root: C:\Users\19166\Desktop\PINN_project
+dataset_id: comsol_internal_defect_pilot_pack_v3_hardcase
+registry_manifest_gate: pass
+manifest_path: C:\Users\19166\Desktop\PINN_project\results\manifests\comsol_internal_defect_pilot_pack_v3_hardcase.manifest.json
+dataset_facts: N=360; split=train/val/test 240/60/60; source_v2_240=240; hardcase_topup_v1=120
+train_ready_candidate: true
+baseline_ready: false
+22.2b_validation_route: pass; route decision points to 22.3 hard-case augmented internal training gate
+21.9_B2_artifact_manifest: present
+21.7_21.9_B2_metrics: present
+22.0_failure_metrics: present
+22.1_shape_conditioned_metrics: present
+forbidden_staged_artifacts: none
+forbidden_visible_worktree_artifacts: none
+
+rules:
+- no COMSOL in this stage
+- no data/NPZ mutation
+- no CURRENT_BASELINE update
+- no checkpoint/preview/notes submission
+- model inputs restricted to delta_b/BxByBz plus delta_b-derived features
+- hard-case flags may be used only for grouping/diagnostics, not model input
+
+status: pass

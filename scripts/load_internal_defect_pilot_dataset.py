@@ -22,6 +22,8 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 DATASET_ID = "comsol_internal_defect_pilot_pack_v1"
 ROUTE = "internal_buried_defect_feasibility"
+HARDCASE_DATASET_ID = "comsol_internal_defect_pilot_pack_v3_hardcase"
+HARDCASE_ROUTE = "internal_buried_defect_hardcase"
 REGISTRY_PATH = ROOT / "COMSOL_DATA_REGISTRY.md"
 PARAM_NAMES = ["L_m", "W_m", "D_m", "burial_depth_m", "center_x_m", "center_y_m", "center_z_m"]
 DIMENSION_NAMES = ["L_m", "W_m", "D_m"]
@@ -54,6 +56,12 @@ class InternalDefectDataset:
     aspect_bin: np.ndarray
     cavity_internal: np.ndarray
     ground_truth_method: np.ndarray
+    row_origin: np.ndarray
+    source_dataset_id_per_row: np.ndarray
+    hardcase_target_id: np.ndarray
+    hardcase_target_reason: np.ndarray
+    hardcase_neighbor_strategy: np.ndarray
+    hardcase_center_region: np.ndarray
 
 
 def parse_args() -> argparse.Namespace:
@@ -130,6 +138,12 @@ def resolve_dataset(dataset_id: str = DATASET_ID, registry_path: Path = REGISTRY
     return entry, manifest, npz_path
 
 
+def expected_route_status(dataset_id: str) -> tuple[str, set[str]]:
+    if dataset_id == HARDCASE_DATASET_ID:
+        return HARDCASE_ROUTE, {"hardcase_pack_generated"}
+    return ROUTE, {"pilot_generated"}
+
+
 def gate_manifest(entry: dict[str, str], manifest: dict[str, Any], npz_path: Path, dataset_id: str = DATASET_ID) -> list[dict[str, Any]]:
     checks: list[dict[str, Any]] = []
 
@@ -141,8 +155,9 @@ def gate_manifest(entry: dict[str, str], manifest: dict[str, Any], npz_path: Pat
     entry_allowed = set(parse_list_value(entry.get("allowed_use", "")))
     entry_forbidden = set(parse_list_value(entry.get("forbidden_use", "")))
     add("dataset_id", manifest.get("dataset_id") == dataset_id, manifest.get("dataset_id"), dataset_id)
-    add("route", manifest.get("route") == ROUTE and entry.get("route") == ROUTE, f"manifest={manifest.get('route')}; registry={entry.get('route')}", ROUTE)
-    add("status", manifest.get("status") == "pilot_generated" and entry.get("status") == "pilot_generated", f"manifest={manifest.get('status')}; registry={entry.get('status')}", "pilot_generated")
+    expected_route, expected_status = expected_route_status(dataset_id)
+    add("route", manifest.get("route") == expected_route and entry.get("route") == expected_route, f"manifest={manifest.get('route')}; registry={entry.get('route')}", expected_route)
+    add("status", manifest.get("status") in expected_status and entry.get("status") in expected_status, f"manifest={manifest.get('status')}; registry={entry.get('status')}", sorted(expected_status))
     add("train_ready_candidate", bool(manifest.get("train_ready_candidate")) and parse_bool(entry.get("train_ready_candidate", "false")), manifest.get("train_ready_candidate"), True)
     add("baseline_ready_false", (not bool(manifest.get("baseline_ready"))) and (not parse_bool(entry.get("baseline_ready", "true"))), manifest.get("baseline_ready"), False)
     add("explicit_internal_training_allowed", "explicit_internal_training_gate" in allowed and "explicit_internal_training_gate" in entry_allowed, sorted(allowed), "explicit_internal_training_gate")
@@ -239,6 +254,11 @@ def load_dataset(dataset_id: str = DATASET_ID, registry_path: Path = REGISTRY_PA
             ]
         ).astype(np.float32)
         shape_type = np.asarray(npz["shape_type"]).astype(str)
+        def optional_strings(key: str, default: str = "") -> np.ndarray:
+            if key in npz.files:
+                return np.asarray(npz[key]).astype(str)
+            return np.full(delta_b.shape[0], default, dtype="<U1")
+
         dataset = InternalDefectDataset(
             dataset_id=dataset_id,
             manifest=manifest,
@@ -262,6 +282,12 @@ def load_dataset(dataset_id: str = DATASET_ID, registry_path: Path = REGISTRY_PA
             aspect_bin=np.asarray(npz["aspect_bin"]).astype(str),
             cavity_internal=np.asarray(npz["cavity_internal"], dtype=bool),
             ground_truth_method=np.asarray(npz["ground_truth_method"]).astype(str),
+            row_origin=optional_strings("row_origin"),
+            source_dataset_id_per_row=optional_strings("source_dataset_id_per_row"),
+            hardcase_target_id=optional_strings("hardcase_target_id"),
+            hardcase_target_reason=optional_strings("hardcase_target_reason"),
+            hardcase_neighbor_strategy=optional_strings("hardcase_neighbor_strategy"),
+            hardcase_center_region=optional_strings("hardcase_center_region"),
         )
     return dataset
 

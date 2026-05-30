@@ -1,0 +1,26 @@
+22.3 hard-case augmented internal defect training summary
+dataset_id: comsol_internal_defect_pilot_pack_v3_hardcase
+selected_model: H2_B2_hardcase_tail_weighted
+selected_seed: 42
+selected_best_epoch: 294
+architecture: fixed 21.7 B2_feature_fusion_burial_head; H2 only adds train-split hard-case sample weighting
+input_policy: delta_b/BxByBz plus delta_b-derived features only
+metadata_policy: hard-case/source flags are not model input; H2 uses train split row_origin only for sample weighting and metrics grouping
+selection_protocol: validation-only seed selection; test final only
+test_total_normalized_mae: 0.421782
+test_LWD_mae_mm: 0.792 / 1.038 / 0.080
+test_burial_depth_mae_mm: 0.531
+test_center_xyz_component_mae_mm: 1.709
+test_shape_accuracy_f1: 0.766667 / 0.778163
+test_catastrophic_failure_count_rate: 9 / 0.150000
+test_geometry_branch_failure_count_rate: 2 / 0.033333
+test_center_p95_max_mm: 8.886 / 14.608
+test_burial_p95_max_mm: 1.599 / 2.861
+old_B2_test_catastrophic_failure_count_rate: 12 / 0.200000
+old_B2_test_geometry_branch_failure_count_rate: 3 / 0.050000
+old_B2_test_center_p95_max_mm: 12.077 / 22.544
+old_B2_test_burial_p95_max_mm: 1.693 / 2.096
+stable_inference_gate_passed: False
+checkpoint_saved: false
+npz_written: false
+current_baseline_update: false

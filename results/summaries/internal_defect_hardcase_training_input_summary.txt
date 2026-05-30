@@ -1,0 +1,10 @@
+22.3 hard-case augmented internal defect training input summary
+dataset_id: comsol_internal_defect_pilot_pack_v3_hardcase
+status: pass
+N: 360
+split: {'train': 240, 'val': 60, 'test': 60}
+model_input_policy: delta_b/BxByBz plus delta_b-derived features only
+grouping_only_metadata: row_origin, hardcase_target_id, shape/burial/size/aspect are not model inputs
+current_baseline_update: false
+comsol_run: false
+data_npz_mutation: false

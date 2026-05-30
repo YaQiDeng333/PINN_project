@@ -657,3 +657,10 @@ The next route is a manifest-only dry run before any real signal array is accept
 路线状态变为：`comsol_internal_defect_pilot_pack_v3_hardcase` 已注册，source `v2_240` 的 `240` 行加上 hard-case top-up `120` 行，assembled `N=360`，split=`train 240 / val 60 / test 60`，`train_ready_candidate=true`，`baseline_ready=false`。这仍然不是 `CURRENT_BASELINE.md` 的候选；当前 baseline 继续是 surface / near-surface true 3D RBC 分支，internal defect 继续独立。
 
 下一步应做 22.3 hard-case augmented internal training gate：比较 v2_240 B2/T3 参考与 v3_hardcase 训练后的 tail metrics，重点看 catastrophic failure、geometry_branch_failure、center p95/max 和 burial p95/max 是否真正下降。真实 internal sample inference smoke 继续暂缓。
+## 2026-05-30 路线同步：22.3 internal hard-case augmented training gate
+
+22.3 验证了 22.2b hard-case top-up 的真实收益：v3_hardcase 数据集可以让模型明显降低部分均值和 tail 风险，但还不足以把 internal branch 推成 stable inference model。
+
+本轮只在 `comsol_internal_defect_pilot_pack_v3_hardcase` 上训练和评估，没有运行 COMSOL，没有生成或修改 data/NPZ，没有提交 checkpoint/preview/notes，也没有修改 `CURRENT_BASELINE.md`。正式模型输入仍然只包含 `delta_b/BxByBz` 和 delta_b-derived features；shape、burial、size、aspect、split、sample_id、hard-case target 都没有进入模型输入。H2 只在 train split 用 `row_origin=hardcase_topup_v1` 做样本加权，这属于训练采样策略，不是推理输入。
+
+路线结论是：H2 相比旧 B2 有进步，但没有过稳定推理门槛。test total normalized MAE 从 `0.515047` 降到 `0.421782`，center p95/max 从 `12.077 / 22.544 mm` 降到 `8.886 / 14.608 mm`，catastrophic failure 从 `12/60` 降到 `9/60`，geometry_branch_failure 从 `3/60` 降到 `2/60`；但 catastrophic rate 仍是 `15%`，burial max 退化到 `2.861 mm`，shape F1 降到 `0.778163`。因此下一步不进入真实 internal sample smoke，也不写 baseline；应继续围绕残余 tail failure 做第二轮 hard-case top-up 或 tail-specific refinement。
