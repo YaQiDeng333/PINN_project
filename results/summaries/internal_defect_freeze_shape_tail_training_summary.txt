@@ -1,0 +1,20 @@
+22.5 freeze-shape tail-regression multi-seed training summary
+dataset_id: comsol_internal_defect_pilot_pack_v3_hardcase
+selected_candidate: F2_freeze_shape_train_center_burial_with_residual
+selected_seed: 42
+selected_best_epoch: 4
+freeze_policy: B2 encoder/trunk/shape outputs are frozen; only center/burial tail residual heads are trained.
+input_policy: delta_b/BxByBz-derived frozen B2 latent/logits/predictions and delta_b-derived feature latent only; no true shape/split/sample_id metadata as formal input.
+selection_protocol: validation-only seed selection; test final only.
+test_total_normalized_mae: 0.510008
+test_LWD_mae_mm: 1.014 / 1.327 / 0.109
+test_burial_depth_mae_mm: 0.587
+test_center_xyz_component_mae_mm: 1.970
+test_shape_accuracy_f1: 0.816667 / 0.824172
+test_center_p90_p95_max_mm: 7.162 / 8.940 / 22.017
+test_burial_p90_p95_max_mm: 1.517 / 1.841 / 2.490
+test_catastrophic_failure_count_rate: 11 / 0.183333
+test_geometry_branch_failure_count_rate: 4 / 0.066667
+checkpoint_saved: false
+npz_written: false
+current_baseline_update: false

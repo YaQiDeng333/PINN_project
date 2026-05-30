@@ -1,0 +1,9 @@
+decision_item,status,evidence,threshold_or_rule,decision
+shape_branch_preserved,True,shape_acc/F1=0.8166666666666667 / 0.8241719520789288,shape F1 close to B2 and not H2-style collapse,preserved
+center_tail_reduced,False,center_p95/max=8.940112113952637 / 22.01708221435547,center p95 and max below B2 reference; no H2-style regression,not_enough
+burial_tail_not_regressed,False,burial_p95/max=1.8406275510787964 / 2.489889621734619,burial p95 and max should not regress vs B2/H2,regressed
+catastrophic_failure_reduced,False,catastrophic=11 / rate=0.18333333333333332,below both B2 and H2; stable target <=5%,not_enough
+geometry_branch_reduced,False,geometry_branch=4 / rate=0.06666666666666667,below both B2 and H2; stable target 0,not_enough
+stable_internal_inference_candidate,False,stable=False; shape=True; center=False; burial=False; cat=False; geometry=False,"shape preserved, center/burial tails improved, catastrophic <=5%, geometry_branch=0",not_stable
+internal_benchmark_candidate,False,benchmark_candidate=False; total_ok=False,can remain benchmark candidate if shape/mean are safe but stable tail gate fails,weak_candidate
+next_step,True,derived from freeze-shape gate,choose one route only,tail-specific refinement plus uncertainty/output gate

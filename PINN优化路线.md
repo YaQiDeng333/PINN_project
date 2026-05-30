@@ -671,3 +671,10 @@ The next route is a manifest-only dry run before any real signal array is accept
 证据很直接：H2 test total normalized MAE 是 `0.421782`，catastrophic failure 是 `9/60`，geometry_branch_failure 是 `2/60`；center p95/max 从旧 B2 的 `12.077 / 22.544 mm` 降到 `8.886 / 14.608 mm`。但 shape F1 从旧 B2 的 `0.841143` 降到 `0.778163`，burial max 从 `2.096 mm` 升到 `2.861 mm`。这说明 H2 不是 stable inference model，也不能作为 internal baseline。
 
 路线更新为：下一步训练 freeze-shape then tail-regression model。先固定或保护 shape classifier / shared encoder，再训练 center/burial tail heads；shape-confidence router 作为后续推理安全层，不作为主路线；第二轮 hard-case top-up 只有在 freeze-shape 后仍出现集中 strata failure 时才考虑。`CURRENT_BASELINE.md` 继续保持 surface / near-surface true 3D RBC baseline，internal defect 仍是独立 benchmark branch。
+## 2026-05-30 路线同步：22.5 freeze-shape internal tail-regression model
+
+22.5 证明 freeze-shape 是必要但不充分的修正。它把 H2 破坏 shape branch 的问题压住了：selected F2 的 shape F1 是 `0.824172`，比 H2 的 `0.778163` 恢复明显，接近 B2 的 `0.841143`；但 tail gate 没过，说明 center/burial 的最坏样本不是靠冻结 shape 后接一个 residual head 就能解决。
+
+具体结果是：F2 seed `42` test total normalized MAE `0.510008`，L/W/D MAE `1.014 / 1.327 / 0.109 mm`，burial_depth MAE `0.587 mm`，center_xyz component MAE `1.970 mm`；center p95/max `8.940 / 22.017 mm`，burial p95/max `1.841 / 2.490 mm`，catastrophic failure `11/60`，geometry_branch_failure `4/60`。它比 H2 更保 shape，但 tail 明显不如 H2，不能称为 stable inference candidate。
+
+路线应转为 tail-specific refinement plus uncertainty/output gate：一边重新设计 center/burial tail objective，一边为高风险 internal 样本输出 unstable/abstain 或风险分数，避免把不可靠预测包装成稳定推理。internal branch 仍是独立 benchmark branch，`CURRENT_BASELINE.md` 继续保持 surface / near-surface true 3D RBC baseline。

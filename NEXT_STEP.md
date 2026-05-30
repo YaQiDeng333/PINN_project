@@ -554,3 +554,10 @@ Only next step: perform a real-data manifest dry run. Start with metadata only: 
 22.4 的关键判断是，H2 不是单纯“还不够强”，而是优化方向把 shape branch 拉坏了。它把 center p95/max 从旧 B2 的 `12.077 / 22.544 mm` 降到 `8.886 / 14.608 mm`，但 shape F1 从 `0.841143` 降到 `0.778163`，burial max 从 `2.096 mm` 退化到 `2.861 mm`，所以继续加 hard-case 权重会继续在 shape 与 tail 之间拉扯。
 
 下一阶段应先保护 shape classifier / shared encoder，再单独训练 center/burial tail heads；shape-confidence router 可以作为后续安全层，第二轮 hard-case top-up 只在 freeze-shape 后仍发现集中 strata failure 时再考虑。internal defect 仍是独立 benchmark branch，不是 stable inference model，也不是 `CURRENT_BASELINE.md`。
+## 2026-05-30 after Stage 22.5 freeze-shape internal tail regression
+
+下一步唯一建议：做 tail-specific refinement plus uncertainty/output gate，不进入真实 internal inference smoke。
+
+22.5 验证了一个关键点：freeze-shape 能保住 shape branch，但不能自动解决 center/burial tail。F2 selected seed `42` 的 shape F1 是 `0.824172`，比 H2 的 `0.778163` 明显恢复，说明冻结 B2 shape/encoder 方向是对的；但 catastrophic failure 是 `11/60`，geometry_branch_failure 是 `4/60`，center p95/max 是 `8.940 / 22.017 mm`，burial p95/max 是 `1.841 / 2.490 mm`，都没有过 stable gate。
+
+路线分界点是：问题已经不是“shape 被训练破坏”，而是 tail correction head 本身对最坏 center/burial case 不够可靠。下一步应改成更明确的 tail-specific objective 和 uncertainty/output gate：对高风险样本输出 unstable/abstain 或风险分数，同时重新设计 tail loss；不要把 F2 称为 stable inference model，也不要更新 `CURRENT_BASELINE.md`。

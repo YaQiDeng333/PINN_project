@@ -3088,3 +3088,15 @@ Review agent 已完成只读复核，无 must-fix。review 建议把 audit/decis
 - route decision：唯一下一步是 `A_train_freeze_shape_then_tail_regression_model`；shape-confidence router 作为后续推理安全层，第二轮 hard-case top-up 只在 freeze-shape 后仍有集中 strata failure 时考虑。
 - baseline 状态：H2 不是 stable inference model，internal defect 仍是独立 benchmark branch，不是 `CURRENT_BASELINE`，不混入 surface / near-surface RBC baseline。
 - review：独立只读 review 通过，无 must-fix；已按 should-fix 将三个脚本明确标注为 analysis artifact generator。
+## 2026-05-30 Stage 22.5 freeze-shape internal tail-regression model
+
+- 范围：在 `comsol_internal_defect_pilot_pack_v3_hardcase` 上训练 freeze-shape + tail-regression 候选；没有运行 COMSOL，没有生成或修改 data/NPZ，没有保存 checkpoint，没有提交 preview/notes，也没有修改 `CURRENT_BASELINE.md`。
+- 输入边界：正式 F1/F2/F3 只使用 frozen B2 latent/logits/predictions 和 delta_b-derived feature latent；true `shape_type`、burial/size/aspect、split、sample_id 不作为正式模型输入。F4 使用 true shape 但只作为 oracle diagnostic，不能被选中。
+- reference：B2 artifact 在 v3_hardcase test 上 total MAE `0.515047`，shape F1 `0.841143`，catastrophic `12/60`，geometry `3/60`；22.3 H2 total MAE `0.421782`，shape F1 `0.778163`，catastrophic `9/60`，geometry `2/60`。
+- candidate screen：seed `42` 下 validation-only 选择 `F2_freeze_shape_train_center_burial_with_residual` 进入 multi-seed；F1/F3 未过 validation guard，F4 是 oracle only。
+- multi-seed：F2 在 seeds `42/123/2026` 上复跑，validation-only 选择 seed `42`，best epoch `4`。
+- selected result：test total normalized MAE `0.510008`；L/W/D MAE `1.014 / 1.327 / 0.109 mm`；burial_depth MAE `0.587 mm`；center_xyz component MAE `1.970 mm`；shape accuracy/F1 `0.816667 / 0.824172`。
+- tail result：center p90/p95/max `7.162 / 8.940 / 22.017 mm`；burial p90/p95/max `1.517 / 1.841 / 2.490 mm`；catastrophic failure `11/60`；geometry_branch_failure `4/60`。
+- 结论：freeze-shape 确实避免了 H2 式 shape collapse，shape F1 从 H2 `0.778163` 回升到 `0.824172`，但没有解决 tail failure；center max 接近 B2，burial p95/max 仍退化，catastrophic 和 geometry branch 都劣于 H2。
+- route decision：不是 stable internal inference candidate，也不是 stronger benchmark candidate；下一步唯一建议是 tail-specific refinement plus uncertainty/output gate，不进入真实 internal inference smoke，不更新 baseline。
+- review：独立只读 review 通过，无 must-fix；已补注释说明 group metadata 只用于 reporting，不进入模型输入。

@@ -1,0 +1,15 @@
+22.5 B2/H2 fixed reference summary
+dataset_id: comsol_internal_defect_pilot_pack_v3_hardcase
+B2_reference: 21.9 B2 artifact replayed on v3_hardcase; no retraining.
+H2_reference: 22.3 selected H2 metrics reused; no checkpoint required.
+B2_test_total_mae: 0.515047
+B2_test_shape_acc_f1: 0.833333 / 0.841143
+B2_test_catastrophic_geometry: 12 / 3
+B2_test_center_p95_max_mm: 12.077 / 22.544
+B2_test_burial_p95_max_mm: 1.693 / 2.096
+H2_test_total_mae: 0.421782
+H2_test_shape_acc_f1: 0.766667 / 0.778163
+H2_test_catastrophic_geometry: 9 / 2
+H2_test_center_p95_max_mm: 8.886 / 14.608
+H2_test_burial_p95_max_mm: 1.599 / 2.861
+current_baseline_update: false

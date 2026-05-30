@@ -1,0 +1,12 @@
+22.5 freeze-shape internal tail-regression route decision
+selected_candidate: F2_freeze_shape_train_center_burial_with_residual
+selected_seed: 42
+shape_preserved: True
+center_tail_reduced: False
+burial_tail_not_regressed: False
+catastrophic_reduced: False
+geometry_branch_reduced: False
+stable_internal_inference_candidate: False
+internal_benchmark_candidate: False
+baseline_status: internal branch only; CURRENT_BASELINE unchanged
+unique_next_step: tail-specific refinement plus uncertainty/output gate

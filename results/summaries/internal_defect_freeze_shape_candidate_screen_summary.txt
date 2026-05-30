@@ -1,0 +1,12 @@
+22.5 freeze-shape tail-regression candidate screen
+dataset_id: comsol_internal_defect_pilot_pack_v3_hardcase
+seed: 42
+frozen_base: 21.9 B2 encoder/trunk/shape classifier/regression output; no B2 parameter updates.
+formal_input_policy: frozen B2 latent/logits/predictions plus delta_b-derived feature latent only; no true shape/split/sample_id metadata as formal input.
+oracle_policy: F4 uses true shape only as diagnostic and cannot be selected.
+selected_candidate: F2_freeze_shape_train_center_burial_with_residual
+stage_d_allowed: True
+F1_freeze_encoder_shape_train_tail_heads: valid=False; best_epoch=152; test_total=0.476811; shape_f1=0.824172; center_p95/max=8.520/19.965; burial_p95/max=1.497/2.676; cat=11; geometry=4; note=shape_f1=0.784; center_p95/max=5.481/6.536; burial_p95/max=1.799/3.077; total=0.377323
+F2_freeze_shape_train_center_burial_with_residual: valid=True; best_epoch=4; test_total=0.510008; shape_f1=0.824172; center_p95/max=8.940/22.017; burial_p95/max=1.841/2.490; cat=11; geometry=4; note=shape_f1=0.784; center_p95/max=6.750/8.471; burial_p95/max=1.584/2.515; total=0.407482
+F3_soft_shape_conditioned_tail_heads: valid=False; best_epoch=289; test_total=0.471991; shape_f1=0.824172; center_p95/max=8.644/20.432; burial_p95/max=1.553/2.775; cat=9; geometry=3; note=shape_f1=0.784; center_p95/max=5.115/7.062; burial_p95/max=1.907/2.679; total=0.378510
+F4_true_shape_oracle_tail_diagnostic: valid=False; best_epoch=94; test_total=0.492025; shape_f1=0.824172; center_p95/max=9.876/20.460; burial_p95/max=1.496/2.300; cat=12; geometry=6; note=oracle diagnostic only; true shape labels are not allowed as formal model input
