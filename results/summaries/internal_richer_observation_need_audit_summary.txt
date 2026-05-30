@@ -1,0 +1,16 @@
+22.8 internal richer-observation need audit
+
+- abstained samples: 43; failure cases: 39.
+- failure shape counts: internal_cuboid=17; internal_ellipsoid=14; internal_sphere=8.
+- failure burial counts: deep=8; deep_plus=18; medium=3; shallow=10.
+- failure size counts: large=20; medium=15; small=4.
+- failure aspect counts: compact=22; elongated_x=2; elongated_y=15.
+
+核心映射：center/lateral tail -> R1_more_y_lines；burial/size tail -> R2_multi_liftoff；geometry/aspect confusion -> R1 first, R3 second.
+R4 multi-magnetization 当前没有足够 failure evidence 支撑第一轮执行。
+- center_xyz_tail_failure: primary=R1_more_y_lines, secondary=R3_multi_scan_direction, priority=1
+- burial_depth_tail_failure: primary=R2_multi_liftoff, secondary=R1_more_y_lines, priority=1
+- geometry_branch_failure: primary=R1_more_y_lines, secondary=R3_multi_scan_direction, priority=2
+- elongated_aspect_confusion: primary=R3_multi_scan_direction, secondary=R1_more_y_lines, priority=3
+- compact_large_high_risk: primary=R1_more_y_lines, secondary=R2_multi_liftoff, priority=2
+- magnetization_direction_uncertainty: primary=R4_multi_magnetization_direction, secondary=R3_multi_scan_direction, priority=5

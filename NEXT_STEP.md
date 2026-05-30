@@ -577,3 +577,11 @@ Only next step: perform a real-data manifest dry run. Start with metadata only: 
 22.7 已打通带拒判的 internal inference smoke。B2 full-set test center p95/max 是 `12.077 / 22.544 mm`，burial p95/max 是 `1.693 / 2.096 mm`；使用 22.6 risk gate 后，accepted subset 的 center p95/max 降到 `4.832 / 4.962 mm`，burial p95/max 降到 `0.605 / 1.106 mm`。catastrophic 和 geometry_branch failure 都被捕获，false alarm 为 `0.381`，coverage retained 为 `0.283`。
 
 真正的取舍是 coverage 很低：60 个 test 样本只有 17 个可 accept，所以这不是 stable all-sample predictor。下一步只能对真实 internal 样品先做 metadata/schema alignment，并且保留 `risk_score` / `abstain_need_review` 机制；缺 no-defect reference、Bx/By/Bz、sensor_z_m、坐标系、单位或 ground truth 时仍停止。
+
+## 2026-05-30 after Stage 22.8 internal richer-observation feasibility plan
+
+下一步唯一建议：执行 **22.9 richer-observation COMSOL diagnostic pack generation**。
+
+22.8 的判断是，22.7 的高拒判率不是单纯模型阈值问题，而是当前观测配置可能信息不足。risk gate 能抓住 catastrophic / geometry branch，但 coverage retained 只有 `0.283`；failure cases 集中在 deep_plus、large、compact/elongated_y，以及 cuboid/ellipsoid hard cases。
+
+22.9 第一轮只做 R0/R1/R2 diagnostic pack：30 个 base geometry，每个 base 6 个 paired variants，总计 180 rows；fallback 是 24 base / 144 rows。R1_more_y_lines 用来验证 center/lateral tail，R2_multi_liftoff 用来验证 burial/size 混淆。R3 multi-scan-direction 暂作第二优先级，R4 multi-magnetization 暂缓。不要在 22.9 里训练或接真实样品。

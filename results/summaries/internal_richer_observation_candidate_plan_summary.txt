@@ -1,0 +1,11 @@
+22.8 internal richer-observation candidate plan
+
+候选结论：R1_more_y_lines 与 R2_multi_liftoff 是 22.9 第一轮默认候选；R3 multi-scan-direction 记录为第二优先级；R4 multi-magnetization 暂缓。
+
+- R0_current_reference: priority=0, fit_for_22_9=True, target=baseline comparator for all richer-observation variants
+- R1_more_y_lines: priority=1, fit_for_22_9=True, target=center_y / lateral extent tail, compact large high-risk, first-pass shape confusion
+- R2_multi_liftoff: priority=2, fit_for_22_9=True, target=burial_depth / size attenuation ambiguity, deep_plus tail, center/burial tradeoff
+- R3_multi_scan_direction: priority=3, fit_for_22_9=False, target=cuboid/ellipsoid confusion, elongated_x/y aspect ambiguity, geometry branch failure
+- R4_multi_magnetization_direction: priority=5, fit_for_22_9=False, target=residual shape discriminability after R1/R2/R3
+
+实现边界：本阶段只规划，不创建 COMSOL generator、不生成 data/NPZ、不更新 registry/manifest。

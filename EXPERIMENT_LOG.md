@@ -3122,3 +3122,14 @@ Review agent 已完成只读复核，无 must-fix。review 建议把 audit/decis
 - contract：新增 `results/summaries/internal_defect_inference_abstention_contract.md`，明确 internal inference 不是 stable all-sample predictor，高风险样本只能输出 raw prediction + warning。
 - route decision：唯一下一步是 `A_internal_real_sample_metadata_alignment_with_abstention`；可以做真实样品 metadata alignment，但仍暂缓直接真实样品推理。
 - review：独立只读 review 通过，无 must-fix；确认 risk gate 无 label leakage、threshold 未用 test 重选、checkpoint artifact 未 staged。
+
+## 2026-05-30 Stage 22.8 internal richer-observation feasibility plan
+
+- 范围：只做 richer-observation 仿真诊断规划；没有运行 COMSOL，没有训练，没有生成或修改 data/NPZ，没有更新 `CURRENT_BASELINE.md`，internal defect 仍是独立 benchmark branch。
+- 输入证据：显式引用 22.0–22.7 failure / abstention 结果和 `comsol_internal_defect_pilot_pack_v3_hardcase` manifest。22.7 coverage retained 只有 `0.283`，high-risk `43/60`，catastrophic 与 geometry-branch recall 均为 `1.000`。
+- failure-to-observation mapping：abstained `43`，failure cases `39`；failure 分布为 `internal_cuboid=17`、`internal_ellipsoid=14`、`internal_sphere=8`，`deep_plus=18`，`large=20`，`compact=22`，`elongated_y=15`。
+- 机制判断：center/lateral tail 优先对应 `R1_more_y_lines`；burial/size tail 对应 `R2_multi_liftoff`；cuboid/ellipsoid 与 elongated aspect confusion 先用 R1 检查，R3 multi-scan-direction 作为第二优先级；R4 multi-magnetization 暂缓。
+- COMSOL 可行性：现有 internal generator 已有 `scan_line_y_m` 和 `sensor_z_m` 入口，R1/R2 可低风险进入 22.9；R3/R4 需要新增 direction/source 协议，不进第一轮主包。
+- 第一轮 diagnostic pack plan：target `30` base geometries / `180` rows，fallback `24` / `144`。每个 base 都有 6 个 paired variants：`R0_3line_z0p008`、`R1_5line_z0p008`、`R1_9line_z0p008`、`R2_5line_z0p006`、`R2_5line_z0p010`、`R2_5line_z0p012`。
+- route decision：唯一下一步是 `22.9_richer_observation_COMSOL_diagnostic_pack_generation`；仍不进入训练或真实样品推理。
+- review：独立只读 review 通过，无 must-fix；确认 plan-only、安全边界和 180-row plan gate 均满足要求。

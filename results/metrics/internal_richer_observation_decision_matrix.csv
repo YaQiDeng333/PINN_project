@@ -1,0 +1,8 @@
+decision_item,result,evidence
+first_round_candidate,R0_vs_R1_vs_R2,R1/R2 use existing scan_line_y_m and sensor_z_m generator hooks
+target_base_count,30,"30 bases selected from failure, abstained, and accepted representative samples"
+target_rows,180,30 bases x 6 variants
+fallback_rows,144,24 bases x 6 variants
+include_R3_now,False,multi-scan-direction requires new direction-aware schema; second priority
+include_R4_now,False,multi-magnetization is high cost and not supported by current failure evidence
+unique_next_step,22.9_richer_observation_COMSOL_diagnostic_pack_generation,plan-only stage complete; next stage may generate diagnostic pack

@@ -694,3 +694,11 @@ The next route is a manifest-only dry run before any real signal array is accept
 本轮 runner 显式加载 v3_hardcase、B2 artifact 和 22.6 risk gate。risk gate 按固定协议恢复到 ignored checkpoints，并由 tracked manifest 记录；threshold 固定为 `0.07046389`，没有用 test 重新选择。test 上 catastrophic recall 和 geometry_branch recall 都是 `1.000`，false alarm `0.381`，coverage `0.283`。accepted subset 的 center/burial tail 大幅下降，但可接受样本只有 17/60。
 
 路线更新为：下一步可以做真实 internal 样品 metadata alignment with abstention。也就是说，先检查真实样品是否具备 Bx/By/Bz、no-defect reference、sensor_z_m、坐标系、单位、scan geometry、ground truth，再决定是否跑带 `risk_score` 的 smoke；不能直接给真实样品稳定几何结论。internal defect 仍是独立 branch，不进入 `CURRENT_BASELINE.md`。
+
+## 2026-05-30 路线同步：22.8 internal richer-observation feasibility
+
+22.8 把路线从“风险门控兜底”推进到“补充观测信息”。22.7 的 gate 能抓住全部 catastrophic / geometry-branch failure，但 coverage retained 只有 `0.283`，说明当前三条 y-line、单 liftoff、单扫描方向的观测配置不足以支持稳定全样本 internal 推理。
+
+failure-to-observation 映射已经明确：center/lateral tail 优先需要更多 y-lines；burial/size 混淆优先需要 multi-liftoff；cuboid/ellipsoid 和 elongated aspect confusion 后续可能需要 multi-scan-direction。现有 COMSOL internal generator 已支持 `scan_line_y_m` 和 `sensor_z_m`，所以 R1/R2 是低成本第一轮；R3/R4 暂不作为默认执行项。
+
+路线更新为：22.9 执行 richer-observation COMSOL diagnostic pack，不训练、不接真实样品。第一轮固定 R0/R1/R2 paired comparison，target 30 base / 180 rows，先判断增加观测能否降低 center/burial tail 和拒判率；internal branch 仍不是 baseline，`CURRENT_BASELINE.md` 不变。
