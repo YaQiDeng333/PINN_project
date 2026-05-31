@@ -1,0 +1,10 @@
+23.5 internal multi-magnetization paired audit summary
+
+base_count: 30
+rows: 60
+magnetization_pairing_complete: true
+source_je_changed: True
+M1_mag_y_5line_z0p008: mean_mag_y_over_mag_x_rms=0.235954, mean_corr=0.024762, nonredundant_count=30/30
+M2_mag_y_9line_z0p008: mean_mag_y_over_mag_x_rms=0.242644, mean_corr=0.002597, nonredundant_count=30/30
+
+结论：mag_y 是真实 source 改向后的 paired observation；是否足以改善 shape/center/burial，需要结合 separability 与 diagnostic probe 判断。

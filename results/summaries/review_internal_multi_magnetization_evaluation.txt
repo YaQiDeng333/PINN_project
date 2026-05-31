@@ -1,0 +1,26 @@
+23.5 internal multi-magnetization diagnostic evaluation review
+
+review_result: pass
+review_mode: independent read-only review agent
+must_fix_findings: none
+
+检查范围：
+- 未运行 COMSOL。
+- 未进行正式模型训练；本轮仅运行 lightweight diagnostic probes，不保存 checkpoint，不形成正式模型候选。
+- 未生成或修改 data/NPZ。
+- 未修改 CURRENT_BASELINE.md。
+- 未发现 forbidden artifacts staged。
+
+关键证据：
+- `scripts/audit_internal_multi_magnetization_pairs.py` 固定 `DATASET_ID=comsol_internal_defect_multi_magnetization_pack_v1`，并通过 `COMSOL_DATA_REGISTRY.md` 与 `results/manifests/comsol_internal_defect_multi_magnetization_pack_v1.manifest.json` 显式加载 NPZ；未使用 latest/newest scan。
+- `build_feature_matrix()` 只从 `delta_b` 派生统计特征；`shape_type`、`burial_depth_level`、`size_level`、`aspect_bin`、`split`、`sample_id` 未拼入输入特征。
+- 标签只用于 diagnostic probe 的 supervision / validation selection / metrics，不作为输入；probe 明确标记为 diagnostic only。
+- paired audit 记录 `base_count=30`、`rows=60`、`magnetization_pairing_complete=true`、`source_je_changed=True`，M1/M2 都是 `30/30` nonredundant。
+- probe 使用 validation-only selection：每个 observation config 在 validation score 上选择模型，只报告 selected model 的 test/tail 结果；未发现 test 反选。
+- route decision 与指标一致：dual_mag_xy_5line 与 dual_mag_xy_9line 均未清晰优于 single mag reference，因此不推荐 23.6 正式训练。
+
+minor_caveat:
+- 由于 probe split 只有 `train/val/test=20/5/5` base，本轮结果只能作为 observation diagnostic，不应升级成正式模型候选或 baseline。
+
+结论：
+23.5 evaluation review 通过。当前结果支持“mag_y 是真实且非冗余的 paired observation”，但不支持直接进入 23.6 multi-magnetization training gate。CURRENT_BASELINE 保持不变，internal branch 仍是独立 diagnostic / benchmark branch。

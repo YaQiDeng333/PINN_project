@@ -1,0 +1,9 @@
+question,answer,evidence,decision
+dual_mag_xy_5line 是否优于 mag_x_5line,no,score_delta=0.136046; shape_f1_delta=0.000000; center_p95_delta_mm=0.822; burial_p95_delta_mm=0.562,5line dual 不足以单独进入训练
+dual_mag_xy_9line 是否优于 mag_x_9line,no,score_delta=0.169521; shape_f1_delta=-0.100000; center_p95_delta_mm=0.058; burial_p95_delta_mm=0.070,9line dual 不足以单独进入训练
+9line 是否明显优于 5line,yes,dual_9_vs_dual_5_score_delta=-0.076426; center_p95_delta_mm=-2.894; burial_p95_delta_mm=0.151,9line 成本可能值得
+dual magnetization 是否改善 shape separability,yes,shape_nn_delta_5=0.000000; shape_nn_delta_9=0.166667; ambiguous_delta_5=-0.033333; ambiguous_delta_9=0.033333,可分性有改善信号
+dual magnetization 是否降低 cuboid/ellipsoid confusion,mixed,probe5_delta=0.000000; probe9_delta=0.333333; nn5_delta=0.000000; nn9_delta=-0.217391,混合信号
+dual magnetization 是否降低 center/burial tail,no,center_p95_delta_5=0.822; center_p95_delta_9=0.058; burial_p95_delta_5=0.562; burial_p95_delta_9=0.070,tail 没有改善信号
+是否进入 23.6 正式训练,no,dual magnetization 没有清晰优于 single mag；暂不进入正式训练,E_keep_abstention_only_route_and_pause_internal_refinement
+是否可更新 baseline,no,diagnostic evaluation only; internal branch is not CURRENT_BASELINE,CURRENT_BASELINE 保持不变

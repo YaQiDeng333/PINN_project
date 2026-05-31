@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-05-31 after Stage 23.5 internal multi-magnetization diagnostic evaluation
+
+下一步唯一建议：**暂停 internal refinement，保留 abstention-only route，不进入 23.6 multi-magnetization training gate**。
+
+23.5 证明 `mag_y` 是真实 COMSOL source `Je` 改向后的非冗余 paired observation，但它没有在 diagnostic probe 中稳定优于 single-mag reference。5line dual 从 `mag_x_5line_only` 的 test total MAE `0.504394` 退化到 `0.623999`；9line dual 从 `mag_x_9line_only` 的 `0.499454` 退化到 `0.558467`，catastrophic failure 也从 `2/5` 升到 `3/5`。虽然 dual 9line 的 feature separability 有改善，shape NN consistency 从 `0.600000` 升到 `0.766667`，但 center/burial tail 和 probe 指标没有同步改善。
+
+因此不要把 23.5 写成正式模型候选，也不要启动 23.6 训练或真实 internal sample inference。当前 internal branch 仍只能作为 diagnostic / benchmark branch，`CURRENT_BASELINE.md` 继续保持 surface / near-surface true 3D RBC baseline。
+
 ## 2026-05-31 after Stage 23.4 internal multi-magnetization diagnostic pack
 
 下一步唯一建议：进入 **23.5 internal multi-magnetization diagnostic evaluation**。

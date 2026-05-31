@@ -1,0 +1,13 @@
+23.5 internal multi-magnetization feature separability summary
+
+输入边界：只使用 delta_b/BxByBz 派生特征；标签只用于可分性指标。
+mag_x_5line_only shape_nn_consistency: 0.700000
+dual_mag_xy_5line shape_nn_consistency: 0.700000
+mag_x_9line_only shape_nn_consistency: 0.600000
+dual_mag_xy_9line shape_nn_consistency: 0.766667
+dual_mag_xy_5line ambiguous_neighbor_rate: 0.866667
+dual_mag_xy_9line ambiguous_neighbor_rate: 0.900000
+dual_mag_xy_5line cuboid_ellipsoid_cross_nn_rate: 0.391304
+dual_mag_xy_9line cuboid_ellipsoid_cross_nn_rate: 0.304348
+
+结论：该阶段只评估双磁化是否改善 delta_b 特征空间的几何可分性；是否进入 23.6 训练由 diagnostic probe 与 route decision 共同判断。

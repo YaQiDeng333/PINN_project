@@ -3199,3 +3199,14 @@ Review agent 已完成只读复核，无 must-fix。review 建议把 audit/decis
 - dual-direction 对比：dual_xy_5line 的 center p95 比 x-only 5line 改善 `0.923 mm`，但 burial p95 退化 `0.595 mm` 且 shape F1 下降；dual_xy_9line 的 burial p95 比 x-only 9line 改善 `0.115 mm`，但 center p95 退化 `4.627 mm` 且 shape F1 下降。
 - route decision：dual-direction 没有清晰优于 x-only，23.3 不进入 23.4 training gate。下一步唯一建议是 `D_generate_multi_magnetization_diagnostic_pack`，用更高信息量的 source / magnetization observation 继续诊断。
 - review：独立只读 review 通过，无 must-fix；一个 should-fix 已处理，把 cuboid/ellipsoid confusion 和 center/burial tail 的中间判断从 yes 改为 mixed，避免误读。
+
+## 2026-05-31 Stage 23.5 internal multi-magnetization diagnostic evaluation
+
+- 范围：只评估 `comsol_internal_defect_multi_magnetization_pack_v1` 的 dual-magnetization 诊断价值；未运行 COMSOL，未进行正式模型训练，未生成或修改 data/NPZ，未提交 checkpoint/preview/notes，也未修改 `CURRENT_BASELINE.md`。
+- 数据入口：通过 `COMSOL_DATA_REGISTRY.md` 和 `results/manifests/comsol_internal_defect_multi_magnetization_pack_v1.manifest.json` 显式加载；assembled `delta_b` shape 为 `(60,3,2,9,201)`，30 个 base 全部具备 `mag_x/mag_y` paired completeness。
+- paired audit：`mag_y` 是真实 COMSOL source `Je` 改向后的 paired observation，不是 metadata-only；M1/M2 都是 `30/30` nonredundant。M1 mean mag_y/mag_x RMS 为 `0.235954`，mean corr 为 `0.024762`；M2 mean ratio 为 `0.242644`，mean corr 为 `0.002597`。
+- feature separability：dual 5line 的 shape NN consistency 与 mag_x 5line 持平为 `0.700000`；dual 9line 从 mag_x 9line 的 `0.600000` 升到 `0.766667`，cuboid/ellipsoid cross NN rate 从 `0.521739` 降到 `0.304348`，但 ambiguous neighbor rate 升到 `0.900000`，center NN distance 也变大。
+- lightweight diagnostic probe：本轮 probe 只用于 observation 诊断，不保存 checkpoint，不形成 formal candidate。标签只用于 supervision / validation selection / metrics，不作为输入；输入仅为 `delta_b/BxByBz` 派生特征。
+- single vs dual：`mag_x_5line_only` test total MAE `0.504394`、shape F1 `0.500000`、catastrophic `3/5`；`dual_mag_xy_5line` 退化到 total MAE `0.623999`、catastrophic `3/5`。`mag_x_9line_only` test total MAE `0.499454`、shape F1 `0.600000`、catastrophic `2/5`；`dual_mag_xy_9line` 退化到 total MAE `0.558467`、shape F1 `0.500000`、catastrophic `3/5`。
+- route decision：dual magnetization 提供非冗余信号，但没有稳定优于 single-mag reference；23.5 不推荐进入 23.6 multi-magnetization formal training gate。唯一下一步是保留 abstention-only route 并暂停 internal refinement，除非后续重新定义 observation / label 或提出新的诊断假设。
+- review：独立只读 review 通过，无 must-fix；确认无 COMSOL、无 data/NPZ mutation、无 label-as-input leakage、无 forbidden staged artifacts。`CURRENT_BASELINE.md` 保持 surface / near-surface true 3D RBC baseline 不变。

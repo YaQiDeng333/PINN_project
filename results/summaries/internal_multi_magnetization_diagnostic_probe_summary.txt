@@ -1,0 +1,13 @@
+23.5 internal multi-magnetization diagnostic probe summary
+
+probe_scope: lightweight diagnostic only; no checkpoint; no baseline update
+input_boundary: delta_b_derived_features_only
+base_split_counts: {'train': 20, 'val': 5, 'test': 5}
+mag_x_5line_only: selected_model=ridge_logreg, val_selection_score=1.140732, test_total_mae=0.504394, test_shape_f1=0.500000, test_catastrophic=3/5
+dual_mag_xy_5line: selected_model=ridge_logreg, val_selection_score=1.510899, test_total_mae=0.623999, test_shape_f1=0.500000, test_catastrophic=3/5
+dual_mag_xy_5line_plus_mag_features: selected_model=svr_rbf_C10, val_selection_score=1.810782, test_total_mae=0.582228, test_shape_f1=0.600000, test_catastrophic=3/5
+mag_x_9line_only: selected_model=ridge_logreg, val_selection_score=1.378776, test_total_mae=0.499454, test_shape_f1=0.600000, test_catastrophic=2/5
+dual_mag_xy_9line: selected_model=ridge_logreg, val_selection_score=1.469584, test_total_mae=0.558467, test_shape_f1=0.500000, test_catastrophic=3/5
+dual_mag_xy_9line_plus_mag_features: selected_model=ridge_logreg, val_selection_score=1.596555, test_total_mae=0.687044, test_shape_f1=0.500000, test_catastrophic=4/5
+
+结论：本轮只比较单磁化与双磁化观测在小样本 diagnostic probe 上的信号；不得把结果写成正式模型或 baseline。
