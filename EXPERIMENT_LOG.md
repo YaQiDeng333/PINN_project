@@ -3145,3 +3145,15 @@ Review agent 已完成只读复核，无 must-fix。review 建议把 audit/decis
 - registry：`status=diagnostic_pack_generated`，`train_ready_candidate=false`，`baseline_ready=false`，allowed use 仅为 `schema_validation, explicit_richer_observation_diagnostic`。
 - route decision：可进入 23.0 richer-observation evaluation gate；训练、真实样品推理和 `CURRENT_BASELINE.md` 更新继续暂缓。
 - review：独立只读复审通过，无 must-fix；COMSOL 既有无关 dirty items 保持未 staged、未回滚、未提交。
+
+## 2026-05-31 Stage 23.1 internal richer-observation training gate
+
+- 范围：在 `comsol_internal_defect_richer_observation_pack_v1` 上执行 richer-observation training gate；没有运行 COMSOL，没有生成或修改 data/NPZ，没有提交 checkpoint/preview/notes，也没有修改 `CURRENT_BASELINE.md`。
+- 数据入口：通过 `COMSOL_DATA_REGISTRY.md` 和 `results/manifests/comsol_internal_defect_richer_observation_pack_v1.manifest.json` 显式加载，禁止 latest/newest scan。22.9 richer-observation pack 仍是 diagnostic pack，不是 baseline，也不是自动训练集。
+- 23.0 前置选择：补齐 reference evaluation / route decision 后，validation-only 选择 `R1_plus_R2_combined`，包含 `R1_9line_z0p008`、`R1_5line_z0p008` 和 `R2_5line_z0p006/0p010/0p012`；test 指标只报告，不参与配置选择。
+- 输入边界：正式模型只使用 `delta_b/BxByBz`、`scan_line_mask`、`sensor_z_m` 和 delta_b-derived features。true `shape_type`、burial/size/aspect、split、sample_id 只用于 supervision / metrics，不作为模型输入。
+- split / normalization：30 个 base 按 `base_group_id` 聚合后做确定性分组，split=`train 20 / val 5 / test 5`；raw、feature、target normalization 均只使用 train split 统计量。
+- selected result：validation-only 选择 `O3_richer_observation_tail_aware` seed `2026`，best epoch `5`。Test total normalized MAE `0.629543`，L/W/D MAE `1.112 / 1.168 / 0.126 mm`，burial_depth MAE `0.879 mm`，center_xyz component MAE `2.095 mm`，shape accuracy/F1 `0.800000 / 0.600000`。
+- tail result：test center p95/max `7.314 / 7.531 mm`，burial p95/max `1.966 / 2.180 mm`，catastrophic failure `4/5`，geometry_branch_failure `1/5`。R1/R2 richer observation 在该 30-base diagnostic scope 内没有形成 stable inference candidate。
+- decision：23.1 不是 internal benchmark candidate upgrade，也不是 stable internal inference model。下一步唯一建议是 `23.2_internal_multi_scan_direction_plan`，优先检查 R3 multi-scan-direction 是否能补足 cuboid/ellipsoid 和 elongated aspect 的几何分支信息。
+- review：独立只读 review 首轮发现 23.0 配置选择存在 test 指标 tie-breaker，已修为只按 validation score 和固定配置顺序选择；复审通过，无 must-fix。

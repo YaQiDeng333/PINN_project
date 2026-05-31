@@ -1,0 +1,12 @@
+# 23.1 internal richer-observation training input summary
+
+- dataset_id: comsol_internal_defect_richer_observation_pack_v1
+- selected_observation_config: R1_plus_R2_combined
+- selected_variants: ['R1_9line_z0p008', 'R2_5line_z0p006', 'R1_5line_z0p008', 'R2_5line_z0p010', 'R2_5line_z0p012']
+- base_count: 30
+- split_counts: {'train': 20, 'val': 5, 'test': 5}
+- raw_input_shape: (30, 135, 201)
+- feature_shape: (30, 232)
+- failed_checks: 0
+- label leakage: no true shape_type / burial_bin / size / aspect / split / sample_id is included in model input.
+- normalization: raw, feature, sensor-derived values, and targets use train-only statistics.

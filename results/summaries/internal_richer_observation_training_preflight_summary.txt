@@ -1,45 +1,38 @@
-# 23.1 internal richer-observation training gate preflight summary
+# 23.1 internal richer-observation training preflight summary
 
 created_at: 2026-05-31
 
 ## 范围
 
-本轮目标是执行 23.1 internal richer-observation training gate。按照任务硬规则，训练前必须先读取 23.0 route decision：
+本轮执行 23.1 internal richer-observation training gate。前置要求是先读取 23.0 route decision，并且 23.0 必须明确推荐 R1 / R2 / R1+R2 范围内的输入配置。
 
-- `results/summaries/internal_richer_observation_evaluation_route_decision_summary.txt`
-- `results/metrics/internal_richer_observation_evaluation_decision_matrix.csv`
-
-若 23.0 没有明确推荐 `R1_5line_z0p008`、`R1_9line_z0p008`、`R2_5line_multi_liftoff` 或 `R1+R2 combined` 之一，则停止，不训练。
-
-## 只读检查结果
+## 当前状态
 
 - 当前目录：`C:\Users\19166\Desktop\PINN_project`
-- richer-observation pack 22.9 artifacts：存在
-  - `results/summaries/internal_richer_observation_pack_validation_summary.txt`
-  - `results/summaries/internal_richer_observation_pack_route_decision_summary.txt`
-  - `results/metrics/internal_richer_observation_pack_validation_metrics.csv`
-  - `results/metrics/internal_richer_observation_pack_route_decision_matrix.csv`
-- 23.0 evaluation route decision summary：缺失
-- 23.0 evaluation decision matrix：缺失
-- 当前可定位到的最新 route：22.9 只允许进入 23.0 richer-observation evaluation gate，不允许直接进入 23.1 training gate。
+- dataset_id：`comsol_internal_defect_richer_observation_pack_v1`
+- registry：`COMSOL_DATA_REGISTRY.md` 中存在显式条目。
+- manifest：`results/manifests/comsol_internal_defect_richer_observation_pack_v1.manifest.json` 存在。
+- NPZ：由 manifest 指向，存在于 ignored `data/` 路径，不提交。
+- 22.9 validation：通过，180 / 180 行，30 / 30 base paired completeness。
+- 23.0 route decision：已补齐并通过。
 
-## Blocker
+## 23.0 训练前置结论
 
-23.1 训练不能开始。缺少 23.0 richer-observation evaluation gate 的结论文件，因此无法确定本轮允许的 observation input 配置，也不能判断应该训练 `R1_5line_z0p008`、`R1_9line_z0p008`、`R2_5line_multi_liftoff` 还是 `R1+R2 combined`。
+- route decision summary：`results/summaries/internal_richer_observation_evaluation_route_decision_summary.txt`
+- decision matrix：`results/metrics/internal_richer_observation_evaluation_decision_matrix.csv`
+- selected observation config：`R1_plus_R2_combined`
+- selected variants：`R1_9line_z0p008`、`R2_5line_z0p006`、`R1_5line_z0p008`、`R2_5line_z0p010`、`R2_5line_z0p012`
+- R3 / R4：本轮不允许进入训练。
 
-## 本轮安全状态
+## 安全边界
 
-- 没有运行 COMSOL。
-- 没有训练。
-- 没有生成或修改 data / NPZ。
-- 没有修改 `CURRENT_BASELINE.md`。
-- 没有创建 checkpoint 或 preview PNG。
+- 不运行 COMSOL。
+- 不生成或修改 data / NPZ。
+- 不更新 `CURRENT_BASELINE.md`。
+- 不创建 baseline。
+- 模型输入只允许 `delta_b/BxByBz`、`scan_line_mask`、`sensor_z_m` 和 delta_b-derived features。
+- true `shape_type`、`burial_bin`、`size/aspect`、`split`、`sample_id` 只用于 supervision / metrics，不作为模型输入。
 
-## 下一步
+## 结论
 
-唯一下一步是先执行 23.0 richer-observation evaluation gate，生成并复核：
-
-- `results/summaries/internal_richer_observation_evaluation_route_decision_summary.txt`
-- `results/metrics/internal_richer_observation_evaluation_decision_matrix.csv`
-
-只有当 23.0 明确推荐 R1 / R2 / R1+R2 输入配置后，才能回到 23.1 training gate。
+preflight 通过，可以进入 23.1 loader/input validation、reference evaluation、training gate 和 route decision。

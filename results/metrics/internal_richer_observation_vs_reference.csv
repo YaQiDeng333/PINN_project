@@ -1,0 +1,9 @@
+metric,reference,selected_model,reference_value,selected_value,delta_selected_minus_reference,notes
+total_normalized_mae,23.0_ridge_feature_probe_same_config,O3_richer_observation_tail_aware,0.4425228238105774,0.6295425295829773,0.1870197057723999,same richer-observation split/config reference
+burial_depth_mae_mm,23.0_ridge_feature_probe_same_config,O3_richer_observation_tail_aware,0.693358838558197,0.8789317607879639,0.18557292222976685,same richer-observation split/config reference
+center_xyz_component_mae_mm,23.0_ridge_feature_probe_same_config,O3_richer_observation_tail_aware,1.607789397239685,2.094998359680176,0.4872089624404907,same richer-observation split/config reference
+shape_macro_f1,23.0_ridge_feature_probe_same_config,O3_richer_observation_tail_aware,0.6,0.6,0.0,same richer-observation split/config reference
+total_normalized_mae,old_B2_v3_hardcase_scope_mismatch,O3_richer_observation_tail_aware,0.5150468945503235,0.6295425295829773,0.11449563503265381,old B2 reference uses v3_hardcase 60-row scope
+burial_depth_mae_mm,old_B2_v3_hardcase_scope_mismatch,O3_richer_observation_tail_aware,0.5575736165046692,0.8789317607879639,0.3213581442832947,old B2 reference uses v3_hardcase 60-row scope
+center_xyz_component_mae_mm,old_B2_v3_hardcase_scope_mismatch,O3_richer_observation_tail_aware,2.1744518280029297,2.094998359680176,-0.0794534683227539,old B2 reference uses v3_hardcase 60-row scope
+shape_macro_f1,old_B2_v3_hardcase_scope_mismatch,O3_richer_observation_tail_aware,0.8411425176131058,0.6,-0.2411425176131058,old B2 reference uses v3_hardcase 60-row scope

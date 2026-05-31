@@ -1,0 +1,7 @@
+decision_item,status,value,threshold_or_reference,notes
+23.0_selected_config,pass,R1_plus_R2_combined,must be R1/R2/R1+R2,23.1 只按 23.0 选中的配置训练
+richer_observation_improves_tail,mixed,center_p95=7.314; burial_p95=1.966,center p95 <=5mm and burial p95 <=1mm preferred,test final only；由于 30-base diagnostic pack 很小，不能过度泛化
+stable_internal_inference_candidate,fail,False,"catastrophic=0, geometry=0, shape F1>=0.80, center/burial p95 gate",未通过时不能称 stable inference model
+benchmark_candidate,fail,False,shape F1>=0.60 and catastrophic<=2 and geometry<=1,通过也仍不是 baseline
+need_multi_scan_direction_pack,yes,True,geometry failure remains or shape F1 weak,R3 只在 R1/R2 后仍有 shape/geometry branch risk 时进入
+next_step,selected,23.2_internal_multi_scan_direction_plan,unique next step,不更新 CURRENT_BASELINE

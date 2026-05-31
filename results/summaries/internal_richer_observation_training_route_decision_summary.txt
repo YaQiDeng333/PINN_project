@@ -1,0 +1,16 @@
+# 23.1 internal richer-observation training route decision
+
+selected_observation_config: R1_plus_R2_combined
+selected_model: O3_richer_observation_tail_aware
+test_total_normalized_mae: 0.629543
+test_center_p95_mm: 7.314
+test_burial_p95_mm: 1.966
+test_catastrophic_failure_count: 4
+test_geometry_branch_failure_count: 1
+test_shape_macro_f1: 0.600000
+stable_internal_inference_candidate: false
+internal_benchmark_candidate: false
+need_multi_scan_direction_pack: true
+next_step: 23.2_internal_multi_scan_direction_plan
+
+结论：23.1 只能形成 internal richer-observation training gate 结论，不更新 CURRENT_BASELINE，也不把 internal branch 写成 baseline。

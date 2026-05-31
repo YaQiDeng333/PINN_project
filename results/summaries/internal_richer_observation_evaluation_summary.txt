@@ -1,0 +1,13 @@
+# 23.0 internal richer-observation evaluation summary
+
+- dataset_id: comsol_internal_defect_richer_observation_pack_v1
+- base_count: 30
+- method: train-only standardized delta_b-derived feature probe; validation score selects the observation config; test metrics are final report only.
+- recommended_23_1_observation_config: R1_plus_R2_combined
+- selected_variants: R1_9line_z0p008;R2_5line_z0p006;R1_5line_z0p008;R2_5line_z0p010;R2_5line_z0p012
+- selected_val_score: 1.447756
+- selected_test_total_normalized_mae: 0.442523
+- selected_test_center_p95/max_mm: 5.374 / 5.696
+- selected_test_burial_p95/max_mm: 1.516 / 1.593
+- selected_test_catastrophic/geometry_count: 2 / 1
+- conclusion: 23.1 may proceed only with the selected config above; R3/R4 remain out of scope.

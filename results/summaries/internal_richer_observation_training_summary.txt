@@ -1,0 +1,20 @@
+# 23.1 internal richer-observation training summary
+
+- dataset_id: comsol_internal_defect_richer_observation_pack_v1
+- selected_observation_config_from_23_0: R1_plus_R2_combined
+- selected_variants: ['R1_9line_z0p008', 'R2_5line_z0p006', 'R1_5line_z0p008', 'R2_5line_z0p010', 'R2_5line_z0p012']
+- selected_model: O3_richer_observation_tail_aware
+- selected_seed: 2026
+- best_epoch: 5
+- train/val/test split: {'train': 20, 'val': 5, 'test': 5}
+- test_total_normalized_mae: 0.629543
+- test_L/W/D_mae_mm: 1.112 / 1.168 / 0.126
+- test_burial_depth_mae_mm: 0.879
+- test_center_xyz_component_mae_mm: 2.095
+- test_shape_accuracy/F1: 0.800000 / 0.600000
+- test_center_p95/max_mm: 7.314 / 7.531
+- test_burial_p95/max_mm: 1.966 / 2.180
+- test_catastrophic/geometry_failure_count: 4 / 1
+- selection: validation-only; test final only.
+- input boundary: delta_b/BxByBz, scan_line_mask/sensor_z_m, and delta_b-derived features only; no true shape/burial/size/aspect/split/sample_id model input.
+- baseline_update: false

@@ -593,3 +593,11 @@ Only next step: perform a real-data manifest dry run. Start with metadata only: 
 22.9 已完成 COMSOL diagnostic pack generation：planned/success `180/180`，30 个 base 全部具备 6 个 paired variants，scan line 覆盖 `3/5/9`，liftoff 覆盖 `0.006/0.008/0.010/0.012 m`。新数据集 `comsol_internal_defect_richer_observation_pack_v1` 已通过 registry/manifest 显式注册，`validation_passed=true`，`status=diagnostic_pack_generated`，但 `train_ready_candidate=false`、`baseline_ready=false`。
 
 23.0 不应直接训练，也不应直接接真实样品；应先比较 R0/R1/R2 是否真的降低 center/burial tail、geometry branch risk 和 abstention rate。`CURRENT_BASELINE.md` 继续保持 surface / near-surface true 3D RBC baseline，internal defect 仍是独立 diagnostic branch。
+
+## 2026-05-31 after Stage 23.1 internal richer-observation training gate
+
+下一步唯一建议：进入 **23.2 internal multi-scan-direction plan**。
+
+23.1 已按 23.0 的 validation-only 选择训练 `R1_plus_R2_combined` 输入，但结果没有过 stable inference gate：selected `O3_richer_observation_tail_aware` seed `2026` 的 test total normalized MAE 为 `0.629543`，shape F1 为 `0.600000`，catastrophic failure 为 `4/5`，geometry_branch_failure 为 `1/5`，center p95/max 为 `7.314 / 7.531 mm`，burial p95/max 为 `1.966 / 2.180 mm`。
+
+真正的分界点是：更多 y-lines 和 multi-liftoff 没有在 30-base diagnostic scope 内解决几何分支错位，下一步不应继续直接调 O3，也不应进入真实 internal sample inference。应先规划 R3 multi-scan-direction diagnostic，验证双扫描方向是否能补足 cuboid/ellipsoid 和 elongated aspect 的形状判别信息。`CURRENT_BASELINE.md` 继续保持 surface / near-surface true 3D RBC baseline，internal branch 仍是独立 diagnostic / benchmark 分支。

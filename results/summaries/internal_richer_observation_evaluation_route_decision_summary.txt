@@ -1,0 +1,11 @@
+# 23.0 internal richer-observation evaluation route decision
+
+route_decision: proceed_to_23_1_training_gate
+selected_observation_config: R1_plus_R2_combined
+selected_variants: R1_9line_z0p008;R2_5line_z0p006;R1_5line_z0p008;R2_5line_z0p010;R2_5line_z0p012
+allowed_training_configs: R1_5line_z0p008, R1_9line_z0p008, R2_5line_multi_liftoff, R1_plus_R2_combined
+r3_r4_allowed: false
+selection_rule: validation score from richer-observation feature probe; test metrics are not used for selection.
+baseline_update: false
+
+理由：23.0 已经明确选择一个 R1/R2/R1+R2 范围内的配置，满足 23.1 的训练前置门槛。

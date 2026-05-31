@@ -1,0 +1,32 @@
+check_name,pass,observed,expected,notes
+dataset_id,True,comsol_internal_defect_richer_observation_pack_v1,comsol_internal_defect_richer_observation_pack_v1,
+registry_dataset_id_present,True,present,present,
+route,True,internal_buried_defect_richer_observation,internal_buried_defect_richer_observation,
+status,True,diagnostic_pack_generated,diagnostic_pack_generated,
+validation_passed,True,True,True,
+train_ready_candidate_false,True,False,False,22.9 是 diagnostic pack；23.1 只能作为 training gate，不是 baseline
+baseline_ready_false,True,False,False,
+explicit_diagnostic_allowed,True,"['explicit_richer_observation_diagnostic', 'schema_validation']",explicit_richer_observation_diagnostic,
+baseline_forbidden,True,"['automatic_mainline_training', 'baseline_update', 'current_baseline_replacement', 'direct_training_without_manifest_gate', 'latest_newest_auto_discovery']",baseline update forbidden,
+latest_newest_forbidden,True,False,False,
+npz_exists,True,C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\generated\internal_richer_observation_pack\comsol_internal_defect_richer_observation_pack_v1.npz,manifest npz_path,
+npz_sha256,True,936d62b88436115177e989fbdacc1b39ca30b917a6e1cdcd8df16287c8155b75,936d62b88436115177e989fbdacc1b39ca30b917a6e1cdcd8df16287c8155b75,
+23_0_selected_config_present,True,R1_plus_R2_combined,"['R0_3line_z0p008', 'R1_5line_z0p008', 'R1_9line_z0p008', 'R1_plus_R2_combined', 'R2_5line_multi_liftoff']",23.0 route decision must select allowed config
+base_count,True,30,30,
+selected_variants,True,"R1_9line_z0p008,R2_5line_z0p006,R1_5line_z0p008,R2_5line_z0p010,R2_5line_z0p012",subset of paired variants,
+raw_finite,True,"(30, 135, 201)",finite raw delta_b input,
+feature_finite,True,"(30, 232)",finite delta_b-derived features,
+split_counts,True,"{'train': 20, 'val': 5, 'test': 5}","{'train': 20, 'val': 5, 'test': 5}",
+paired_variants_do_not_cross_split,True,base-level examples,one split per base,每个 base 先聚合为一个训练样本，paired variants 不跨 split
+labels_complete,True,"(30, 7)","L/W/D, burial_depth, center_xyz, shape_type",
+no_forbidden_label_inputs,True,inputs=delta_b + scan_line_mask/sensor_z + delta_b-derived features,no true shape/burial/size/aspect/split/sample_id input,
+train_only_target_scaler,True,"[0.0014168500201776624, 0.0018762600375339389, 0.00013266000314615667, 0.001400390057824552, 0.011752230115234852, 0.0032291600946336985, 0.0013946699909865856]",train split only,
+train_only_raw_normalization,True,"(1, 135, 1)",train split only,
+train_only_feature_normalization,True,"(1, 232)",train split only,
+train_shape_coverage,True,"Counter({'internal_cuboid': 13, 'internal_ellipsoid': 4, 'internal_sphere': 3})",>=2 shape types,30-base diagnostic pack cannot guarantee every sparse stratum in every split
+train_burial_coverage,True,"Counter({'deep_plus': 9, 'shallow': 5, 'deep': 4, 'medium': 2})",>=2 burial levels,medium stratum is sparse in diagnostic pack
+val_shape_coverage,True,"Counter({'internal_ellipsoid': 3, 'internal_sphere': 2})",>=2 shape types,30-base diagnostic pack cannot guarantee every sparse stratum in every split
+val_burial_coverage,True,"Counter({'deep_plus': 3, 'shallow': 1, 'deep': 1})",>=2 burial levels,medium stratum is sparse in diagnostic pack
+test_shape_coverage,True,"Counter({'internal_ellipsoid': 3, 'internal_sphere': 2})",>=2 shape types,30-base diagnostic pack cannot guarantee every sparse stratum in every split
+test_burial_coverage,True,"Counter({'deep_plus': 4, 'shallow': 1})",>=2 burial levels,medium stratum is sparse in diagnostic pack
+paired_completeness,True,30,30,
