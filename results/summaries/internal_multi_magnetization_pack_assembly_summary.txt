@@ -1,0 +1,19 @@
+23.4 internal multi-magnetization pack assembly summary
+
+dataset_id: comsol_internal_defect_multi_magnetization_pack_v1
+status: diagnostic_pack_generated
+n_samples: 60
+base_count: 30
+complete_base_count: 30
+assembled_delta_shape: [60, 3, 2, 9, 201]
+magnetization_direction_names: ['mag_x', 'mag_y']
+nominal_source_je: ['0', '1e6[A/m^2]', '0']
+orthogonal_source_je: ['1e6[A/m^2]', '0', '0']
+source_je_changed: true
+manifest_path: C:\Users\19166\Desktop\PINN_project\results\manifests\comsol_internal_defect_multi_magnetization_pack_v1.manifest.json
+npz_path_ignored: C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\generated\internal_multi_magnetization_pack\comsol_internal_defect_multi_magnetization_pack_v1.npz
+train_ready_candidate: false
+baseline_ready: false
+current_baseline_updated: false
+
+结论：已将既有 nominal/mag_x reference 与新生成 mag_y rows 配对为 multi-magnetization diagnostic pack；NPZ 位于 ignored data 路径，不作为 baseline。

@@ -1,5 +1,16 @@
 # 实验工作日志
 
+## 2026-05-31 Stage 23.4 internal multi-magnetization diagnostic pack
+
+- 范围：执行 internal multi-magnetization COMSOL diagnostic pack generation、schema validation、assembly、registry/manifest 和 route decision；没有训练，没有更新 `CURRENT_BASELINE.md`，没有把 internal defect 写成 baseline。
+- COMSOL 结果：计划/成功 `60/60`，30 个 base 全部具备 `M1_mag_y_5line_z0p008` 和 `M2_mag_y_9line_z0p008`，失败 `0`。
+- 真实 source 改向：23.4 不是 metadata-only。COMSOL generator 将 source `Je` 从 nominal `["0","1e6[A/m^2]","0"]` 显式改为 orthogonal `["1e6[A/m^2]","0","0"]` 后分别求解 no-defect 和 defect。
+- 数据组装：`comsol_internal_defect_multi_magnetization_pack_v1` 已通过 registry/manifest 显式注册；assembled `delta_b` shape 为 `[60,3,2,9,201]`，方向维为 `magnetization_direction_names=["mag_x","mag_y"]`，并记录精确 `nominal_source_je` / `orthogonal_source_je`。
+- validation：`validation_passed=true`，`source_je_changed_all_true=true`，`delta_b=b_defect-b_no_defect` 最大误差 `1.1641532182693481e-10`，M1/M2 paired completeness `30/30`。
+- registry：`route=internal_buried_defect_multi_magnetization`，`status=diagnostic_pack_generated`，`train_ready_candidate=false`，`baseline_ready=false`，allowed use 仅为 `schema_validation, explicit_multi_magnetization_diagnostic`。
+- route decision：可进入 23.5 internal multi-magnetization diagnostic evaluation；训练、真实 internal sample inference 和 `CURRENT_BASELINE.md` 更新继续暂缓。
+- review：独立只读 review 通过；初始流程 follow-up 是补写 review summary 和同步 Markdown，已处理。COMSOL repo 既有无关 dirty items 未 staging、未回滚、未提交。
+
 ## 2026-05-29 Stage 21.3 internal defect dataset expansion plan
 
 - 范围：只做 internal / buried defect dataset expansion plan。未运行 COMSOL，未训练，未生成或修改 data/NPZ，未更新 `CURRENT_BASELINE.md`，未创建 baseline。

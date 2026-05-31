@@ -380,3 +380,35 @@ This registry records generated COMSOL dataset identities and allowed usage. It 
 - source_dataset_ids: comsol_internal_defect_richer_observation_pack_v1, comsol_internal_defect_multi_scan_direction_y_scan_pack_v1, comsol_internal_defect_pilot_pack_v3_hardcase
 - npz_sha256: ef21b3e975a20a9cca3b22ac5cc41663889290f1f0efa55d0e2cddfd9270b731
 - notes: Dual-direction diagnostic pack only. Generated NPZ/data files are not committed; not a baseline.
+
+## comsol_internal_defect_multi_magnetization_pack_v1
+
+- dataset_role: internal_defect_multi_magnetization_diagnostic_pack
+- status: diagnostic_pack_generated
+- route: internal_buried_defect_multi_magnetization
+- stage: 23.4
+- schema_version: internal_defect_multi_magnetization_v1
+- internal_surface_mixed: false
+- path: `C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\generated\internal_multi_magnetization_pack\comsol_internal_defect_multi_magnetization_pack_v1.npz`
+- manifest_path: `C:\Users\19166\Desktop\PINN_project\results\manifests\comsol_internal_defect_multi_magnetization_pack_v1.manifest.json`
+- n_samples: 60
+- base_count: 30
+- complete_base_count: 30
+- assembled_delta_shape: [60, 3, 2, 9, 201]
+- magnetization_direction_names: ['mag_x', 'mag_y']
+- observation_variants: {'M1_mag_y_5line_z0p008': 30, 'M2_mag_y_9line_z0p008': 30}
+- paired_reference_variants: {'R1_5line_z0p008': 30, 'R1_9line_z0p008': 30}
+- nominal_source_je: ['0', '1e6[A/m^2]', '0']
+- orthogonal_source_je: ['1e6[A/m^2]', '0', '0']
+- source_je_changed: true
+- shape_counts: {'internal_cuboid': 26, 'internal_ellipsoid': 20, 'internal_sphere': 14}
+- burial_depth_counts: {'deep': 10, 'deep_plus': 32, 'shallow': 14, 'medium': 4}
+- train_ready_candidate: false
+- baseline_ready: false
+- auto_discovery_allowed: false
+- latest_newest_discovery_allowed: false
+- allowed_use: schema_validation, explicit_multi_magnetization_diagnostic
+- forbidden_use: automatic_mainline_training, baseline_update, current_baseline_replacement, latest_newest_auto_discovery, direct_training_without_manifest_gate
+- source_dataset_ids: comsol_internal_defect_richer_observation_pack_v1, comsol_internal_defect_multi_magnetization_mag_y_pack_v1, comsol_internal_defect_pilot_pack_v3_hardcase
+- npz_sha256: 250b98ae07036849bbd33c50f3cc551dd4d8f7a707db50a63eb4ed88bbcd2f89
+- notes: Multi-magnetization diagnostic pack only. Generated NPZ/data files are not committed; not a baseline.

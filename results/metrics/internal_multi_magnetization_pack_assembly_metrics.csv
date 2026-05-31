@@ -1,0 +1,8 @@
+check_name,pass,observed,expected
+assembled_rows,True,60,60
+base_count,True,30,30
+complete_base_count,True,30,30
+assembled_delta_shape,True,"[60, 3, 2, 9, 201]","[60, 3, 2, 9, 201]"
+source_je_changed,True,True,True
+train_ready_candidate_false,True,False,False
+baseline_ready_false,True,False,False

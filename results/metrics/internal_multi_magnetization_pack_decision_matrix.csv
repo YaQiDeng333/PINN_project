@@ -1,0 +1,7 @@
+question,answer,evidence,decision
+multi-magnetization COMSOL pack 是否生成成功,yes,status=diagnostic_pack_generated; n=60; base_count=30; complete_base_count=30,可用
+magnetization/source 方向是否真实改变,yes,source_je_changed=True; validation=True,满足 23.4 核心 gate
+M1/M2 paired completeness 是否达标,yes,complete_base_count=30; target=30; fallback=24,可配对 mag_x/mag_y
+assembled tensor shape 是否正确,yes,"assembled_delta_shape=[60, 3, 2, 9, 201]",可供 23.5 loader/eval 使用
+是否可进入 23.5 diagnostic evaluation,yes,validation_passed=True; assembly_passed=True; full=True; partial=False,进入 23.5 multi-magnetization diagnostic evaluation
+是否可训练或更新 baseline,no,train_ready_candidate=false; baseline_ready=false; CURRENT_BASELINE unchanged,训练、真实 internal smoke 和 baseline 更新继续暂缓

@@ -1,0 +1,40 @@
+23.4 internal multi-magnetization diagnostic pack 只读 review
+
+review_agent: 019e7e5e-dd26-7772-a1cc-d2755b7431f9
+review_scope: PINN_project 与 COMSOL_Multiphysics_MCP，只读检查
+review_result: passed_after_process_followup
+must_fix_count: 0
+nice_to_have_count: 1
+
+must_fix 处理：
+- review 初始发现两个流程 follow-up：缺少本 review summary，三份 Markdown 尚未同步。
+- 当前已通过本文件以及 EXPERIMENT_LOG.md、NEXT_STEP.md、PINN优化路线.md 的 23.4 条目完成收口。
+
+技术 gate 证据：
+- COMSOL source / magnetization 方向确实改变，不是只写 metadata。generator 定义 nominal_source_je=["0","1e6[A/m^2]","0"] 与 orthogonal_source_je=["1e6[A/m^2]","0","0"]，并在求解前写入 config["source"]["Je"]=ORTHOGONAL_SOURCE_JE。
+- COMSOL summary 记录 planned/success rows 60/60、base_count_planned=30、complete_base_count=30、M1/M2 variant counts=30/30。
+- COMSOL inventory 记录 60 行 success，source_je_changed=true，Boolean / mesh / solve / export 均成功，delta_b=b_defect-b_no_defect 校验通过。
+- PINN validation 通过：results/summaries/internal_multi_magnetization_pack_validation_summary.txt 记录 validation_passed=true 与 source_je_changed_all_true=true。
+- PINN assembly 通过：results/summaries/internal_multi_magnetization_pack_assembly_summary.txt 记录 dataset_id=comsol_internal_defect_multi_magnetization_pack_v1 与 assembled_delta_shape=[60,3,2,9,201]。
+- Route decision 通过：results/summaries/internal_multi_magnetization_pack_route_decision_summary.txt 记录 can_enter_23_5=true。
+
+manifest / registry 检查：
+- manifest 路径：results/manifests/comsol_internal_defect_multi_magnetization_pack_v1.manifest.json。
+- registry 入口：COMSOL_DATA_REGISTRY.md。
+- route=internal_buried_defect_multi_magnetization。
+- allowed_use=schema_validation, explicit_multi_magnetization_diagnostic。
+- forbidden_use 包含 automatic_mainline_training, baseline_update, current_baseline_replacement, latest_newest_auto_discovery, direct_training_without_manifest_gate。
+- train_ready_candidate=false，baseline_ready=false。
+
+安全检查：
+- 没有训练。
+- CURRENT_BASELINE.md 未修改。
+- 生成的 NPZ 保留在 ignored data 路径，不允许提交。
+- checkpoint、preview PNG、notes、.mph、raw CSV、temp STL、NPZ 都不允许进入 staged files。
+- COMSOL repo 既有无关 dirty files 不属于本轮提交范围，也不应 staging：src/tools/physics.py、src/tools/results.py、src/tools/study.py、scripts/generate_mfl_rectangular_sweep.py。
+
+nice-to-have：
+- assembled direction labels 是 magnetization_direction_names=["mag_x","mag_y"]，而更精确的物理证据是 source vector 从 nominal Jy 切换到 orthogonal Jx。23.5 报告应优先引用 nominal_source_je 与 orthogonal_source_je，不要只依赖 mag_x/mag_y 简写。
+
+结论：
+23.4 multi-magnetization diagnostic pack 通过 review。可以进入 23.5 diagnostic evaluation，但它不是 train-ready，不是 baseline-ready，也不修改 CURRENT_BASELINE.md。

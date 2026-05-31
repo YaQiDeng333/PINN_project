@@ -1,5 +1,13 @@
 # PINN 优化路线
 
+## 2026-05-31 路线同步：23.4 internal multi-magnetization diagnostic pack
+
+23.4 把 23.3 的路线判断落成了新的 source / magnetization observation diagnostic pack。23.3 已经证明 dual-direction scan 提供非冗余信息，但没有稳定优于 x-only；因此这次不再继续堆扫描方向，而是让 COMSOL source `Je` 从 nominal `["0","1e6[A/m^2]","0"]` 改为 orthogonal `["1e6[A/m^2]","0","0"]`，生成 M1/M2 两个 mag_y diagnostic variants。
+
+数据链路现在是完整的：COMSOL planned/success `60/60`，30 个 base 全部 paired complete；PINN 侧组装为 `comsol_internal_defect_multi_magnetization_pack_v1`，`delta_b` shape 为 `[60,3,2,9,201]`，方向维为 `["mag_x","mag_y"]`，同时保留精确 `nominal_source_je` 和 `orthogonal_source_je` 作为物理解释依据。registry/manifest 明确 `train_ready_candidate=false`、`baseline_ready=false`，并禁止 automatic mainline training / baseline update / latest-newest discovery。
+
+路线分界点是：23.4 只证明 multi-magnetization 观测已经可生成、可配对、可验证，不证明它已经改善模型，也不授权训练或 baseline transition。下一步只进入 23.5 diagnostic evaluation，判断 orthogonal source 是否缓解 cuboid/ellipsoid confusion、center/burial tail 和 geometry_branch failure；`CURRENT_BASELINE.md` 继续保持 surface / near-surface true 3D RBC baseline，internal defect 仍是独立 diagnostic / benchmark branch。
+
 ## 2026-05-29 路线同步：21.3 internal defect dataset expansion plan
 
 21.3 不是训练阶段，而是把 internal / buried defect 分支的数据覆盖问题收口成可执行的扩展方案。`comsol_internal_defect_pilot_pack_v1` 的 N=96 可以复用，但旧 split 不能复用：val/test 都只有 `internal_cuboid`，test burial 只覆盖 `deep/deep_plus`，所以 21.2 的 shape accuracy 只能说明 cuboid-only 局部信号，不能说明三类 shape 泛化。

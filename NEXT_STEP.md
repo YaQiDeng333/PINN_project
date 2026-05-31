@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-05-31 after Stage 23.4 internal multi-magnetization diagnostic pack
+
+下一步唯一建议：进入 **23.5 internal multi-magnetization diagnostic evaluation**。
+
+23.4 已完成 multi-magnetization COMSOL diagnostic pack generation：planned/success `60/60`，30 个 base 均有 `M1_mag_y_5line_z0p008` 与 `M2_mag_y_9line_z0p008`，并与既有 R1 reference 形成 paired pack。关键不是只写了 `mag_y` metadata，而是 COMSOL source `Je` 从 nominal `["0","1e6[A/m^2]","0"]` 显式改为 orthogonal `["1e6[A/m^2]","0","0"]` 后重新求解。assembled `delta_b` shape 为 `[60,3,2,9,201]`，`validation_passed=true`，`can_enter_23_5=true`。
+
+23.5 只应做 diagnostic evaluation：比较 multi-magnetization 是否相对 single-source / multi-scan-direction 进一步改善 shape confusion、center/burial tail 和 geometry_branch failure。不要在 23.5 直接训练，不要接真实 internal sample，不要更新 `CURRENT_BASELINE.md`；internal defect 仍是独立 diagnostic / benchmark branch。
+
 ## 2026-05-30 after Stage 22.2 targeted internal hard-case top-up plan
 
 下一步唯一建议：**执行 22.2b targeted COMSOL hard-case top-up pack generation**。

@@ -1,0 +1,12 @@
+23.4 internal multi-magnetization registry summary
+
+dataset_id: comsol_internal_defect_multi_magnetization_pack_v1
+registry_path: C:\Users\19166\Desktop\PINN_project\COMSOL_DATA_REGISTRY.md
+manifest_path: C:\Users\19166\Desktop\PINN_project\results\manifests\comsol_internal_defect_multi_magnetization_pack_v1.manifest.json
+status: diagnostic_pack_generated
+route: internal_buried_defect_multi_magnetization
+allowed_use: schema_validation, explicit_multi_magnetization_diagnostic
+forbidden_use: automatic_mainline_training, baseline_update, current_baseline_replacement, latest_newest_auto_discovery, direct_training_without_manifest_gate
+train_ready_candidate: false
+baseline_ready: false
+surface_rbc_baseline_update: false
