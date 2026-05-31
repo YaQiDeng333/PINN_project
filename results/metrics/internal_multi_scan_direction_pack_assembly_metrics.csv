@@ -1,0 +1,6 @@
+metric,value
+assembled_rows,60
+base_count,30
+complete_base_count,30
+delta_shape,"(60, 3, 2, 9, 201)"
+status,diagnostic_pack_generated

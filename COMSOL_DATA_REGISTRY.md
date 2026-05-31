@@ -351,3 +351,32 @@ This registry records generated COMSOL dataset identities and allowed usage. It 
 - validation_script: `scripts/validate_internal_richer_observation_pack.py`
 - npz_sha256: 936d62b88436115177e989fbdacc1b39ca30b917a6e1cdcd8df16287c8155b75
 - notes: Richer-observation diagnostic pack only; generated NPZ/data files are not committed; not a baseline.
+
+## comsol_internal_defect_multi_scan_direction_pack_v1
+
+- dataset_role: internal_defect_multi_scan_direction_diagnostic_pack
+- status: diagnostic_pack_generated
+- route: internal_buried_defect_multi_scan_direction
+- stage: 23.2b
+- schema_version: internal_defect_multi_scan_direction_v1
+- internal_surface_mixed: false
+- path: `C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\generated\internal_multi_scan_direction_pack\comsol_internal_defect_multi_scan_direction_pack_v1.npz`
+- manifest_path: `C:\Users\19166\Desktop\PINN_project\results\manifests\comsol_internal_defect_multi_scan_direction_pack_v1.manifest.json`
+- n_samples: 60
+- base_count: 30
+- complete_base_count: 30
+- assembled_delta_shape: [60, 3, 2, 9, 201]
+- direction_names: ['x_scan', 'y_scan']
+- observation_variants: {'D1_y_scan_5line_z0p008': 30, 'D2_y_scan_9line_z0p008': 30}
+- paired_x_variants: {'R1_5line_z0p008': 30, 'R1_9line_z0p008': 30}
+- shape_counts: {'internal_cuboid': 26, 'internal_ellipsoid': 20, 'internal_sphere': 14}
+- burial_depth_counts: {'deep': 10, 'deep_plus': 32, 'shallow': 14, 'medium': 4}
+- train_ready_candidate: false
+- baseline_ready: false
+- auto_discovery_allowed: false
+- latest_newest_discovery_allowed: false
+- allowed_use: schema_validation, explicit_multi_scan_direction_diagnostic
+- forbidden_use: automatic_mainline_training, baseline_update, current_baseline_replacement, latest_newest_auto_discovery, direct_training_without_manifest_gate
+- source_dataset_ids: comsol_internal_defect_richer_observation_pack_v1, comsol_internal_defect_multi_scan_direction_y_scan_pack_v1, comsol_internal_defect_pilot_pack_v3_hardcase
+- npz_sha256: ef21b3e975a20a9cca3b22ac5cc41663889290f1f0efa55d0e2cddfd9270b731
+- notes: Dual-direction diagnostic pack only. Generated NPZ/data files are not committed; not a baseline.

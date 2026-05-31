@@ -3167,3 +3167,13 @@ Review agent 已完成只读复核，无 must-fix。review 建议把 audit/decis
 - 数据契约：23.2b assembled tensor 规划为 `delta_b=(N,3,2,9,201)`，包含 `direction_names=[x_scan,y_scan]`、`direction_mask`、`scan_line_mask`、path/line coordinate axis 和 padded scan-line metadata。
 - route decision：唯一下一步是 `23.2b_internal_multi_scan_direction_generation`；训练暂缓到 23.3，真实 internal sample inference 继续暂缓，internal branch 仍不是 baseline。
 - review：独立只读 review 通过，无 must-fix；已按建议明确 forbidden artifact check 只覆盖非 ignored tracked/untracked 路径。
+
+## 2026-05-31 Stage 23.2b internal multi-scan-direction diagnostic pack
+
+- 范围：执行 23.2b y_scan COMSOL diagnostic pack generation、x/y dual-direction assembly、schema validation、registry/manifest 和 route decision；没有训练，没有更新 `CURRENT_BASELINE.md`，没有把 internal defect 写成 baseline。
+- COMSOL 结果：计划 `60` 行，成功 `60/60`；30 个 base 全部具备 `D1_y_scan_5line_z0p008` 与 `D2_y_scan_9line_z0p008`，失败 `0`。
+- 方向化坐标：23.2b 新增真正的 `direction-aware` y_scan 采样，`path_coordinate_axis=y`、`line_coordinate_axis=x`，采样点为 `(x_line, y_path, sensor_z_m)`，不是只写 `scan_direction=y_scan` metadata。
+- 组装结果：新数据集 `comsol_internal_defect_multi_scan_direction_pack_v1` 已注册；与 22.9 既有 x_scan `R1_5line_z0p008` / `R1_9line_z0p008` 配对后，assembled `delta_b` shape 为 `(60,3,2,9,201)`，`direction_names=[x_scan,y_scan]`。
+- validation：`validation_passed=true`，`delta_b=b_defect-b_no_defect` 最大误差 `1.1641532182693481e-10`，`direction_aware_y_scan_coordinate_check=true`，D1/D2 paired completeness `30/30`。
+- registry：`status=diagnostic_pack_generated`，`train_ready_candidate=false`，`baseline_ready=false`，allowed use 仅为 `schema_validation, explicit_multi_scan_direction_diagnostic`。
+- route decision：可进入 23.3 internal multi-scan-direction diagnostic evaluation；训练、真实 internal sample inference 和 `CURRENT_BASELINE.md` 更新继续暂缓。

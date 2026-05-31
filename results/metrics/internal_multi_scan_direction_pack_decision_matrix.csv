@@ -1,0 +1,7 @@
+question,answer,evidence,decision
+top-up 是否生成成功,yes,status=diagnostic_pack_generated; n=60; base_count=30; complete_base_count=30,可用
+y_scan 是否是真正方向化坐标,yes,direction_check=True; path_axis_y=True; line_axis_x=True,满足 23.2b 核心 gate
+D1/D2 paired completeness 是否达标,yes,complete_base_count=30; target=30; fallback=24,可配对 existing x_scan
+assembled tensor shape 是否正确,yes,"assembled_delta_shape=[60, 3, 2, 9, 201]",可供 23.3 loader/eval 使用
+是否可进入 23.3 diagnostic evaluation,yes,validation_passed=True; direction_ok=True; full=True; partial=False,进入 23.3，不训练
+是否可训练或更新 baseline,no,train_ready_candidate=false; baseline_ready=false; CURRENT_BASELINE unchanged,训练、真实 internal smoke 和 baseline 更新继续暂缓

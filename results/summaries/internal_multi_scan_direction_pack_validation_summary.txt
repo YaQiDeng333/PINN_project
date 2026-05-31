@@ -1,0 +1,15 @@
+23.2b internal multi-scan-direction y_scan pack validation summary
+
+planned_rows: 60
+success_rows: 60
+base_count: 30
+d1_d2_complete_base_count: 30
+validation_passed: true
+max_delta_error: 1.1641532182693481e-10
+direction_aware_coordinate: y_scan 使用 path_coordinate_axis=y，line_coordinate_axis=x；采样点为 (x_line, y_path, sensor_z_m)。
+training_run: false
+comsol_run_by_this_script: false
+data_npz_modified_by_this_script: false
+current_baseline_updated: false
+
+结论: y_scan top-up 只作为 23.2b dual-direction diagnostic 输入；不是训练集，不是 baseline。

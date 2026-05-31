@@ -1,0 +1,16 @@
+23.2b internal multi-scan-direction generation preflight
+
+plan_csv: C:\Users\19166\Desktop\PINN_project\results\metrics\internal_multi_scan_direction_diagnostic_pack_plan.csv
+richer_manifest: C:\Users\19166\Desktop\PINN_project\results\manifests\comsol_internal_defect_richer_observation_pack_v1.manifest.json
+source_manifest: C:\Users\19166\Desktop\PINN_project\results\manifests\comsol_internal_defect_pilot_pack_v3_hardcase.manifest.json
+planned_rows: 60
+planned_rows_expected_60: true
+y_scan_rows: 60
+base_count: 30
+line_count_distribution: {'5': 30, '9': 30}
+missing_source_base_sample_ids: []
+direction_aware_sensor_point_builder: true
+y_scan_coordinate_rule: points=(x_line, y_path, sensor_z_m)
+x_scan_not_regenerated: true
+no_comsol_training_or_baseline_update: true
+stop_if_y_scan_not_orthogonal: true

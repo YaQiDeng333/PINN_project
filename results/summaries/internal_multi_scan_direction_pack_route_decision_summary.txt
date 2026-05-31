@@ -1,0 +1,15 @@
+23.2b internal multi-scan-direction route decision summary
+
+dataset_id: comsol_internal_defect_multi_scan_direction_pack_v1
+status: diagnostic_pack_generated
+n_samples: 60
+base_count: 30
+complete_base_count: 30
+assembled_delta_shape: [60, 3, 2, 9, 201]
+validation_passed: true
+direction_aware_coordinate_ok: true
+can_enter_23_3: true
+needs_topup: false
+next_step: 进入 23.3 internal multi-scan-direction diagnostic evaluation
+
+判断: 23.2b 只完成 dual-direction diagnostic pack gate；internal branch 仍不是 baseline。

@@ -608,3 +608,11 @@ Only next step: perform a real-data manifest dry run. Start with metadata only: 
 23.2 的核心判断是：23.1 失败不是继续调 O3 能解决的问题，而是当前 internal observation 缺少正交扫描方向。R1/R2 已经补了更多 y-lines 和 multi-liftoff，但 shape F1 仍只有 `0.600000`，catastrophic failure `4/5`，geometry branch `1/5`；因此下一步应补生成 y_scan 的 `5-line` 和 `9-line` 观测，与既有 x_scan 数据配对，验证 cuboid/ellipsoid 和 elongated aspect 的方向性信息是否真的不足。
 
 23.2b 只应运行 COMSOL diagnostic pack generation，不训练、不更新 `CURRENT_BASELINE.md`、不提交 data/NPZ/.mph/raw CSV/checkpoint/preview/notes。生成目标是复用 22.9 的 30 个 base，补 `60` 行 y_scan；fallback 是 24 个 base / 48 行。COMSOL 侧必须实现真正的 direction-aware sensor point builder，不能只写 `scan_direction=y_scan` metadata。
+
+## 2026-05-31 after Stage 23.2b internal multi-scan-direction pack
+
+下一步唯一建议：进入 **23.3 internal multi-scan-direction diagnostic evaluation**。
+
+23.2b 已经完成 y_scan 方向化 COMSOL 生成和 dual-direction assembly：planned/success `60/60`，30 个 base 全部有 `D1_y_scan_5line_z0p008` 与 `D2_y_scan_9line_z0p008`，并且与既有 x_scan `R1_5line_z0p008` / `R1_9line_z0p008` 成对。真正的分界点是这次不只是写了 `scan_direction=y_scan` metadata，而是把传感器点改成 `(x_line, y_path, sensor_z_m)`，也就是路径沿 y 方向、line offset 沿 x 方向。
+
+assembled dataset 为 `comsol_internal_defect_multi_scan_direction_pack_v1`，`delta_b` shape 是 `(60,3,2,9,201)`，`validation_passed=true`，`train_ready_candidate=false`，`baseline_ready=false`。23.3 只应该先评估双方向观测是否缓解 cuboid/ellipsoid 与 elongated aspect 的几何分支错误；不要直接训练或接真实 internal sample，`CURRENT_BASELINE.md` 继续保持 surface / near-surface true 3D RBC baseline。

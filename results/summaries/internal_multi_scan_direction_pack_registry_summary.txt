@@ -1,0 +1,8 @@
+23.2b internal multi-scan-direction registry summary
+dataset_id: comsol_internal_defect_multi_scan_direction_pack_v1
+status: diagnostic_pack_generated
+manifest: C:\Users\19166\Desktop\PINN_project\results\manifests\comsol_internal_defect_multi_scan_direction_pack_v1.manifest.json
+npz_path: C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\generated\internal_multi_scan_direction_pack\comsol_internal_defect_multi_scan_direction_pack_v1.npz
+npz_sha256: ef21b3e975a20a9cca3b22ac5cc41663889290f1f0efa55d0e2cddfd9270b731
+allowed_use: schema_validation, explicit_multi_scan_direction_diagnostic
+forbidden_use: automatic_mainline_training, baseline_update, current_baseline_replacement, latest_newest_auto_discovery, direct_training_without_manifest_gate
