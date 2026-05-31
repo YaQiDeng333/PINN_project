@@ -1,0 +1,36 @@
+23.3 internal multi-scan-direction evaluation preflight summary
+
+dataset_id: comsol_internal_defect_multi_scan_direction_pack_v1
+manifest: C:\Users\19166\Desktop\PINN_project\results\manifests\comsol_internal_defect_multi_scan_direction_pack_v1.manifest.json
+npz_path: C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\generated\internal_multi_scan_direction_pack\comsol_internal_defect_multi_scan_direction_pack_v1.npz
+preflight_passed: true
+n_rows: 60
+base_count: 30
+delta_b_shape: (60, 3, 2, 9, 201)
+direction_names: ['x_scan', 'y_scan']
+path_coordinate_axis: ['x', 'y']
+line_coordinate_axis: ['y', 'x']
+split_counts_for_diagnostic_probes: {'train': 20, 'val': 5, 'test': 5}
+richer_observation_manifest_exists: True
+23_1_metrics_exists: True
+comsol_run: false
+formal_training_run: false
+data_npz_mutation: false
+current_baseline_update: false
+
+checks:
+- registry_entry_present: True observed=present expected=present
+- manifest_exists: True observed=C:\Users\19166\Desktop\PINN_project\results\manifests\comsol_internal_defect_multi_scan_direction_pack_v1.manifest.json expected=exists
+- dataset_id: True observed=comsol_internal_defect_multi_scan_direction_pack_v1 expected=comsol_internal_defect_multi_scan_direction_pack_v1
+- status: True observed=diagnostic_pack_generated expected=diagnostic_pack_generated
+- npz_exists: True observed=C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\generated\internal_multi_scan_direction_pack\comsol_internal_defect_multi_scan_direction_pack_v1.npz expected=exists
+- npz_sha256: True observed=ef21b3e975a20a9cca3b22ac5cc41663889290f1f0efa55d0e2cddfd9270b731 expected=ef21b3e975a20a9cca3b22ac5cc41663889290f1f0efa55d0e2cddfd9270b731
+- assembled_shape: True observed=[60, 3, 2, 9, 201] expected=[60, 3, 2, 9, 201]
+- base_count: True observed=30 expected=30
+- paired_complete: True observed=30 expected=30
+- baseline_ready_false: True observed=False expected=False
+- train_ready_candidate_false: True observed=False expected=False
+- baseline_forbidden: True observed=['automatic_mainline_training', 'baseline_update', 'current_baseline_replacement', 'direct_training_without_manifest_gate', 'latest_newest_auto_discovery'] expected=baseline forbidden
+- richer_manifest_exists: True observed=C:\Users\19166\Desktop\PINN_project\results\manifests\comsol_internal_defect_richer_observation_pack_v1.manifest.json expected=exists
+- no_forbidden_staged: True observed=[] expected=[]
+- protected_paths_clean: True observed=[] expected=[]

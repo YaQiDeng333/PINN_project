@@ -616,3 +616,11 @@ Only next step: perform a real-data manifest dry run. Start with metadata only: 
 23.2b 已经完成 y_scan 方向化 COMSOL 生成和 dual-direction assembly：planned/success `60/60`，30 个 base 全部有 `D1_y_scan_5line_z0p008` 与 `D2_y_scan_9line_z0p008`，并且与既有 x_scan `R1_5line_z0p008` / `R1_9line_z0p008` 成对。真正的分界点是这次不只是写了 `scan_direction=y_scan` metadata，而是把传感器点改成 `(x_line, y_path, sensor_z_m)`，也就是路径沿 y 方向、line offset 沿 x 方向。
 
 assembled dataset 为 `comsol_internal_defect_multi_scan_direction_pack_v1`，`delta_b` shape 是 `(60,3,2,9,201)`，`validation_passed=true`，`train_ready_candidate=false`，`baseline_ready=false`。23.3 只应该先评估双方向观测是否缓解 cuboid/ellipsoid 与 elongated aspect 的几何分支错误；不要直接训练或接真实 internal sample，`CURRENT_BASELINE.md` 继续保持 surface / near-surface true 3D RBC baseline。
+
+## 2026-05-31 after Stage 23.3 internal multi-scan-direction diagnostic evaluation
+
+下一步唯一建议：执行 **multi-magnetization diagnostic pack plan / generation**，不要进入 23.4 dual-direction training gate。
+
+23.3 证明 y_scan 不是冗余观测：D1/D2 paired completeness 为 `30/30`，assembled `delta_b=(60,3,2,9,201)`，D1/D2 的 y/x RMS 接近 1 且方向相关性低。但轻量 probe 没有证明 dual-direction 比 x-only 更稳：best validation-selected test config 是 `single_x_9line`，而 dual_xy_5line 只改善 center tail、牺牲 burial 与 shape，dual_xy_9line 只改善 burial tail、牺牲 center 与 shape。
+
+因此当前瓶颈不应再归因于“缺一个正交扫描方向”本身。下一步应检查更高信息量的源/磁化观测轴；internal branch 继续是 diagnostic / benchmark branch，不是 stable inference model，也不进入 `CURRENT_BASELINE.md`。

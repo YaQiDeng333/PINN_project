@@ -3177,3 +3177,14 @@ Review agent 已完成只读复核，无 must-fix。review 建议把 audit/decis
 - validation：`validation_passed=true`，`delta_b=b_defect-b_no_defect` 最大误差 `1.1641532182693481e-10`，`direction_aware_y_scan_coordinate_check=true`，D1/D2 paired completeness `30/30`。
 - registry：`status=diagnostic_pack_generated`，`train_ready_candidate=false`，`baseline_ready=false`，allowed use 仅为 `schema_validation, explicit_multi_scan_direction_diagnostic`。
 - route decision：可进入 23.3 internal multi-scan-direction diagnostic evaluation；训练、真实 internal sample inference 和 `CURRENT_BASELINE.md` 更新继续暂缓。
+
+## 2026-05-31 Stage 23.3 internal multi-scan-direction diagnostic evaluation
+
+- 范围：只做 `comsol_internal_defect_multi_scan_direction_pack_v1` 的 diagnostic evaluation；未运行 COMSOL，未训练 formal model，未生成或修改 data/NPZ，未更新 `CURRENT_BASELINE.md`，internal defect 仍是独立 diagnostic / benchmark branch。
+- 数据入口：显式使用 `COMSOL_DATA_REGISTRY.md` 与 `results/manifests/comsol_internal_defect_multi_scan_direction_pack_v1.manifest.json`；assembled `delta_b` shape 为 `(60,3,2,9,201)`，方向维为 `[x_scan,y_scan]`，30 个 base 均 D1/D2 paired complete。
+- paired audit：y_scan 对每个 base 都提供非冗余正交观测；D1 5-line 的 mean y/x RMS 为 `1.077851`、mean corr 为 `0.225959`，D2 9-line 的 mean y/x RMS 为 `0.996417`、mean corr 为 `0.197233`。
+- feature separability：dual_xy_9line 的 shape nearest-neighbor consistency 从 single_x_9line 的 `0.600000` 升到 `0.700000`，ambiguous neighbor rate 从 `0.866667` 降到 `0.833333`；dual_xy_5line 相对 single_x_5line 没有改善 shape NN consistency。
+- lightweight probe：本轮 probe 只用于路线判断，不保存 checkpoint，不形成 formal candidate。validation-selected best test config 是 `single_x_9line`，test total normalized MAE `0.499454`，shape accuracy/F1 `0.800000 / 0.600000`，center p95/max `5.678 / 6.341 mm`，burial p95/max `1.522 / 1.652 mm`，catastrophic/geometry count `2 / 0`。
+- dual-direction 对比：dual_xy_5line 的 center p95 比 x-only 5line 改善 `0.923 mm`，但 burial p95 退化 `0.595 mm` 且 shape F1 下降；dual_xy_9line 的 burial p95 比 x-only 9line 改善 `0.115 mm`，但 center p95 退化 `4.627 mm` 且 shape F1 下降。
+- route decision：dual-direction 没有清晰优于 x-only，23.3 不进入 23.4 training gate。下一步唯一建议是 `D_generate_multi_magnetization_diagnostic_pack`，用更高信息量的 source / magnetization observation 继续诊断。
+- review：独立只读 review 通过，无 must-fix；一个 should-fix 已处理，把 cuboid/ellipsoid confusion 和 center/burial tail 的中间判断从 yes 改为 mixed，避免误读。

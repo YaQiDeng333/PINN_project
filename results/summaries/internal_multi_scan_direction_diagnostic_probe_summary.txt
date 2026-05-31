@@ -1,0 +1,13 @@
+23.3 internal multi-scan-direction lightweight diagnostic probe summary
+
+scope: diagnostic probe only; no formal model candidate, no checkpoint, no COMSOL, no data/NPZ mutation.
+base split: {'train': 20, 'val': 5, 'test': 5}
+best_validation_selected_test_config_by_score: single_x_9line
+best_selected_model: ridge_logreg
+test_total_normalized_mae: 0.499454
+test_shape_accuracy/F1: 0.800000 / 0.600000
+test_center_p95/max_mm: 5.678 / 6.341
+test_burial_p95/max_mm: 1.522 / 1.652
+test_catastrophic/geometry_count: 2 / 0
+
+结论：probe 仅用于判断 dual-direction 是否值得进入 23.4；不得把 probe 写成正式模型候选。

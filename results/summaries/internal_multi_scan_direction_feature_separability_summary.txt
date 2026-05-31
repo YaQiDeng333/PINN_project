@@ -1,0 +1,10 @@
+23.3 internal multi-scan-direction feature separability summary
+
+single_x_5line shape_nn_consistency: 0.700000
+dual_xy_5line shape_nn_consistency: 0.666667
+single_x_9line shape_nn_consistency: 0.600000
+dual_xy_9line shape_nn_consistency: 0.700000
+dual_xy_5line ambiguous_neighbor_rate: 0.900000
+dual_xy_9line ambiguous_neighbor_rate: 0.833333
+
+结论：该阶段只评估 delta_b 派生特征的几何可分性；没有训练正式模型，也没有使用标签作为输入。

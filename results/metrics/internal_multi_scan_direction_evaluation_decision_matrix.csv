@@ -1,0 +1,8 @@
+question,answer,evidence,decision
+dual_xy_5line 是否优于 x_only_5line,no,score_delta=-0.072971; shape_f1_delta=-0.166667; center_p95_delta_mm=-0.923; burial_p95_delta_mm=0.595,5line dual 不足以单独进入训练
+dual_xy_9line 是否优于 x_only_9line,no,score_delta=0.021271; shape_f1_delta=-0.100000; center_p95_delta_mm=4.627; burial_p95_delta_mm=-0.115,9line dual 不足以单独进入训练
+9line 是否显著优于 5line,no,dual_9_vs_dual_5_score_delta=-0.015660; center_p95_delta_mm=3.420,9line 成本优势未被证明
+dual-direction 是否降低 cuboid/ellipsoid confusion,mixed,probe5_delta=0.333333; probe9_delta=0.333333; nn5_delta=0.043478; nn9_delta=-0.130435,混合信号：9line NN 改善，但 probe 与 5line NN 未改善
+dual-direction 是否降低 center/burial tail,mixed,center_p95_delta_5=-0.923; center_p95_delta_9=4.627; burial_p95_delta_5=0.595; burial_p95_delta_9=-0.115,混合信号：5line center 改善但 burial 变差，9line burial 改善但 center 变差
+是否进入 23.4 training gate,no,dual direction did not clearly beat x-only; richer source/magnetization information is the next observation axis,D_generate_multi_magnetization_diagnostic_pack
+是否可更新 baseline,no,diagnostic evaluation only; internal branch is not CURRENT_BASELINE,CURRENT_BASELINE 保持不变

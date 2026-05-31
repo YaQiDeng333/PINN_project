@@ -1,0 +1,9 @@
+23.3 internal multi-scan-direction paired direction audit summary
+
+base_count: 30
+rows: 60
+direction_pairing_complete: true
+D1_y_scan_5line_z0p008: mean_y_over_x_rms=1.077851, mean_corr=0.225959, nonredundant_count=30/30
+D2_y_scan_9line_z0p008: mean_y_over_x_rms=0.996417, mean_corr=0.197233, nonredundant_count=30/30
+
+结论：y_scan 为每个 base 提供了与 x_scan 可配对的正交观测；是否足以降低 shape/center/burial tail 需要看 separability 和 diagnostic probe。
