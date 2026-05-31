@@ -601,3 +601,10 @@ Only next step: perform a real-data manifest dry run. Start with metadata only: 
 23.1 已按 23.0 的 validation-only 选择训练 `R1_plus_R2_combined` 输入，但结果没有过 stable inference gate：selected `O3_richer_observation_tail_aware` seed `2026` 的 test total normalized MAE 为 `0.629543`，shape F1 为 `0.600000`，catastrophic failure 为 `4/5`，geometry_branch_failure 为 `1/5`，center p95/max 为 `7.314 / 7.531 mm`，burial p95/max 为 `1.966 / 2.180 mm`。
 
 真正的分界点是：更多 y-lines 和 multi-liftoff 没有在 30-base diagnostic scope 内解决几何分支错位，下一步不应继续直接调 O3，也不应进入真实 internal sample inference。应先规划 R3 multi-scan-direction diagnostic，验证双扫描方向是否能补足 cuboid/ellipsoid 和 elongated aspect 的形状判别信息。`CURRENT_BASELINE.md` 继续保持 surface / near-surface true 3D RBC baseline，internal branch 仍是独立 diagnostic / benchmark 分支。
+## 2026-05-31 after Stage 23.2 internal multi-scan-direction plan
+
+下一步唯一建议：执行 **23.2b internal multi-scan-direction generation**。
+
+23.2 的核心判断是：23.1 失败不是继续调 O3 能解决的问题，而是当前 internal observation 缺少正交扫描方向。R1/R2 已经补了更多 y-lines 和 multi-liftoff，但 shape F1 仍只有 `0.600000`，catastrophic failure `4/5`，geometry branch `1/5`；因此下一步应补生成 y_scan 的 `5-line` 和 `9-line` 观测，与既有 x_scan 数据配对，验证 cuboid/ellipsoid 和 elongated aspect 的方向性信息是否真的不足。
+
+23.2b 只应运行 COMSOL diagnostic pack generation，不训练、不更新 `CURRENT_BASELINE.md`、不提交 data/NPZ/.mph/raw CSV/checkpoint/preview/notes。生成目标是复用 22.9 的 30 个 base，补 `60` 行 y_scan；fallback 是 24 个 base / 48 行。COMSOL 侧必须实现真正的 direction-aware sensor point builder，不能只写 `scan_direction=y_scan` metadata。

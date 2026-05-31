@@ -1,0 +1,11 @@
+decision_item,status,value,rationale
+reuse_22_9_base_geometries,yes,30,保持与 R1/R2 richer-observation 失败样本 paired comparison
+only_generate_y_scan_topup,yes,True,既有 x_scan R1_5/R1_9 可复用；23.2b 只补正交方向
+target_base_count,pass,30,target=30; fallback=24
+target_planned_rows,pass,60,30 bases x 2 y_scan variants = 60
+fallback_rows,pass,48,24 bases x 2 y_scan variants
+paired_completeness_required,yes,D1 and D2 per selected base,缺任一 y_scan variant 的 base 不能进入完整 dual-direction comparison
+input_tensor_contract,selected,"(N,3,2,9,201)","axes, directions, padded lines, path points"
+include_multi_liftoff_now,no,False,避免 D3 成本膨胀；先验证 direction 信息
+include_multi_magnetization_now,no,False,R4 高成本且 evidence 不足
+unique_next_step,selected,23.2b_internal_multi_scan_direction_generation,执行 y_scan top-up COMSOL generation；训练暂缓到 23.3

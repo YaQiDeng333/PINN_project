@@ -3157,3 +3157,13 @@ Review agent 已完成只读复核，无 must-fix。review 建议把 audit/decis
 - tail result：test center p95/max `7.314 / 7.531 mm`，burial p95/max `1.966 / 2.180 mm`，catastrophic failure `4/5`，geometry_branch_failure `1/5`。R1/R2 richer observation 在该 30-base diagnostic scope 内没有形成 stable inference candidate。
 - decision：23.1 不是 internal benchmark candidate upgrade，也不是 stable internal inference model。下一步唯一建议是 `23.2_internal_multi_scan_direction_plan`，优先检查 R3 multi-scan-direction 是否能补足 cuboid/ellipsoid 和 elongated aspect 的几何分支信息。
 - review：独立只读 review 首轮发现 23.0 配置选择存在 test 指标 tie-breaker，已修为只按 validation score 和固定配置顺序选择；复审通过，无 must-fix。
+## 2026-05-31 Stage 23.2 internal multi-scan-direction observation plan
+
+- 范围：只做 multi-scan-direction diagnostic plan；未运行 COMSOL，未训练，未生成或修改 data/NPZ/checkpoint/preview/notes，未更新 `CURRENT_BASELINE.md`。
+- 输入证据：23.1 在 `comsol_internal_defect_richer_observation_pack_v1` 上的 `R1_plus_R2_combined` / `O3_richer_observation_tail_aware` 没有通过 stable inference gate，test total normalized MAE `0.629543`，shape F1 `0.600000`，catastrophic failure `4/5`，geometry_branch_failure `1/5`。
+- 机制判断：22.9 的 R1/R2 只扩展 y-line 和 liftoff，没有提供正交扫描方向；现有 COMSOL richer generator 虽有 `scan_direction` metadata，但 sensor points 仍固定为 x-path，23.2b 必须新增真正的 direction-aware sensor point builder。
+- 候选设计：D0 复用 single-direction reference；D1 为 dual-direction 5-line；D2 为 dual-direction 9-line；D3 dual-direction + multi-liftoff 留作二阶段；D4 multi-magnetization 暂缓。
+- 第一轮 diagnostic pack：复用 22.9 的 30 个 base，只补生成 `D1_y_scan_5line_z0p008` 和 `D2_y_scan_9line_z0p008`，planned rows `60`，fallback `24 base / 48 rows`；组装时与既有 `R1_5line_z0p008` / `R1_9line_z0p008` x_scan 配对。
+- 数据契约：23.2b assembled tensor 规划为 `delta_b=(N,3,2,9,201)`，包含 `direction_names=[x_scan,y_scan]`、`direction_mask`、`scan_line_mask`、path/line coordinate axis 和 padded scan-line metadata。
+- route decision：唯一下一步是 `23.2b_internal_multi_scan_direction_generation`；训练暂缓到 23.3，真实 internal sample inference 继续暂缓，internal branch 仍不是 baseline。
+- review：独立只读 review 通过，无 must-fix；已按建议明确 forbidden artifact check 只覆盖非 ignored tracked/untracked 路径。

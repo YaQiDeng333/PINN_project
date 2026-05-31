@@ -1,0 +1,12 @@
+# 23.2 failure-to-scan-direction need audit
+
+23.1 的 R1/R2 输入扩展没有形成 stable inference candidate；这说明 y-line/liftoff 不是唯一瓶颈。下一步应验证正交扫描方向是否补足 shape branch 和 center 定位信息。
+
+- 23_1_r1_r2_gate_failure: 推荐 `D1_and_D2`；依据：shape_F1=0.600000; catastrophic=4/5; geometry=1/5; selected_config=R1_plus_R2_combined
+- cuboid_ellipsoid_geometry_branch: 推荐 `D1_dual_direction_5line_z0p008`；依据：22.0 geometry pairs=internal_cuboid->internal_ellipsoid=1; 22.7 geometry pairs=internal_cuboid->internal_ellipsoid=2; internal_ellipsoid->internal_cuboid=1
+- elongated_aspect_confusion: 推荐 `D2_dual_direction_9line_z0p008`；依据：elongated_failures=17; aspect_counts=compact=22; elongated_x=2; elongated_y=15; richer_base_aspect_counts=compact=18; elongated_x=2; elongated_y=10
+- center_xyz_tail: 推荐 `D1_and_D2`；依据：23.1 center_p95=7.314 mm; 22.7 center_outlier_count=38; center_region_counts==38
+- burial_depth_center_tradeoff: 推荐 `D1_then_D3_if_needed`；依据：23.1 burial_p95=1.966 mm; 22.7 burial_outlier_count=13; burial_counts=deep=1; deep_plus=7; medium=1; shallow=4
+- multi_magnetization_cost: 推荐 `D4_defer`；依据：22.0-23.1 failure evidence 指向 scan direction 和 shape/center coupling，尚未证明 magnetization direction 是主瓶颈。
+
+结论：23.2b 第一轮只生成 y_scan 5-line / 9-line top-up，并与 22.9 既有 x_scan 配对；训练暂缓到 23.3。

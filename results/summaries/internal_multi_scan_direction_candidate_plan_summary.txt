@@ -1,0 +1,21 @@
+# 23.2 multi-scan-direction candidate plan
+
+候选结论：D1 和 D2 是 23.2b 默认执行候选；D0 只作既有 x_scan reference；D3/D4 暂缓。
+
+建议 assembled tensor contract:
+- delta_b shape: `(N,3,2,9,201)`
+- axis 1: `[Bx, By, Bz]`
+- axis 2: `direction_names=[x_scan,y_scan]`
+- axis 3: padded scan lines
+- axis 4: path samples
+
+direction metadata: ["direction_mask","scan_line_mask","direction_names","path_coordinate_axis","line_coordinate_axis","path_coordinate_m","line_coordinate_m","sensor_z_m","observation_variant","base_group_id"]
+
+- D0_reference_single_direction: fit_for_23_2b=False, rows/base=0, decision=reuse_existing
+- D1_dual_direction_5line_z0p008: fit_for_23_2b=True, rows/base=1, decision=default_generate_y_scan
+- D2_dual_direction_9line_z0p008: fit_for_23_2b=True, rows/base=1, decision=default_generate_y_scan
+- D3_dual_direction_5line_multi_liftoff: fit_for_23_2b=False, rows/base=6, decision=defer_until_D1_D2_result
+- D4_multi_magnetization_direction: fit_for_23_2b=False, rows/base=2, decision=defer
+
+实现约束：23.2b 必须新增真正的 direction-aware sensor point builder；不能只写 `scan_direction=y_scan` metadata。
+本阶段不创建 manifest / registry / data / NPZ。
