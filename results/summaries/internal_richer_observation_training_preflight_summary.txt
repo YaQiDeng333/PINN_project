@@ -1,0 +1,45 @@
+# 23.1 internal richer-observation training gate preflight summary
+
+created_at: 2026-05-31
+
+## 范围
+
+本轮目标是执行 23.1 internal richer-observation training gate。按照任务硬规则，训练前必须先读取 23.0 route decision：
+
+- `results/summaries/internal_richer_observation_evaluation_route_decision_summary.txt`
+- `results/metrics/internal_richer_observation_evaluation_decision_matrix.csv`
+
+若 23.0 没有明确推荐 `R1_5line_z0p008`、`R1_9line_z0p008`、`R2_5line_multi_liftoff` 或 `R1+R2 combined` 之一，则停止，不训练。
+
+## 只读检查结果
+
+- 当前目录：`C:\Users\19166\Desktop\PINN_project`
+- richer-observation pack 22.9 artifacts：存在
+  - `results/summaries/internal_richer_observation_pack_validation_summary.txt`
+  - `results/summaries/internal_richer_observation_pack_route_decision_summary.txt`
+  - `results/metrics/internal_richer_observation_pack_validation_metrics.csv`
+  - `results/metrics/internal_richer_observation_pack_route_decision_matrix.csv`
+- 23.0 evaluation route decision summary：缺失
+- 23.0 evaluation decision matrix：缺失
+- 当前可定位到的最新 route：22.9 只允许进入 23.0 richer-observation evaluation gate，不允许直接进入 23.1 training gate。
+
+## Blocker
+
+23.1 训练不能开始。缺少 23.0 richer-observation evaluation gate 的结论文件，因此无法确定本轮允许的 observation input 配置，也不能判断应该训练 `R1_5line_z0p008`、`R1_9line_z0p008`、`R2_5line_multi_liftoff` 还是 `R1+R2 combined`。
+
+## 本轮安全状态
+
+- 没有运行 COMSOL。
+- 没有训练。
+- 没有生成或修改 data / NPZ。
+- 没有修改 `CURRENT_BASELINE.md`。
+- 没有创建 checkpoint 或 preview PNG。
+
+## 下一步
+
+唯一下一步是先执行 23.0 richer-observation evaluation gate，生成并复核：
+
+- `results/summaries/internal_richer_observation_evaluation_route_decision_summary.txt`
+- `results/metrics/internal_richer_observation_evaluation_decision_matrix.csv`
+
+只有当 23.0 明确推荐 R1 / R2 / R1+R2 输入配置后，才能回到 23.1 training gate。
