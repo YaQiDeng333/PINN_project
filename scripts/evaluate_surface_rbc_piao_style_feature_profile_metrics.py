@@ -291,7 +291,7 @@ def run(args: argparse.Namespace) -> int:
         f"metrics_improved_vs_20_85_count: {improved_counts['20.85_formal_rerun_20.77_protocol']}",
         f"metrics_improved_vs_20_77_count: {improved_counts['20.77_original_candidate']}",
         f"metrics_improved_vs_20_81_count: {improved_counts['20.81_feature_fusion_visual_comparator']}",
-                "docs_sync_skipped_due_to_unrelated_24_0B_changes: true",
+                "docs_sync_completed: EXPERIMENT_LOG.md, NEXT_STEP.md, PINN优化路线.md",
             ]
         )
         + "\n",

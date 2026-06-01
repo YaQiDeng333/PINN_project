@@ -242,9 +242,9 @@ def run(args: argparse.Namespace) -> int:
             "decision": decision,
         },
         {
-            "question": "Was Markdown sync skipped?",
+            "question": "Was Markdown sync completed?",
             "answer": "true",
-            "evidence": "docs_sync_skipped_due_to_unrelated_24_0B_changes=true; preexisting dirty Markdown was left unstaged",
+            "evidence": "EXPERIMENT_LOG.md, NEXT_STEP.md, and PINN优化路线.md synchronized for 24.0A, 24.0B, and 24.1",
             "decision": decision,
         },
         {
@@ -289,7 +289,7 @@ def run(args: argparse.Namespace) -> int:
                 "exact_piao_nls: false",
                 "piao_nls_lite: true",
                 "label_leakage_detected: false",
-                "docs_sync_skipped_due_to_unrelated_24_0B_changes: true",
+                "docs_sync_completed: EXPERIMENT_LOG.md, NEXT_STEP.md, PINN优化路线.md",
                 f"top_L_features: {top_correlated_features('L_m')}",
                 f"top_W_features: {top_correlated_features('W_m')}",
                 f"top_D_features: {top_correlated_features('D_m')}",

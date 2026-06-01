@@ -60,4 +60,4 @@ forbidden_artifact_checks:
 
 dirty_worktree_boundary:
 - preexisting_modified_docs: [EXPERIMENT_LOG.md, NEXT_STEP.md, PINN优化路线.md]
-- docs_sync_decision: skipped_due_to_unrelated_24_0B_changes
+- docs_sync_decision: merge 24.0A, 24.0B, and 24.1 into allowed Markdown files only

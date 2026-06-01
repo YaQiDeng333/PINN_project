@@ -600,7 +600,7 @@ def write_summary(result: TrainingResult, by_model_split: dict[str, dict[str, An
         f"selected_test_clip_applied_fraction: {selected_test['clip_applied_mean']:.6f}",
         f"nls_lite_fit_success_rate_24_0A: {fit_success:.6f}",
         f"nls_lite_fallback_rate_24_0A: {fallback:.6f}",
-        "docs_sync_skipped_due_to_unrelated_24_0B_changes: true",
+        "docs_sync_completed: EXPERIMENT_LOG.md, NEXT_STEP.md, PINN优化路线.md",
     ]
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")

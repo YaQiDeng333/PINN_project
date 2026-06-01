@@ -26,7 +26,7 @@ worst_test_group_by_dice: aspect_bin=narrow, dice=0.793465
 exact_piao_nls: false
 piao_nls_lite: true
 label_leakage_detected: false
-docs_sync_skipped_due_to_unrelated_24_0B_changes: true
+docs_sync_completed: EXPERIMENT_LOG.md, NEXT_STEP.md, PINN优化路线.md
 top_L_features: nlslite_Bx_yneg_half_peak_width_m|rho=0.895; nlslite_Bx_y0_half_peak_width_m|rho=0.893; nlslite_Bx_yneg_fit_width_m|rho=0.889
 top_W_features: nlslite_Bx_yneg_fit_width_m|rho=0.706; nlslite_Bx_yneg_half_peak_width_m|rho=0.704; nlslite_Bx_ypos_fit_width_m|rho=0.696
 top_D_features: nlslite_Bx_yneg_abs_peak|rho=-0.708; nlslite_Bx_yneg_negative_peak_abs|rho=-0.708; nlslite_Bx_ypos_abs_peak|rho=-0.703

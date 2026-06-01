@@ -34,4 +34,4 @@ selected_test_volume_proxy_rel_error: 0.652869
 selected_test_clip_applied_fraction: 0.051282
 nls_lite_fit_success_rate_24_0A: 1.000000
 nls_lite_fallback_rate_24_0A: 0.000000
-docs_sync_skipped_due_to_unrelated_24_0B_changes: true
+docs_sync_completed: EXPERIMENT_LOG.md, NEXT_STEP.md, PINN优化路线.md

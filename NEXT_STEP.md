@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-06-01 after Stage 24.1 surface RBC Piao-style NLS-lite feature baseline
+
+下一步唯一建议：进入 **24.2 NLS-lite feature fusion diagnostic**，把 `nlslite_*` 作为神经模型的辅助输入做 bounded fusion gate；不要替换 `CURRENT_BASELINE.md`，也不要把 24.1 classical feature baseline 写成 exact Piao NLS。
+
+24.1 validation 选中 `lssvm_rbf_alpha_0p1_gamma_0p00171821`（`LS-SVM-like-RBF`）。test total normalized MAE=`0.654046`，优于 20.85/20.77 的 `0.678014` 和 20.81 的 `0.667888`；Dice=`0.862988`，优于 20.85/20.77 但略弱于 20.81；profile RMSE=`0.000445182 m`，仍弱于 20.85/20.77 的 `0.000387737 m`。真正的价值是 classical comparator 与 curvature/w 参数补充信号，而不是 profile-depth baseline replacement。
+
+24.2 如果启动，应继续固定 `dataset_id=comsol_true_3d_rbc_imported_watertight_pilot_v3_240`，只通过 registry + manifest 加载；feature scaler 和 target scaler 仍必须 train-only，candidate/seed/epoch selection 仍必须 validation-only，test 只做最终报告。24.0B full-compatible framework 继续作为未来 richer y-line ROI 接口，不参与 24.2 输入。
+
 ## 2026-06-01 after Stage 24.0B surface RBC NLS full-compatible framework
 
 Next step: keep NLS-full-compatible as a gated interface and do not claim full Piao mode until surface RBC has a richer y-line ROI pack.
@@ -7,6 +15,14 @@ Next step: keep NLS-full-compatible as a gated interface and do not claim full P
 The current v3_240 pack is three-axis but only `scan_line_count=3`, so the new framework correctly reports `full_feature_ready=false`, `degraded_mode=true`, and `degraded_mode_reason=scan_line_count_lt_5`. The full-compatible minimum is `M>=5`, and the recommended full-candidate count is `M>=9`, with aligned Bx/By/Bz ROI matrices, validated `sensor_x_m`, validated `scan_line_y_m`, no missing values, and validated equations.
 
 This branch should run in parallel with the existing NLS-lite / Piao-inspired 3-line path. Do not replace NLS-lite, do not update `CURRENT_BASELINE.md`, and do not describe current 3-line features as exact Piao full NLS. A future surface richer y-line pack can reuse this schema/validator/extractor interface when full ROI data is available.
+
+## 2026-06-01 after Stage 24.0A surface RBC NLS-lite feature extractor
+
+下一步唯一建议：进入 **24.1 surface RBC NLS-lite feature baseline**，但仍然保持不训练神经模型、不替换 `CURRENT_BASELINE.md`，先把 24.0A 的 `nlslite_*` 稳定物理特征作为 feature-only / hybrid diagnostic baseline 输入做正式 gate。
+
+24.0A 已确认 `comsol_true_3d_rbc_imported_watertight_pilot_v3_240` 可以通过 registry + manifest 显式加载，`delta_b=(240,3,3,201)`，feature_count=`291`，finite fraction=`1.0`，fit_success_rate=`1.0`，fallback_rate=`0.0`。最强信号集中在 `Bx` 的 line width / amplitude / energy：`nlslite_Bx_yneg_half_peak_width_m` 对 `L_m`/`W_m` 最强，`nlslite_Bx_yneg_abs_peak` 对 `D_m`/profile depth 最强，curvature 相关性较弱但有诊断价值。正式 feature CSV 没有 target labels，labels 只用于 correlation audit。
+
+不要把这一步写成 exact Piao 18-feature reproduction；当前边界是 `exact_piao_nls=false`、`piao_nls_lite=true`，因为 v3_240 只有三条 `scan_line_y`。真实实验预处理可以沿用这些 delta_b-only 特征，但前提是 Bx/By/Bz 轴序、三条扫描线、sensor_x、no-defect reference 和 gain/calibration 条件先对齐。
 
 ## 2026-05-31 after Stage 23.5 internal multi-magnetization diagnostic evaluation
 

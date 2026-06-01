@@ -24,4 +24,4 @@ best_test_group_by_dice: aspect_bin=wide, dice=0.913100
 metrics_improved_vs_20_85_count: 8
 metrics_improved_vs_20_77_count: 8
 metrics_improved_vs_20_81_count: 6
-docs_sync_skipped_due_to_unrelated_24_0B_changes: true
+docs_sync_completed: EXPERIMENT_LOG.md, NEXT_STEP.md, PINN优化路线.md

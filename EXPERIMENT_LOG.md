@@ -1,5 +1,14 @@
 # 实验工作日志
 
+## 2026-06-01 Stage 24.1 surface RBC Piao-style NLS-lite feature baseline
+
+- 范围：使用 24.0A 已生成的 `nlslite_*` 特征训练 classical feature-to-geometry comparator；输入只允许 `nlslite_*`，`sample_id` 只用于 join/reporting，`split` 只用于 train/val/test 划分。没有运行 COMSOL，没有生成或修改 data/NPZ，没有写 checkpoint，没有更新 `CURRENT_BASELINE.md`。
+- 数据入口：固定 `dataset_id=comsol_true_3d_rbc_imported_watertight_pilot_v3_240`，通过 `COMSOL_DATA_REGISTRY.md + manifest` 显式加载；preflight 确认 24.0A feature manifest/CSV/quality 存在，feature CSV 只有 `sample_id`、`split` 和 291 个 `nlslite_*` 列。
+- 模型选择：新增 `scripts/train_surface_rbc_piao_style_feature_baseline.py`，候选包括 mean、Ridge、closed-form LS-SVM-like RBF、KernelRidge RBF、SVR RBF；使用 train-only feature scaler、train-only target scaler、validation-only selection，test 只对 validation-selected 模型和固定 mean comparator 报告。
+- 结果：validation 选中 `lssvm_rbf_alpha_0p1_gamma_0p00171821`（`LS-SVM-like-RBF`）。test total normalized MAE=`0.654046`，L/W/D MAE=`1.913667/1.991751/0.967491 mm`，wMAE auxiliary=`0.185724`，wLD/wWD/wLW=`0.197556/0.191340/0.168276`，profile RMSE=`0.000445182 m`，Er-like=`0.431187`，IoU/Dice=`0.769353/0.862988`。
+- 对比：相对 20.85/20.77，total MAE、W、wMAE、wLD/wWD/wLW、IoU/Dice 改善，但 L、D、profile RMSE 和 Er-like 退化；相对 20.81，total MAE、L、wMAE、wLD/wWD、profile RMSE 轻微改善，但 W、D、wLW、IoU/Dice 较弱。
+- route decision：新增 `scripts/decide_surface_rbc_piao_style_feature_baseline_route.py`，结论是 `enter_24_2_feature_fusion_candidate`。24.1 有补充价值，可进入 24.2 feature-fusion diagnostic，但不能替代 `CURRENT_BASELINE.md`，也不能声称 exact Piao NLS。
+
 ## 2026-06-01 Stage 24.0B surface RBC NLS full-compatible feature framework
 
 - Scope: implemented the Piao NLS full-compatible schema, extractor, input adequacy validator, synthetic tests, route decision, and review record. No COMSOL, no training, no data/NPZ generation or modification, and no `CURRENT_BASELINE.md` update.
@@ -9,6 +18,17 @@
 - Route decision: NLS-full-compatible is a future full ROI / richer-observation interface for surface RBC, not exact Piao full NLS and not a replacement for NLS-lite. Existing internal richer-observation 5/9-line pack is only an interface reference, not surface RBC full data.
 - Tests: synthetic tests passed for 3-line degraded mode, 5-line compatible mode, 9-line full-candidate mode, explicit fit failure handling, and feature name stability.
 - Claim boundary: `piao_full_compatible=true`; `exact_piao_full=false` until full ROI data and exact equations are validated.
+
+## 2026-06-01 Stage 24.0A surface RBC NLS-lite feature extractor
+
+- 范围：在当前 surface / near-surface true 3D RBC baseline 的固定 `dataset_id=comsol_true_3d_rbc_imported_watertight_pilot_v3_240` 上实现 NLS-lite feature extractor；没有运行 COMSOL、没有训练、没有生成或修改 data/NPZ、没有更新 `CURRENT_BASELINE.md`。
+- 数据入口：通过 `COMSOL_DATA_REGISTRY.md` 和 `results/manifests/comsol_true_3d_rbc_imported_watertight_pilot_v3_240.manifest.json` 显式加载；禁止 latest/newest NPZ scan。预检确认 `delta_b=(240,3,3,201)`、axis order `[Bx, By, Bz]`、三条 `scan_line_y=[-0.001,0,0.001]`、split=`162/39/39`。
+- extractor：新增 `scripts/extract_surface_rbc_nls_lite_features.py`，输出 `results/metrics/surface_rbc_nls_lite_features.csv`、`results/metrics/surface_rbc_nls_lite_feature_quality.csv`、`results/summaries/surface_rbc_nls_lite_feature_summary.txt` 和 `results/manifests/surface_rbc_nls_lite_feature_manifest.json`。
+- 特征边界：正式 feature CSV 只有 `sample_id`、`split` 元数据和 `nlslite_*` 特征列；数值特征只来自 `delta_b/BxByBz`，不使用 `rbc_params`、profile、mask、split、sample_id 或分组 metadata；target labels 只在 correlation audit 中作为 target。
+- 质量结果：feature_count=`291`，overall finite fraction=`1.0`，fit_success_rate=`1.0`，fallback_rate=`0.0`，fit_residual_mean=`0.164980`，fit_residual_max=`0.302589`。
+- correlation audit：新增 `scripts/audit_surface_rbc_nls_lite_feature_correlations.py`，输出 `results/metrics/surface_rbc_nls_lite_feature_correlations.csv` 和 summary。主要相关特征包括 `nlslite_Bx_yneg_half_peak_width_m` 对 `L_m`/`W_m`，`nlslite_Bx_yneg_abs_peak` 对 `D_m`/profile depth，`nlslite_Bx_yneg_fit_width_m` 对 projected mask area。
+- route decision：新增 `scripts/decide_surface_rbc_nls_lite_feature_route.py`，判断 NLS-lite 稳定、fit failure 可接受、无 label leakage，可进入 24.1 feature baseline；真实实验预处理适配为 `yes_with_calibration_caveat`。
+- claim 边界：`exact_piao_nls=false`、`piao_nls_lite=true`；当前数据只有三条 scan line，不声称 exact Piao 18-feature reproduction。
 
 ## 2026-05-31 Stage 23.4 internal multi-magnetization diagnostic pack
 

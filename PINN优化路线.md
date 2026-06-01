@@ -1,10 +1,26 @@
 # PINN 优化路线
 
+## 2026-06-01 route sync: 24.1 surface RBC Piao-style NLS-lite feature baseline
+
+24.1 的路线判断是：`nlslite_*` classical feature baseline 有补充价值，可以进入 24.2 feature-fusion diagnostic，但不能成为 `CURRENT_BASELINE`。validation 选中的 `LS-SVM-like-RBF` 在 test total normalized MAE 上达到 `0.654046`，低于 20.85/20.77 的 `0.678014` 和 20.81 的 `0.667888`；同时 wMAE auxiliary=`0.185724`，比 20.85/20.77 的 `0.201076` 和 20.81 的 `0.194483` 更好。
+
+真正的分界点在 profile-depth：24.1 的 profile RMSE=`0.000445182 m`、Er-like=`0.431187`，仍弱于 20.85/20.77 的 profile RMSE=`0.000387737 m` 和 Er-like=`0.340544`。因此 24.1 不能替代当前 surface RBC profile-depth baseline，只能作为 classical comparator、curvature/w 参数补充信号和 24.2 feature-fusion 输入候选。
+
+路线边界继续保持：24.0A 是三线 NLS-lite，不是 exact Piao 18-feature reproduction；24.0B 是 full-compatible interface，但当前 v3_240 只有 `scan_line_count=3`，仍是 degraded mode。后续如果要做 true full-compatible，需要 surface RBC richer y-line ROI pack（至少 `M>=5`，推荐 `M>=9`）以及已验证的 Bx/By/Bz ROI matrix 和方程。
+
 ## 2026-06-01 route sync: 24.0B surface RBC NLS full-compatible framework
 
 24.0B 的核心判断是：当前 v3_240 可以建立 Piao NLS full-compatible 的接口层，但不能进入 full mode。技术分界点是 `scan_line_count`：v3_240 的 Bx/By/Bz 输入形状是 `[240,3,3,201]`，三轴齐全、`sensor_x_count=201`，但 tangential y 只有 3 条线；full-compatible 最低需要 `M>=5`，full-candidate 推荐 `M>=9`，所以当前只能是 `degraded_mode=true`。
 
 本轮新增的 schema、extractor、validator 和 synthetic tests 把这个边界固化了：所有 feature 都有 `valid__*` flag，tangential envelope fit 失败会写入 failure reason 和 quality 统计，`exact_piao_full=false`，`piao_full_compatible=true`。这条路线暂时是未来 surface richer y-line ROI / 真实实验数据的接口，不替代 NLS-lite，也不更新 `CURRENT_BASELINE.md`。
+
+## 2026-06-01 路线同步：24.0A surface RBC NLS-lite feature extractor
+
+24.0A 的分界点是：在不训练、不运行 COMSOL、不修改 data/NPZ、不更新 `CURRENT_BASELINE.md` 的前提下，把当前 surface / near-surface true 3D RBC baseline 的 `delta_b/BxByBz` 信号整理成稳定的 NLS-lite 物理特征。数据身份固定为 `comsol_true_3d_rbc_imported_watertight_pilot_v3_240`，入口必须是 `COMSOL_DATA_REGISTRY.md + manifest` 显式加载，禁止 latest/newest 自动扫描。
+
+结果说明 NLS-lite 特征本身是稳定可用的：`delta_b=(240,3,3,201)`，三条 `scan_line_y`，feature_count=`291`，overall finite fraction=`1.0`，fit_success_rate=`1.0`，fallback_rate=`0.0`。最强相关性来自 `Bx` 的 width/amplitude/energy 族：`nlslite_Bx_yneg_half_peak_width_m` 对 `L_m`/`W_m` 最强，`nlslite_Bx_yneg_abs_peak` 对 `D_m` 和 profile depth 最强，`nlslite_Bx_yneg_fit_width_m` 对 projected mask area 最强；`wLD/wWD/wLW` 的相关性较弱，只能作为辅助 curvature 诊断。
+
+路线判断更新为：可进入 24.1 feature baseline gate，但这不是 exact Piao NLS 复现，也不是 baseline replacement。当前必须继续写清楚 `exact_piao_nls=false`、`piao_nls_lite=true`；v3_240 只有三条 scan line，所以不能声称 exact Piao 18-feature reproduction。真实实验预处理可以考虑复用这些 delta_b-only 特征，但需要先解决 Bx/By/Bz 轴序、三线 scan geometry、no-defect reference 和 gain/calibration 对齐。
 
 ## 2026-05-31 路线同步：23.4 internal multi-magnetization diagnostic pack
 
