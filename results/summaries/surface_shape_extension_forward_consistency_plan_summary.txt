@@ -1,0 +1,41 @@
+surface_shape_extension_forward_consistency_plan_summary
+stage: 25.0
+
+scope: plan the post-Piao-NLS surface route; no COMSOL, no training, no data/NPZ generation, no CURRENT_BASELINE update.
+
+core_judgment:
+The next useful surface branch is not another NLS feature tweak. The next route should first define a surface shape-extension dataset plan, then use that plan to design a geometry-aware decoder / profile-basis decoder and a forward-consistency refinement path.
+
+target_capabilities:
+- non_RBC_like_surface_defects: leave the RBC-like six-parameter bottleneck when the surface profile is not well represented by L/W/D/wLD/wWD/wLW.
+- asymmetric_profiles: support one-sided pits, skewed depth distribution, and non-symmetric footprint/profile coupling.
+- flat_bottom_defects: represent plateaus and sharp sidewalls without forcing a smooth RBC-style cap.
+- crack_like_slots: represent long narrow openings, high aspect-ratio profiles, and thin connected components.
+- multi_pit_or_multi_component_surface_damage: represent multiple local minima or separated footprint components.
+- profile_level_reconstruction: preserve depth/profile metrics as the governing score, not only projected footprint IoU/Dice.
+- forward_consistency: use a validated forward/surrogate residual as a plausibility check after profile labels and shape classes are fixed.
+
+recommended_25_1:
+A. surface shape-extension dataset plan.
+
+why_A_first:
+- Decoder design depends on target representation. A geometry-aware decoder or profile-basis decoder cannot be evaluated before the defect taxonomy and profile labels are defined.
+- Forward consistency depends on a stable output representation and forward target. Without a shape-extension schema, a surrogate residual can reward the wrong geometry.
+- The Piao-NLS branch already delivered diagnostic feature value; it did not solve surface shape generalization.
+
+25_1_scope:
+- Define surface defect taxonomy: RBC-like retained as comparator, asymmetric pit, flat-bottom pit, crack-like slot, multi-pit/multi-component, and mixed hard cases.
+- Define labels: profile_depth_grid_m, projected_mask_2d, local depth metrics, footprint topology, component_count, aspect/size/depth bins, and generation method.
+- Define split coverage: train/val/test must each cover shape family, size, depth, aspect, asymmetry, and component_count bins.
+- Define acceptance gates: profile RMSE, Er-like profile error, local max-depth error, footprint IoU/Dice, topology/component error, and forward residual.
+- Define forbidden shortcuts: no replacement of profile metrics with Dice-only gains; no six-parameter-only claim for non-RBC-like surfaces; no baseline update without formal rerun.
+
+dependent_later_tracks:
+- 25.2 geometry-aware decoder plan: select output representation after 25.1 fixes schema and labels.
+- 25.3 profile-basis decoder plan: compare basis/implicit/profile-grid representations against six-parameter bottleneck.
+- 25.4 forward-consistency refinement plan: add forward residual only after profile representation and validation gates are stable.
+
+not_recommended_for_25_1:
+- B geometry-aware decoder plan as first step: premature without dataset/schema.
+- C forward-surrogate consistency plan as first step: premature without output representation and label coverage.
+- D final report only: insufficient because it does not unlock the surface defect capability gap.

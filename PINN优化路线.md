@@ -1,5 +1,13 @@
 # PINN 优化路线
 
+## 2026-06-01 route sync: 25.0 surface Piao-NLS closeout
+
+25.0 的核心判断是：Piao-NLS 分支到这里收口为 diagnostic/QC/classical comparator，不再作为 `CURRENT_BASELINE` replacement 路线。24.0A 的 NLS-lite 特征稳定、无 label leakage，可继续用于 QC 和特征对照；24.0B 的 full-compatible 框架只能作为未来 richer y-line ROI 接口；24.1 的 LS-SVM-like baseline 不能替代 20.85，因为 profile RMSE 和 Er-like 退化；24.2 的 feature fusion 虽然改善指标，但仍被 RBC 六参数表示约束，只能作为 diagnostic candidate。
+
+真正的分界点是表示能力：当前 `L/W/D/wLD/wWD/wLW` 路线不能自然表示 asymmetric、flat-bottom、crack-like、multi-pit / multi-component surface defects。继续做 NLS feature-fusion 小修会围着同一个六参数瓶颈打转，不能解决 surface defect generalization。
+
+下一阶段主线切到 surface shape-extension + profile-level reconstruction + forward-consistency gates。25.1 唯一建议是 `A_surface_shape_extension_dataset_plan`：先定义形状 taxonomy、profile/depth label、projected-mask QA、topology/component labels、split coverage 和 acceptance gates；geometry-aware decoder、profile-basis decoder、forward-surrogate consistency 都在 25.1 之后再规划。
+
 ## 2026-06-01 route sync: 24.2 surface RBC NLS-lite feature fusion
 
 24.2 moves the surface RBC NLS-lite path from feature-only comparison into neural feature fusion. The fixed input contract is `delta_b/BxByBz + nlslite_*`; `sample_id` is join/reporting only, `split` is train/val/test routing only, and all feature/target scalers are train-only. No COMSOL, no data/NPZ mutation, no checkpoint commit, and no `CURRENT_BASELINE.md` update occurred.

@@ -1,5 +1,14 @@
 # 实验工作日志
 
+## 2026-06-01 Stage 25.0 surface Piao-NLS diagnostic branch closeout
+
+- Scope: closed the 24.0A / 24.0B / 24.1 / 24.2 surface Piao-NLS branch as a diagnostic/QC/classical-comparator route. No COMSOL, no training, no data/NPZ generation or modification, and no `CURRENT_BASELINE.md` update.
+- Closeout: NLS-lite remains useful as stable delta_b-derived diagnostic/QC features and as a classical comparator input, but it is not an exact Piao 18-feature reproduction. NLS-full-compatible remains a future richer-observation interface because current v3_240 has only `scan_line_count=3`, below the `M>=5` minimum.
+- Baseline decision: 24.1 LS-SVM-like NLS-lite improves total MAE/wMAE/Dice but worsens L/D/profile RMSE/Er-like versus 20.85, so it cannot replace the current profile-depth baseline. 24.2 feature fusion improved the neural metrics, but it remains a diagnostic candidate inside the RBC six-parameter bottleneck and is not the next mainline.
+- Route change: stop NLS feature-fusion small fixes as the main surface route. The blocker is representation coverage for non-RBC-like surface defects, not another handcrafted feature tweak.
+- Next capability target: asymmetric, flat-bottom, crack-like, multi-pit / multi-component surface defects with profile-level reconstruction and forward-consistency gates.
+- 25.1 unique recommendation: `A_surface_shape_extension_dataset_plan`, before any geometry-aware decoder, profile-basis decoder, or forward-surrogate consistency implementation.
+
 ## 2026-06-01 Stage 24.2 surface RBC NLS-lite feature-fusion diagnostic
 
 - Scope: fused `delta_b/BxByBz` with the existing 24.0A `nlslite_*` feature matrix on fixed `dataset_id=comsol_true_3d_rbc_imported_watertight_pilot_v3_240`. No COMSOL, no data/NPZ generation or modification, no checkpoint artifact, and no `CURRENT_BASELINE.md` update.

@@ -1,12 +1,20 @@
 # NEXT_STEP
 
+## 2026-06-01 after Stage 25.0 surface Piao-NLS branch closeout
+
+Next step: run **25.1 surface shape-extension dataset plan**. This is the only recommended next step: define the taxonomy, labels, split coverage, and acceptance gates for non-RBC-like surface defects before any decoder or forward-consistency implementation.
+
+25.0 closes the Piao-NLS branch as diagnostic/QC/classical-comparator work. Keep `nlslite_*` for QC and classical comparison, keep NLS-full-compatible as a future richer-observation interface, and stop small NLS feature-fusion tweaks as the mainline. 24.1 cannot replace 20.85 because it worsens profile RMSE and Er-like error, and 24.2 remains a diagnostic candidate rather than a baseline transition.
+
+25.1 should cover asymmetric pits, flat-bottom defects, crack-like slots, multi-pit / multi-component surface damage, profile-depth labels, projected-mask QA, topology labels, forward residual gates, and train/val/test coverage. Do not train, do not run COMSOL, do not generate data/NPZ, and do not update `CURRENT_BASELINE.md` until a later explicitly approved generation or baseline-transition stage.
+
 ## 2026-06-01 after Stage 24.2 surface RBC NLS-lite feature fusion diagnostic
 
-Next step: run a formal surface RBC feature-fusion rerun/candidate-upgrade check for `F1_late_fusion`, while keeping `CURRENT_BASELINE.md` unchanged until a separate baseline transition is explicitly approved.
+Superseded by Stage 25.0: the earlier formal `F1_late_fusion` rerun suggestion is closed as a diagnostic branch note, not the current next step. The current next step is the Stage 25.1 surface shape-extension dataset plan at the top of this file.
 
 24.2 used fixed v3_240 registry/manifest loading and fused `delta_b/BxByBz + nlslite_*` with train-only scalers, validation-only selection, and test-final-only reporting. Validation selected `F1_late_fusion`; multi-seed selected seed `123`. Test total normalized MAE was `0.598309`, L/W/D MAE `1.816667/1.657295/0.654960 mm`, wMAE `0.183249`, profile RMSE `0.000317238 m`, Er-like `0.267248`, and IoU/Dice `0.793564/0.877942`. This improves over 20.85/20.77 and 24.1 on the main reported metrics.
 
-Keep the role split clear: 24.0A is the three-line NLS-lite feature source, 24.0B is the future NLS-full-compatible interface for richer y-line ROI data, 24.1 is the feature-only comparator, and 24.2 is now a surface feature-fusion candidate. Do not call it exact Piao full NLS, do not write a baseline, and do not update `CURRENT_BASELINE.md` in the next rerun.
+Keep the role split clear: 24.0A is the three-line NLS-lite feature source, 24.0B is the future NLS-full-compatible interface for richer y-line ROI data, 24.1 is the feature-only comparator, and 24.2 is a diagnostic surface feature-fusion candidate. Do not call it exact Piao full NLS, do not write a baseline, and do not update `CURRENT_BASELINE.md`.
 
 ## 2026-06-01 after Stage 24.1 surface RBC Piao-style NLS-lite feature baseline
 

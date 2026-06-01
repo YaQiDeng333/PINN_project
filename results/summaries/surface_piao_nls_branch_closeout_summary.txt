@@ -1,0 +1,40 @@
+surface_piao_nls_branch_closeout_summary
+stage: 25.0
+
+scope: close 24.0A / 24.0B / 24.1 / 24.2 surface Piao-NLS diagnostic branch and define the next surface shape-extension route.
+dataset_anchor: comsol_true_3d_rbc_imported_watertight_pilot_v3_240
+COMSOL_run: false
+training_run: false
+data_or_NPZ_modified: false
+CURRENT_BASELINE_update: false
+baseline_replacement: false
+
+source_evidence:
+- 24.0A NLS-lite feature extractor: feature_count=291, fit_success_rate=1.0, fallback_rate=0.0, formal_feature_csv_labels=false, exact_piao_nls=false, piao_nls_lite=true.
+- 24.0A data boundary: delta_b shape is (240,3,3,201) with only three scan_line_y values, so it is not an exact Piao 18-feature reproduction.
+- 24.0B NLS-full-compatible framework: scan_line_count=3, full_feature_ready=false, degraded_mode=true, degraded_mode_reason=scan_line_count_lt_5, exact_piao_full=false.
+- 24.1 LS-SVM-like NLS-lite feature baseline: test total normalized MAE improves from 20.85 value 0.678014 to 0.654046, wMAE improves from 0.201076 to 0.185724, and Dice improves from 0.847727 to 0.862988.
+- 24.1 replacement blocker: L MAE worsens from 1.891892 to 1.913667 mm, D MAE worsens from 0.800231 to 0.967491 mm, profile RMSE worsens from 0.000387737 to 0.000445182 m, and Er-like error worsens from 0.340544 to 0.431187.
+- 24.2 feature fusion: F1_late_fusion seed=123 improved test total MAE to 0.598309, profile RMSE to 0.000317238 m, wMAE to 0.183249, and Dice to 0.877942, but it remains a diagnostic surface candidate and did not update CURRENT_BASELINE.
+
+final_positioning:
+- NLS-lite is retained as diagnostic/QC/classical-comparator input only.
+- NLS-lite + LS-SVM cannot replace the 20.85 CURRENT_BASELINE because it improves auxiliary total/w/Dice metrics while worsening profile-level reconstruction and selected geometry terms.
+- NLS-full-compatible is retained as a future richer-observation interface, not as current full Piao mode.
+- Stop incremental NLS feature-fusion small fixes as the main route; additional tuning stays diagnostic unless a separate formal rerun and baseline-transition prompt is opened.
+- CURRENT_BASELINE remains the 20.85 true 3D RBC-style profile-depth baseline.
+
+why_not_continue_exact_piao_reproduction:
+- Current surface data has only three scan_line_y observations, below the full-compatible M>=5 minimum and below the M>=9 recommended candidate count.
+- The current model family still predicts RBC-style six parameters, so it cannot represent asymmetric, flat-bottom, crack-like, or multi-pit defects without forcing them into the wrong geometry family.
+- Projected IoU/Dice improvements alone are not enough for a profile-depth baseline transition; profile RMSE and Er-like profile error remain the governing metrics.
+- The highest-value blocker is representation coverage, not another small NLS feature or fusion tweak.
+
+surface_next_stage_mainline:
+- Move from RBC-like six-parameter inversion to surface shape extension.
+- Target non-RBC-like surface defects: asymmetric pits, flat-bottom defects, crack-like slots, multi-pit/multi-component surface damage, and mixed profile/topology cases.
+- Preserve profile-level reconstruction as the main metric, with projected mask as footprint QA and forward consistency as a physics plausibility constraint.
+- Develop geometry-aware decoder / profile-basis decoder / forward-consistency refinement after the surface shape-extension dataset plan fixes labels, schema, splits, and acceptance gates.
+
+25_1_unique_recommendation: A_surface_shape_extension_dataset_plan
+reason: geometry-aware decoders and forward-surrogate consistency need an explicit surface shape taxonomy, profile/depth label schema, split coverage, and acceptance gates before implementation or training.
