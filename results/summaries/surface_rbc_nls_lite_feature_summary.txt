@@ -1,0 +1,23 @@
+24.0A surface RBC NLS-lite feature extraction summary
+
+dataset_id: comsol_true_3d_rbc_imported_watertight_pilot_v3_240
+scope: feature extraction only; no COMSOL, no training, no data/NPZ modification, no CURRENT_BASELINE update.
+loading_policy: explicit COMSOL_DATA_REGISTRY.md plus manifest; latest/newest NPZ scan is not used.
+method_claim: NLS-lite stable physical feature extractor; exact_piao_nls=false; piao_nls_lite=true.
+input_delta_b_shape: (240, 3, 3, 201)
+axis_order: ['Bx', 'By', 'Bz']
+scan_line_y_m: [-0.0010000000474974513, 0.0, 0.0010000000474974513]
+split_counts: train=162, val=39, test=39
+sample_count: 240
+feature_count: 291
+overall_finite_fraction: 1.0
+fit_success_rate: 1.0
+fallback_rate: 0.0
+fit_residual_mean: 0.1649799962928789
+fit_residual_max: 0.3025888272112355
+formal_feature_csv_labels: false
+feature_input_boundary: formal numeric features come only from delta_b Bx/By/Bz; rbc_params/profile/mask/split/sample_id are not numeric feature inputs.
+current_data_boundary: only three scan_line_y values are available, so this is not an exact Piao 18-feature reproduction.
+features_csv: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_rbc_nls_lite_features.csv
+quality_csv: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_rbc_nls_lite_feature_quality.csv
+feature_manifest: C:\Users\19166\Desktop\PINN_project\results\manifests\surface_rbc_nls_lite_feature_manifest.json

@@ -1,0 +1,9 @@
+question,answer,evidence,decision
+Are NLS-lite features stable?,True,finite_fraction=1.0; feature_count=291,enter_24_1_feature_baseline
+Is fit failure acceptable?,True,fit_success_rate=1.0; fallback_rate=0.0,enter_24_1_feature_baseline
+Can this enter 24.1 feature baseline?,True,stable=True; fit_ok=True; max_abs_correlation=0.894505,enter_24_1_feature_baseline
+Which L/W/D features look valuable?,D_m:nlslite_Bx_yneg_abs_peak(0.708); L_m:nlslite_Bx_yneg_half_peak_width_m(0.895); W_m:nlslite_Bx_yneg_half_peak_width_m(0.735),all-scope absolute Pearson/Spearman >= 0.35,enter_24_1_feature_baseline
+Which curvature/profile features look valuable?,profile_max_abs_depth_m:nlslite_Bx_yneg_abs_peak(0.709); wLD:nlslite_Bx_ypos_energy(0.381); wWD:nlslite_Bx_y0_energy(0.361),all-scope absolute Pearson/Spearman >= 0.35,enter_24_1_feature_baseline
+Is it suitable for real experimental preprocessing?,yes_with_calibration_caveat,delta_b-only deterministic features; still requires Bx/By/Bz calibration and the same three scan_line_y geometry.,enter_24_1_feature_baseline
+Label leakage status,no_label_leakage_detected,feature CSV has only sample_id/split metadata plus nlslite_* columns; labels used only in correlation audit.,enter_24_1_feature_baseline
+Piao claim boundary,exact_piao_nls=false; piao_nls_lite=true,current v3_240 data has only three scan_line_y values.,enter_24_1_feature_baseline

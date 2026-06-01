@@ -1,0 +1,22 @@
+24.0A surface RBC NLS-lite feature correlation audit summary
+
+dataset_id: comsol_true_3d_rbc_imported_watertight_pilot_v3_240
+scope: diagnostic correlation audit only; no training and no model selection.
+label_usage: labels/profile metrics are used only as correlation targets and are not written into the formal feature matrix.
+feature_csv: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_rbc_nls_lite_features.csv
+feature_count: 291
+sample_count: 240
+correlation_rows: 13968
+
+top_all_scope_correlations:
+- L_m: nlslite_Bx_yneg_half_peak_width_m pearson=0.881262 spearman=0.894505
+- W_m: nlslite_Bx_yneg_half_peak_width_m pearson=0.734545 spearman=0.703513
+- D_m: nlslite_Bx_yneg_abs_peak pearson=-0.678133 spearman=-0.707974
+- wLD: nlslite_Bx_ypos_energy pearson=-0.308404 spearman=-0.380535
+- wWD: nlslite_Bx_y0_energy pearson=-0.295604 spearman=-0.360869
+- wLW: nlslite_Bx_ypos_energy pearson=-0.331356 spearman=-0.284335
+- profile_max_abs_depth_m: nlslite_Bx_yneg_abs_peak pearson=-0.679227 spearman=-0.709194
+- projected_mask_area_px: nlslite_Bx_yneg_fit_width_m pearson=0.773274 spearman=0.827341
+
+boundary: formal feature CSV contains only sample_id, split metadata, and nlslite_* delta_b-derived features; target labels are loaded separately for this audit.
+correlations_csv: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_rbc_nls_lite_feature_correlations.csv

@@ -1,0 +1,8 @@
+quality_scope,feature_count,finite_fraction,nan_count,inf_count,fit_success_rate,fallback_rate,fit_residual_mean,fit_residual_max,notes
+cross_axis,45,1.0,0,0,,,,,feature group quality
+fit_quality,60,1.0,0,0,,,,,feature group quality
+gradient_asymmetry_decay,36,1.0,0,0,,,,,feature group quality
+line_to_line,24,1.0,0,0,,,,,feature group quality
+peak_width_energy,108,1.0,0,0,,,,,feature group quality
+vector_magnitude,18,1.0,0,0,,,,,feature group quality
+overall,291,1.0,0,0,1.0,0.0,0.1649799962928789,0.3025888272112355,sample-level fit quality averaged over 3 axes x 3 lines
