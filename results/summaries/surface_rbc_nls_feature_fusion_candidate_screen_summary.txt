@@ -1,0 +1,32 @@
+surface_rbc_nls_feature_fusion_candidate_screen_summary
+stage: 24.2 Stage C
+
+dataset_id: comsol_true_3d_rbc_imported_watertight_pilot_v3_240
+seed: 42
+epochs: 220
+batch_size: 8
+scope: candidate diagnostic only; no COMSOL, no data/NPZ write, no checkpoint, no baseline update.
+model_inputs: delta_b/BxByBz + train-scaled nlslite_* features
+sample_id_use: join/reporting only
+split_use: train/val/test routing only
+model_selection: validation-only composite of profile RMSE and total normalized MAE
+candidates: F1_late_fusion, F2_feature_gated_fusion, F3_w_head_assisted
+selected_candidate: F1_late_fusion
+selected_candidate_role: Conv1D latent + feature MLP concat six-param head
+selected_feature_count: 291
+selected_val_selection_score: 1.047971
+selected_val_total_mae: 0.723454
+selected_val_profile_depth_rmse_m: 0.000472358
+selected_val_wMAE: 0.200948
+selected_val_projected_mask_iou_dice: 0.704064/0.813792
+selected_best_epoch: 43
+eligible_for_multiseed: True
+
+selected_test_total_mae: 0.643971
+selected_test_LWD_mae_mm: 2.367861/1.893362/0.731334
+selected_test_wMAE: 0.189089
+selected_test_wLD_wWD_wLW: 0.208019/0.192212/0.167036
+selected_test_profile_depth_rmse_m: 0.000357984
+selected_test_er_like_profile_error: 0.350772
+selected_test_projected_mask_iou_dice: 0.747640/0.844267
+stage_D_gate: run multi-seed only if eligible_for_multiseed is true.

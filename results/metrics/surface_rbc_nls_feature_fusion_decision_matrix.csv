@@ -1,0 +1,9 @@
+question,answer,evidence,decision
+Does NLS-lite enhance the neural model?,True,"delta_vs_20.85 total=-0.079706, wMAE=-0.017827, profile=-0.000070499, dice=0.030215",surface enhancement signal
+Is the main gain in w parameters?,True,delta_wMAE_vs_20.85=-0.017827; delta_wMAE_vs_24.1=-0.002475; selected_test_wMAE=0.183249,w-head benefit present
+Does profile-level quality improve?,True,delta_profile_vs_20.85=-0.000070499; delta_profile_vs_24.1=-0.000127943; selected_test_profile=0.000317238,profile improvement present
+Is this only a diagnostic feature route?,False,surface_feature_fusion_candidate=True,"promote only to surface candidate, not baseline"
+Does it form a surface candidate?,True,selected_seed=123; test_total=0.598309; dice_delta_vs_24.1=0.014953,surface candidate for formal rerun
+Is formal rerun needed?,True,formal rerun is reserved for a surface candidate with no profile/LWD regression,run formal rerun next
+Should CURRENT_BASELINE remain unchanged?,True,24.2 is diagnostic and prompt forbids CURRENT_BASELINE update,CURRENT_BASELINE.md unchanged
+How does it compare with 24.1?,True,"delta_vs_24.1 total=-0.055738, wMAE=-0.002475, profile=-0.000127943, dice=0.014953",has at least one 24.1-side improvement

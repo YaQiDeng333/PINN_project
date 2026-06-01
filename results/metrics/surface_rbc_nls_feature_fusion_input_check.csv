@@ -1,0 +1,17 @@
+check_name,pass,observed,expected,notes
+dataset_id,True,comsol_true_3d_rbc_imported_watertight_pilot_v3_240,comsol_true_3d_rbc_imported_watertight_pilot_v3_240,explicit dataset_id
+delta_b_shape,True,"(240, 3, 3, 201)","(240, 3, 3, 201)",
+axis_order,True,"['Bx', 'By', 'Bz']","[Bx, By, Bz]",
+split_counts,True,"{'train': 162, 'val': 39, 'test': 39}","{train:162,val:39,test:39}",
+nlslite_feature_count,True,291,291,
+nlslite_prefix_only,True,all nlslite_*,all nlslite_*,
+sample_id_join,True,240,240,sample_id used only for join
+x_norm_finite,True,1.0,1.0,train-only delta_b normalization
+feature_norm_finite,True,1.0,1.0,train-only NLS feature scaler
+target_norm_finite,True,1.0,1.0,targets for supervised training only
+feature_train_mean_abs_max,True,1.3119644791004248e-05,near 0,diagnostic only
+feature_train_std_mean,True,0.938144326210022,near 1,diagnostic only
+fit_success_rate_24_0A,True,1.0,>=0.95,
+fallback_rate_24_0A,True,0.0,<=0.05,
+COMSOL_run,True,False,False,loader never calls COMSOL
+NPZ_write,True,False,False,loader writes no data/NPZ artifact

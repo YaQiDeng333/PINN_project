@@ -1,5 +1,14 @@
 # 实验工作日志
 
+## 2026-06-01 Stage 24.2 surface RBC NLS-lite feature-fusion diagnostic
+
+- Scope: fused `delta_b/BxByBz` with the existing 24.0A `nlslite_*` feature matrix on fixed `dataset_id=comsol_true_3d_rbc_imported_watertight_pilot_v3_240`. No COMSOL, no data/NPZ generation or modification, no checkpoint artifact, and no `CURRENT_BASELINE.md` update.
+- Input gate: `scripts/load_surface_rbc_nls_feature_fusion_dataset.py` loads v3_240 only through `COMSOL_DATA_REGISTRY.md + manifest`, joins the 291 `nlslite_*` columns by `sample_id`, keeps `sample_id`/`split` out of model input, and uses train-only standardization for both delta_b and features. Preflight checks passed with zero failed checks.
+- Candidate screen: seed `42`, epochs `220`, batch size `8`; validation-only selection chose `F1_late_fusion`.
+- Multi-seed: seeds `42/123/2026`; validation-only seed selection chose seed `123`. Test final metrics: total normalized MAE `0.598309`, L/W/D MAE `1.816667/1.657295/0.654960 mm`, wMAE `0.183249`, wLD/wWD/wLW `0.203378/0.189823/0.156546`, profile RMSE `0.000317238 m`, Er-like `0.267248`, IoU/Dice `0.793564/0.877942`.
+- Comparison: relative to 20.85/20.77, total `-0.079706`, wMAE `-0.017827`, profile RMSE `-0.000070499 m`, Dice `+0.030215`. Relative to 24.1, total `-0.055738`, wMAE `-0.002475`, profile RMSE `-0.000127943 m`, Dice `+0.014953`.
+- Route decision: 24.2 forms a surface feature-fusion candidate and should go to a formal rerun if continued, but it remains diagnostic and does not replace `CURRENT_BASELINE.md`. 24.0A remains the NLS-lite feature source, 24.0B remains the future NLS-full-compatible interface, and 24.1 remains the feature-only comparator.
+
 ## 2026-06-01 Stage 24.1 surface RBC Piao-style NLS-lite feature baseline
 
 - 范围：使用 24.0A 已生成的 `nlslite_*` 特征训练 classical feature-to-geometry comparator；输入只允许 `nlslite_*`，`sample_id` 只用于 join/reporting，`split` 只用于 train/val/test 划分。没有运行 COMSOL，没有生成或修改 data/NPZ，没有写 checkpoint，没有更新 `CURRENT_BASELINE.md`。

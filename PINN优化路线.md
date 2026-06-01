@@ -1,5 +1,13 @@
 # PINN 优化路线
 
+## 2026-06-01 route sync: 24.2 surface RBC NLS-lite feature fusion
+
+24.2 moves the surface RBC NLS-lite path from feature-only comparison into neural feature fusion. The fixed input contract is `delta_b/BxByBz + nlslite_*`; `sample_id` is join/reporting only, `split` is train/val/test routing only, and all feature/target scalers are train-only. No COMSOL, no data/NPZ mutation, no checkpoint commit, and no `CURRENT_BASELINE.md` update occurred.
+
+The selected route is `F1_late_fusion`, seed `123` after multi-seed validation-only selection. Test metrics are total normalized MAE `0.598309`, L/W/D MAE `1.816667/1.657295/0.654960 mm`, wMAE `0.183249`, profile RMSE `0.000317238 m`, Er-like `0.267248`, and IoU/Dice `0.793564/0.877942`. It improves over 20.85/20.77 and 24.1 on total, wMAE, profile RMSE, and Dice, so it forms a surface feature-fusion candidate.
+
+The route boundary remains explicit: 24.0A is the three-line NLS-lite feature source, 24.0B is the NLS-full-compatible future interface for richer y-line ROI matrices, 24.1 is the feature-only comparator, and 24.2 is a candidate needing a formal rerun before any baseline discussion. `CURRENT_BASELINE.md` remains the 20.85 surface RBC profile-depth baseline until a separate baseline transition is requested and reviewed.
+
 ## 2026-06-01 route sync: 24.1 surface RBC Piao-style NLS-lite feature baseline
 
 24.1 的路线判断是：`nlslite_*` classical feature baseline 有补充价值，可以进入 24.2 feature-fusion diagnostic，但不能成为 `CURRENT_BASELINE`。validation 选中的 `LS-SVM-like-RBF` 在 test total normalized MAE 上达到 `0.654046`，低于 20.85/20.77 的 `0.678014` 和 20.81 的 `0.667888`；同时 wMAE auxiliary=`0.185724`，比 20.85/20.77 的 `0.201076` 和 20.81 的 `0.194483` 更好。

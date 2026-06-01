@@ -1,0 +1,35 @@
+surface_rbc_nls_feature_fusion_training_summary
+stage: 24.2 Stage D
+
+dataset_id: comsol_true_3d_rbc_imported_watertight_pilot_v3_240
+selected_candidate: F1_late_fusion
+selected_candidate_role: Conv1D latent + feature MLP concat six-param head
+feature_count: 291
+seeds: [42, 123, 2026]
+epochs: 220
+batch_size: 8
+selected_seed: 123
+model_selection: validation-only seed selection; test final only for selected seed.
+model_inputs: delta_b/BxByBz + train-scaled nlslite_* features
+COMSOL_run: false
+data_or_NPZ_modified: false
+CURRENT_BASELINE_update: false
+
+selected_test_total_mae: 0.598309
+selected_test_LWD_mae_mm: 1.816667/1.657295/0.654960
+selected_test_wMAE: 0.183249
+selected_test_wLD_wWD_wLW: 0.203378/0.189823/0.156546
+selected_test_profile_depth_rmse_m: 0.000317238
+selected_test_er_like_profile_error: 0.267248
+selected_test_projected_mask_iou_dice: 0.793564/0.877942
+delta_vs_20_85_total: -0.079706
+delta_vs_20_85_wMAE: -0.017827
+delta_vs_20_85_profile_rmse_m: -0.000070499
+delta_vs_20_85_dice: 0.030215
+delta_vs_24_1_total: -0.055738
+delta_vs_24_1_wMAE: -0.002475
+delta_vs_24_1_profile_rmse_m: -0.000127943
+delta_vs_24_1_dice: 0.014953
+surface_candidate_gate: {'profile_not_obviously_worse_than_20_85': True, 'LWD_not_obviously_degraded': True, 'w_or_mask_improved': True, 'dice_not_obviously_worse_than_20_85': True}
+surface_feature_fusion_candidate: True
+boundary: diagnostic candidate only; CURRENT_BASELINE remains unchanged.

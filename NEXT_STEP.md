@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-06-01 after Stage 24.2 surface RBC NLS-lite feature fusion diagnostic
+
+Next step: run a formal surface RBC feature-fusion rerun/candidate-upgrade check for `F1_late_fusion`, while keeping `CURRENT_BASELINE.md` unchanged until a separate baseline transition is explicitly approved.
+
+24.2 used fixed v3_240 registry/manifest loading and fused `delta_b/BxByBz + nlslite_*` with train-only scalers, validation-only selection, and test-final-only reporting. Validation selected `F1_late_fusion`; multi-seed selected seed `123`. Test total normalized MAE was `0.598309`, L/W/D MAE `1.816667/1.657295/0.654960 mm`, wMAE `0.183249`, profile RMSE `0.000317238 m`, Er-like `0.267248`, and IoU/Dice `0.793564/0.877942`. This improves over 20.85/20.77 and 24.1 on the main reported metrics.
+
+Keep the role split clear: 24.0A is the three-line NLS-lite feature source, 24.0B is the future NLS-full-compatible interface for richer y-line ROI data, 24.1 is the feature-only comparator, and 24.2 is now a surface feature-fusion candidate. Do not call it exact Piao full NLS, do not write a baseline, and do not update `CURRENT_BASELINE.md` in the next rerun.
+
 ## 2026-06-01 after Stage 24.1 surface RBC Piao-style NLS-lite feature baseline
 
 下一步唯一建议：进入 **24.2 NLS-lite feature fusion diagnostic**，把 `nlslite_*` 作为神经模型的辅助输入做 bounded fusion gate；不要替换 `CURRENT_BASELINE.md`，也不要把 24.1 classical feature baseline 写成 exact Piao NLS。
