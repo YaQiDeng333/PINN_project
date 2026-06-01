@@ -1,5 +1,13 @@
 # PINN 优化路线
 
+## 2026-06-02 route sync: 25.3 current baseline generalization audit
+
+25.3 separates representation failure from model inversion failure. The RBC oracle fit is strong for most single-component families: `104/120` total samples and `80/96` non-RBC samples are representable by the old six-parameter RBC profile under the audit thresholds. The clear representation failure is multi-pit: `multi_pit_two_component_surface_defect` has `0/16` representable and component merge proxy `1.000000`.
+
+The frozen 20.85 baseline does not generalize to this pilot distribution. It passes only `22/120`, non-RBC pass is `19/96`, and even RBC-like smooth pit control is only `3/24`. That means the next route should not be a direct 20.85-style baseline transition, and it should not assume non-RBC failure is mostly a label/schema problem.
+
+The selected route is `D. forward-consistency refinement plan`: first define a no-training plan for using forward residuals and RBC-like control stability on this pilot, while keeping `component_set` as the separate multi-pit branch. `CURRENT_BASELINE.md` remains the 20.85/20.86 surface RBC profile-depth baseline.
+
 ## 2026-06-02 route sync: 25.2 surface shape-extension COMSOL pilot pack
 
 25.2 turns the 25.1 plan into a real COMSOL pilot pack, but it is still a data and validation stage, not a model-training or baseline-transition stage. The generated dataset is `comsol_surface_shape_extension_pilot_v1`, with `N=120`, split `72/24/24`, RBC-like control `24`, and six non-RBC-like surface defect families at `16` each.

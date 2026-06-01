@@ -1,5 +1,16 @@
 # 实验工作日志
 
+## 2026-06-02 Stage 25.3 current surface RBC baseline generalization audit
+
+- Scope: audited frozen 20.85/20.86 surface RBC baseline on `comsol_surface_shape_extension_pilot_v1`. No training, no COMSOL, no data/NPZ mutation, no checkpoint/preview/notes artifact, and no `CURRENT_BASELINE.md` update.
+- Preflight: loaded the pilot only through `COMSOL_DATA_REGISTRY.md` plus `results/manifests/comsol_surface_shape_extension_pilot_v1.manifest.json`; baseline artifact manifest and ignored checkpoint/prediction artifacts were present and sha256-verified.
+- RBC oracle fit: all 120 samples fit without silent skip. Oracle representability was `104/120`; non-RBC representability was `80/96`. `multi_pit_two_component_surface_defect` was the only full representation failure family, with representable rate `0.000000` and component merge proxy `1.000000`.
+- Frozen baseline inference: model pass was `22/120`; non-RBC pass was `19/96`; RBC-like control pass was only `3/24`. Labels were used only for post-inference metrics; model input was `delta_b/BxByBz` only.
+- Diagnosis: `82/120` samples were `rbc_representable_but_model_fail`, `22/120` were `rbc_representable_and_model_pass`, and `16/120` were `rbc_not_representable`. The representation failure bucket was entirely multi-pit; most other failures are 20.85 inversion/generalization failures under the new pilot distribution.
+- Required answers: RBC-like smooth pit did not pass as a frozen-model control; flat-bottom and sharp-wall did not fail at the oracle level; asymmetric, crack-like, flat-bottom, sharp-wall, and irregular were mainly model failures; multi-pit is a component representation failure; current 20.85 cannot serve as a non-RBC-like baseline.
+- Route decision: unique next step is `D. forward-consistency refinement plan`, with component-set decoder retained as an explicit multi-pit sub-branch. Direct 20.85-style non-RBC baseline transition remains forbidden.
+- Review: independent read-only review passed with no must-fix and confirmed no COMSOL/training/data mutation, no label leakage in model inference, no `CURRENT_BASELINE.md` diff, and no forbidden artifacts staged.
+
 ## 2026-06-02 Stage 25.2 surface shape-extension COMSOL pilot pack
 
 - Scope: executed the approved surface shape-extension COMSOL pilot generation only. No training, no checkpoint/preview/notes artifact, no `CURRENT_BASELINE.md` update, and no baseline transition.

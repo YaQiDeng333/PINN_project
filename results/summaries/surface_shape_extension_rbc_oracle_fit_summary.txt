@@ -1,0 +1,29 @@
+surface shape-extension RBC oracle fit summary
+stage: 25.3
+
+dataset_id: comsol_surface_shape_extension_pilot_v1
+sample_count: 120
+oracle_fit_success_count: 120
+rbc_representable_count: 104
+rbc_representable_rate: 0.866667
+non_rbc_representable_count: 80
+non_rbc_representable_rate: 0.833333
+representability_thresholds: profile_rmse<=0.0004, dice>=0.8
+
+by_shape:
+- asymmetric_corrosion: n=16 representable_rate=1.000000 rmse_mean=0.000073058 dice_mean=0.973188 interpretation=RBC representation adequate
+- elongated_crack_like_surface_defect: n=16 representable_rate=1.000000 rmse_mean=0.000106050 dice_mean=0.920979 interpretation=RBC representation adequate
+- flat_bottom_pit: n=16 representable_rate=1.000000 rmse_mean=0.000095624 dice_mean=0.953418 interpretation=RBC representation adequate
+- irregular_corrosion_non_rbc: n=16 representable_rate=1.000000 rmse_mean=0.000118400 dice_mean=0.897308 interpretation=RBC representation adequate
+- multi_pit_two_component_surface_defect: n=16 representable_rate=0.000000 rmse_mean=0.000281264 dice_mean=0.343038 interpretation=RBC representation failure
+- rbc_like_smooth_pit: n=24 representable_rate=1.000000 rmse_mean=0.000040894 dice_mean=0.965626 interpretation=RBC representation adequate
+- sharp_wall_boxy_corrosion: n=16 representable_rate=1.000000 rmse_mean=0.000127132 dice_mean=0.916779 interpretation=RBC representation adequate
+
+interpretation:
+- RBC oracle uses labels only; Bx/By/Bz are not used for fitting.
+- rbc_representable=false means the old six-parameter RBC surface representation is not sufficient for that sample under the fixed thresholds.
+- This is not model inference and not training.
+
+metrics: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_shape_extension_rbc_oracle_fit_metrics.csv
+group_summary: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_shape_extension_rbc_oracle_fit_group_summary.csv
+failure_cases: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_shape_extension_rbc_oracle_failure_cases.csv

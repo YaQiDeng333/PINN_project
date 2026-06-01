@@ -1,0 +1,30 @@
+surface shape-extension current baseline inference summary
+stage: 25.3
+
+dataset_id: comsol_surface_shape_extension_pilot_v1
+baseline_artifact_id: true_3d_rbc_v3_240_seed42_20_77_baseline_inference_artifact
+model_family: 20.77 small Conv1D encoder + MLP six-parameter head
+sample_count: 120
+model_pass_count: 22
+model_pass_rate: 0.183333
+non_rbc_model_pass_count: 19
+non_rbc_model_pass_rate: 0.197917
+model_pass_thresholds: profile_rmse<=0.0006, dice>=0.7
+
+by_shape:
+- asymmetric_corrosion: n=16 model_pass_rate=0.250000 rmse_mean=0.000479750 dice_mean=0.559129 norm_mae_vs_oracle=10.111354
+- elongated_crack_like_surface_defect: n=16 model_pass_rate=0.000000 rmse_mean=0.000497829 dice_mean=0.472065 norm_mae_vs_oracle=9.871964
+- flat_bottom_pit: n=16 model_pass_rate=0.312500 rmse_mean=0.000404481 dice_mean=0.571939 norm_mae_vs_oracle=9.957199
+- irregular_corrosion_non_rbc: n=16 model_pass_rate=0.250000 rmse_mean=0.000455319 dice_mean=0.597839 norm_mae_vs_oracle=10.046882
+- multi_pit_two_component_surface_defect: n=16 model_pass_rate=0.000000 rmse_mean=0.000718363 dice_mean=0.334227 norm_mae_vs_oracle=7.603861
+- rbc_like_smooth_pit: n=24 model_pass_rate=0.125000 rmse_mean=0.000501181 dice_mean=0.493556 norm_mae_vs_oracle=1.332315
+- sharp_wall_boxy_corrosion: n=16 model_pass_rate=0.375000 rmse_mean=0.000370406 dice_mean=0.631465 norm_mae_vs_oracle=9.890648
+
+input_boundary:
+- model input: delta_b reshaped to 9x201 Bx/By/Bz channels only
+- labels are used only for profile/mask/parameter metrics after inference
+- no training, no COMSOL, no checkpoint save, no data/NPZ mutation
+
+metrics: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_shape_extension_current_baseline_metrics.csv
+group_summary: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_shape_extension_current_baseline_group_summary.csv
+failure_cases: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_shape_extension_current_baseline_failure_cases.csv

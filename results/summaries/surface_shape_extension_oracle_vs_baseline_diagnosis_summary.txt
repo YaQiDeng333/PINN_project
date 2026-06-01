@@ -1,0 +1,35 @@
+surface shape-extension oracle vs baseline diagnosis summary
+stage: 25.3
+
+dataset_id: comsol_surface_shape_extension_pilot_v1
+sample_count: 120
+diagnosis_counts: {'rbc_representable_but_model_fail': 82, 'rbc_representable_and_model_pass': 22, 'rbc_not_representable': 16}
+non_rbc_diagnosis_counts: {'rbc_representable_but_model_fail': 61, 'rbc_representable_and_model_pass': 19, 'rbc_not_representable': 16}
+representation_failure_rate: 0.133333
+model_failure_rate_when_representable: 0.788462
+
+required_answers:
+1. RBC-like smooth pit pass: no; model_pass_rate=0.125000; oracle_representable_rate=1.000000.
+2. flat-bottom / sharp-wall oracle failure: flat=no sharp=no; flat_oracle_repr=1.000000; sharp_oracle_repr=1.000000.
+3. asymmetric primary failure: rbc_representable_but_model_fail; oracle_representable_rate=1.000000; model_pass_rate=0.250000.
+4. elongated/crack-like failure type: rbc_representable_but_model_fail; oracle_representable_rate=1.000000; model_pass_rate=0.000000.
+5. multi-pit component representation failure: yes; component_recall_proxy_mean=0.500000; merge_proxy_rate=1.000000.
+6. irregular corrosion needs depth_grid/profile-basis: no; dominant=rbc_representable_but_model_fail; oracle_representable_rate=1.000000.
+7. Current 20.85 usable as non-RBC-like baseline: no; non-RBC pass count=19/96.
+
+by_shape:
+- asymmetric_corrosion: dominant=rbc_representable_but_model_fail oracle_repr_rate=1.000000 model_pass_rate=0.250000 oracle_rmse=0.000073058 baseline_rmse=0.000479750 dice=0.559129
+- elongated_crack_like_surface_defect: dominant=rbc_representable_but_model_fail oracle_repr_rate=1.000000 model_pass_rate=0.000000 oracle_rmse=0.000106050 baseline_rmse=0.000497829 dice=0.472065
+- flat_bottom_pit: dominant=rbc_representable_but_model_fail oracle_repr_rate=1.000000 model_pass_rate=0.312500 oracle_rmse=0.000095624 baseline_rmse=0.000404481 dice=0.571939
+- irregular_corrosion_non_rbc: dominant=rbc_representable_but_model_fail oracle_repr_rate=1.000000 model_pass_rate=0.250000 oracle_rmse=0.000118400 baseline_rmse=0.000455319 dice=0.597839
+- multi_pit_two_component_surface_defect: dominant=rbc_not_representable oracle_repr_rate=0.000000 model_pass_rate=0.000000 oracle_rmse=0.000281264 baseline_rmse=0.000718363 dice=0.334227
+- rbc_like_smooth_pit: dominant=rbc_representable_but_model_fail oracle_repr_rate=1.000000 model_pass_rate=0.125000 oracle_rmse=0.000040894 baseline_rmse=0.000501181 dice=0.493556
+- sharp_wall_boxy_corrosion: dominant=rbc_representable_but_model_fail oracle_repr_rate=1.000000 model_pass_rate=0.375000 oracle_rmse=0.000127132 baseline_rmse=0.000370406 dice=0.631465
+
+interpretation:
+- rbc_not_representable means the six-parameter RBC surface representation itself is the blocker.
+- rbc_representable_but_model_fail means the oracle can represent the target but frozen 20.85 inversion does not generalize.
+- This is an audit only; it does not train or change CURRENT_BASELINE.
+
+matrix: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_shape_extension_oracle_vs_baseline_matrix.csv
+failure_mode_by_shape: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_shape_extension_failure_mode_by_shape.csv

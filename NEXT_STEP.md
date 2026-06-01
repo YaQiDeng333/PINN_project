@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-06-02 after Stage 25.3 current baseline generalization audit
+
+Next step: run **D. forward-consistency refinement plan** for the surface shape-extension branch. Keep `component_set` as a required sub-branch for multi-pit, but do not jump straight into training a 20.85-style six-parameter model.
+
+25.3 showed the real split: the RBC oracle can represent `104/120` samples and `80/96` non-RBC samples, so most single-component non-RBC failures are not caused by the six-parameter shape family alone. The frozen 20.85 baseline fails broadly, with pass `22/120`, non-RBC pass `19/96`, and RBC-like control pass only `3/24`; therefore the immediate blocker is model/generalization and forward consistency under the new pilot distribution. The exception is multi-pit: `16/16` are `rbc_not_representable`, with component merge proxy `1.000000`.
+
+The next work should be plan-only unless separately approved: define how forward-consistency refinement would use the pilot without label leakage, how RBC-like control is protected, and how multi-pit component-set handling is separated. Do not train, do not update `CURRENT_BASELINE.md`, and do not treat the 25.2 pilot as an automatic training dataset.
+
 ## 2026-06-02 after Stage 25.2 surface shape-extension COMSOL pilot pack
 
 Next step: run **25.3 current baseline generalization audit** on `comsol_surface_shape_extension_pilot_v1`. Use the frozen 20.85/20.86 surface RBC baseline as the audited model, report where it fails on non-RBC-like surface defects, and keep the result as an audit, not a baseline transition.

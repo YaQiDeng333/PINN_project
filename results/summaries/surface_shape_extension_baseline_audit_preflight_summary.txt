@@ -1,0 +1,40 @@
+surface shape-extension baseline audit preflight summary
+stage: 25.3
+
+- root_directory: pass=true observed=C:\Users\19166\Desktop\PINN_project
+- registry_exists: pass=true observed=C:\Users\19166\Desktop\PINN_project\COMSOL_DATA_REGISTRY.md
+- pilot_manifest_exists: pass=true observed=C:\Users\19166\Desktop\PINN_project\results\manifests\comsol_surface_shape_extension_pilot_v1.manifest.json
+- pilot_validation_summary_exists: pass=true observed=C:\Users\19166\Desktop\PINN_project\results\summaries\surface_shape_extension_pilot_validation_summary.txt
+- baseline_artifact_manifest_exists: pass=true observed=C:\Users\19166\Desktop\PINN_project\results\manifests\true_3d_rbc_baseline_inference_artifact_manifest.json
+- profile_generator_exists: pass=true observed=C:\Users\19166\Desktop\PINN_project\scripts\true_3d_rbc_profile_generator.py
+- pilot_dataset_loaded_by_registry_manifest: pass=true observed=C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\prepared\experimental\surface_shape_extension\comsol_surface_shape_extension_pilot_v1.npz
+- pilot_npz_sha256_matches_manifest: pass=true observed=d054b7e24f32fffcd20cc3a2303d894791b9c2dab1a3a67171edf58dbb75a132
+- pilot_validation_status_true: pass=true observed=True
+- pilot_train_ready_false: pass=true observed=False
+- pilot_baseline_ready_false: pass=true observed=False
+- delta_b_shape: pass=true observed=(120, 3, 3, 201)
+- delta_b_equals_b_defect_minus_b_no_defect: pass=true observed=0.0
+- bxyz_finite: pass=true observed=delta_b finite
+- split_counts: pass=true observed={'train': 72, 'val': 24, 'test': 24}
+- shape_coverage: pass=true observed={'rbc_like_smooth_pit': 24, 'flat_bottom_pit': 16, 'sharp_wall_boxy_corrosion': 16, 'asymmetric_corrosion': 16, 'elongated_crack_like_surface_defect': 16, 'multi_pit_two_component_surface_defect': 16, 'irregular_corrosion_non_rbc': 16}
+- depth_grid_present: pass=true observed=(120, 64, 128)
+- projected_mask_present: pass=true observed=(120, 64, 128)
+- non_rbc_compatibility_false: pass=true observed=checked
+- baseline_artifact_dataset: pass=true observed=comsol_true_3d_rbc_imported_watertight_pilot_v3_240
+- baseline_checkpoint_exists: pass=true observed=C:\Users\19166\Desktop\PINN_project\checkpoints\true_3d_rbc_baseline_artifacts\true_3d_rbc_v3_240_seed42_20_77_baseline.pt
+- baseline_prediction_artifact_exists: pass=true observed=C:\Users\19166\Desktop\PINN_project\checkpoints\true_3d_rbc_baseline_artifacts\true_3d_rbc_v3_240_seed42_20_77_predictions.npz
+- baseline_checkpoint_sha256: pass=true observed=2a3b948c4e16f4e17b800e20af48d47a87ef9c7d66912e75514f414f4b20329b
+- baseline_prediction_sha256: pass=true observed=50822c9f0a2cbc2b855603403817caaec29db87e02cfed2afc08d0c3f26ff5d4
+- pilot_validation_passed_summary: pass=true observed=validation_pass: true
+- CURRENT_BASELINE_unmodified: pass=true observed=git diff CURRENT_BASELINE.md
+- forbidden_artifacts_not_staged: pass=true observed=[]
+
+policy:
+- COMSOL_run: false
+- training_run: false
+- data_or_npz_mutation: false
+- CURRENT_BASELINE_update: false
+- latest_newest_npz_scan: false
+- dataset_load: COMSOL_DATA_REGISTRY.md + manifest only
+
+preflight_decision: pass
