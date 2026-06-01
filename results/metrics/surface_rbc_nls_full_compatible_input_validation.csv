@@ -1,0 +1,11 @@
+check_name,pass,observed,expected,severity,notes
+axis_order,True,"['Bx', 'By', 'Bz']","['Bx', 'By', 'Bz']",blocker,
+scan_line_count_min_for_degraded,True,3,>=3,warning,
+scan_line_count_min_for_full,False,3,>=5,degraded,
+scan_line_count_recommended_full,False,3,>=9,candidate,
+sensor_x_count,True,201,>=5,blocker,
+y_line_spacing,True,"[0.0010000000474974513, 0.0010000000474974513]",strictly increasing and approximately uniform,blocker,
+missing_values,True,0,0,blocker,
+fit_feasibility,False,M=3; K=201,M>=5 and K>=5,degraded,
+full_feature_ready,False,False,True,degraded,False is acceptable only in degraded-compatible mode.
+degraded_mode_reason,True,scan_line_count_lt_5,reason present when degraded,info,

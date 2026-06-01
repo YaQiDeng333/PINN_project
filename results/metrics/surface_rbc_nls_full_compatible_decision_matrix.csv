@@ -1,0 +1,7 @@
+question,answer,evidence,decision
+Is current v3_240 full-ready?,no,scan_line_count=3; full_feature_ready=False; reason=scan_line_count_lt_5,current v3_240 can only be degraded-compatible
+What data is required for true full-compatible mode?,"Bx/By/Bz ROI matrices with M>=5, recommended M>=9","current axes=['Bx', 'By', 'Bz']; current M=3; current K=201",collect or generate surface RBC y-line ROI pack before claiming full mode
+Is a surface richer y-line pack needed?,yes,"internal richer-observation pack has 5/9-line references, but it is not surface RBC full data",use internal richer pack as interface reference only; create/validate surface RBC richer pack separately
+Is NLS-full-compatible only a future interface for now?,yes,exact_piao_full=False; piao_full_compatible=True; full_candidate_mode=False,keep as schema/extractor/validator framework until full ROI and equations are validated
+Does NLS-full-compatible replace NLS-lite?,no,degraded-compatible features coexist with current 3-line NLS-lite/Piao-inspired branch,run in parallel; do not replace NLS-lite or CURRENT_BASELINE
+Input adequacy gate present?,yes,scan_line_count_min_for_full=False; metrics=C:\Users\19166\Desktop\PINN_project\results\metrics\surface_rbc_nls_full_compatible_input_validation.csv,gate blocks full-ready claim on 3-line input

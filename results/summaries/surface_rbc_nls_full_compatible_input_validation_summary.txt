@@ -1,0 +1,19 @@
+surface RBC NLS full-compatible input validation summary
+
+dataset_id: comsol_true_3d_rbc_imported_watertight_pilot_v3_240
+input_shape: [240, 3, 3, 201]
+axis_order: ['Bx', 'By', 'Bz']
+scan_line_count: 3
+sensor_x_count: 201
+scan_line_y_m: [-0.0010000000474974513, 0.0, 0.0010000000474974513]
+missing_values: 0
+fit_feasibility: false
+full_feature_ready: false
+full_candidate_mode: false
+degraded_mode: true
+degraded_mode_reason: scan_line_count_lt_5
+status: degraded-compatible
+
+decision: current v3_240 is not full-ready because scan_line_count=3 < 5.
+actions: no COMSOL, no training, no data/NPZ writing, no CURRENT_BASELINE update.
+metrics_csv: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_rbc_nls_full_compatible_input_validation.csv

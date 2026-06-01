@@ -1,5 +1,11 @@
 # PINN 优化路线
 
+## 2026-06-01 route sync: 24.0B surface RBC NLS full-compatible framework
+
+24.0B 的核心判断是：当前 v3_240 可以建立 Piao NLS full-compatible 的接口层，但不能进入 full mode。技术分界点是 `scan_line_count`：v3_240 的 Bx/By/Bz 输入形状是 `[240,3,3,201]`，三轴齐全、`sensor_x_count=201`，但 tangential y 只有 3 条线；full-compatible 最低需要 `M>=5`，full-candidate 推荐 `M>=9`，所以当前只能是 `degraded_mode=true`。
+
+本轮新增的 schema、extractor、validator 和 synthetic tests 把这个边界固化了：所有 feature 都有 `valid__*` flag，tangential envelope fit 失败会写入 failure reason 和 quality 统计，`exact_piao_full=false`，`piao_full_compatible=true`。这条路线暂时是未来 surface richer y-line ROI / 真实实验数据的接口，不替代 NLS-lite，也不更新 `CURRENT_BASELINE.md`。
+
 ## 2026-05-31 路线同步：23.4 internal multi-magnetization diagnostic pack
 
 23.4 把 23.3 的路线判断落成了新的 source / magnetization observation diagnostic pack。23.3 已经证明 dual-direction scan 提供非冗余信息，但没有稳定优于 x-only；因此这次不再继续堆扫描方向，而是让 COMSOL source `Je` 从 nominal `["0","1e6[A/m^2]","0"]` 改为 orthogonal `["1e6[A/m^2]","0","0"]`，生成 M1/M2 两个 mag_y diagnostic variants。

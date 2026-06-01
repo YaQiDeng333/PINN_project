@@ -1,0 +1,7 @@
+feature_group,feature_count,finite_fraction,valid_fraction,fit_attempt_count,fit_success_count,fit_failure_count,notes
+axial_local_features,24,1.0,1.0,0,0,0,
+axial_decay_features,18,1.0,1.0,0,0,0,
+tangential_envelope_features,24,0.5,0.5,0,0,0,degraded mode: tangential fits not attempted
+cross_axis_features,10,1.0,1.0,0,0,0,
+fit_residuals,6,0.0,0.0,0,0,0,degraded mode: tangential fits not attempted
+feature_validity_flags,82,1.0,1.0,0,0,0,one validity flag column per feature column

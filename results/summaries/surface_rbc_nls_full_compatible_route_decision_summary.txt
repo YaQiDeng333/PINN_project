@@ -1,0 +1,21 @@
+surface RBC NLS full-compatible route decision summary
+
+dataset_id: comsol_true_3d_rbc_imported_watertight_pilot_v3_240
+feature_schema_version: nls_full_compatible_v1
+scan_line_count: 3
+sensor_x_count: 201
+full_feature_ready: false
+full_candidate_mode: false
+degraded_mode: true
+degraded_mode_reason: scan_line_count_lt_5
+piao_full_compatible: true
+exact_piao_full: false
+
+decision_1_current_v3_240: degraded-compatible only; M=3 is below the M>=5 full-compatible minimum.
+decision_2_true_full_data_needed: Bx/By/Bz surface RBC ROI matrices with validated axis order, sensor_x, scan_line_y, no missing values, M>=5 minimum and M>=9 recommended.
+decision_3_richer_y_line_pack: needed for surface RBC; existing internal richer-observation 5/9-line pack is only an interface reference.
+decision_4_framework_role: NLS-full-compatible remains a future real-experiment/richer-observation interface until full ROI and exact equations are validated.
+decision_5_nls_lite_relation: keep parallel with NLS-lite/Piao-inspired 3-line branch; do not replace it.
+
+actions: no COMSOL, no training, no data/NPZ writing, no CURRENT_BASELINE update.
+decision_matrix: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_rbc_nls_full_compatible_decision_matrix.csv

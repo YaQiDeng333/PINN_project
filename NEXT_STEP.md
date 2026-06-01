@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-06-01 after Stage 24.0B surface RBC NLS full-compatible framework
+
+Next step: keep NLS-full-compatible as a gated interface and do not claim full Piao mode until surface RBC has a richer y-line ROI pack.
+
+The current v3_240 pack is three-axis but only `scan_line_count=3`, so the new framework correctly reports `full_feature_ready=false`, `degraded_mode=true`, and `degraded_mode_reason=scan_line_count_lt_5`. The full-compatible minimum is `M>=5`, and the recommended full-candidate count is `M>=9`, with aligned Bx/By/Bz ROI matrices, validated `sensor_x_m`, validated `scan_line_y_m`, no missing values, and validated equations.
+
+This branch should run in parallel with the existing NLS-lite / Piao-inspired 3-line path. Do not replace NLS-lite, do not update `CURRENT_BASELINE.md`, and do not describe current 3-line features as exact Piao full NLS. A future surface richer y-line pack can reuse this schema/validator/extractor interface when full ROI data is available.
+
 ## 2026-05-31 after Stage 23.5 internal multi-magnetization diagnostic evaluation
 
 下一步唯一建议：**暂停 internal refinement，保留 abstention-only route，不进入 23.6 multi-magnetization training gate**。

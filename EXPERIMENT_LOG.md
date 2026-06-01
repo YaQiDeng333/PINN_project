@@ -1,5 +1,15 @@
 # 实验工作日志
 
+## 2026-06-01 Stage 24.0B surface RBC NLS full-compatible feature framework
+
+- Scope: implemented the Piao NLS full-compatible schema, extractor, input adequacy validator, synthetic tests, route decision, and review record. No COMSOL, no training, no data/NPZ generation or modification, and no `CURRENT_BASELINE.md` update.
+- Schema: `NLS_FULL_COMPATIBLE_FEATURE_SCHEMA.md` fixes required input as aligned Bx/By/Bz ROI matrices over axial x and tangential y, with `M>=5` as the full-compatible minimum and `M>=9` as the recommended full-candidate count.
+- Extractor: `scripts/extract_surface_rbc_nls_full_compatible_features.py` emits 82 stable feature columns plus 82 `valid__*` flags, records `feature_schema_version=nls_full_compatible_v1`, and writes degraded/full mode metadata per row.
+- Current v3_240 result: `delta_b` shape is `[240,3,3,201]`, axis order is `[Bx, By, Bz]`, `scan_line_count=3`, `sensor_x_count=201`; therefore `full_feature_ready=false`, `degraded_mode=true`, `degraded_mode_reason=scan_line_count_lt_5`.
+- Route decision: NLS-full-compatible is a future full ROI / richer-observation interface for surface RBC, not exact Piao full NLS and not a replacement for NLS-lite. Existing internal richer-observation 5/9-line pack is only an interface reference, not surface RBC full data.
+- Tests: synthetic tests passed for 3-line degraded mode, 5-line compatible mode, 9-line full-candidate mode, explicit fit failure handling, and feature name stability.
+- Claim boundary: `piao_full_compatible=true`; `exact_piao_full=false` until full ROI data and exact equations are validated.
+
 ## 2026-05-31 Stage 23.4 internal multi-magnetization diagnostic pack
 
 - 范围：执行 internal multi-magnetization COMSOL diagnostic pack generation、schema validation、assembly、registry/manifest 和 route decision；没有训练，没有更新 `CURRENT_BASELINE.md`，没有把 internal defect 写成 baseline。

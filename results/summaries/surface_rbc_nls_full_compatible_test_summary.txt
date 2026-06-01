@@ -1,0 +1,9 @@
+surface RBC NLS full-compatible synthetic test summary
+status: pass
+test_count: 18
+passed_count: 18
+real_data_used: false
+npz_used: false
+training_run: false
+comsol_run: false
+results_csv: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_rbc_nls_full_compatible_test_results.csv

@@ -1,0 +1,41 @@
+{
+  "framework": "surface_rbc_nls_full_compatible_features",
+  "feature_schema_version": "nls_full_compatible_v1",
+  "dataset_id": "comsol_true_3d_rbc_imported_watertight_pilot_v3_240",
+  "generated_at": "2026-06-01T14:04:55",
+  "input_shape": [
+    240,
+    3,
+    3,
+    201
+  ],
+  "axis_names": [
+    "Bx",
+    "By",
+    "Bz"
+  ],
+  "scan_line_count": 3,
+  "sensor_x_count": 201,
+  "full_feature_ready": false,
+  "full_candidate_mode": false,
+  "degraded_mode": true,
+  "degraded_mode_reason": "scan_line_count_lt_5",
+  "piao_full_compatible": true,
+  "exact_piao_full": false,
+  "feature_count": 82,
+  "validity_flag_count": 82,
+  "fit_failure_count": 0,
+  "fit_failure_reasons": [],
+  "outputs": {
+    "features_csv": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\metrics\\surface_rbc_nls_full_compatible_features.csv",
+    "quality_csv": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\metrics\\surface_rbc_nls_full_compatible_quality.csv",
+    "summary": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\summaries\\surface_rbc_nls_full_compatible_summary.txt",
+    "manifest": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\manifests\\surface_rbc_nls_full_compatible_feature_manifest.json"
+  },
+  "forbidden_actions": {
+    "comsol_run": false,
+    "training_run": false,
+    "data_npz_written": false,
+    "current_baseline_updated": false
+  }
+}
