@@ -1,5 +1,13 @@
 # PINN 优化路线
 
+## 2026-06-01 route sync: 25.1 surface shape-extension dataset plan
+
+25.1 的核心判断是：surface branch 的下一步不是继续调 NLS 特征，也不是直接训练 decoder，而是先把 non-RBC-like surface defects 的表示空间钉牢。当前 `CURRENT_BASELINE` 仍是 20.85/20.86 true 3D RBC-style profile-depth baseline；它只覆盖 RBC-like smooth pit 这类六参数可表达缺陷，不能外推成任意 surface corrosion。
+
+本轮把 shape-extension 数据集计划拆成七类：RBC-like smooth pit 作为 control，另有 flat-bottom、sharp-wall/boxy、asymmetric、elongated/crack-like、multi-pit/two-component、irregular corrosion。真正的分界点是 label target：RBC-like 可以继续 `L/W/D/wLD/wWD/wLW`，non-RBC-like 必须转向 `profile_basis`、`depth_grid`、`component_set` 或 `polygon_or_contour`，否则模型会把新形状错误压回旧的六参数瓶颈。
+
+pilot 计划固定为 `N=120`、split=`72/24/24`，RBC-like control `24`，六类 non-RBC-like 各 `16`。`N=84` 只能是 reduced feasibility，不满足完整 coverage；最低 full-coverage fallback 是 `N=96`。下一步唯一建议是 25.2 surface shape-extension COMSOL pilot generation，只生成 pilot 并验证 labels/geometry gates；25.3 才 audit 20.85 baseline，25.4 才考虑模型训练。`CURRENT_BASELINE.md` 继续不变。
+
 ## 2026-06-01 route sync: 25.0 surface Piao-NLS closeout
 
 25.0 的核心判断是：Piao-NLS 分支到这里收口为 diagnostic/QC/classical comparator，不再作为 `CURRENT_BASELINE` replacement 路线。24.0A 的 NLS-lite 特征稳定、无 label leakage，可继续用于 QC 和特征对照；24.0B 的 full-compatible 框架只能作为未来 richer y-line ROI 接口；24.1 的 LS-SVM-like baseline 不能替代 20.85，因为 profile RMSE 和 Er-like 退化；24.2 的 feature fusion 虽然改善指标，但仍被 RBC 六参数表示约束，只能作为 diagnostic candidate。

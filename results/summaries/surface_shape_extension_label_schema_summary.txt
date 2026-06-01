@@ -1,0 +1,14 @@
+surface shape-extension label schema summary
+stage: 25.1
+
+label_count: 20
+required_label_count: 20
+rbc_like_policy: rbc_like_smooth_pit may continue six_param_rbc labels.
+non_rbc_policy: non-RBC-like shape families must not be forced into L/W/D/wLD/wWD/wLW as a complete representation.
+multi_pit_policy: component_count and component_params_json are mandatory component-level labels.
+crack_like_policy: aspect_ratio and rotation_angle are mandatory.
+irregular_policy: depth_grid_m and profile_descriptor remain the primary target.
+forward_consistency_policy: every pilot-ready sample must be capable of later forward residual evaluation.
+leakage_policy: sample_id, split, shape_type, topology_type, component labels, and representation_target are targets/metadata unless a later route explicitly authorizes them as inputs.
+
+schema_csv: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_shape_extension_label_schema.csv

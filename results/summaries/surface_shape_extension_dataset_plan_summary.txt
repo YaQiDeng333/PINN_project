@@ -1,0 +1,25 @@
+surface shape-extension dataset plan summary
+stage: 25.1
+
+target_N: 120
+split: train/val/test = 72/24/24
+rbc_like_control_count: 24
+non_rbc_like_count: 96
+minimum_full_coverage_fallback_N: 96
+reduced_feasibility_only_N: 84
+fallback_note: N=84 conflicts with RBC-like >=24 plus seven shape families >=12 each; it is reduced_feasibility_only, not full coverage.
+v2_benchmark_target: N=300-480 after pilot generation/label validation passes.
+
+per_shape_totals:
+- rbc_like_smooth_pit: 24
+- flat_bottom_pit: 16
+- sharp_wall_boxy_corrosion: 16
+- asymmetric_corrosion: 16
+- elongated_crack_like_surface_defect: 16
+- multi_pit_two_component_surface_defect: 16
+- irregular_non_rbc_corrosion: 16
+
+coverage_gate: every split covers RBC-like, flat/sharp-wall, asymmetric, elongated, multi-pit, irregular, shallow/medium/deep, small/medium/large, compact/elongated.
+scope_boundary: plan only; no COMSOL, no training, no data/NPZ writing.
+dataset_plan_csv: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_shape_extension_dataset_plan.csv
+expected_coverage_csv: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_shape_extension_expected_coverage.csv

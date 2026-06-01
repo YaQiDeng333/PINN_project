@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-06-01 after Stage 25.1 surface shape-extension dataset plan
+
+Next step: run **25.2 surface shape-extension COMSOL pilot generation**. This is the only recommended next step, and it is allowed only as pilot generation after the 25.1 taxonomy, schema, feasibility, route, and acceptance gates passed review.
+
+25.1 completed plan-only surface shape-extension design. The pilot target is `N=120` with train/val/test=`72/24/24`, `rbc_like_smooth_pit=24`, and six non-RBC-like families at `16` each: flat-bottom, sharp-wall/boxy, asymmetric, elongated/crack-like, multi-pit/two-component, and irregular corrosion. `N=84` is only reduced feasibility because it cannot satisfy RBC-like >=24 plus seven shape families >=12; the minimum full-coverage fallback is `N=96`.
+
+The label contract now separates RBC-compatible six-parameter controls from non-RBC targets: `profile_basis`, `depth_grid`, `component_set`, and `polygon_or_contour`. Multi-pit requires component-level labels, crack-like cases require aspect/rotation, irregular corrosion keeps depth-grid/profile targets, and forward-consistency remains a later gate. Do not train, do not update `CURRENT_BASELINE.md`, and do not treat the 25.2 pilot as a baseline transition.
+
 ## 2026-06-01 after Stage 25.0 surface Piao-NLS branch closeout
 
 Next step: run **25.1 surface shape-extension dataset plan**. This is the only recommended next step: define the taxonomy, labels, split coverage, and acceptance gates for non-RBC-like surface defects before any decoder or forward-consistency implementation.

@@ -1,0 +1,21 @@
+label_name,required,dtype_or_shape,applies_to,allowed_values_or_rule,leakage_policy,representation_policy,notes
+sample_id,True,string,all,unique stable id; no latest/newest discovery,join_key_only_not_model_input,metadata,must remain explicit in manifest and metrics
+shape_type,True,categorical string,all,taxonomy shape_type values only,allowed for stratification/audit; model input only in explicitly shape-conditioned routes,taxonomy,separates RBC-like controls from non-RBC-like surface defects
+topology_type,True,categorical string,all,single_component|multi_component|elongated|irregular,target/audit label; not implicit input,topology,used for split coverage and topology failure metrics
+L_m,True,float meters,all,positive footprint major length,supervision/metric only,global_size,"for non-RBC-like shapes this is a bounding descriptor, not a sufficient representation"
+W_m,True,float meters,all,positive footprint minor width,supervision/metric only,global_size,crack-like cases must preserve high aspect_ratio separately
+D_m,True,float meters,all,positive max depth,supervision/metric only,global_depth,not enough for flat-bottom/asymmetric/irregular profile shape
+center_xyz_m,True,3 floats meters,all,"[center_x_m,center_y_m,center_z_m] in COMSOL coordinate convention",supervision/metric only unless route explicitly conditions on known pose,pose,surface origin remains z=0 scan surface
+surface_origin,True,string or 3 floats,all,top_z_0 with explicit coordinate convention,metadata,coordinate_frame,prevents mixing surface and internal-defect conventions
+depth_grid_m,True,2D float array meters,all,finite nonnegative depth grid; max approximately D_m,target only; never input feature for inverse model,depth_grid,mandatory for profile/depth metrics and irregular corrosion
+projected_mask_2d,True,2D uint8/bool array,all,depth_grid_m > threshold; nonempty for defect sample,target/QA only,projected_mask,"IoU/Dice remain QA, not replacement for profile metrics"
+profile_descriptor,True,JSON object,all,"family-specific profile basis, contour, or depth-grid descriptor",target metadata,profile_basis_or_descriptor,RBC-like may store six-param descriptor; non-RBC stores richer target
+component_count,True,integer,all,>=1; multi-pit requires 2 for first pilot,target/audit label,component_set,used for component recall and merge-rate metrics
+component_params_json,True,JSON list/object,multi_component and all component-capable shapes,component-level L/W/D/center/profile fields,target metadata; not model input unless explicit component-conditioned route,component_set,multi-pit must keep component-level labels
+edge_steepness,True,float proxy,all,finite edge gradient or wall steepness proxy,target/metric only,edge_metric,also covers sharpness proxy requested by plan
+asymmetry_score,True,"float [0,1] preferred",all,0 for symmetric controls; higher for skewed depth distribution,target/stratification only,profile_metric,asymmetric corrosion must have nonzero expected range
+aspect_ratio,True,float,all,L_m / W_m after rotation-aware major/minor ordering,target/stratification only,shape_metric,crack-like defects require high aspect_ratio coverage
+rotation_angle,True,float radians or degrees with unit suffix,"elongated, boxy, flat-bottom, multi-component where applicable",finite angle; may be 0.0 for axis-aligned controls,target/metric only,pose,required for crack-like and rotated polygon/primitive routes
+rbc_compatible,True,boolean,all,true only for rbc_like_smooth_pit,target/route gating label,route_boundary,prevents non-RBC-like cases from being forced into six-param RBC
+representation_target,True,categorical string,all,six_param_rbc|profile_basis|depth_grid|component_set|polygon_or_contour,target/route selection label,output_contract,model output family is chosen from this field
+forward_consistency_required,True,boolean,all,true for pilot generation and model gate rows,gate metadata,physics_gate,predicted profile -> forward surrogate -> Bx/By/Bz residual in later stages

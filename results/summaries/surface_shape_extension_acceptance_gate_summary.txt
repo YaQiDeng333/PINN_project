@@ -1,0 +1,15 @@
+surface shape-extension acceptance gate summary
+stage: 25.1
+
+gate_count: 21
+baseline_audit_gate_count: 6
+dataset_gate_count: 5
+generation_gate_count: 6
+model_gate_count: 4
+
+generation_gate: closed body, Boolean subtract, mesh/solver, finite Bx/By/Bz, delta_b check, profile/depth labels valid.
+dataset_gate: shape/split/topology coverage, no label leakage, explicit registry/manifest read.
+baseline_audit_gate: audit 20.85 failures before any training.
+model_gate: beat current baseline on non-RBC-like, keep RBC-like control stable, forward residual non-worsening, no baseline transition without formal benchmark.
+scope_boundary: these are acceptance definitions only; no COMSOL, no training, no CURRENT_BASELINE update.
+acceptance_gate_matrix: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_shape_extension_acceptance_gate_matrix.csv

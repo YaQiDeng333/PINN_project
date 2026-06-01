@@ -1,0 +1,18 @@
+surface shape-extension model route summary
+stage: 25.1
+
+stage_policy:
+- 25.2: COMSOL pilot generation only; no training.
+- 25.3: audit current 20.85 baseline on the shape-extension pilot.
+- 25.4: consider model training only after pilot and audit gates pass.
+
+routes:
+- R0_current_baseline_audit: stage=25.3; target=all shape-extension pilot families; output=existing six_param_rbc prediction replayed as diagnostic
+- R1_six_param_rbc_control: stage=25.3_or_later; target=rbc_like_smooth_pit only; output=L_m,W_m,D_m,wLD,wWD,wLW
+- R2_profile_basis_decoder: stage=25.4_candidate; target=asymmetric_corrosion; irregular_non_rbc_corrosion; output=profile_basis or low-dimensional depth/profile coefficients
+- R3_component_set_decoder: stage=25.4_candidate; target=multi_pit_two_component_surface_defect; output=K component set with component_params_json-compatible fields
+- R4_geometry_aware_contour_decoder: stage=25.4_candidate; target=flat_bottom_pit; sharp_wall_boxy_corrosion; elongated_crack_like_surface_defect; output=polygon_or_contour or rotated primitives
+- R5_forward_consistency_refinement: stage=25.4_or_later_after_representation_selection; target=all representation-compatible shape families; output=predicted profile -> forward surrogate -> Bx/By/Bz residual
+
+baseline_policy: CURRENT_BASELINE remains 20.85 unless a later formal benchmark explicitly passes and a baseline-transition prompt approves it.
+model_route_matrix: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_shape_extension_model_route_matrix.csv

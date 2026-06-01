@@ -1,0 +1,10 @@
+surface shape-extension route decision summary
+stage: 25.1
+
+required_output_count: 14
+missing_output_count: 0
+decision: A_execute_surface_shape_extension_COMSOL_pilot_generation
+unique_next_step: A. execute surface shape-extension COMSOL pilot generation
+condition: taxonomy, schema, COMSOL feasibility, model route, and acceptance gates must pass read-only review before 25.2.
+scope_boundary: 25.1 did not run COMSOL, train, modify data/NPZ, or update CURRENT_BASELINE.md.
+decision_matrix: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_shape_extension_decision_matrix.csv

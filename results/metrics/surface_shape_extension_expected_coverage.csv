@@ -1,0 +1,21 @@
+coverage_scope,group_field,group_value,train_min,val_min,test_min,planned_train,planned_val,planned_test,planned_total,pass,notes
+shape_family,shape_type,rbc_like_smooth_pit,1,1,1,14,5,5,24,True,topology=single_component; target=six_param_rbc
+shape_family,shape_type,flat_bottom_pit,1,1,1,10,3,3,16,True,topology=single_component; target=polygon_or_contour
+shape_family,shape_type,sharp_wall_boxy_corrosion,1,1,1,10,3,3,16,True,topology=single_component; target=polygon_or_contour
+shape_family,shape_type,asymmetric_corrosion,1,1,1,10,3,3,16,True,topology=single_component; target=profile_basis
+shape_family,shape_type,elongated_crack_like_surface_defect,1,1,1,10,3,3,16,True,topology=elongated; target=polygon_or_contour
+shape_family,shape_type,multi_pit_two_component_surface_defect,1,1,1,9,3,4,16,True,topology=multi_component; target=component_set
+shape_family,shape_type,irregular_non_rbc_corrosion,1,1,1,9,4,3,16,True,topology=irregular; target=depth_grid
+topology,topology_type,single_component,1,1,1,44,14,14,72,True,topology present in every split
+topology,topology_type,elongated,1,1,1,10,3,3,16,True,topology present in every split
+topology,topology_type,multi_component,1,1,1,9,3,4,16,True,topology present in every split
+topology,topology_type,irregular,1,1,1,9,4,3,16,True,topology present in every split
+stratification,depth_bin,shallow,1,1,1,balanced_within_each_shape_quota,balanced_within_each_shape_quota,balanced_within_each_shape_quota,covered_by_generation_grid,True,generation stage must instantiate bins inside each shape family without test-set tuning
+stratification,depth_bin,medium,1,1,1,balanced_within_each_shape_quota,balanced_within_each_shape_quota,balanced_within_each_shape_quota,covered_by_generation_grid,True,generation stage must instantiate bins inside each shape family without test-set tuning
+stratification,depth_bin,deep,1,1,1,balanced_within_each_shape_quota,balanced_within_each_shape_quota,balanced_within_each_shape_quota,covered_by_generation_grid,True,generation stage must instantiate bins inside each shape family without test-set tuning
+stratification,size_bin,small,1,1,1,balanced_within_each_shape_quota,balanced_within_each_shape_quota,balanced_within_each_shape_quota,covered_by_generation_grid,True,generation stage must instantiate bins inside each shape family without test-set tuning
+stratification,size_bin,medium,1,1,1,balanced_within_each_shape_quota,balanced_within_each_shape_quota,balanced_within_each_shape_quota,covered_by_generation_grid,True,generation stage must instantiate bins inside each shape family without test-set tuning
+stratification,size_bin,large,1,1,1,balanced_within_each_shape_quota,balanced_within_each_shape_quota,balanced_within_each_shape_quota,covered_by_generation_grid,True,generation stage must instantiate bins inside each shape family without test-set tuning
+stratification,aspect_bin,compact,1,1,1,balanced_within_each_shape_quota,balanced_within_each_shape_quota,balanced_within_each_shape_quota,covered_by_generation_grid,True,generation stage must instantiate bins inside each shape family without test-set tuning
+stratification,aspect_bin,elongated,1,1,1,balanced_within_each_shape_quota,balanced_within_each_shape_quota,balanced_within_each_shape_quota,covered_by_generation_grid,True,generation stage must instantiate bins inside each shape family without test-set tuning
+split_total,split,train/val/test,72,24,24,72,24,24,120,True,fixed 72/24/24 split; test remains final evaluation only

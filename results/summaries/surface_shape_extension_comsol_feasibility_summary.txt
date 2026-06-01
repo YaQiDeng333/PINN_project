@@ -1,0 +1,20 @@
+surface shape-extension COMSOL feasibility summary
+stage: 25.1
+
+scope: feasibility plan only; no COMSOL execution.
+no_defect_reference_policy: reuse no-defect reference is allowed only when source/material/domain/sensor setup remains identical and manifest records it explicitly.
+material_domain_solver_policy: 20.70 dynamic material/domain/solver fix applies as a required safety pattern for imported or Boolean-subtracted defect solids.
+shape_count: 7
+high_risk_shapes: sharp_wall_boxy_corrosion, asymmetric_corrosion, elongated_crack_like_surface_defect, multi_pit_two_component_surface_defect, irregular_non_rbc_corrosion
+
+preferred_routes:
+- rbc_like_smooth_pit: imported_watertight_mesh_solid
+- flat_bottom_pit: COMSOL-native geometry
+- sharp_wall_boxy_corrosion: COMSOL-native geometry
+- asymmetric_corrosion: height_depth_map_solid
+- elongated_crack_like_surface_defect: COMSOL-native geometry
+- multi_pit_two_component_surface_defect: multi-component Boolean subtract
+- irregular_non_rbc_corrosion: imported_watertight_mesh_solid
+
+pilot_boundary: 25.2 may generate pilot only after taxonomy/schema/feasibility gates pass; 25.1 generates no data.
+feasibility_matrix: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_shape_extension_comsol_feasibility_matrix.csv

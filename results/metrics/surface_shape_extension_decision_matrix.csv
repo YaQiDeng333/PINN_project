@@ -1,0 +1,7 @@
+question,answer,decision,evidence,next_action
+Are required 25.1 plan outputs present?,yes,25.1 plan package is complete,missing_count=0,continue to route gate
+Does taxonomy cover non-RBC-like surface shapes?,yes,taxonomy gate passes,"seven shape families include flat-bottom, sharp-wall, asymmetric, elongated, multi-pit, irregular, and RBC-like control",use taxonomy for 25.2 generation plan
+Does schema avoid forcing non-RBC into six-param RBC?,yes,schema gate passes,"representation_target includes six_param_rbc, profile_basis, depth_grid, component_set, polygon_or_contour",preserve representation_target in pilot manifest
+Is COMSOL feasibility defined without running COMSOL?,yes,feasibility gate passes for planning,"matrix records generation route, Boolean risk, mesh risk, solver risk, label extraction, no-defect reuse, and 20.70 fix applicability",only 25.2 may execute COMSOL pilot generation
+Is model route staged before training?,yes,model route gate passes,"25.2 pilot generation, 25.3 current baseline audit, 25.4 model training consideration",do not train in 25.1 or 25.2
+What is the unique next route?,A_execute_surface_shape_extension_COMSOL_pilot_generation,A_execute_surface_shape_extension_COMSOL_pilot_generation,taxonomy/schema/dataset/COMSOL feasibility/model route/acceptance gates are plan-defined,open 25.2 COMSOL pilot generation only after review passes

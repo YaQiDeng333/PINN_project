@@ -1,0 +1,22 @@
+gate_group,gate_id,criterion,required_evidence,pass_rule,blocks_next_route,notes
+generation,G1_closed_body,closed defect body,COMSOL inventory row or mesh validation row with closed_body_success=true,every generated defect body is closed before Boolean subtract,True,not evaluated in 25.1; required for 25.2
+generation,G2_boolean_subtract,Boolean subtract,boolean_subtract_success=true and nonempty steel_notched domain,no empty-domain or sliver-domain blocker,True,apply 20.70 dynamic material/domain pattern
+generation,G3_mesh_solver,mesh and solver complete,mesh_build_success=true and stationary solve complete,solver produces finite field export for each accepted sample,True,COMSOL is not run in 25.1
+generation,G4_field_finite,Bx/By/Bz finite,"all exported Bx, By, Bz arrays finite over scan grid",no NaN/Inf and axis order explicitly recorded,True,"input shape should remain compatible with (N,3,3,201) pilot unless route changes explicitly"
+generation,G5_delta_b,delta_b check,delta_b equals b_defect - b_no_defect within tolerance,max absolute reconstruction error is recorded and acceptable,True,no-defect reference reuse must be explicit
+generation,G6_profile_labels,profile/depth labels valid,"finite depth_grid_m, nonempty projected_mask_2d, valid profile_descriptor",all accepted samples pass label validation,True,non-RBC labels must keep their richer target representation
+dataset,D1_shape_coverage,shape coverage,dataset coverage CSV,all seven shape families appear in train/val/test and meet full coverage minima,True,N=84 cannot pass the full coverage rule
+dataset,D2_split_coverage,split coverage,manifest split counts and stratification table,train/val/test are fixed before training and test is final-only,True,default pilot split is 72/24/24
+dataset,D3_topology_coverage,topology coverage,topology_type counts by split,"single_component, multi_component, elongated, irregular are covered",True,topology errors become audit metrics
+dataset,D4_no_label_leakage,no label leakage,loader/input audit,target labels do not enter model inputs unless route explicitly permits conditioning,True,shape_type and component labels default to target/audit metadata
+dataset,D5_registry_manifest,registry/manifest explicit read,COMSOL_DATA_REGISTRY and manifest path are explicitly read,no latest/newest auto-discovery,True,inherits current project data safety rule
+baseline_audit,B1_current_20_85_failure_modes,current 20.85 failure modes,R0 audit summary,documents non-RBC-like failures before any training route,True,25.3 before 25.4 training
+baseline_audit,B2_profile_rmse,profile RMSE,profile/depth metric table,profile RMSE remains primary over Dice-only gains,True,compares by shape family
+baseline_audit,B3_component_recall,component recall,multi-pit component audit,component recall and merge/split errors are measured,True,required for component_set route
+baseline_audit,B4_edge_corner_metrics,edge/corner metrics,flat/sharp-wall/elongated audit metrics,"edge and corner errors are reported, not hidden by mask Dice",True,required for contour route
+baseline_audit,B5_multi_pit_merge_rate,multi-pit merge rate,connected component prediction audit,merged-component cases are counted,True,separate from component recall
+baseline_audit,B6_crack_like_miss_rate,crack-like miss rate,elongated footprint audit,missed narrow defects and aspect collapse are counted,True,required for elongated shape route
+model,M1_non_rbc_improvement,must beat current baseline on non-RBC-like,formal benchmark by shape family,non-RBC profile/depth metrics improve over R0,True,"no benchmark, no baseline transition"
+model,M2_rbc_control_not_collapse,must not collapse RBC-like,RBC-like control metrics,RBC-like profile metrics do not materially regress,True,protects current baseline scope
+model,M3_forward_residual_non_worsening,forward consistency residual must not worsen,validated forward/surrogate residual table,forward residual is not worse on validation/test audits,True,"R5 is a later gate, not a 25.1 implementation"
+model,M4_no_baseline_transition_without_benchmark,no baseline transition unless formal benchmark passes,formal route decision and approved baseline-transition prompt,CURRENT_BASELINE remains unchanged until later explicit approval,True,25.1 never updates CURRENT_BASELINE.md

@@ -1,0 +1,20 @@
+review_surface_shape_extension_dataset_plan
+stage: 25.1
+
+review_agent: independent read-only subagent 019e83c7-2708-77c3-921c-acedbb9acd1b
+status: PASS
+must_fix_findings: none
+
+checked_scope:
+- 7 plan scripts exist and are limited to plan summary/csv generation.
+- No COMSOL execution, no training, no data/NPZ/checkpoint/preview/notes writing logic was found.
+- Generated outputs cover taxonomy, label schema, pilot N=120, split 72/24/24, RBC-like control count 24, six non-RBC-like families with 16 samples each, COMSOL feasibility, model routes, acceptance gates, and unique next route A.
+- Label schema avoids forcing non-RBC-like defects into RBC six-parameter representation.
+- Multi-pit labels include component_count and component_params_json.
+- Crack-like labels include aspect_ratio and rotation_angle.
+- Irregular corrosion retains depth_grid_m and profile_descriptor targets.
+- CURRENT_BASELINE.md, data/, NPZ, checkpoints/, results/previews/, notes/, and scripts/visualize_current_baseline.py have no tracked modifications.
+
+residual_risk:
+- Review was read-only and did not rerun scripts.
+- results/summaries and results/metrics are ignored by default, so allowed outputs must be staged with explicit git add -f paths.

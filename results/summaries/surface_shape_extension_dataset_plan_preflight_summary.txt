@@ -1,0 +1,35 @@
+surface shape-extension dataset plan preflight summary
+stage: 25.1
+
+scope: read-only preflight for taxonomy/schema/dataset planning; no COMSOL, no training, no data/NPZ generation, no CURRENT_BASELINE update.
+
+required_context_files:
+- CURRENT_BASELINE.md: exists=true
+- COMSOL_DATA_REGISTRY.md: exists=true
+- NLS_FULL_COMPATIBLE_FEATURE_SCHEMA.md: exists=true
+- results\summaries\surface_piao_nls_branch_closeout_summary.txt: exists=true
+- results\summaries\surface_shape_extension_forward_consistency_plan_summary.txt: exists=true
+- results\metrics\surface_piao_nls_branch_closeout_matrix.csv: exists=true
+- results\metrics\surface_shape_extension_forward_consistency_plan.csv: exists=true
+
+reference_metric_files:
+- results\metrics\true_3d_rbc_formal_benchmark_20_77_metrics.csv: exists=true
+- results\metrics\true_3d_rbc_v3_240_feature_fusion_metrics.csv: exists=true
+- results\metrics\true_3d_rbc_v3_240_profile_primary_candidate_screen_metrics.csv: exists=true
+- results\metrics\surface_rbc_nls_lite_feature_decision_matrix.csv: exists=true
+- results\metrics\surface_rbc_nls_full_compatible_decision_matrix.csv: exists=true
+- results\metrics\surface_rbc_piao_style_feature_baseline_metrics.csv: exists=true
+- results\metrics\surface_rbc_nls_feature_fusion_metrics.csv: exists=true
+
+existing_true_3d_design_script_count: 10
+existing_surface_rbc_script_count: 13
+forbidden_artifact_roots_present_but_not_touched:
+- data: exists=true; action=do_not_stage_or_modify
+- checkpoints: exists=true; action=do_not_stage_or_modify
+- notes: exists=true; action=do_not_stage_or_modify
+- results\previews: exists=true; action=do_not_stage_or_modify
+
+anchor_baseline: 20.85 / 20.86 CURRENT_BASELINE remains true 3D RBC-style profile-depth baseline.
+anchor_dataset_id: comsol_true_3d_rbc_imported_watertight_pilot_v3_240
+current_gap: current six-parameter RBC representation cannot claim arbitrary surface-defect coverage.
+preflight_decision: proceed with plan-only taxonomy, schema, split coverage, feasibility, model route, and gates.

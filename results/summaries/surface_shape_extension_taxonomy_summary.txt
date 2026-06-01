@@ -1,0 +1,20 @@
+surface shape-extension taxonomy summary
+stage: 25.1
+
+shape_family_count: 7
+rbc_compatible_count: 1
+non_rbc_like_count: 6
+rbc_anchor: rbc_like_smooth_pit remains a control / anchor family only.
+non_rbc_boundary: non-RBC-like surface defects must not be forced into L_m/W_m/D_m/wLD/wWD/wLW.
+required_new_targets: profile_basis, depth_grid, component_set, polygon_or_contour.
+
+shape_types:
+- rbc_like_smooth_pit: topology=single_component; target=six_param_rbc; rbc_valid=true
+- flat_bottom_pit: topology=single_component; target=polygon_or_contour; rbc_valid=false
+- sharp_wall_boxy_corrosion: topology=single_component; target=polygon_or_contour; rbc_valid=false
+- asymmetric_corrosion: topology=single_component; target=profile_basis; rbc_valid=false
+- elongated_crack_like_surface_defect: topology=elongated; target=polygon_or_contour; rbc_valid=false
+- multi_pit_two_component_surface_defect: topology=multi_component; target=component_set; rbc_valid=false
+- irregular_non_rbc_corrosion: topology=irregular; target=depth_grid; rbc_valid=false
+
+taxonomy_matrix: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_shape_extension_taxonomy_matrix.csv

@@ -1,5 +1,18 @@
 # 实验工作日志
 
+## 2026-06-01 Stage 25.1 surface shape-extension dataset plan
+
+- Scope: completed the plan-only surface / near-surface shape-extension dataset design. No COMSOL, no training, no data/NPZ generation or modification, no checkpoint/preview artifact, and no `CURRENT_BASELINE.md` update.
+- Preflight: fixed the anchor to the current 20.85/20.86 true 3D RBC-style profile-depth baseline on `dataset_id=comsol_true_3d_rbc_imported_watertight_pilot_v3_240`; 25.0 Piao-NLS closeout remains diagnostic/QC/classical-comparator only.
+- Taxonomy: defined seven families: `rbc_like_smooth_pit`, `flat_bottom_pit`, `sharp_wall_boxy_corrosion`, `asymmetric_corrosion`, `elongated_crack_like_surface_defect`, `multi_pit_two_component_surface_defect`, and `irregular_non_rbc_corrosion`.
+- Label schema: kept RBC-like controls on `six_param_rbc`, but non-RBC-like cases use `profile_basis`, `depth_grid`, `component_set`, or `polygon_or_contour`. Multi-pit requires `component_count` and `component_params_json`; crack-like requires `aspect_ratio` and `rotation_angle`; irregular corrosion keeps `depth_grid_m` and `profile_descriptor`.
+- Dataset plan: target pilot `N=120`, split `72/24/24`, with RBC-like control `24` and each non-RBC-like family `16`. `N=84` is marked reduced feasibility only because it cannot satisfy full coverage; minimum full-coverage fallback is `N=96`.
+- COMSOL feasibility: planned per-shape generation routes across COMSOL-native geometry, imported watertight mesh, height/depth-map solid, stacked layer control, and multi-component Boolean subtract. The 20.70 dynamic material/domain/solver fix remains a required safety pattern for imported or Boolean-subtracted defect solids.
+- Model route: fixed the later sequence as 25.2 pilot generation only, 25.3 audit current 20.85 baseline on the pilot, and 25.4 consider training. R0 audit comes before R1/R2/R3/R4/R5 model routes.
+- Acceptance gates: generation, dataset, baseline audit, and model gates now require closed body, Boolean subtract, mesh/solver, finite Bx/By/Bz, delta_b check, label validity, split/topology coverage, no label leakage, component/edge/crack metrics, non-RBC improvement, RBC control stability, and forward residual non-worsening.
+- Review: independent read-only review passed with no must-fix. It confirmed no forbidden tracked modifications and noted that allowed ignored result files must be staged with explicit `git add -f`.
+- Route decision: unique next step is `A_execute_surface_shape_extension_COMSOL_pilot_generation`, after review, still without training or baseline transition.
+
 ## 2026-06-01 Stage 25.0 surface Piao-NLS diagnostic branch closeout
 
 - Scope: closed the 24.0A / 24.0B / 24.1 / 24.2 surface Piao-NLS branch as a diagnostic/QC/classical-comparator route. No COMSOL, no training, no data/NPZ generation or modification, and no `CURRENT_BASELINE.md` update.
