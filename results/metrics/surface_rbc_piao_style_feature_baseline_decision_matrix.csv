@@ -1,0 +1,10 @@
+question,answer,evidence,decision
+Can NLS-lite plus RBF/classical baseline approach 20.85?,True,total_delta=-0.023968; profile_delta=0.000057444; dice_delta=0.015261,enter_24_2_feature_fusion_candidate
+Does it have L/W/D advantage?,True,improved_LWD_vs_20.85=1/3; improved_LWD_vs_20.81=1/3; current_LWD_mm=1.913667/1.991751/0.967491,enter_24_2_feature_fusion_candidate
+Does it add supplementary value on w/profile metrics?,True,w_improved_vs_20.85=4/4; w_improved_vs_20.81=3/4; profile_rmse=0.000445182; er_like=0.431187,enter_24_2_feature_fusion_candidate
+Should it enter 24.2 NLS-feature fusion?,True,selected_family=LS-SVM-like-RBF; close_to_20.85=True; supplementary_value=True,enter_24_2_feature_fusion_candidate
+Is it suitable for real experiment preprocessing/QC?,diagnostic_qc_only,finite_fraction=1.000000; fit_success=1.000000; fallback=0.000000,enter_24_2_feature_fusion_candidate
+Are NLS-lite fit failures acceptable?,True,fit_success_rate=1.000000; fallback_rate=0.000000; threshold fallback<=0.05,enter_24_2_feature_fusion_candidate
+Which features look valuable for L/W/D or curvature?,diagnostic_correlation_only,L=nlslite_Bx_yneg_half_peak_width_m|rho=0.895; nlslite_Bx_y0_half_peak_width_m|rho=0.893; nlslite_Bx_yneg_fit_width_m|rho=0.889; W=nlslite_Bx_yneg_fit_width_m|rho=0.706; nlslite_Bx_yneg_half_peak_width_m|rho=0.704; nlslite_Bx_ypos_fit_width_m|rho=0.696; D=nlslite_Bx_yneg_abs_peak|rho=-0.708; nlslite_Bx_yneg_negative_peak_abs|rho=-0.708; nlslite_Bx_ypos_abs_peak|rho=-0.703; wLD=nlslite_Bx_ypos_energy|rho=-0.381; nlslite_Bx_y0_energy|rho=-0.367; wWD=nlslite_Bx_y0_energy|rho=-0.361; nlslite_Bx_ypos_energy|rho=-0.355; wLW=nlslite_Bx_ypos_energy|rho=-0.284; nlslite_Bx_y0_energy|rho=-0.281,enter_24_2_feature_fusion_candidate
+Was Markdown sync skipped?,true,docs_sync_skipped_due_to_unrelated_24_0B_changes=true; preexisting dirty Markdown was left unstaged,enter_24_2_feature_fusion_candidate
+Can it replace CURRENT_BASELINE?,False,No baseline update; feature baseline remains a comparator/fusion input only.,enter_24_2_feature_fusion_candidate

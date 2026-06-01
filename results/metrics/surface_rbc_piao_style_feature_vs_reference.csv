@@ -1,0 +1,37 @@
+metric,reference_label,current_label,reference_value,current_value,delta,improved,notes
+total_normalized_mae,20.85_formal_rerun_20.77_protocol,lssvm_rbf_alpha_0p1_gamma_0p00171821,0.6780143536818333,0.6540464762693796,-0.023967877412453653,True,test split final only; lower is better except IoU/Dice
+L_mae_mm,20.85_formal_rerun_20.77_protocol,lssvm_rbf_alpha_0p1_gamma_0p00171821,1.8918915996566796,1.9136665956332133,0.02177499597653365,False,test split final only; lower is better except IoU/Dice
+W_mae_mm,20.85_formal_rerun_20.77_protocol,lssvm_rbf_alpha_0p1_gamma_0p00171821,2.1857599088778863,1.9917513088156016,-0.1940086000622847,True,test split final only; lower is better except IoU/Dice
+D_mae_mm,20.85_formal_rerun_20.77_protocol,lssvm_rbf_alpha_0p1_gamma_0p00171821,0.8002313476246901,0.9674908621953084,0.16725951457061838,False,test split final only; lower is better except IoU/Dice
+wMAE_auxiliary,20.85_formal_rerun_20.77_protocol,lssvm_rbf_alpha_0p1_gamma_0p00171821,0.20107580616306037,0.18572381000297192,-0.01535199616008845,True,test split final only; lower is better except IoU/Dice
+wLD_abs_error,20.85_formal_rerun_20.77_protocol,lssvm_rbf_alpha_0p1_gamma_0p00171821,0.2094394748027508,0.1975561517935533,-0.011883323009197505,True,test split final only; lower is better except IoU/Dice
+wWD_abs_error,20.85_formal_rerun_20.77_protocol,lssvm_rbf_alpha_0p1_gamma_0p00171821,0.20446911683449379,0.1913395753273597,-0.01312954150713408,True,test split final only; lower is better except IoU/Dice
+wLW_abs_error,20.85_formal_rerun_20.77_protocol,lssvm_rbf_alpha_0p1_gamma_0p00171821,0.18931882809369993,0.16827570016567522,-0.021043127928024707,True,test split final only; lower is better except IoU/Dice
+profile_depth_rmse_m,20.85_formal_rerun_20.77_protocol,lssvm_rbf_alpha_0p1_gamma_0p00171821,0.0003877372636895579,0.00044518171694690886,5.744445325735095e-05,False,test split final only; lower is better except IoU/Dice
+er_like_profile_error,20.85_formal_rerun_20.77_protocol,lssvm_rbf_alpha_0p1_gamma_0p00171821,0.3405436946031375,0.43118681281040877,0.09064311820727128,False,test split final only; lower is better except IoU/Dice
+projected_mask_iou,20.85_formal_rerun_20.77_protocol,lssvm_rbf_alpha_0p1_gamma_0p00171821,0.7506502455785019,0.769352875827035,0.018702630248533136,True,test split final only; higher is better
+projected_mask_dice,20.85_formal_rerun_20.77_protocol,lssvm_rbf_alpha_0p1_gamma_0p00171821,0.8477271366767738,0.8629883531612551,0.01526121648448131,True,test split final only; higher is better
+total_normalized_mae,20.77_original_candidate,lssvm_rbf_alpha_0p1_gamma_0p00171821,0.6780143536818333,0.6540464762693796,-0.023967877412453653,True,test split final only; lower is better except IoU/Dice
+L_mae_mm,20.77_original_candidate,lssvm_rbf_alpha_0p1_gamma_0p00171821,1.8918915996566796,1.9136665956332133,0.02177499597653365,False,test split final only; lower is better except IoU/Dice
+W_mae_mm,20.77_original_candidate,lssvm_rbf_alpha_0p1_gamma_0p00171821,2.1857599088778863,1.9917513088156016,-0.1940086000622847,True,test split final only; lower is better except IoU/Dice
+D_mae_mm,20.77_original_candidate,lssvm_rbf_alpha_0p1_gamma_0p00171821,0.8002313476246901,0.9674908621953084,0.16725951457061838,False,test split final only; lower is better except IoU/Dice
+wMAE_auxiliary,20.77_original_candidate,lssvm_rbf_alpha_0p1_gamma_0p00171821,0.20107580616306037,0.18572381000297192,-0.01535199616008845,True,test split final only; lower is better except IoU/Dice
+wLD_abs_error,20.77_original_candidate,lssvm_rbf_alpha_0p1_gamma_0p00171821,0.2094394748027508,0.1975561517935533,-0.011883323009197505,True,test split final only; lower is better except IoU/Dice
+wWD_abs_error,20.77_original_candidate,lssvm_rbf_alpha_0p1_gamma_0p00171821,0.20446911683449379,0.1913395753273597,-0.01312954150713408,True,test split final only; lower is better except IoU/Dice
+wLW_abs_error,20.77_original_candidate,lssvm_rbf_alpha_0p1_gamma_0p00171821,0.18931882809369993,0.16827570016567522,-0.021043127928024707,True,test split final only; lower is better except IoU/Dice
+profile_depth_rmse_m,20.77_original_candidate,lssvm_rbf_alpha_0p1_gamma_0p00171821,0.0003877372636895579,0.00044518171694690886,5.744445325735095e-05,False,test split final only; lower is better except IoU/Dice
+er_like_profile_error,20.77_original_candidate,lssvm_rbf_alpha_0p1_gamma_0p00171821,nan,0.43118681281040877,nan,,test split final only; lower is better except IoU/Dice
+projected_mask_iou,20.77_original_candidate,lssvm_rbf_alpha_0p1_gamma_0p00171821,0.7506502455785019,0.769352875827035,0.018702630248533136,True,test split final only; higher is better
+projected_mask_dice,20.77_original_candidate,lssvm_rbf_alpha_0p1_gamma_0p00171821,0.8477271366767738,0.8629883531612551,0.01526121648448131,True,test split final only; higher is better
+total_normalized_mae,20.81_feature_fusion_visual_comparator,lssvm_rbf_alpha_0p1_gamma_0p00171821,0.667888397971789,0.6540464762693796,-0.013841921702409388,True,test split final only; lower is better except IoU/Dice
+L_mae_mm,20.81_feature_fusion_visual_comparator,lssvm_rbf_alpha_0p1_gamma_0p00171821,2.0303866893817215,1.9136665956332133,-0.11672009374850822,True,test split final only; lower is better except IoU/Dice
+W_mae_mm,20.81_feature_fusion_visual_comparator,lssvm_rbf_alpha_0p1_gamma_0p00171821,1.8066299970333393,1.9917513088156016,0.18512131178226232,False,test split final only; lower is better except IoU/Dice
+D_mae_mm,20.81_feature_fusion_visual_comparator,lssvm_rbf_alpha_0p1_gamma_0p00171821,0.9566183099761988,0.9674908621953084,0.010872552219109655,False,test split final only; lower is better except IoU/Dice
+wMAE_auxiliary,20.81_feature_fusion_visual_comparator,lssvm_rbf_alpha_0p1_gamma_0p00171821,0.19448333899848735,0.18572381000297192,-0.008759528995515437,True,test split final only; lower is better except IoU/Dice
+wLD_abs_error,20.81_feature_fusion_visual_comparator,lssvm_rbf_alpha_0p1_gamma_0p00171821,0.21707869340211916,0.1975561517935533,-0.01952254160856587,True,test split final only; lower is better except IoU/Dice
+wWD_abs_error,20.81_feature_fusion_visual_comparator,lssvm_rbf_alpha_0p1_gamma_0p00171821,0.20230379012914804,0.1913395753273597,-0.01096421480178833,True,test split final only; lower is better except IoU/Dice
+wLW_abs_error,20.81_feature_fusion_visual_comparator,lssvm_rbf_alpha_0p1_gamma_0p00171821,0.1640675358283214,0.16827570016567522,0.004208164337353826,False,test split final only; lower is better except IoU/Dice
+profile_depth_rmse_m,20.81_feature_fusion_visual_comparator,lssvm_rbf_alpha_0p1_gamma_0p00171821,0.00044529733223988354,0.00044518171694690886,-1.1561529297468695e-07,True,test split final only; lower is better except IoU/Dice
+er_like_profile_error,20.81_feature_fusion_visual_comparator,lssvm_rbf_alpha_0p1_gamma_0p00171821,nan,0.43118681281040877,nan,,test split final only; lower is better except IoU/Dice
+projected_mask_iou,20.81_feature_fusion_visual_comparator,lssvm_rbf_alpha_0p1_gamma_0p00171821,0.77454093657963,0.769352875827035,-0.005188060752594925,False,test split final only; higher is better
+projected_mask_dice,20.81_feature_fusion_visual_comparator,lssvm_rbf_alpha_0p1_gamma_0p00171821,0.8665725224434271,0.8629883531612551,-0.0035841692821719784,False,test split final only; higher is better

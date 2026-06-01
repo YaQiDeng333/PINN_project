@@ -1,0 +1,63 @@
+surface_rbc_piao_style_feature_baseline_preflight
+stage: 24.1
+created_at: 2026-06-01
+dataset_id: comsol_true_3d_rbc_imported_watertight_pilot_v3_240
+
+status: PASS
+
+registry_and_manifest:
+- loaded_through_COMSOL_DATA_REGISTRY_and_manifest: true
+- latest_newest_npz_scan: false
+- source_manifest: C:\Users\19166\Desktop\PINN_project\results\manifests\comsol_true_3d_rbc_imported_watertight_pilot_v3_240.manifest.json
+- source_npz: C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\prepared\experimental\true_3d_rbc_pilot\comsol_true_3d_rbc_imported_watertight_pilot_v3_240.npz
+
+dataset_checks:
+- delta_b_shape: (240, 3, 3, 201)
+- expected_delta_b_shape: (240, 3, 3, 201)
+- axis_order: [Bx, By, Bz]
+- scan_line_y_count: 3
+- scan_line_y_m: [-0.0010000000474974513, 0.0, 0.0010000000474974513]
+- split_counts: train=162, val=39, test=39
+
+feature_artifact_checks:
+- nls_lite_manifest: C:\Users\19166\Desktop\PINN_project\results\manifests\surface_rbc_nls_lite_feature_manifest.json
+- nls_lite_features_csv: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_rbc_nls_lite_features.csv
+- nls_lite_quality_csv: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_rbc_nls_lite_feature_quality.csv
+- sample_count: 240
+- feature_count: 291
+- feature_prefix: nlslite_
+- non_feature_columns: [sample_id, split]
+- target_labels_in_feature_csv: false
+- exact_piao_nls: false
+- piao_nls_lite: true
+- fit_success_rate_24_0A: 1.0
+- fallback_rate_24_0A: 0.0
+
+reference_metric_checks:
+- 20.85_formal_rerun_20.77_protocol: total=0.6780143536818333, L/W/D_mm=1.8918915996566796/2.1857599088778863/0.8002313476246901, profile_rmse_m=0.0003877372636895579, IoU/Dice=0.7506502455785019/0.8477271366767738
+- 20.77_original_candidate: total=0.6780143536818333, L/W/D_mm=1.8918915996566796/2.1857599088778863/0.8002313476246901, profile_rmse_m=0.0003877372636895579, IoU/Dice=0.7506502455785019/0.8477271366767738
+- 20.81_feature_fusion_visual_comparator: total=0.667888397971789, L/W/D_mm=2.0303866893817215/1.8066299970333393/0.9566183099761988, profile_rmse_m=0.00044529733223988354, IoU/Dice=0.77454093657963/0.8665725224434271
+
+24_0B_full_compatible_reference:
+- committed: true
+- commit: 31ddbb7 Add Piao NLS full-compatible feature framework
+- tracked_files_present: true
+- usage_in_24_1: future full-mode reference only; not model input
+
+leakage_boundary:
+- model_input_policy: only nlslite_* numeric features
+- sample_id_use: join/reporting only
+- split_use: split selection only
+- labels_use: targets and diagnostic metrics only, not feature input
+- profile_mask_metadata_use: metrics/group audit only, not feature input
+
+forbidden_artifact_checks:
+- COMSOL_run: false
+- training_in_preflight: false
+- data_or_NPZ_modified: false
+- CURRENT_BASELINE_update: false
+- forbidden_artifacts_staged: false
+
+dirty_worktree_boundary:
+- preexisting_modified_docs: [EXPERIMENT_LOG.md, NEXT_STEP.md, PINN优化路线.md]
+- docs_sync_decision: skipped_due_to_unrelated_24_0B_changes

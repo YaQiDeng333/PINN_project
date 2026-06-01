@@ -1,0 +1,37 @@
+surface_rbc_piao_style_feature_baseline_summary
+stage: 24.1
+
+scope: Piao-style NLS-lite feature-to-geometry comparator; not exact Piao 18-feature reproduction.
+dataset_id: comsol_true_3d_rbc_imported_watertight_pilot_v3_240
+feature_manifest: C:\Users\19166\Desktop\PINN_project\results\manifests\surface_rbc_nls_lite_feature_manifest.json
+feature_csv: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_rbc_nls_lite_features.csv
+quality_csv: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_rbc_nls_lite_feature_quality.csv
+feature_count: 291
+formal_model_input: nlslite_* columns only
+sample_id_use: join/reporting only
+split_use: split selection only
+target_labels_in_feature_matrix: false
+COMSOL_run: false
+data_or_NPZ_modified: false
+CURRENT_BASELINE_update: false
+checkpoint_written: false
+selection_protocol: train-only feature/target scaling, validation-only model selection, test final only
+candidate_count: 56
+selected_model: lssvm_rbf_alpha_0p1_gamma_0p00171821
+selected_family: LS-SVM-like-RBF
+selected_val_normalized_mae: 0.708856
+selected_train_normalized_mae: 0.162437
+selected_test_normalized_mae: 0.654046
+mean_test_normalized_mae: 0.912677
+selected_test_dimension_mae_norm: 0.462100
+selected_test_curvature_mae_norm: 0.845993
+selected_test_LWD_mae_mm: L=1.913667, W=1.991751, D=0.967491
+selected_test_w_errors: wLD=0.197556, wWD=0.191340, wLW=0.168276
+selected_test_wMAE_auxiliary: 0.185724
+selected_test_projected_mask_iou_dice: 0.769353, 0.862988
+selected_test_profile_depth_rmse_m: 0.000445182
+selected_test_volume_proxy_rel_error: 0.652869
+selected_test_clip_applied_fraction: 0.051282
+nls_lite_fit_success_rate_24_0A: 1.000000
+nls_lite_fallback_rate_24_0A: 0.000000
+docs_sync_skipped_due_to_unrelated_24_0B_changes: true

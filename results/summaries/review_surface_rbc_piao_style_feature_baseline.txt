@@ -1,0 +1,33 @@
+review_surface_rbc_piao_style_feature_baseline
+stage: 24.1
+review_agent: Popper
+mode: independent read-only review
+
+round_1: FAIL
+- must_fix: docs sync boundary was inconsistent in scripts/results; some outputs claimed Markdown sync completed even though unrelated 24.0B dirty Markdown required skip.
+- must_fix: Markdown files were dirty and must remain unstaged/uncommitted for this round.
+
+repair:
+- scripts/results changed to docs_sync_skipped_due_to_unrelated_24_0B_changes=true.
+- preexisting dirty Markdown files left unstaged and excluded from the allowed commit set.
+- training metrics constrained to test final only: train/val rows are written for all candidates; test rows are written only for fixed mean comparator and the validation-selected final model.
+
+round_2: PASS
+- cwd confirmed: C:\Users\19166\Desktop\PINN_project
+- staged files were empty during review.
+- feature CSV boundary passed: 291 nlslite_* features; non-feature columns only sample_id and split.
+- model input boundary passed: sample_id used only for join/reporting; split used only for split/validation; labels/profile/mask/metadata excluded from numeric feature input.
+- dataset loading boundary passed: load_dataset(V3_240_DATASET_ID) uses COMSOL_DATA_REGISTRY.md + manifest and does not use latest/newest NPZ discovery.
+- protocol boundary passed: train-only feature scaler, train-only target normalization, validation-only model selection, test final only.
+- forbidden artifacts passed: no data/NPZ, checkpoint, preview, notes, CURRENT_BASELINE.md, or scripts/visualize_current_baseline.py modification/staging detected.
+
+final_local_verification_after_repair:
+- py_compile: pass
+- test rows in surface_rbc_piao_style_feature_baseline_metrics.csv: 2
+- test row models: mean_train_target; lssvm_rbf_alpha_0p1_gamma_0p00171821
+- docs_sync_completed/docs_sync_required residual search: none
+- label_leakage_detected: false
+- exact_piao_nls: false
+- piao_nls_lite: true
+
+review_result: PASS
