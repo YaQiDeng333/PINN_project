@@ -1,0 +1,9 @@
+question,answer,decision,evidence,next_action
+Did pilot reach target N=120?,yes,full_pilot,n_samples=120,use full pilot for audit
+"If partial, did pilot reach fallback N=84?",yes,fallback_pass,n_samples=120; fallback=84,may audit as partial pilot
+Is each shape_type covered?,yes,shape_coverage_present,"{""asymmetric_corrosion"": 16, ""elongated_crack_like_surface_defect"": 16, ""flat_bottom_pit"": 16, ""irregular_corrosion_non_rbc"": 16, ""multi_pit_two_component_surface_defect"": 16, ""rbc_like_smooth_pit"": 24, ""sharp_wall_boxy_corrosion"": 16}",audit all families
+Are non-RBC-like labels usable?,yes,non_rbc_label_gate_pass,"{""component_set"": 16, ""depth_grid"": 16, ""polygon_or_contour"": 48, ""profile_basis"": 16, ""six_param_rbc"": 24}",preserve representation_target in 25.3 audit
+Are depth/profile/mask labels audit-ready?,yes,profile_mask_labels_ready,depth_grid_finite/projected_mask_nonempty/component/crack/irregular checks,use profile/depth as governing audit metrics
+Should 25.3 current baseline generalization audit start?,yes,enter_25_3_current_baseline_generalization_audit,validation_pass=True; fallback_pass=True; all_shapes_present=True; labels_usable=True,run frozen 20.85 baseline audit; no training
+Is failed-family top-up needed?,no,topup_not_needed,target_pass=True; full_shape_counts=True,no top-up before 25.3
+Are training and baseline update still forbidden?,yes,training_and_baseline_update_forbidden,manifest train_ready_candidate=false; baseline_ready=false; CURRENT_BASELINE unchanged,do not train until a later explicit 25.4 training gate

@@ -1,0 +1,20 @@
+surface shape-extension pilot validation summary
+stage: 25.2
+
+dataset_id: comsol_surface_shape_extension_pilot_v1
+status: pilot_generated
+validation_pass: true
+target_n_pass: true
+fallback_n_pass: true
+n_samples: 120
+split_counts: {'train': 72, 'val': 24, 'test': 24}
+shape_type_counts: {'rbc_like_smooth_pit': 24, 'flat_bottom_pit': 16, 'sharp_wall_boxy_corrosion': 16, 'asymmetric_corrosion': 16, 'elongated_crack_like_surface_defect': 16, 'multi_pit_two_component_surface_defect': 16, 'irregular_corrosion_non_rbc': 16}
+topology_counts: {'single_component': 72, 'elongated': 16, 'multi_component': 16, 'irregular': 16}
+representation_target_counts: {'six_param_rbc': 24, 'polygon_or_contour': 48, 'profile_basis': 16, 'component_set': 16, 'depth_grid': 16}
+delta_max_abs_error: 0.0
+train_ready_candidate: false
+baseline_ready: false
+CURRENT_BASELINE_update: false
+manifest_path: C:\Users\19166\Desktop\PINN_project\results\manifests\comsol_surface_shape_extension_pilot_v1.manifest.json
+validation_metrics: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_shape_extension_pilot_validation_metrics.csv
+group_summary: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_shape_extension_pilot_group_summary.csv

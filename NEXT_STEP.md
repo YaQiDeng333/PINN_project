@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-06-02 after Stage 25.2 surface shape-extension COMSOL pilot pack
+
+Next step: run **25.3 current baseline generalization audit** on `comsol_surface_shape_extension_pilot_v1`. Use the frozen 20.85/20.86 surface RBC baseline as the audited model, report where it fails on non-RBC-like surface defects, and keep the result as an audit, not a baseline transition.
+
+25.2 completed the COMSOL pilot pack with `N=120`, train/val/test=`72/24/24`, `rbc_like_smooth_pit=24`, and six non-RBC-like families at `16` each. Boolean subtract, mesh precheck, solve, finite `Bx/By/Bz`, `delta_b=b_defect-b_no_defect`, profile/depth labels, projected masks, topology labels, and explicit `representation_target` passed validation. The generated NPZ/data remain ignored and uncommitted.
+
+25.3 should measure 20.85 failure modes: profile RMSE, component recall, edge/corner metrics, multi-pit merge rate, crack-like miss rate, RBC-like control stability, and forward residual behavior. Do not train, do not update `CURRENT_BASELINE.md`, and do not treat `comsol_surface_shape_extension_pilot_v1` as an automatic training dataset.
+
 ## 2026-06-01 after Stage 25.1 surface shape-extension dataset plan
 
 Next step: run **25.2 surface shape-extension COMSOL pilot generation**. This is the only recommended next step, and it is allowed only as pilot generation after the 25.1 taxonomy, schema, feasibility, route, and acceptance gates passed review.

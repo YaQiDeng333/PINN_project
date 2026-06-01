@@ -1,5 +1,16 @@
 # 实验工作日志
 
+## 2026-06-02 Stage 25.2 surface shape-extension COMSOL pilot pack
+
+- Scope: executed the approved surface shape-extension COMSOL pilot generation only. No training, no checkpoint/preview/notes artifact, no `CURRENT_BASELINE.md` update, and no baseline transition.
+- COMSOL result: generated `comsol_surface_shape_extension_pilot_v1` with planned/success `120/120`, failed `0`, split `72/24/24`, and axes `Bx/By/Bz`.
+- Shape coverage: `rbc_like_smooth_pit=24`; `flat_bottom_pit=16`; `sharp_wall_boxy_corrosion=16`; `asymmetric_corrosion=16`; `elongated_crack_like_surface_defect=16`; `multi_pit_two_component_surface_defect=16`; `irregular_corrosion_non_rbc=16`.
+- Geometry / solve gates: Boolean subtract, mesh precheck, and COMSOL solve all passed for successful rows. The generated pack includes `b_defect`, `b_no_defect`, `delta_b`, depth/profile labels, projected masks, component labels, topology labels, and explicit `representation_target`.
+- Data policy: generated data and NPZ live under ignored `data/comsol_mfl/...` paths and are not committed. The committed record is limited to the generator, inventory/summary, validation/decision scripts, manifest, registry, and this run's summaries/metrics.
+- Validation: PINN validation passed with `n_samples=120`, `delta_b` shape `(120,3,3,201)`, finite `Bx/By/Bz`, `delta_max_abs_error=0.0`, full split/shape/topology coverage, `train_ready_candidate=false`, and `baseline_ready=false`.
+- Route decision: enter `25.3 current baseline generalization audit` using the frozen 20.85/20.86 surface RBC baseline. Training and baseline updates remain forbidden until a later explicit 25.4 gate.
+- Review: independent read-only review passed with no must-fix. It confirmed `CURRENT_BASELINE.md` unchanged, non-RBC labels are not forced into six RBC parameters, and forbidden generated artifacts are not staged.
+
 ## 2026-06-01 Stage 25.1 surface shape-extension dataset plan
 
 - Scope: completed the plan-only surface / near-surface shape-extension dataset design. No COMSOL, no training, no data/NPZ generation or modification, no checkpoint/preview artifact, and no `CURRENT_BASELINE.md` update.

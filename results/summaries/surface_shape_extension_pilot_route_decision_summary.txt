@@ -1,0 +1,14 @@
+surface shape-extension pilot route decision summary
+stage: 25.2
+
+dataset_id: comsol_surface_shape_extension_pilot_v1
+n_samples: 120
+target_n_pass: true
+fallback_n_pass: true
+shape_coverage_present: true
+non_rbc_labels_usable: true
+decision: enter_25_3_current_baseline_generalization_audit
+next_step: 25.3 current baseline generalization audit
+training_allowed: false
+baseline_update_allowed: false
+decision_matrix: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_shape_extension_pilot_decision_matrix.csv

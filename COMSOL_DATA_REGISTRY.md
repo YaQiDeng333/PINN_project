@@ -412,3 +412,31 @@ This registry records generated COMSOL dataset identities and allowed usage. It 
 - source_dataset_ids: comsol_internal_defect_richer_observation_pack_v1, comsol_internal_defect_multi_magnetization_mag_y_pack_v1, comsol_internal_defect_pilot_pack_v3_hardcase
 - npz_sha256: 250b98ae07036849bbd33c50f3cc551dd4d8f7a707db50a63eb4ed88bbcd2f89
 - notes: Multi-magnetization diagnostic pack only. Generated NPZ/data files are not committed; not a baseline.
+
+## comsol_surface_shape_extension_pilot_v1
+
+- dataset_role: surface_shape_extension_pilot
+- status: pilot_generated
+- route: surface_shape_extension_non_rbc
+- stage: 25.2
+- schema_version: surface_shape_extension_v1
+- shape_taxonomy_version: surface_shape_extension_taxonomy_v1
+- label_schema_version: surface_shape_extension_label_schema_v1
+- geometry_method: surface_connected_polygon_prism_boolean_subtract / stacked_layer_control
+- path: `C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\prepared\experimental\surface_shape_extension\comsol_surface_shape_extension_pilot_v1.npz`
+- manifest_path: `C:\Users\19166\Desktop\PINN_project\results\manifests\comsol_surface_shape_extension_pilot_v1.manifest.json`
+- n_samples: 120
+- split_counts: {'train': 72, 'val': 24, 'test': 24}
+- shape_type_counts: {'rbc_like_smooth_pit': 24, 'flat_bottom_pit': 16, 'sharp_wall_boxy_corrosion': 16, 'asymmetric_corrosion': 16, 'elongated_crack_like_surface_defect': 16, 'multi_pit_two_component_surface_defect': 16, 'irregular_corrosion_non_rbc': 16}
+- topology_counts: {'single_component': 72, 'elongated': 16, 'multi_component': 16, 'irregular': 16}
+- representation_target_counts: {'six_param_rbc': 24, 'polygon_or_contour': 48, 'profile_basis': 16, 'component_set': 16, 'depth_grid': 16}
+- train_ready_candidate: false
+- baseline_ready: false
+- auto_discovery_allowed: false
+- latest_newest_discovery_allowed: false
+- allowed_use: schema_validation, explicit_surface_shape_extension_audit
+- forbidden_use: automatic_mainline_training, baseline_update, current_baseline_replacement, latest_newest_auto_discovery, direct_training_without_manifest_gate
+- generator_script: `scripts/generate_mfl_surface_shape_extension_pilot_pack.py`
+- validation_script: `scripts/validate_surface_shape_extension_pilot_pack.py`
+- npz_sha256: d054b7e24f32fffcd20cc3a2303d894791b9c2dab1a3a67171edf58dbb75a132
+- notes: Metadata only. Generated NPZ/data files are not committed and must be loaded only by explicit dataset_id + manifest.

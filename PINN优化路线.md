@@ -1,5 +1,13 @@
 # PINN 优化路线
 
+## 2026-06-02 route sync: 25.2 surface shape-extension COMSOL pilot pack
+
+25.2 turns the 25.1 plan into a real COMSOL pilot pack, but it is still a data and validation stage, not a model-training or baseline-transition stage. The generated dataset is `comsol_surface_shape_extension_pilot_v1`, with `N=120`, split `72/24/24`, RBC-like control `24`, and six non-RBC-like surface defect families at `16` each.
+
+The important boundary is representation. RBC-like control rows keep `representation_target=six_param_rbc`; non-RBC-like rows use `profile_basis`, `depth_grid`, `component_set`, or `polygon_or_contour`. Validation confirmed finite `Bx/By/Bz`, `delta_b=b_defect-b_no_defect`, Boolean/mesh/solve pass, topology coverage, component labels, projected masks, and no collapse of non-RBC shapes into the old six RBC parameters.
+
+The route now moves to 25.3: audit the frozen 20.85/20.86 surface RBC baseline on this pilot pack and quantify non-RBC failure modes. Training remains out of scope until a later explicit 25.4 gate, and `CURRENT_BASELINE.md` remains unchanged.
+
 ## 2026-06-01 route sync: 25.1 surface shape-extension dataset plan
 
 25.1 的核心判断是：surface branch 的下一步不是继续调 NLS 特征，也不是直接训练 decoder，而是先把 non-RBC-like surface defects 的表示空间钉牢。当前 `CURRENT_BASELINE` 仍是 20.85/20.86 true 3D RBC-style profile-depth baseline；它只覆盖 RBC-like smooth pit 这类六参数可表达缺陷，不能外推成任意 surface corrosion。

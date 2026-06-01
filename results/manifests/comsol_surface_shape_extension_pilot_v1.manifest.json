@@ -1,0 +1,80 @@
+{
+  "allowed_use": [
+    "schema_validation",
+    "explicit_surface_shape_extension_audit"
+  ],
+  "auto_discovery_allowed": false,
+  "axes": [
+    "Bx",
+    "By",
+    "Bz"
+  ],
+  "baseline_ready": false,
+  "comsol_commit": "0f2ea9c519ada1aa49a78aa38f5cb3ca81b07f0b",
+  "comsol_generator_script": "C:\\Users\\19166\\Desktop\\COMSOL_Multiphysics_MCP\\scripts\\generate_mfl_surface_shape_extension_pilot_pack.py",
+  "comsol_inventory_path": "C:\\Users\\19166\\Desktop\\COMSOL_Multiphysics_MCP\\results\\inventory_surface_shape_extension_pilot_pack.csv",
+  "dataset_id": "comsol_surface_shape_extension_pilot_v1",
+  "dataset_role": "surface_shape_extension_pilot",
+  "fallback_N": 84,
+  "fallback_n_pass": true,
+  "forbidden_use": [
+    "automatic_mainline_training",
+    "baseline_update",
+    "current_baseline_replacement",
+    "latest_newest_auto_discovery",
+    "direct_training_without_manifest_gate"
+  ],
+  "generated_at": "2026-06-02T01:20:37",
+  "generated_npz_path": "C:\\Users\\19166\\Desktop\\PINN_project\\data\\comsol_mfl\\prepared\\experimental\\surface_shape_extension\\comsol_surface_shape_extension_pilot_v1.npz",
+  "label_schema_version": "surface_shape_extension_label_schema_v1",
+  "latest_newest_discovery_allowed": false,
+  "manifest_path": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\manifests\\comsol_surface_shape_extension_pilot_v1.manifest.json",
+  "n_samples": 120,
+  "notes": "Generated data/NPZ are ignored artifacts and must not be committed.",
+  "npz_sha256": "d054b7e24f32fffcd20cc3a2303d894791b9c2dab1a3a67171edf58dbb75a132",
+  "pinn_commit": "d3c2b37cc33349cd70a251b7790950e489807bcc",
+  "representation_target_counts": {
+    "component_set": 16,
+    "depth_grid": 16,
+    "polygon_or_contour": 48,
+    "profile_basis": 16,
+    "six_param_rbc": 24
+  },
+  "route": "surface_shape_extension_non_rbc",
+  "scan_line_y": [
+    -0.001,
+    0.0,
+    0.001
+  ],
+  "schema_version": "surface_shape_extension_v1",
+  "sensor_x_count": 201,
+  "sensor_z_m": 0.008,
+  "shape_taxonomy_version": "surface_shape_extension_taxonomy_v1",
+  "shape_type_counts": {
+    "asymmetric_corrosion": 16,
+    "elongated_crack_like_surface_defect": 16,
+    "flat_bottom_pit": 16,
+    "irregular_corrosion_non_rbc": 16,
+    "multi_pit_two_component_surface_defect": 16,
+    "rbc_like_smooth_pit": 24,
+    "sharp_wall_boxy_corrosion": 16
+  },
+  "split_counts": {
+    "test": 24,
+    "train": 72,
+    "val": 24
+  },
+  "stage": "25.2",
+  "status": "pilot_generated",
+  "target_N": 120,
+  "target_n_pass": true,
+  "topology_counts": {
+    "elongated": 16,
+    "irregular": 16,
+    "multi_component": 16,
+    "single_component": 72
+  },
+  "train_ready_candidate": false,
+  "validation_script": "scripts/validate_surface_shape_extension_pilot_pack.py",
+  "validation_status": true
+}

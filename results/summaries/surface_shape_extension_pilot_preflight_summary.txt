@@ -1,0 +1,35 @@
+surface shape-extension pilot preflight summary
+stage: 25.2
+
+scope: preflight before/around COMSOL pilot generation; COMSOL is allowed in 25.2, training and CURRENT_BASELINE updates remain forbidden.
+
+required_inputs:
+- C:\Users\19166\Desktop\PINN_project\results\metrics\surface_shape_extension_dataset_plan.csv: exists=true
+- C:\Users\19166\Desktop\PINN_project\results\metrics\surface_shape_extension_label_schema.csv: exists=true
+- C:\Users\19166\Desktop\PINN_project\results\metrics\surface_shape_extension_comsol_feasibility_matrix.csv: exists=true
+- C:\Users\19166\Desktop\PINN_project\results\metrics\surface_shape_extension_taxonomy_matrix.csv: exists=true
+- C:\Users\19166\Desktop\COMSOL_Multiphysics_MCP\scripts\generate_mfl_surface_shape_extension_pilot_pack.py: exists=true
+
+protocol_reuse:
+- 20.70 dynamic material/domain/solver protocol is reused through existing COMSOL MagneticFields helper path.
+- Surface subtract is implemented as surface-connected polygon-prism material loss from top_z_0.
+- shape_type, topology_type, representation_target, rbc_compatible, component labels, depth grids, and masks are required metadata.
+
+git_status_PINN_project:
+M COMSOL_DATA_REGISTRY.md
+ M EXPERIMENT_LOG.md
+ M NEXT_STEP.md
+ M "PINN\344\274\230\345\214\226\350\267\257\347\272\277.md"
+?? results/manifests/comsol_surface_shape_extension_pilot_v1.manifest.json
+?? scripts/decide_surface_shape_extension_pilot_route.py
+?? scripts/validate_surface_shape_extension_pilot_pack.py
+
+git_status_COMSOL_Multiphysics_MCP:
+M src/tools/physics.py
+ M src/tools/results.py
+ M src/tools/study.py
+?? Origin2026SR1H_1971.zip
+?? scripts/generate_mfl_rectangular_sweep.py
+?? scripts/generate_mfl_surface_shape_extension_pilot_pack.py
+
+preflight_decision: stop if taxonomy/schema/feasibility inputs are missing; otherwise generation may proceed.

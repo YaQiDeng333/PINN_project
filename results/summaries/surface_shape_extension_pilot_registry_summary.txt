@@ -1,0 +1,11 @@
+surface shape-extension pilot registry summary
+stage: 25.2
+
+dataset_id: comsol_surface_shape_extension_pilot_v1
+registry_updated: true
+manifest_path: C:\Users\19166\Desktop\PINN_project\results\manifests\comsol_surface_shape_extension_pilot_v1.manifest.json
+train_ready_candidate: false
+baseline_ready: false
+allowed_use: schema_validation, explicit_surface_shape_extension_audit
+forbidden_use: automatic_mainline_training, baseline_update, current_baseline_replacement
+data_policy: generated NPZ/data remain ignored and uncommitted.
