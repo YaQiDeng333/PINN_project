@@ -1,0 +1,15 @@
+check_name,pass,observed,reference,threshold_or_condition,notes
+artifact_manifest_present,True,C:\Users\19166\Desktop\PINN_project\results\manifests\surface_forward_refinement_inference_artifact_manifest.json,manifest exists,exists,Commit-safe manifest is required; artifact body remains in ignored checkpoints/.
+artifact_allowed_use,True,['explicit_surface_forward_refinement_inference'],['explicit_surface_forward_refinement_inference'],exact allowed_use,Manifest must not authorize baseline replacement.
+artifact_forbidden_use,True,"['current_baseline_replacement', 'automatic_baseline_update']","['current_baseline_replacement', 'automatic_baseline_update']",exact forbidden_use set,Baseline transition remains forbidden.
+runner_row_count_matches_25_6,True,120,120,runner rows == formal rows == 120,Full pilot replay is required for verification.
+runner_reproduces_25_6_per_sample,True,max_abs_diff=0 at ,25.6 formal benchmark CSV,max_abs_diff <= 1e-8 on key per-sample fields,Runner must reproduce the fixed 25.6 protocol within deterministic floating-point tolerance.
+target_subset_count,True,82,82,target count == 82,Target subset remains rbc_representable_but_model_fail.
+target_profile_rmse_improves,True,0.000509518351056->0.000220386413188,0.000509518351056->0.000220386413188,refined < baseline,Primary target subset must improve.
+target_iou_dice_improve,True,IoU 0.32360140234->0.578523465369; Dice 0.480524080842->0.709451842351,25.6 target IoU/Dice improvement,IoU and Dice both increase,Projected-mask metrics must improve on the target subset.
+target_forward_residual_improves,True,70.5944261489->0.564105036956,25.6 target forward residual improvement,after < before,Forward-feature residual must decrease.
+rbc_like_control_not_degraded,True,RMSE 0.000501181023155->0.000165198934316; Dice 0.493556208833->0.689754743215,RMSE non-increase and Dice non-decrease,control guard,RBC-like control must not collapse.
+multi_pit_not_success_credit,True,multi_pit_rows=16,all multi-pit rows excluded,not_suitable_for_rbc_refinement and no success credit,Component-set representation failures must not be counted as RBC refinement wins.
+current_baseline_unchanged,True,unchanged,unchanged,no CURRENT_BASELINE.md diff,25.7 is not a baseline transition.
+artifact_body_not_staged,True,none,none,no staged checkpoints path,Only the manifest is commit-safe.
+artifact_body_not_tracked,True,none,none,git ls-files empty for artifact body path,Ignored artifact body must remain uncommitted.

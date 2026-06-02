@@ -1,0 +1,21 @@
+25.7 surface forward-refinement inference runner review
+
+review_result: PASS
+must_fix_findings: none
+
+Scope reviewed:
+- Stage 25.7 export and runner working tree.
+- Read-only git/status/diff review; no file edits, no staging, no COMSOL, no training.
+
+Checks passed:
+- No COMSOL or main neural training path in the new diff.
+- No data/NPZ/CURRENT_BASELINE.md mutation showed in tracked or staged diffs.
+- Runtime artifact body is under ignored checkpoints and is not staged/tracked.
+- Commit-safe manifest records allowed use, forbidden use, artifact path, sha256, baseline artifact identity, dataset id, feature columns, initialization, lambda values, optimized params, strategy, surrogate id, and stage.
+- Runner refinement inputs are observed delta_b-derived features, frozen 20.85 predicted six params, and the exported artifact. Oracle/true depth/mask fields are used only after refinement for metrics/reporting.
+- Multi-pit/component-set rows are marked not_suitable_for_rbc_refinement, skip optimization, and receive no RBC-refinement success credit.
+- Allowed output scope is limited to the five 25.7 scripts, artifact manifest, this round results/summaries, and this round results/metrics; checkpoint artifact body must not be force-added.
+
+Residual risks:
+- Review did not run code because this was a read-only review gate; local verification separately ran py_compile and the full 25.7 five-script sequence.
+- Manifest locks artifact identity by sha256 but does not hash every source input/script used to rebuild the artifact.

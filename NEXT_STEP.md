@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-06-02 after Stage 25.7 surface forward-refinement inference runner
+
+Next step: run **A. surface refinement visualization/report package**. Keep it as a reporting package around the verified companion runner: no COMSOL, no main neural training, no data/NPZ mutation, no checkpoint artifact commit, and no `CURRENT_BASELINE.md` update.
+
+25.7 exported `surface_forward_refinement_inference_artifact_v1` and implemented the runtime chain `frozen 20.85 baseline -> predicted RBC six params -> observed delta_b feature-space forward-consistency refinement -> refined profile/projected mask`. The runner reproduced 25.6 checked per-sample fields with `max_abs_diff=0`. On the 82 target rows, profile RMSE is `0.000509518351056 -> 0.000220386413188 m`, Er-like is `2.80015739379 -> 0.909941363416`, IoU/Dice improves from `0.32360140234/0.480524080842` to `0.578523465369/0.709451842351`, and forward residual moves from `70.5944261489` to `0.564105036956`.
+
+The boundary remains fixed: this is a companion/post-hoc surface refinement runner, not a baseline replacement. Multi-pit/component-set rows are marked `not_suitable_for_rbc_refinement` and remain a future component-set branch. Unknown real samples can only report `refinement_applied`, not representable success, unless oracle/label or human confirmation exists.
+
 ## 2026-06-02 after Stage 25.6 surface forward-refinement formal benchmark
 
 Next step: run **A. export surface forward-refinement inference artifact / runner**. Keep it as a no-baseline-transition runtime artifact for the fixed 25.6 candidate: no COMSOL, no main neural training, no data/NPZ mutation, and no `CURRENT_BASELINE.md` update unless a separate baseline-transition request is explicitly approved later.

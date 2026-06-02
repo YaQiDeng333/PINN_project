@@ -1,0 +1,6 @@
+option,selected,decision,evidence,blocked_by
+A. surface refinement visualization/report package,True,selected,runner_usable=True; reproduces_25_6=True; artifact_lock_complete=True; companion_ready=True; target_rmse=0.000509518351056->0.000220386413188,
+B. component-set branch for multi-pit,False,future_branch,multi_pit_accounting_ok=True; multi-pit rows are not_suitable_for_rbc_refinement,not the immediate next step after successful runner export; remains required later for multi-pit
+C. real-sample metadata alignment,False,defer,unknown real samples can only claim refinement_applied until metadata/oracle/human representability confirmation exists,visualization/report package should first lock how the companion output is presented
+D. baseline transition request,False,forbidden_this_stage,"CURRENT_BASELINE_unchanged=True; forbidden_use=['current_baseline_replacement', 'automatic_baseline_update']",requires separate explicit user request and formal baseline-transition gate
+E. stop and report,False,not_selected,all_checks_pass=True; companion_ready=True,runner export is verified and can move to reporting/visualization

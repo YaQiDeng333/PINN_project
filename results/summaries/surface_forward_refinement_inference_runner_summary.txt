@@ -1,0 +1,41 @@
+25.7 surface forward-refinement inference runner
+
+dataset_id: comsol_surface_shape_extension_pilot_v1
+artifact_id: surface_forward_refinement_inference_artifact_v1
+artifact_manifest: C:\Users\19166\Desktop\PINN_project\results\manifests\surface_forward_refinement_inference_artifact_manifest.json
+selected_surrogate: ridge_param_only_linear_alpha_10
+lambda_param: 1
+baseline_prediction_source: frozen_20_85_baseline_checkpoint_with_train_bounds_clip
+runtime_refinement_inputs: observed delta_b-derived features + frozen 20.85 predicted six params + exported artifact
+label_or_oracle_used_for_refinement: false
+labels_used_for_metric_only: true for this labeled pilot report
+
+sample_count: 120
+target_role_counts: {'refinement_target': 82, 'already_pass_reference': 22, 'excluded_negative_control': 16}
+refinement_target_count: 82
+already_pass_reference_count: 22
+excluded_negative_control_count: 16
+refinement_applied_count: 104
+not_suitable_for_rbc_refinement_count: 16
+
+target_baseline_profile_rmse_mean_m: 0.000509518351056
+target_refined_profile_rmse_mean_m: 0.000220386413188
+target_oracle_profile_rmse_mean_m: 7.84896954944e-05
+target_baseline_Er_like_mean: 2.80015739379
+target_refined_Er_like_mean: 0.909941363416
+target_baseline_IoU_mean: 0.32360140234
+target_refined_IoU_mean: 0.578523465369
+target_baseline_Dice_mean: 0.480524080842
+target_refined_Dice_mean: 0.709451842351
+target_feature_residual_before_mean: 70.5944261489
+target_feature_residual_after_mean: 0.564105036956
+
+rbc_like_control_baseline_rmse_mean_m: 0.000501181023155
+rbc_like_control_refined_rmse_mean_m: 0.000165198934316
+rbc_like_control_baseline_Dice_mean: 0.493556208833
+rbc_like_control_refined_Dice_mean: 0.689754743215
+multi_pit_handling: metadata marks multi-pit/component-set rows as not_suitable_for_rbc_refinement; no RBC success credit.
+
+metrics_csv: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_forward_refinement_inference_metrics.csv
+by_shape_csv: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_forward_refinement_inference_by_shape.csv
+failure_cases_csv: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_forward_refinement_inference_failure_cases.csv

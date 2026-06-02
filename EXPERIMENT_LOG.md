@@ -1,5 +1,17 @@
 # 实验工作日志
 
+## 2026-06-02 Stage 25.7 surface forward-refinement inference artifact / runner
+
+- Scope: exported the fixed 25.6 surface forward-refinement inference artifact and implemented the runtime runner. No COMSOL, no main neural training, no data/NPZ mutation, no checkpoint artifact commit, no preview/notes artifact, and no `CURRENT_BASELINE.md` update.
+- Artifact: wrote the runtime body to ignored `checkpoints/surface_forward_refinement_artifacts/surface_forward_refinement_inference_artifact_v1.json` and committed only `results/manifests/surface_forward_refinement_inference_artifact_manifest.json`. The manifest records `allowed_use=explicit_surface_forward_refinement_inference` and forbids `current_baseline_replacement` / `automatic_baseline_update`.
+- Fixed protocol: preserved `ridge_param_only_linear_alpha_10`, `alpha=10.0`, `lambda_profile=1.0`, `lambda_param=1.0`, `R1_low_dim_param_refinement`, frozen 20.85 predicted six-parameter initialization, and optimization over `L_m/W_m/D_m/wLD/wWD/wLW`.
+- Runner boundary: runtime refinement inputs are observed `delta_b`-derived features, frozen 20.85 predicted six params, and the exported artifact. Labels, oracle params, true masks, and true depth are used only after refinement for metrics on the labeled pilot.
+- Verification: runner reproduced 25.6 per-sample checked fields with `max_abs_diff=0`. Target subset remained `82` rows, with profile RMSE `0.000509518351056 -> 0.000220386413188 m`, Er-like `2.80015739379 -> 0.909941363416`, IoU/Dice `0.32360140234/0.480524080842 -> 0.578523465369/0.709451842351`, and forward residual `70.5944261489 -> 0.564105036956`.
+- Controls: RBC-like control did not degrade (`RMSE 0.000501181023155 -> 0.000165198934316`, `Dice 0.493556208833 -> 0.689754743215`). Multi-pit/component-set rows are marked `not_suitable_for_rbc_refinement`, skip six-parameter optimization, and receive no RBC success credit.
+- Contract: `results/summaries/surface_forward_refinement_inference_contract.md` states the runner is a companion/post-hoc refinement layer, not a baseline replacement. Unknown real samples may report `refinement_applied`, not representable success, without oracle/label or human confirmation.
+- Route decision: unique next step is `A. surface refinement visualization/report package`. Multi-pit remains a future `component_set` branch, and any baseline transition still requires a separate explicit request.
+- Review: independent read-only review passed with no must-fix. It confirmed no forbidden artifact staging, clean runtime input boundary, sufficient manifest identity/protocol, and no `CURRENT_BASELINE.md` diff.
+
 ## 2026-06-02 Stage 25.6 surface forward-refinement formal benchmark
 
 - Scope: formalized the 25.5 `F0_feature_space_consistency + R1_low_dim_param_refinement` candidate as a no-baseline-transition benchmark. No COMSOL, no main neural training, no data/NPZ mutation, no checkpoint/preview/notes artifact, and no `CURRENT_BASELINE.md` update.
