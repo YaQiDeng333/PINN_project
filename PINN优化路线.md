@@ -1,5 +1,13 @@
 # PINN 优化路线
 
+## 2026-06-03 route sync: 25.15b surface multi-pit label-v3 target failure audit
+
+25.15b explains why label v3 failed after it fixed the near-empty symptom. The problem is not that raw labels are missing and not that the evaluator invented a merge: v3 made the component-local positive/valid region too broad, so the model learned union-like masks with weak component identity.
+
+The target audit is the key evidence. Soft OR/raw union ratio averages `2.010499`, reaches `2.451613`, and every sample (`112/112`) has union-like soft support. Soft/valid duplicate fractions reach `0.327496`, with leakage visible even outside the hard topology subset: separated rows have nonzero soft overlap and close rows reach duplicate fraction `0.253333`. The failure grouping matches that mechanism: test merged rate is `1.000000` for component_count=2, component_count=3, separated, close, touching, and partially_overlapping rows.
+
+The route implication is `NEEDS_PINN_LABEL_DERIVATION_V3B`: keep the fix inside `PINN_project`, but make the next label transform stricter before any training. V3B should add a mutually exclusive hard core, split valid regions into hard core / boundary halo / ignore overlap, keep soft halo narrow and non-overlapping, treat shared overlap pixels as ignore/diagnostic unless ownership confidence exists, and supervise depth only on hard core plus narrow owned boundary. `CURRENT_BASELINE.md` remains unchanged.
+
 ## 2026-06-03 route sync: 25.15 surface multi-pit label-v3 training gate
 
 25.15 tests the cleanest answer to 25.13: keep the 25.10 component-set model and loss mainline, but replace the brittle hard target with label-v3 soft/SDF/valid-region supervision. The result is a useful `FAIL`, because it proves support sparsity was only part of the problem.

@@ -1,5 +1,16 @@
 # 实验工作日志
 
+## 2026-06-03 Stage 25.15b surface multi-pit label-v3 target failure audit after merge collapse
+
+- Scope: audited the 25.15 label-v3 `FAIL` result only. This stage read the 25.14/25.15/25.10/25.13 metrics and manifests plus the explicit `comsol_surface_multipit_component_set_pilot_v1` dataset manifest/NPZ. It did not train, tune losses, run COMSOL, mutate data/NPZ files, expand model capacity, export checkpoints/previews/notes, or update `CURRENT_BASELINE.md`.
+- Main finding: label v3 relieved near-empty mask collapse but converted the failure into union-like merged masks. The current soft/valid support is too broad relative to component identity, while raw component masks/depths remain sufficient for a stricter v3b derivation inside `PINN_project`.
+- Metric evidence: 25.15 test recall `0.674419`, missed `0.325581`, extra `0.340909`, merged `1.000000`, component Dice `0.034245`, union Dice `0.061694`, depth RMSE `0.001106223 m`. Versus 25.13, component Dice improved by `+0.028710` and union Dice by `+0.058865`, but merged worsened by `+1.000000` and depth RMSE by `+0.000863332 m`.
+- V3 target leakage: soft OR/raw union ratio mean/p95/max `2.010499/2.397522/2.451613`; soft duplicate fraction mean/p95/max `0.061993/0.243511/0.327496`; valid duplicate fraction mean/p95/max `0.061993/0.243511/0.327496`; all `112/112` samples have union-like soft support. Separated rows still have nonzero soft overlap, and close rows reach soft duplicate max `0.253333`.
+- Failure grouping: test merged rate is `1.000000` for component_count=2, component_count=3, separated, close, touching, and partially_overlapping rows. This rules out a topology-only explanation and does not support an evaluator/threshold artifact.
+- Cause ranking: primary `soft support too broad`, secondary `valid region leakage`, tertiary `SDF identity too weak in multi-valid boundary zones`; depth target leakage is secondary because nonzero depth outside depth-valid is `0`, but duplicated depth-valid pixels remain in raw overlap regions.
+- Acceptance decision: `NEEDS_PINN_LABEL_DERIVATION_V3B`.
+- Route decision: unique next step is `A. enter 25.16 label-v3b derivation + validator, no training`. Do not continue loss tuning and do not enter a baseline transition.
+
 ## 2026-06-03 Stage 25.15 surface multi-pit label-v3 training gate
 
 - Scope: executed the label-v3 training gate on `comsol_surface_multipit_component_set_pilot_v1`. The model architecture, fixed `K=3` component-set representation, fixed split `72/20/20`, Hungarian matching, and `component_set_gate_v1` 25.10 loss mainline were kept unchanged. This stage did not use the 25.11/25.12 rebalance stack, did not run COMSOL, did not mutate data/NPZ files, did not export a formal inference artifact, and did not update `CURRENT_BASELINE.md`.

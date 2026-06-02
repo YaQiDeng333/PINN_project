@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-06-03 after Stage 25.15b surface multi-pit label-v3 target failure audit
+
+Next step: run **A. 25.16 label-v3b derivation + validator, no training**. The audit shows the fix is still inside `PINN_project`: raw component masks/depths and ownership diagnostics are available, but v3 soft/valid support must be tightened before another training gate.
+
+The root mechanism is component-identity leakage. Label v3 expanded positive support enough to avoid the 25.13 near-empty failure, but the soft OR/raw union ratio averages `2.010499`, all `112/112` samples are union-like under soft support, and test merged rate is `1.000000` across separated, close, touching, partially_overlapping, component_count=2, and component_count=3 slices. That means this is not a topology-only hard case and not a threshold artifact.
+
+25.16 should derive v3b targets only: keep an exclusive hard core, split valid region into hard core / boundary halo / ignore overlap, restrict soft halo to non-overlapping boundary context, keep partially-overlapping shared pixels as ignore or diagnostic unless ownership confidence is explicit, and supervise depth only on hard core plus narrow owned boundary. `CURRENT_BASELINE.md` remains unchanged.
+
 ## 2026-06-03 after Stage 25.15 surface multi-pit label-v3 training gate
 
 Next step: run **C. return to label-v3 derivation or generator/export schema; do not continue loss tuning**. The 25.15 gate used the 25.10 loss mainline plus label-v3 supervision, so this failure should not be answered by reusing the 25.11/25.12 rebalance stack or by increasing model capacity.
