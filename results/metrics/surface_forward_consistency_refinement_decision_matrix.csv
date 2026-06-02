@@ -1,0 +1,7 @@
+option,selected,decision,evidence,blocked_by
+A. execute 25.5 feature-space forward-consistency refinement diagnostic,True,recommended_unique_next_step,refinement_target=82; negative_control=16; pass_reference=22; surrogate=F0; strategy=R1; acceptance_gates=10,
+B. first train neural forward surrogate,False,defer,F1 requires training and surrogate validation,25.4 and 25.5 first diagnostic are no-training routes
+C. first build RBC parameter bounds / optimizer only,False,already_planned_inside_A,R1 bounds and stop criteria are defined in the strategy matrix,insufficient alone without F0 consistency residual and acceptance gates
+D. switch to profile-basis decoder plan,False,not_primary_for_25_5,25.3 oracle shows most non-multi failures are RBC-representable,model-failure dominates representation failure outside multi-pit
+E. switch to component-set decoder for multi-pit,False,future_parallel_branch,multi-pit remains representation failure and excluded_negative_control,does not address the 82 RBC-representable model failures
+F. pause shape-extension route,False,not_recommended,25.4 has a low-cost diagnostic path using existing 25.3 evidence,no current blocker for plan-only F0/R1 diagnostic design

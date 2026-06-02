@@ -1,5 +1,13 @@
 # PINN 优化路线
 
+## 2026-06-02 route sync: 25.4 surface forward-consistency refinement plan
+
+25.4 turns the 25.3 audit into a bounded next route: do not replace the surface RBC representation yet; first test whether the frozen 20.85 inverse can be repaired by six-parameter refinement plus a forward-consistency signal. The key subset is `82` `rbc_representable_but_model_fail` rows. These are not representation failures, because the RBC oracle can fit them; they are inverse/generalization failures under the new shape-extension distribution.
+
+The selected technical route is `F0_feature_space_consistency + R1_low_dim_param_refinement`. F0 compares predicted compact delta_b-derived features from the generated RBC profile against observed delta_b/BxByBz features. R1 starts from frozen 20.85 `L_m/W_m/D_m/wLD/wWD/wLW`, changes no model weights, and applies parameter-bound/profile-regularity constraints. This makes 25.5 a diagnostic refinement stage, not training and not a baseline transition.
+
+The gating boundary is explicit: profile RMSE, Er-like error, IoU/Dice, area error, RBC-like control, and forward residual must improve coherently on the same target subset. Multi-pit remains excluded from RBC success accounting because it is a `component_set` representation failure; it needs a later component-set decoder branch.
+
 ## 2026-06-02 route sync: 20.99 internal / buried defect feasibility schema
 
 20.99 fixes the internal / buried defect branch as a separate feasibility schema, not a robustness case of the current surface RBC baseline. The current `CURRENT_BASELINE.md` route still predicts six RBC-style surface parameters and surface profile/depth. Internal cavities need `burial_depth_m` / `depth_to_surface_m`, `defect_center_xyz_m`, `shape_type`, and a ground-truth method, so forcing them into the surface RBC output would confuse burial depth with surface profile or curvature.

@@ -1,0 +1,19 @@
+25.4 surface RBC parameter refinement plan
+
+refinement_target_count: 82
+recommended_first_strategy: R1_low_dim_param_refinement
+reference_strategy: R0_current_20_85
+future_component_strategy: R4_component_set_branch for multi-pit only
+
+R1 fixed design:
+- Initial value: frozen 20.85 predicted six params.
+- Optimized variables: L_m, W_m, D_m, wLD, wWD, wLW.
+- Loss: forward-feature residual + profile regularity + parameter bounds.
+- Model weights: unchanged.
+- Training: none.
+- Parameter bounds: L_m=[0.0015,0.035]; W_m=[0.00075,0.018]; D_m=[5e-05,0.0045]; wLD=[0.03,10.0]; wWD=[0.03,10.0]; wLW=[0.03,10.0].
+- Profile constraints: profile_depth_m>=0; max_depth<=D_m; D_m<=0.0045; generated surface profile remains anchored to scan surface.
+
+Stop criteria:
+- stop if forward residual decreases but profile RMSE/Dice do not improve; stop on parameter bound hit with nonphysical profile; do not trade RBC-like control degradation for non-RBC gains; do not count multi-pit as RBC refinement success.
+strategy_matrix: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_rbc_parameter_refinement_strategy_matrix.csv

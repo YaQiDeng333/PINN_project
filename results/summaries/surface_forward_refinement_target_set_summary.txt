@@ -1,0 +1,28 @@
+25.4 surface forward-refinement target set
+
+source: results/metrics/surface_shape_extension_oracle_vs_baseline_matrix.csv
+sample_count: 120
+refinement_target_count: 82
+excluded_negative_control_count: 16
+already_pass_reference_count: 22
+
+target_role_rules:
+- refinement_target: diagnosis=rbc_representable_but_model_fail and not component_set/multi-pit.
+- excluded_negative_control: rbc_not_representable or multi-pit/component-set; excluded from RBC success gates.
+- already_pass_reference: rbc_representable_and_model_pass; used as non-collapse reference.
+
+refinement_targets_by_shape: {'rbc_like_smooth_pit': 21, 'flat_bottom_pit': 11, 'sharp_wall_boxy_corrosion': 10, 'asymmetric_corrosion': 12, 'elongated_crack_like_surface_defect': 16, 'irregular_corrosion_non_rbc': 12}
+refinement_targets_by_split: {'train': 51, 'val': 16, 'test': 15}
+refinement_targets_by_representation_target: {'six_param_rbc': 21, 'polygon_or_contour': 37, 'profile_basis': 12, 'depth_grid': 12}
+negative_controls_by_shape: {'multi_pit_two_component_surface_defect': 16}
+
+target_baseline_profile_rmse_mean_m: 0.000509518351056
+target_oracle_profile_rmse_mean_m: 7.84896954944e-05
+target_baseline_dice_mean: 0.480524080842
+target_oracle_dice_mean: 0.940860104629
+
+success_gate_policy:
+- Multi-pit/component-set samples are recorded as negative controls only.
+- RBC-like control failures are included in the refinement target and also flagged for control-gate tracking.
+- The 25.5 diagnostic must report all roles separately.
+target_csv: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_forward_refinement_target_set.csv

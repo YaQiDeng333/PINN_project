@@ -1,0 +1,13 @@
+25.4 surface forward-refinement acceptance gates
+
+refinement_target_count: 82
+multi_pit_negative_control_count: 16
+primary_gate: target subset profile RMSE, Er-like error, and projected mask metrics must improve versus 25.3 frozen baseline.
+secondary_gate: RBC-like control must not collapse; non-multi shape families must improve broadly; forward residual and profile metrics must move together.
+failure_gate: nonphysical params, multi-pit success credit, or CURRENT_BASELINE.md transition fails the route.
+
+25.5 reporting requirement:
+- Report metrics by target_role, shape_type, split, and representation_target.
+- Report multi-pit separately as excluded_negative_control.
+- Report before/after forward residual and before/after profile/mask metrics on the same sample set.
+acceptance_gate_matrix: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_forward_refinement_acceptance_gate_matrix.csv

@@ -1,5 +1,16 @@
 # 实验工作日志
 
+## 2026-06-02 Stage 25.4 surface forward-consistency refinement plan
+
+- Scope: completed a plan-only forward-consistency refinement design for the surface shape-extension branch. No training, no COMSOL, no data/NPZ generation or mutation, no checkpoint/preview/notes artifact, and no `CURRENT_BASELINE.md` update.
+- Preflight: fixed the evidence chain to 25.3 oracle fit, frozen 20.85 baseline inference, oracle-vs-baseline diagnosis, `comsol_surface_shape_extension_pilot_v1` manifest, frozen baseline artifact manifest, current RBC profile generator helpers, NLS-lite / feature baseline context, and `COMSOL_DATA_REGISTRY.md`.
+- Target set: selected `82` `rbc_representable_but_model_fail` rows as refinement targets, kept `22` `rbc_representable_and_model_pass` rows as pass references, and marked the `16` `multi_pit_two_component_surface_defect` / `rbc_not_representable` rows as excluded negative controls.
+- Surrogate plan: selected `F0_feature_space_consistency` as the first route for 25.5. `F1_neural_forward_surrogate`, `F2_cached_COMSOL_local_refinement`, and `F3_direct_COMSOL_refinement` remain later or non-recommended options.
+- Refinement plan: selected `R1_low_dim_param_refinement`, initialized from frozen 20.85 predicted six parameters, optimizing `L_m/W_m/D_m/wLD/wWD/wLW` with forward-feature residual, profile regularity, and parameter-bound terms. Model weights remain unchanged.
+- Acceptance gates: require target-subset profile RMSE and Er-like error reduction, IoU/Dice improvement, no RBC-like control collapse, forward residual alignment with profile metrics, no nonphysical parameters, no multi-pit success credit, and no baseline transition.
+- Route decision: unique next step is `A. execute 25.5 feature-space forward-consistency refinement diagnostic`. Multi-pit remains a future `component_set` branch and does not block the RBC-representable refinement diagnostic.
+- Review: independent read-only review passed with no must-fix and confirmed target counts, multi-pit exclusion, F0/R1 selection, executable gates, output whitelist, and no forbidden artifacts or `CURRENT_BASELINE.md` diff.
+
 ## 2026-06-02 Stage 20.99 internal / buried defect feasibility schema
 
 - Scope: defined the internal / buried defect feasibility schema and data-generation design only. No COMSOL, no training, no data/NPZ generation or mutation, and no `CURRENT_BASELINE.md` update.

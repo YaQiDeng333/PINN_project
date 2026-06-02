@@ -1,0 +1,20 @@
+25.4 surface forward-consistency surrogate plan
+
+refinement_target_count: 82
+recommended_first_route: F0_feature_space_consistency
+
+F0 definition:
+- Predict compact delta_b-derived features from RBC six params/profile.
+- Compare predicted features with observed features from delta_b/BxByBz.
+- Use residual as a test-time refinement diagnostic; no training, no COMSOL, no data generation.
+
+why F0 first:
+- It can be implemented from existing 25.3 artifacts and existing feature-extraction conventions.
+- It is low cost and compatible with finite-difference or differentiable proxy refinement.
+- Acceptance gates can detect the main risk: lower feature residual without better profile/mask metrics.
+
+future options:
+- F1 neural forward surrogate requires training and surrogate validation, so it is not first.
+- F2 cached COMSOL lookup is limited by sampled coverage.
+- F3 direct COMSOL refinement is future-only and not recommended.
+surrogate_matrix: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_forward_consistency_surrogate_matrix.csv

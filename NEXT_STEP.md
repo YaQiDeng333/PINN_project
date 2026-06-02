@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-06-02 after Stage 25.4 surface forward-consistency refinement plan
+
+Next step: run **A. execute 25.5 feature-space forward-consistency refinement diagnostic**. Keep it diagnostic-only: no training, no COMSOL, no data/NPZ mutation, and no `CURRENT_BASELINE.md` update.
+
+25.4 narrowed the target to the 82 `rbc_representable_but_model_fail` samples from 25.3. The 22 already-pass rows are references, while the 16 multi-pit/component-set representation failures are negative controls and cannot count as RBC-refinement success. The selected route is `F0_feature_space_consistency + R1_low_dim_param_refinement`: start from frozen 20.85 six parameters, adjust only `L_m/W_m/D_m/wLD/wWD/wLW`, and judge success by profile/mask metrics plus forward-feature residual alignment.
+
+25.5 must report metrics by target role, shape type, split, and representation target. It must prove target-subset profile RMSE / Er-like / IoU / Dice improvements, protect RBC-like control, and keep multi-pit outside the success gate. Component-set decoding for multi-pit remains a later branch.
+
 ## 2026-06-02 after Stage 20.99 internal / buried defect feasibility schema
 
 Next step: run **A. execute internal COMSOL smoke pack after metadata confirmation**. First confirm the required metadata and labels, then in a later approved stage generate only the 6-12 sample internal smoke pack; do not train and do not update `CURRENT_BASELINE.md`.
