@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-06-02 after Stage 25.12 surface multi-pit component-separation-aware rebalance training
+
+Next step: run **C. rollback to 25.10 loss mainline and redesign component raster/depth targets before further training**. The component-separation-aware loss reduced merged rate from `0.900000` to `0.700000`, but it bought that by worsening recall, missed rate, extra rate, and union Dice, so it is not a viable training route.
+
+The key failure is that loss-only separation pressure does not recover stable component masks on the current target formulation. 25.12 test recall is `0.744186` versus `0.860465` in 25.11 and `0.837209` in 25.10; missed rate is `0.255814`, extra rate `0.200000`, component Dice `0.108790`, union Dice `0.138075`, and depth RMSE `0.000501023 m`. Three-component test rows still merge completely (`merged_rate=1.0`).
+
+The next design stage should return to the 25.10 loss mainline as the stable comparator, then redesign component raster/depth targets before more training: inspect component-mask target separability, overlap ownership, per-component depth semantics, and whether component masks need explicit non-overlap/ownership labels rather than only loss penalties. `CURRENT_BASELINE.md` remains unchanged.
+
 ## 2026-06-02 after Stage 25.11b surface multi-pit component-set merge-collapse audit
 
 Next step: run **A. 25.12 component-separation-aware rebalance training**. The 25.11b audit shows the blocker is not generic capacity and not just touching/overlap topology: the rebalance made union-level agreement easier while component-level separation stayed underconstrained.

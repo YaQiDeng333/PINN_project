@@ -1,0 +1,30 @@
+{
+  "allowed_use": [
+    "component_set_training_gate_evaluation",
+    "mask_depth_loss_rebalance_training",
+    "failure_audit_input"
+  ],
+  "baseline_ready": false,
+  "checkpoint_saved": false,
+  "component_set_representation_changed": false,
+  "current_baseline_updated": false,
+  "dataset_id": "comsol_surface_multipit_component_set_pilot_v1",
+  "dataset_manifest": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\manifests\\comsol_surface_multipit_component_set_pilot_v1.manifest.json",
+  "forbidden_use": [
+    "baseline_update",
+    "current_baseline_replacement",
+    "automatic_mainline_training",
+    "formal_inference_artifact"
+  ],
+  "gate_decision": "FAIL",
+  "gate_id": "25_12_component_separation_rebalance_training",
+  "inference_artifact_exported": false,
+  "loss_config": "component_separation_rebalance_v1",
+  "metrics_path": "results\\metrics\\25_12_component_separation_rebalance_training_metrics.json",
+  "model_capacity_expanded": false,
+  "route_decision": "C. rollback to 25.10 loss mainline and redesign component raster/depth targets before further training",
+  "script": "scripts/train_surface_multipit_component_set_gate.py",
+  "stage": "25.12",
+  "summary_path": "results\\summaries\\25_12_component_separation_rebalance_training_summary.md",
+  "train_ready_candidate_consumed": true
+}

@@ -1,5 +1,16 @@
 # 实验工作日志
 
+## 2026-06-02 Stage 25.12 surface multi-pit component-separation-aware rebalance training
+
+- Scope: executed the component-separation-aware rebalance gate on `comsol_surface_multipit_component_set_pilot_v1`. The architecture, fixed `K=3` component-set representation, fixed split `72/20/20`, and Hungarian matching were unchanged.
+- Boundary: no COMSOL, no data/NPZ mutation, no checkpoint/preview/notes artifact commit, no model-capacity expansion, no formal inference artifact export, no baseline transition, and no `CURRENT_BASELINE.md` update.
+- Loss config: added `component_separation_rebalance_v1`, with delayed/low union mask loss, higher component-mask emphasis, component-normalized foreground depth, logged background depth diagnostics, pairwise separation consistency, and anti-merge penalty.
+- Gate decision: `FAIL`. Merged collapse was only partially reduced versus 25.11 (`0.900000 -> 0.700000`) but remained far worse than 25.10 (`0.200000`), while recall/missed/extra collapsed relative to 25.11.
+- Test metrics: recall `0.744186`, missed `0.255814`, extra `0.200000`, merged `0.700000`, component Dice `0.108790`, union Dice `0.138075`, depth RMSE `0.000501023 m`.
+- Comparison: versus 25.10, recall worsened by `-0.093023`, component Dice stayed slightly below (`-0.000772`), and depth RMSE remained worse by `+0.000257708 m`. Versus 25.11, merged improved by `-0.200000` and depth improved by `-0.000172604 m`, but recall worsened by `-0.116279`, missed worsened by `+0.116279`, extra worsened by `+0.102439`, and union Dice fell by `-0.028157`.
+- Three-component slice: still failed, with merged rate `1.0`, recall `0.555556`, missed `0.444444`, and predicted component count mean `2.0`.
+- Route decision: unique next step is `C. rollback to 25.10 loss mainline and redesign component raster/depth targets before further training`. Do not continue with more capacity or stacked training.
+
 ## 2026-06-02 Stage 25.11b surface multi-pit component-set merge-collapse audit
 
 - Scope: audited the 25.11 `PARTIAL` mask/depth rebalance result only. No new training, no COMSOL, no model-capacity expansion, no data/NPZ mutation, no checkpoint/preview/notes artifact commit, no baseline transition, and no `CURRENT_BASELINE.md` update.

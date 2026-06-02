@@ -1,5 +1,13 @@
 # PINN 优化路线
 
+## 2026-06-02 route sync: 25.12 surface multi-pit component-separation-aware rebalance training
+
+25.12 tests the most direct fix for the 25.11b diagnosis: keep the same model and representation, but add component-separation and anti-merge pressure while delaying/capping union loss. The result is a `FAIL`, which is useful because it narrows the blocker: the current component raster/depth targets are not being repaired by loss weighting alone.
+
+The tradeoff is clear. Merged rate improves relative to 25.11 (`0.900000 -> 0.700000`), but that is still far worse than 25.10 (`0.200000`) and it comes with recall collapse (`0.860465 -> 0.744186`), missed-rate regression (`0.139535 -> 0.255814`), extra-rate regression (`0.097561 -> 0.200000`), lower union Dice (`0.166233 -> 0.138075`), and depth still far above 25.10 (`0.000501023 m` versus `0.000243315 m`). Three-component rows still merge completely.
+
+The route implication is to stop this training stack. The unique next route is `C. rollback to 25.10 loss mainline and redesign component raster/depth targets before further training`: audit component-mask ownership, overlap/touching depth semantics, and whether labels need explicit component ownership/non-overlap constraints. `CURRENT_BASELINE.md` remains unchanged.
+
 ## 2026-06-02 route sync: 25.11b surface multi-pit component-set merge-collapse audit
 
 25.11b pins down why the first rebalance stayed `PARTIAL`: the objective improved union-level agreement without preserving component separation. That is why the headline looks contradictory: union Dice improved from `0.130480` to `0.166233`, recall improved from `0.837209` to `0.860465`, and extra/missed rates improved, while merged rate jumped from `0.200000` to `0.900000`.

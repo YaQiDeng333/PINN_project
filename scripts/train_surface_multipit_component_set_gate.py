@@ -38,6 +38,7 @@ DEFAULT_SUMMARY = ROOT / "results/summaries/25_10_component_set_training_gate_su
 DEFAULT_GATE_MANIFEST = ROOT / "results/manifests/25_10_component_set_training_gate_manifest.json"
 DEFAULT_REGISTRY = ROOT / "COMSOL_DATA_REGISTRY.md"
 DEFAULT_COMPARISON_METRICS = ROOT / "results/metrics/25_10_component_set_training_gate_metrics.json"
+DEFAULT_COMPARISON_METRICS_25_11 = ROOT / "results/metrics/25_11_mask_depth_loss_rebalance_training_metrics.json"
 
 TARGET_SPLIT = {"train": 72, "val": 20, "test": 20}
 K_MAX = 3
@@ -45,6 +46,7 @@ LOW_H = 32
 LOW_W = 64
 PERMS = list(permutations(range(K_MAX)))
 MASK_DEPTH_TERMS = ("component_mask", "union_mask", "component_depth", "union_depth")
+COMPONENT_SEPARATION_TERMS = ("separation_penalty", "merge_penalty")
 FORBIDDEN_DIFF_PATHS = [
     "CURRENT_BASELINE.md",
     "data",
@@ -62,6 +64,8 @@ class LossConfig:
     weights: dict[str, float]
     mask_supervision: str
     depth_supervision: str
+    union_warmup_epochs: int = 0
+    union_ramp_epochs: int = 1
 
 
 LOSS_CONFIGS = {
@@ -76,6 +80,10 @@ LOSS_CONFIGS = {
             "union_mask": 0.0,
             "component_depth": 0.9,
             "union_depth": 0.0,
+            "component_depth_background": 0.0,
+            "union_depth_background": 0.0,
+            "separation_penalty": 0.0,
+            "merge_penalty": 0.0,
         },
         mask_supervision="component_mean_bce_plus_dice",
         depth_supervision="component_full_grid_target_weight_0p15_background",
@@ -91,9 +99,34 @@ LOSS_CONFIGS = {
             "union_mask": 1.20,
             "component_depth": 1.00,
             "union_depth": 0.55,
+            "component_depth_background": 0.0,
+            "union_depth_background": 0.0,
+            "separation_penalty": 0.0,
+            "merge_penalty": 0.0,
         },
         mask_supervision="existing_slots_balanced_foreground_background_bce_plus_dice_with_union_loss",
         depth_supervision="existing_slots_and_union_smooth_l1_only_inside_valid_target_mask",
+    ),
+    "component_separation_rebalance_v1": LossConfig(
+        name="component_separation_rebalance_v1",
+        description="25.12 rebalance: keep architecture fixed, cap/delay union losses, emphasize matched component masks, add component separation and anti-merge penalties, and keep depth foreground-normalized.",
+        weights={
+            "exist": 1.10,
+            "param": 1.40,
+            "shape": 0.20,
+            "component_mask": 1.70,
+            "union_mask": 0.15,
+            "component_depth": 0.35,
+            "union_depth": 0.0,
+            "component_depth_background": 0.0,
+            "union_depth_background": 0.0,
+            "separation_penalty": 1.00,
+            "merge_penalty": 3.00,
+        },
+        mask_supervision="matched_existing_slots_balanced_bce_dice_plus_delayed_low_weight_union_loss",
+        depth_supervision="component_normalized_foreground_depth_with_background_logged_not_weighted",
+        union_warmup_epochs=60,
+        union_ramp_epochs=120,
     ),
 }
 
@@ -106,6 +139,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--gate-manifest", type=Path, default=DEFAULT_GATE_MANIFEST)
     parser.add_argument("--registry", type=Path, default=DEFAULT_REGISTRY)
     parser.add_argument("--comparison-metrics", type=Path, default=DEFAULT_COMPARISON_METRICS)
+    parser.add_argument("--comparison-metrics-25-11", type=Path, default=DEFAULT_COMPARISON_METRICS_25_11)
     parser.add_argument("--stage", default="25.10")
     parser.add_argument("--gate-id", default=GATE_ID)
     parser.add_argument("--loss-config", choices=sorted(LOSS_CONFIGS), default="component_set_gate_v1")
@@ -271,6 +305,61 @@ def balanced_bce_from_prob(prob: torch.Tensor, target: torch.Tensor, eps: float 
 def valid_region_smooth_l1(pred: torch.Tensor, target: torch.Tensor, valid: torch.Tensor, eps: float = 1.0e-6) -> torch.Tensor:
     raw = F.smooth_l1_loss(pred, target, reduction="none")
     return (raw * valid).sum(dim=(-2, -1)) / valid.sum(dim=(-2, -1)).clamp_min(eps)
+
+
+def scheduled_loss_weights(loss_config: LossConfig, epoch: int | None = None) -> dict[str, float]:
+    weights = dict(loss_config.weights)
+    if loss_config.name == "component_separation_rebalance_v1":
+        if epoch is None:
+            scale = 1.0
+        elif epoch <= loss_config.union_warmup_epochs:
+            scale = 0.0
+        else:
+            scale = min(1.0, (epoch - loss_config.union_warmup_epochs) / max(float(loss_config.union_ramp_epochs), 1.0))
+        weights["union_mask"] *= scale
+        weights["union_depth"] *= scale
+    return weights
+
+
+def pairwise_component_losses(
+    pred_params: torch.Tensor,
+    pred_mask_logits: torch.Tensor,
+    target_params: torch.Tensor,
+    target_mask: torch.Tensor,
+    exists: torch.Tensor,
+    eps: float = 1.0e-6,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    mask_prob = torch.sigmoid(pred_mask_logits)
+    sep_terms = []
+    merge_terms = []
+    for i, j in ((0, 1), (0, 2), (1, 2)):
+        pair_exists = exists[:, i] * exists[:, j]
+        pred_i = mask_prob[:, i]
+        pred_j = mask_prob[:, j]
+        target_i = target_mask[:, i]
+        target_j = target_mask[:, j]
+
+        pred_overlap = (pred_i * pred_j).sum(dim=(-2, -1))
+        pred_min_area = torch.minimum(pred_i.sum(dim=(-2, -1)), pred_j.sum(dim=(-2, -1))).clamp_min(eps)
+        pred_overlap_fraction = pred_overlap / pred_min_area
+
+        target_overlap = (target_i * target_j).sum(dim=(-2, -1))
+        target_min_area = torch.minimum(target_i.sum(dim=(-2, -1)), target_j.sum(dim=(-2, -1))).clamp_min(eps)
+        target_overlap_fraction = target_overlap / target_min_area
+        allowed_overlap = (target_overlap_fraction + 0.04).clamp(max=0.85)
+        merge_raw = F.relu(pred_overlap_fraction - allowed_overlap)
+
+        pred_dist = torch.linalg.norm(pred_params[:, i, 0:2] - pred_params[:, j, 0:2], dim=-1)
+        target_dist = torch.linalg.norm(target_params[:, i, 0:2] - target_params[:, j, 0:2], dim=-1)
+        target_separated_weight = (1.0 - target_overlap_fraction.clamp(0.0, 1.0)).detach()
+        sep_raw = F.smooth_l1_loss(pred_dist, target_dist, reduction="none") * target_separated_weight
+
+        sep_terms.append(sep_raw * pair_exists)
+        merge_terms.append(merge_raw * pair_exists * target_separated_weight)
+    sep_stack = torch.stack(sep_terms, dim=1)
+    merge_stack = torch.stack(merge_terms, dim=1)
+    pair_counts = torch.stack([exists[:, 0] * exists[:, 1], exists[:, 0] * exists[:, 2], exists[:, 1] * exists[:, 2]], dim=1).sum(dim=1).clamp_min(1.0)
+    return sep_stack.sum(dim=1) / pair_counts, merge_stack.sum(dim=1) / pair_counts
 
 
 @dataclass
@@ -462,7 +551,7 @@ def loss_terms_for_perm(pred: dict[str, torch.Tensor], batch: dict[str, torch.Te
     shape_loss = (shape_flat * exists).sum(dim=1) / active_count
 
     depth_pred = F.softplus(pred["depth_raw"])
-    if loss_config.name == "mask_depth_rebalance_v1":
+    if loss_config.name in {"mask_depth_rebalance_v1", "component_separation_rebalance_v1"}:
         mask_bce = balanced_bce_from_logits(pred["mask_logits"], mask)
         mask_dice = soft_dice_loss(pred["mask_logits"], mask)
         component_mask_loss = ((mask_bce + mask_dice) * exists).sum(dim=1) / active_count
@@ -474,13 +563,24 @@ def loss_terms_for_perm(pred: dict[str, torch.Tensor], batch: dict[str, torch.Te
         union_mask_loss = balanced_bce_from_prob(pred_union_prob, target_union_mask) + soft_dice_loss_prob(pred_union_prob, target_union_mask)
 
         valid = (mask > 0.5).float()
+        background = 1.0 - valid
         component_depth_raw = valid_region_smooth_l1(depth_pred, depth, valid)
         component_depth_loss = (component_depth_raw * exists).sum(dim=1) / active_count
+        component_depth_background_raw = valid_region_smooth_l1(depth_pred, depth, background)
+        component_depth_background_loss = (component_depth_background_raw * exists).sum(dim=1) / active_count
 
         target_union_depth = depth.max(dim=1).values
         pred_union_depth = (depth_pred * mask_prob * active_view).max(dim=1).values
         valid_union = (target_union_mask > 0.5).float()
+        background_union = 1.0 - valid_union
         union_depth_loss = valid_region_smooth_l1(pred_union_depth, target_union_depth, valid_union)
+        union_depth_background_loss = valid_region_smooth_l1(pred_union_depth, target_union_depth, background_union)
+
+        if loss_config.name == "component_separation_rebalance_v1":
+            separation_loss, merge_loss = pairwise_component_losses(pred["params"], pred["mask_logits"], params, mask, exists)
+        else:
+            separation_loss = torch.zeros_like(component_mask_loss)
+            merge_loss = torch.zeros_like(component_mask_loss)
     else:
         mask_bce = F.binary_cross_entropy_with_logits(pred["mask_logits"], mask, reduction="none").mean(dim=(-2, -1))
         mask_dice = soft_dice_loss(pred["mask_logits"], mask)
@@ -491,6 +591,10 @@ def loss_terms_for_perm(pred: dict[str, torch.Tensor], batch: dict[str, torch.Te
         depth_mse = (((depth_pred - depth) ** 2) * target_weight).mean(dim=(-2, -1))
         component_depth_loss = (depth_mse * exists).sum(dim=1) / active_count
         union_depth_loss = torch.zeros_like(component_depth_loss)
+        component_depth_background_loss = torch.zeros_like(component_depth_loss)
+        union_depth_background_loss = torch.zeros_like(component_depth_loss)
+        separation_loss = torch.zeros_like(component_depth_loss)
+        merge_loss = torch.zeros_like(component_depth_loss)
 
     return {
         "exist": exist_loss,
@@ -500,40 +604,54 @@ def loss_terms_for_perm(pred: dict[str, torch.Tensor], batch: dict[str, torch.Te
         "union_mask": union_mask_loss,
         "component_depth": component_depth_loss,
         "union_depth": union_depth_loss,
+        "component_depth_background": component_depth_background_loss,
+        "union_depth_background": union_depth_background_loss,
+        "separation_penalty": separation_loss,
+        "merge_penalty": merge_loss,
     }
 
 
-def hungarian_loss_breakdown(pred: dict[str, torch.Tensor], batch: dict[str, torch.Tensor], loss_config: LossConfig) -> tuple[torch.Tensor, dict[str, Any]]:
+def hungarian_loss_breakdown(pred: dict[str, torch.Tensor], batch: dict[str, torch.Tensor], loss_config: LossConfig, epoch: int | None = None) -> tuple[torch.Tensor, dict[str, Any]]:
     per_perm_terms = [loss_terms_for_perm(pred, batch, perm, loss_config) for perm in PERMS]
+    weights = scheduled_loss_weights(loss_config, epoch)
     weighted_totals = []
     for terms in per_perm_terms:
-        weighted_totals.append(sum(loss_config.weights[name] * terms[name] for name in loss_config.weights))
+        weighted_totals.append(sum(weights[name] * terms[name] for name in weights))
     weighted_stack = torch.stack(weighted_totals, dim=1)
     best_idx = weighted_stack.argmin(dim=1)
     selected_total = weighted_stack.gather(1, best_idx[:, None]).squeeze(1)
     selected_terms: dict[str, torch.Tensor] = {}
-    for name in loss_config.weights:
+    for name in weights:
         stack = torch.stack([terms[name] for terms in per_perm_terms], dim=1)
         selected_terms[name] = stack.gather(1, best_idx[:, None]).squeeze(1)
     loss = selected_total.mean()
     unweighted = {name: float(value.detach().mean().cpu()) for name, value in selected_terms.items()}
-    weighted = {name: float((selected_terms[name] * loss_config.weights[name]).detach().mean().cpu()) for name in loss_config.weights}
+    weighted = {name: float((selected_terms[name] * weights[name]).detach().mean().cpu()) for name in weights}
     total_weighted = float(sum(weighted.values()))
     mask_depth_weighted = float(sum(weighted[name] for name in MASK_DEPTH_TERMS))
+    separation_weighted = float(sum(weighted[name] for name in COMPONENT_SEPARATION_TERMS))
     stats = {
         "loss": float(loss.detach().cpu()),
         "unweighted": unweighted,
         "weighted": weighted,
+        "effective_weights": weights,
         "mask_depth_weighted_sum": mask_depth_weighted,
+        "component_separation_weighted_sum": separation_weighted,
         "total_weighted_sum": total_weighted,
         "mask_depth_weighted_ratio": mask_depth_weighted / total_weighted if total_weighted > 0.0 else math.nan,
+        "component_separation_weighted_ratio": separation_weighted / total_weighted if total_weighted > 0.0 else math.nan,
+        "component_mask_to_union_mask_weighted_ratio": weighted["component_mask"] / max(weighted["union_mask"], 1.0e-12),
+        "depth_foreground_to_background_unweighted_ratio": (
+            (unweighted["component_depth"] + unweighted["union_depth"])
+            / max(unweighted["component_depth_background"] + unweighted["union_depth_background"], 1.0e-12)
+        ),
     }
     return loss, stats
 
 
-def hungarian_training_loss(pred: dict[str, torch.Tensor], batch: dict[str, torch.Tensor], loss_config: LossConfig | None = None) -> torch.Tensor:
+def hungarian_training_loss(pred: dict[str, torch.Tensor], batch: dict[str, torch.Tensor], loss_config: LossConfig | None = None, epoch: int | None = None) -> torch.Tensor:
     config = loss_config or LOSS_CONFIGS["component_set_gate_v1"]
-    loss, _stats = hungarian_loss_breakdown(pred, batch, config)
+    loss, _stats = hungarian_loss_breakdown(pred, batch, config, epoch)
     return loss
 
 
@@ -873,13 +991,21 @@ def average_loss_records(records: list[dict[str, Any]]) -> dict[str, Any]:
     loss = float(sum(float(record["loss"]) * int(record["batch_size"]) for record in records) / total_n)
     total_weighted = float(sum(weighted.values()))
     mask_depth_weighted = float(sum(weighted[name] for name in MASK_DEPTH_TERMS))
+    separation_weighted = float(sum(weighted[name] for name in COMPONENT_SEPARATION_TERMS))
     return {
         "loss": loss,
         "unweighted": unweighted,
         "weighted": weighted,
         "mask_depth_weighted_sum": mask_depth_weighted,
+        "component_separation_weighted_sum": separation_weighted,
         "total_weighted_sum": total_weighted,
         "mask_depth_weighted_ratio": mask_depth_weighted / total_weighted if total_weighted > 0.0 else math.nan,
+        "component_separation_weighted_ratio": separation_weighted / total_weighted if total_weighted > 0.0 else math.nan,
+        "component_mask_to_union_mask_weighted_ratio": weighted.get("component_mask", 0.0) / max(weighted.get("union_mask", 0.0), 1.0e-12),
+        "depth_foreground_to_background_unweighted_ratio": (
+            (unweighted.get("component_depth", 0.0) + unweighted.get("union_depth", 0.0))
+            / max(unweighted.get("component_depth_background", 0.0) + unweighted.get("union_depth_background", 0.0), 1.0e-12)
+        ),
     }
 
 
@@ -901,7 +1027,7 @@ def train_model(args: argparse.Namespace, arrays: Arrays, device: torch.device, 
             batch = move_batch(batch, device)
             optimizer.zero_grad(set_to_none=True)
             out = model(batch["signal"], batch["sensor_z"])
-            loss, stats = hungarian_loss_breakdown(out, batch, loss_config)
+            loss, stats = hungarian_loss_breakdown(out, batch, loss_config, epoch)
             loss.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), 5.0)
             optimizer.step()
@@ -913,7 +1039,7 @@ def train_model(args: argparse.Namespace, arrays: Arrays, device: torch.device, 
             for batch in val_loader:
                 batch = move_batch(batch, device)
                 out = model(batch["signal"], batch["sensor_z"])
-                _loss, stats = hungarian_loss_breakdown(out, batch, loss_config)
+                _loss, stats = hungarian_loss_breakdown(out, batch, loss_config, epoch)
                 stats["batch_size"] = int(batch["signal"].shape[0])
                 val_records.append(stats)
         train_terms = average_loss_records(train_records)
@@ -932,9 +1058,16 @@ def train_model(args: argparse.Namespace, arrays: Arrays, device: torch.device, 
                 "train_unweighted_terms": train_terms["unweighted"],
                 "train_weighted_terms": train_terms["weighted"],
                 "train_mask_depth_weighted_ratio": train_terms["mask_depth_weighted_ratio"],
+                "train_component_separation_weighted_ratio": train_terms["component_separation_weighted_ratio"],
+                "train_component_mask_to_union_mask_weighted_ratio": train_terms["component_mask_to_union_mask_weighted_ratio"],
+                "train_depth_foreground_to_background_unweighted_ratio": train_terms["depth_foreground_to_background_unweighted_ratio"],
                 "val_unweighted_terms": val_terms["unweighted"],
                 "val_weighted_terms": val_terms["weighted"],
                 "val_mask_depth_weighted_ratio": val_terms["mask_depth_weighted_ratio"],
+                "val_component_separation_weighted_ratio": val_terms["component_separation_weighted_ratio"],
+                "val_component_mask_to_union_mask_weighted_ratio": val_terms["component_mask_to_union_mask_weighted_ratio"],
+                "val_depth_foreground_to_background_unweighted_ratio": val_terms["depth_foreground_to_background_unweighted_ratio"],
+                "effective_loss_weights": train_records[-1]["effective_weights"] if train_records else scheduled_loss_weights(loss_config, epoch),
                 "best_epoch": best_epoch,
                 "best_val_loss": best_val_loss,
             }
@@ -1096,6 +1229,135 @@ def decide_rebalance_gate(history: list[dict[str, Any]], split_metrics: dict[str
     }
 
 
+def compare_sample_rows(current_rows: list[dict[str, Any]], previous_path: Path, label: str) -> dict[str, Any]:
+    previous = read_json(previous_path)
+    prev_rows = {str(row["sample_id"]): row for row in previous["sample_metrics"]}
+    rows = []
+    for row in current_rows:
+        sample_id = str(row["sample_id"])
+        old = prev_rows[sample_id]
+        rows.append(
+            {
+                "sample_id": sample_id,
+                "split": str(row["split"]),
+                "component_count": int(row["component_count"]),
+                "separation_type": str(row["separation_type"]),
+                "topology_relation": str(row["topology_relation"]),
+                "merged_previous": bool(old["merged_sample"]),
+                "merged_current": bool(row["merged_sample"]),
+                "newly_merged": bool((not old["merged_sample"]) and row["merged_sample"]),
+                "recovered_from_merged": bool(old["merged_sample"] and not row["merged_sample"]),
+                "component_mask_dice_delta": float(row["component_mask_dice_mean"]) - float(old["component_mask_dice_mean"]),
+                "union_mask_dice_delta": float(row["union_mask_dice"]) - float(old["union_mask_dice"]),
+                "depth_grid_rmse_delta_m": float(row["depth_grid_rmse_m"]) - float(old["depth_grid_rmse_m"]),
+                "component_recall_delta": float(row["component_recall"]) - float(old["component_recall"]),
+                "pred_component_count_delta": int(row["pred_component_count"]) - int(old["pred_component_count"]),
+            }
+        )
+
+    def aggregate(subset: list[dict[str, Any]]) -> dict[str, Any]:
+        if not subset:
+            return {"sample_count": 0}
+        return {
+            "sample_count": len(subset),
+            "newly_merged_rate": sum(bool(item["newly_merged"]) for item in subset) / len(subset),
+            "recovered_from_merged_rate": sum(bool(item["recovered_from_merged"]) for item in subset) / len(subset),
+            "component_mask_dice_delta_mean": float(np.mean([float(item["component_mask_dice_delta"]) for item in subset])),
+            "union_mask_dice_delta_mean": float(np.mean([float(item["union_mask_dice_delta"]) for item in subset])),
+            "depth_grid_rmse_delta_m_mean": float(np.mean([float(item["depth_grid_rmse_delta_m"]) for item in subset])),
+        }
+
+    test_rows = [row for row in rows if row["split"] == "test"]
+    return {
+        "label": label,
+        "comparison_path": str(previous_path),
+        "test": {
+            "overall": aggregate(test_rows),
+            "by_component_count": {str(key): aggregate([row for row in test_rows if int(row["component_count"]) == int(key)]) for key in sorted({row["component_count"] for row in test_rows})},
+            "by_separation": {str(key): aggregate([row for row in test_rows if row["separation_type"] == key]) for key in sorted({row["separation_type"] for row in test_rows})},
+            "by_topology": {str(key): aggregate([row for row in test_rows if row["topology_relation"] == key]) for key in sorted({row["topology_relation"] for row in test_rows})},
+            "newly_merged_samples": [row for row in test_rows if row["newly_merged"]],
+            "recovered_from_merged_samples": [row for row in test_rows if row["recovered_from_merged"]],
+        },
+    }
+
+
+def decide_component_separation_gate(
+    history: list[dict[str, Any]],
+    split_metrics: dict[str, Any],
+    comparison_25_10: dict[str, Any],
+    comparison_25_11: dict[str, Any],
+) -> dict[str, Any]:
+    first_train = float(history[0]["train_loss"])
+    final_train = float(history[-1]["train_loss"])
+    best_val = min(float(row["val_loss"]) for row in history)
+    test = split_metrics["test"]
+    d10 = comparison_25_10["test_deltas"]
+    d11 = comparison_25_11["test_deltas"]
+
+    merged_delta_vs_25_11 = float(d11["merged_rate"]["delta"])
+    recall_delta_vs_25_11 = float(d11["component_recall"]["delta"])
+    missed_delta_vs_25_11 = float(d11["missed_rate"]["delta"])
+    extra_delta_vs_25_11 = float(d11["extra_rate"]["delta"])
+    component_dice_delta_vs_25_10 = float(d10["component_mask_dice_mean"]["delta"])
+    component_dice_delta_vs_25_11 = float(d11["component_mask_dice_mean"]["delta"])
+    union_dice_delta_vs_25_11 = float(d11["union_mask_dice_mean"]["delta"])
+    depth_delta_vs_25_11 = float(d11["depth_grid_rmse_m_mean"]["delta"])
+    depth_delta_vs_25_10 = float(d10["depth_grid_rmse_m_mean"]["delta"])
+    three_component = test.get("groups", {}).get("component_count", {}).get("3", {})
+    three_component_still_merged = bool(three_component and float(three_component.get("merged_rate", 0.0)) >= 0.75)
+
+    loss_descended = final_train < 0.85 * first_train and best_val < first_train
+    merged_clearly_improved = merged_delta_vs_25_11 <= -0.25 and float(test["merged_rate"]) <= 0.65
+    merged_somewhat_improved = merged_delta_vs_25_11 <= -0.10
+    component_or_depth_improved = component_dice_delta_vs_25_10 >= 0.0 or depth_delta_vs_25_11 <= -0.00010
+    recall_not_collapsed = recall_delta_vs_25_11 >= -0.08 and float(test["component_recall"]) >= 0.75
+    missed_extra_not_collapsed = missed_delta_vs_25_11 <= 0.08 and extra_delta_vs_25_11 <= 0.08
+    depth_close_to_25_10 = depth_delta_vs_25_10 <= 0.00015
+    severe_depth_worse = depth_delta_vs_25_11 > 0.00005
+
+    if (
+        loss_descended
+        and merged_clearly_improved
+        and component_or_depth_improved
+        and recall_not_collapsed
+        and missed_extra_not_collapsed
+    ):
+        decision = "IMPROVED"
+        next_route = "A. enter 25.13 topology-aware / three-component focused training gate, no baseline transition"
+    elif loss_descended and merged_somewhat_improved and recall_not_collapsed and missed_extra_not_collapsed:
+        decision = "PARTIAL"
+        next_route = "B. enter 25.12b targeted failure audit for separation penalty and depth foreground loss"
+    else:
+        decision = "FAIL"
+        next_route = "C. rollback to 25.10 loss mainline and redesign component raster/depth targets before further training"
+
+    return {
+        "decision": decision,
+        "next_route": next_route,
+        "criteria": {
+            "loss_descended": loss_descended,
+            "merged_clearly_improved": merged_clearly_improved,
+            "merged_somewhat_improved": merged_somewhat_improved,
+            "component_or_depth_improved": component_or_depth_improved,
+            "recall_not_collapsed": recall_not_collapsed,
+            "missed_extra_not_collapsed": missed_extra_not_collapsed,
+            "depth_close_to_25_10": depth_close_to_25_10,
+            "severe_depth_worse": severe_depth_worse,
+            "three_component_still_merged": three_component_still_merged,
+            "merged_rate_delta_vs_25_11": merged_delta_vs_25_11,
+            "component_recall_delta_vs_25_11": recall_delta_vs_25_11,
+            "missed_rate_delta_vs_25_11": missed_delta_vs_25_11,
+            "extra_rate_delta_vs_25_11": extra_delta_vs_25_11,
+            "component_mask_dice_delta_vs_25_10": component_dice_delta_vs_25_10,
+            "component_mask_dice_delta_vs_25_11": component_dice_delta_vs_25_11,
+            "union_mask_dice_delta_vs_25_11": union_dice_delta_vs_25_11,
+            "depth_grid_rmse_delta_vs_25_10_m": depth_delta_vs_25_10,
+            "depth_grid_rmse_delta_vs_25_11_m": depth_delta_vs_25_11,
+        },
+    }
+
+
 def update_registry_note(path: Path, gate_manifest: dict[str, Any]) -> None:
     text = path.read_text(encoding="utf-8")
     marker = f"## {DATASET_ID}"
@@ -1133,8 +1395,15 @@ def write_summary(path: Path, payload: dict[str, Any]) -> None:
     test = payload["metrics_by_split"]["test"]
     val = payload["metrics_by_split"]["val"]
     comparison = payload.get("comparison_to_25_10", {})
+    comparison_25_11 = payload.get("comparison_to_25_11", {})
     deltas = comparison.get("test_deltas", {})
-    title = "25.11 Mask/Depth Loss Rebalance Training" if payload["stage"] == "25.11" else "25.10 Surface Multi-Pit Component-Set Training Gate"
+    deltas_25_11 = comparison_25_11.get("test_deltas", {})
+    if payload["stage"] == "25.12":
+        title = "25.12 Component-Separation-Aware Rebalance Training"
+    elif payload["stage"] == "25.11":
+        title = "25.11 Mask/Depth Loss Rebalance Training"
+    else:
+        title = "25.10 Surface Multi-Pit Component-Set Training Gate"
     lines = [
         f"# {title}",
         "",
@@ -1150,6 +1419,9 @@ def write_summary(path: Path, payload: dict[str, Any]) -> None:
         f"- best_val_loss: `{payload['training']['best_val_loss']:.6f}`",
         f"- final_train_mask_depth_weighted_ratio: `{fmt_metric(payload['training']['final_train_mask_depth_weighted_ratio'])}`",
         f"- final_val_mask_depth_weighted_ratio: `{fmt_metric(payload['training']['final_val_mask_depth_weighted_ratio'])}`",
+        f"- final_train_component_separation_weighted_ratio: `{fmt_metric(payload['training'].get('final_train_component_separation_weighted_ratio'))}`",
+        f"- final_val_component_separation_weighted_ratio: `{fmt_metric(payload['training'].get('final_val_component_separation_weighted_ratio'))}`",
+        f"- final_train_component_mask_to_union_mask_weighted_ratio: `{fmt_metric(payload['training'].get('final_train_component_mask_to_union_mask_weighted_ratio'))}`",
         "",
         "## Validation Metrics",
         "",
@@ -1181,6 +1453,16 @@ def write_summary(path: Path, payload: dict[str, Any]) -> None:
         f"- center_error_delta_m: `{fmt_metric(deltas.get('center_error_m_mean', {}).get('delta'), 9)}`",
         f"- lwd_relative_error_delta: `{fmt_metric(deltas.get('lwd_relative_error_mean', {}).get('delta'))}`",
         f"- depth_grid_RMSE_delta_m: `{fmt_metric(deltas.get('depth_grid_rmse_m_mean', {}).get('delta'), 9)}`",
+        "",
+        "## 25.11 Comparison",
+        "",
+        f"- component_recall_delta: `{fmt_metric(deltas_25_11.get('component_recall', {}).get('delta'))}`",
+        f"- missed_rate_delta: `{fmt_metric(deltas_25_11.get('missed_rate', {}).get('delta'))}`",
+        f"- extra_rate_delta: `{fmt_metric(deltas_25_11.get('extra_rate', {}).get('delta'))}`",
+        f"- merged_rate_delta: `{fmt_metric(deltas_25_11.get('merged_rate', {}).get('delta'))}`",
+        f"- component_mask_dice_delta: `{fmt_metric(deltas_25_11.get('component_mask_dice_mean', {}).get('delta'))}`",
+        f"- union_mask_dice_delta: `{fmt_metric(deltas_25_11.get('union_mask_dice_mean', {}).get('delta'))}`",
+        f"- depth_grid_RMSE_delta_m: `{fmt_metric(deltas_25_11.get('depth_grid_rmse_m_mean', {}).get('delta'), 9)}`",
         "",
         "## Boundary",
         "",
@@ -1215,8 +1497,22 @@ def main() -> int:
         "empty": {split: empty_baseline(arrays, split) for split in ["train", "val", "test"]},
         "one_slot_prior": {split: one_slot_prior_baseline(arrays, split) for split in ["train", "val", "test"]},
     }
-    comparison = compare_to_previous(metrics_by_split, args.comparison_metrics) if args.loss_config == "mask_depth_rebalance_v1" else {}
-    gate = decide_rebalance_gate(history, metrics_by_split, comparison) if args.loss_config == "mask_depth_rebalance_v1" else decide_gate(history, metrics_by_split, baselines)
+    comparison = compare_to_previous(metrics_by_split, args.comparison_metrics) if args.loss_config in {"mask_depth_rebalance_v1", "component_separation_rebalance_v1"} else {}
+    comparison_25_11 = compare_to_previous(metrics_by_split, args.comparison_metrics_25_11) if args.loss_config == "component_separation_rebalance_v1" else {}
+    if args.loss_config == "component_separation_rebalance_v1":
+        gate = decide_component_separation_gate(history, metrics_by_split, comparison, comparison_25_11)
+    elif args.loss_config == "mask_depth_rebalance_v1":
+        gate = decide_rebalance_gate(history, metrics_by_split, comparison)
+    else:
+        gate = decide_gate(history, metrics_by_split, baselines)
+    sample_comparisons = (
+        {
+            "vs_25_10": compare_sample_rows(sample_rows, args.comparison_metrics, "25.10"),
+            "vs_25_11": compare_sample_rows(sample_rows, args.comparison_metrics_25_11, "25.11"),
+        }
+        if args.loss_config == "component_separation_rebalance_v1"
+        else {}
+    )
     split_counts = {split: int(indices.size) for split, indices in arrays.split_indices.items()}
     family_counts = dict(Counter(arrays.raw["component_shape_family"].astype(str).reshape(-1).tolist()))
     payload = {
@@ -1230,6 +1526,8 @@ def main() -> int:
         "route_decision": gate["next_route"],
         "criteria": gate["criteria"],
         "comparison_to_25_10": comparison,
+        "comparison_to_25_11": comparison_25_11,
+        "sample_comparisons": sample_comparisons,
         "data": {
             "n_samples": int(arrays.raw["sample_ids"].shape[0]),
             "split_counts": split_counts,
@@ -1251,6 +1549,9 @@ def main() -> int:
             "loss": loss_config.description,
             "loss_config": loss_config.name,
             "loss_weights": loss_config.weights,
+            "loss_effective_weights_final_epoch": scheduled_loss_weights(loss_config, args.epochs),
+            "union_warmup_epochs": loss_config.union_warmup_epochs,
+            "union_ramp_epochs": loss_config.union_ramp_epochs,
             "mask_supervision": loss_config.mask_supervision,
             "depth_supervision": loss_config.depth_supervision,
             "architecture_changed_from_25_10": False,
@@ -1273,9 +1574,15 @@ def main() -> int:
             "final_train_unweighted_terms": history[-1]["train_unweighted_terms"],
             "final_train_weighted_terms": history[-1]["train_weighted_terms"],
             "final_train_mask_depth_weighted_ratio": history[-1]["train_mask_depth_weighted_ratio"],
+            "final_train_component_separation_weighted_ratio": history[-1]["train_component_separation_weighted_ratio"],
+            "final_train_component_mask_to_union_mask_weighted_ratio": history[-1]["train_component_mask_to_union_mask_weighted_ratio"],
+            "final_train_depth_foreground_to_background_unweighted_ratio": history[-1]["train_depth_foreground_to_background_unweighted_ratio"],
             "final_val_unweighted_terms": history[-1]["val_unweighted_terms"],
             "final_val_weighted_terms": history[-1]["val_weighted_terms"],
             "final_val_mask_depth_weighted_ratio": history[-1]["val_mask_depth_weighted_ratio"],
+            "final_val_component_separation_weighted_ratio": history[-1]["val_component_separation_weighted_ratio"],
+            "final_val_component_mask_to_union_mask_weighted_ratio": history[-1]["val_component_mask_to_union_mask_weighted_ratio"],
+            "final_val_depth_foreground_to_background_unweighted_ratio": history[-1]["val_depth_foreground_to_background_unweighted_ratio"],
             "history": history,
         },
         "selection": selection,
@@ -1309,6 +1616,8 @@ def main() -> int:
         "gate_decision": gate["decision"],
         "route_decision": gate["next_route"],
         "loss_config": loss_config.name,
+        "model_capacity_expanded": False,
+        "component_set_representation_changed": False,
         "train_ready_candidate_consumed": True,
         "baseline_ready": False,
         "current_baseline_updated": False,
