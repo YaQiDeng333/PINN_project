@@ -1,0 +1,22 @@
+25.6 surface forward-refinement formal route decision
+
+decision: A. export surface forward-refinement inference artifact / runner
+formal_gates_pass: True
+CURRENT_BASELINE_unchanged: True
+multi_pit_accounting_ok: True
+target_subset_count: 82
+profile_improved: True
+dice_improved: True
+forward_residual_improved: True
+
+target_baseline_profile_rmse_mean_m: 0.000509518351056
+target_refined_profile_rmse_mean_m: 0.000220386413188
+target_oracle_profile_rmse_mean_m: 7.84896954944e-05
+target_baseline_Dice_mean: 0.480524080842
+target_refined_Dice_mean: 0.709451842351
+target_forward_residual_before_mean: 70.5944261489
+target_forward_residual_after_mean: 0.564105036956
+
+baseline_transition_allowed: false
+component_set_branch_status: future branch for multi-pit; does not block runner export.
+decision_matrix: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_forward_refinement_formal_decision_matrix.csv

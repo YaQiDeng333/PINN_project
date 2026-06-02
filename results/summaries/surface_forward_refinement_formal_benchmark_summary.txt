@@ -1,0 +1,40 @@
+25.6 surface forward-refinement formal benchmark
+
+fixed_protocol_replayed: true
+selected_surrogate: ridge_param_only_linear_alpha_10
+surrogate_family: F0_feature_space_consistency
+refinement_strategy: R1_low_dim_param_refinement
+lambda_param: 1
+hyperparameter_search_performed: false
+main_neural_training_performed: false
+COMSOL_run_performed: false
+data_npz_mutation_performed: false
+
+target_subset_count: 82
+negative_control_count: 16
+target_baseline_profile_rmse_mean_m: 0.000509518351056
+target_refined_profile_rmse_mean_m: 0.000220386413188
+target_oracle_profile_rmse_mean_m: 7.84896954944e-05
+target_baseline_Er_like_mean: 2.80015739379
+target_refined_Er_like_mean: 0.909941363416
+target_oracle_Er_like_mean: 0.28925522333
+target_baseline_IoU_mean: 0.32360140234
+target_refined_IoU_mean: 0.578523465369
+target_oracle_IoU_mean: 0.889664764117
+target_baseline_Dice_mean: 0.480524080842
+target_refined_Dice_mean: 0.709451842351
+target_oracle_Dice_mean: 0.940860104629
+target_feature_residual_before_mean: 70.5944261489
+target_feature_residual_after_mean: 0.564105036956
+
+rbc_like_control_baseline_rmse_mean_m: 0.000501181023155
+rbc_like_control_refined_rmse_mean_m: 0.000165198934316
+rbc_like_control_baseline_Dice_mean: 0.493556208833
+rbc_like_control_refined_Dice_mean: 0.689754743215
+multi_pit_handling: excluded_negative_control; no refinement applied; no RBC success credit.
+
+interpretation: formal benchmark confirms a surface forward-refinement candidate for rbc_representable_but_model_fail rows only; it is not a baseline replacement.
+metrics_csv: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_forward_refinement_formal_benchmark_metrics.csv
+by_split_csv: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_forward_refinement_formal_benchmark_by_split.csv
+by_shape_csv: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_forward_refinement_formal_benchmark_by_shape.csv
+failure_cases_csv: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_forward_refinement_formal_benchmark_failure_cases.csv

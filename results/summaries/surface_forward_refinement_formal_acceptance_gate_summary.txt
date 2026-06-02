@@ -1,0 +1,23 @@
+25.6 surface forward-refinement formal acceptance gates
+
+gate_counts: {'PASS': 10}
+all_gates_pass: True
+target_subset_count: 82
+target_baseline_profile_rmse_mean_m: 0.000509518351056
+target_refined_profile_rmse_mean_m: 0.000220386413188
+target_oracle_profile_rmse_mean_m: 7.84896954944e-05
+target_baseline_Er_like_mean: 2.80015739379
+target_refined_Er_like_mean: 0.909941363416
+target_baseline_IoU_mean: 0.32360140234
+target_refined_IoU_mean: 0.578523465369
+target_baseline_Dice_mean: 0.480524080842
+target_refined_Dice_mean: 0.709451842351
+target_forward_residual_before_mean: 70.5944261489
+target_forward_residual_after_mean: 0.564105036956
+
+rbc_like_control_baseline_rmse_mean_m: 0.000501181023155
+rbc_like_control_refined_rmse_mean_m: 0.000165198934316
+rbc_like_control_baseline_Dice_mean: 0.493556208833
+rbc_like_control_refined_Dice_mean: 0.689754743215
+multi_pit_policy: negative control only; no RBC refinement success credit.
+acceptance_gate_matrix: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_forward_refinement_formal_acceptance_gate_matrix.csv

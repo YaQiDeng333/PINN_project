@@ -1,5 +1,17 @@
 # 实验工作日志
 
+## 2026-06-02 Stage 25.6 surface forward-refinement formal benchmark
+
+- Scope: formalized the 25.5 `F0_feature_space_consistency + R1_low_dim_param_refinement` candidate as a no-baseline-transition benchmark. No COMSOL, no main neural training, no data/NPZ mutation, no checkpoint/preview/notes artifact, and no `CURRENT_BASELINE.md` update.
+- Preflight: confirmed `comsol_surface_shape_extension_pilot_v1` registry/manifest loading, 25.3 oracle/baseline/diagnosis metrics, 25.5 refinement metrics and gates, 20.85 baseline artifact manifest, RBC profile generator helpers, and reusable 25.5 scripts. The loader still verifies the ignored NPZ by sha256 and forbids latest/newest discovery.
+- Fixed protocol: replayed `ridge_param_only_linear_alpha_10`, `alpha=10.0`, `lambda_param=1.0`, `R1_low_dim_param_refinement`, frozen 20.85 six-parameter initialization, and `L_m/W_m/D_m/wLD/wWD/wLW` optimization. No surrogate-family, alpha, loss-weight, or optimizer hyperparameter search was performed.
+- Formal replay: per-sample formal benchmark metrics exactly matched the 25.5 refinement metrics on checked fields (`120` rows, max absolute difference `0.0`). Target subset remained `82` `rbc_representable_but_model_fail` rows.
+- Target results: baseline/refined/oracle profile RMSE was `0.000509518351056 / 0.000220386413188 / 0.0000784896954944 m`; Er-like was `2.80015739379 / 0.909941363416 / 0.28925522333`; IoU/Dice moved from `0.32360140234/0.480524080842` to `0.578523465369/0.709451842351`; forward residual moved from `70.5944261489` to `0.564105036956`.
+- Formal gates: all `10/10` gates passed. RBC-like control did not degrade (`RMSE 0.000501181023155 -> 0.000165198934316`, `Dice 0.493556208833 -> 0.689754743215`). Multi-pit / `rbc_not_representable` rows stayed negative controls with no RBC success credit.
+- Candidate report: the candidate applies to `rbc_representable_but_model_fail` only. It is frozen 20.85 baseline plus post-hoc parameter refinement, not a baseline replacement. Multi-pit still needs a future component-set branch.
+- Route decision: unique next step is `A. export surface forward-refinement inference artifact / runner`. `CURRENT_BASELINE.md` remains the 20.85 surface RBC baseline and is unchanged.
+- Review: independent read-only review passed with no must-fix. Residual risks are 17 target rows with local non-improvement modes and already-pass references worsening on mean RMSE; a future runner should guard against degrading already-good cases.
+
 ## 2026-06-02 Stage 25.5 surface feature-space forward-consistency refinement diagnostic
 
 - Scope: executed the bounded surface feature-space forward-consistency refinement diagnostic. No COMSOL, no main neural training, no data/NPZ mutation, no checkpoint/preview/notes artifact, and no `CURRENT_BASELINE.md` update. The only fitting was the allowed lightweight train-split feature-space ridge surrogate/scaler.

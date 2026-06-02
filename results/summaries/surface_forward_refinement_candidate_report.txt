@@ -1,0 +1,27 @@
+25.6 surface forward-refinement candidate report
+
+refinement_candidate_formed: True
+candidate_name: 25.6_F0_R1_surface_forward_refinement_candidate
+candidate_scope: rbc_representable_but_model_fail rows
+not_applicable_scope: multi-pit / rbc_not_representable / component_set representation failures
+baseline_relation: frozen 20.85 baseline plus post-hoc six-parameter refinement; model weights unchanged.
+why_not_baseline_transition: no CURRENT_BASELINE update was requested or allowed; this is a runtime refinement candidate needing a dedicated artifact/runner and later approval before any baseline discussion.
+
+target_role_counts: {'refinement_target': 82, 'already_pass_reference': 22, 'excluded_negative_control': 16}
+refinement_target_count: 82
+already_pass_reference_count: 22
+excluded_negative_control_count: 16
+negative_control_shapes: {'multi_pit_two_component_surface_defect': 16}
+
+target_baseline_profile_rmse_mean_m: 0.000509518351056
+target_refined_profile_rmse_mean_m: 0.000220386413188
+target_oracle_profile_rmse_mean_m: 7.84896954944e-05
+target_baseline_Er_like_mean: 2.80015739379
+target_refined_Er_like_mean: 0.909941363416
+target_baseline_IoU_Dice_mean: 0.32360140234/0.480524080842
+target_refined_IoU_Dice_mean: 0.578523465369/0.709451842351
+target_forward_residual_before_after: 70.5944261489 -> 0.564105036956
+
+inference_artifact_runner_value: yes; the candidate is worth a dedicated runner/export route, still without baseline transition.
+component_set_branch_needed_for_multi_pit: yes; multi-pit remains a representation branch, not a six-param refinement success.
+comparison_matrix: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_forward_refinement_candidate_comparison_matrix.csv

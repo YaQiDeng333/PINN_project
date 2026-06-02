@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-06-02 after Stage 25.6 surface forward-refinement formal benchmark
+
+Next step: run **A. export surface forward-refinement inference artifact / runner**. Keep it as a no-baseline-transition runtime artifact for the fixed 25.6 candidate: no COMSOL, no main neural training, no data/NPZ mutation, and no `CURRENT_BASELINE.md` update unless a separate baseline-transition request is explicitly approved later.
+
+25.6 replayed the fixed 25.5 protocol exactly: `ridge_param_only_linear_alpha_10`, `alpha=10.0`, `lambda_param=1.0`, frozen 20.85 six-parameter initialization, and post-hoc optimization over `L_m/W_m/D_m/wLD/wWD/wLW`. The formal target subset is still the 82 `rbc_representable_but_model_fail` rows. Baseline/refined/oracle profile RMSE is `0.000509518351056 / 0.000220386413188 / 0.0000784896954944 m`, Er-like is `2.80015739379 / 0.909941363416 / 0.28925522333`, and IoU/Dice improves from `0.32360140234/0.480524080842` to `0.578523465369/0.709451842351`.
+
+The runner export must preserve the same boundaries: refinement inputs are observed `delta_b` features plus frozen 20.85 predicted six params; labels are not runtime inputs; multi-pit remains a future `component_set` branch; already-pass references need a guard because they are monitoring-only and can degrade under unconditional refinement.
+
 ## 2026-06-02 after Stage 25.5 surface feature-space forward-consistency refinement diagnostic
 
 Next step: run **A. formal no-baseline-transition benchmark for the 25.5 F0/R1 refinement candidate**. Keep it as a benchmark candidate audit: no COMSOL, no main neural training unless separately approved, no data/NPZ mutation, and no `CURRENT_BASELINE.md` update.

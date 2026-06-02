@@ -1,5 +1,13 @@
 # PINN 优化路线
 
+## 2026-06-02 route sync: 25.6 surface forward-refinement formal benchmark
+
+25.6 converts the 25.5 diagnostic into a formal no-baseline-transition benchmark. The core result is that the fixed `F0_feature_space_consistency + R1_low_dim_param_refinement` protocol reproduces 25.5 exactly without new hyperparameter search: `ridge_param_only_linear_alpha_10`, `alpha=10.0`, `lambda_param=1.0`, frozen 20.85 predicted six params, and post-hoc optimization over `L/W/D/wLD/wWD/wLW`.
+
+The candidate's real scope is narrow and useful: `rbc_representable_but_model_fail`. On those 82 rows, baseline/refined/oracle profile RMSE is `0.000509518351056 / 0.000220386413188 / 0.0000784896954944 m`, Er-like is `2.80015739379 / 0.909941363416 / 0.28925522333`, IoU/Dice improves from `0.32360140234/0.480524080842` to `0.578523465369/0.709451842351`, and forward residual falls from `70.5944261489` to `0.564105036956`. Formal gates are `10/10` PASS and RBC-like control does not degrade.
+
+This still is not a baseline transition. `CURRENT_BASELINE.md` remains the 20.85 surface RBC baseline, multi-pit remains a `component_set` representation branch, and already-pass references need runner-time protection because unconditional refinement can degrade rows that were already good. The unique next route is to export a dedicated surface forward-refinement inference artifact / runner with those safeguards.
+
 ## 2026-06-02 route sync: 25.5 surface feature-space forward-consistency refinement diagnostic
 
 25.5 proves that the 82 RBC-representable surface shape-extension failures are not just frozen-inverse failures; they can be materially repaired by a no-baseline-transition `F0_feature_space_consistency + R1_low_dim_param_refinement` diagnostic. The selected surrogate is `ridge_param_only_linear_alpha_10`, fit on train rows and selected on validation only. Test-time refinement uses observed `delta_b` features plus frozen 20.85 six-parameter predictions, not labels.

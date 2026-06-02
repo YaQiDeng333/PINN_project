@@ -1,0 +1,7 @@
+option,selected,decision,evidence,blocked_by
+A. export surface forward-refinement inference artifact / runner,True,selected,formal_gates_pass=True; CURRENT_BASELINE_unchanged=True; target_count=82; profile_improved=True; dice_improved=True; forward_residual_improved=True,
+B. build component-set branch for multi-pit,False,future_branch,multi_pit_accounting_ok=True; multi-pit remains excluded negative control,does not block A because target failures are RBC-representable model-fail rows
+C. train neural forward surrogate,False,defer,fixed F0/R1 candidate passed formal gates without neural surrogate training,main neural training is outside 25.6 and not needed before runner export
+D. profile-basis decoder plan,False,not_selected,profile_improved=True; dice_improved=True,25.6 candidate addresses the intended RBC-representable subset
+E. stop refinement and report only,False,not_selected,formal_gates_pass=True,formal benchmark supports a next export/runner step
+F. baseline transition request,False,forbidden_this_stage,CURRENT_BASELINE.md remains unchanged and user did not authorize a baseline transition,requires explicit user confirmation and separate baseline-transition review
