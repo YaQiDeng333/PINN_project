@@ -1,5 +1,15 @@
 # 实验工作日志
 
+## 2026-06-03 Stage 25.13b surface multi-pit generator/label schema audit after target-v2 collapse
+
+- Scope: audited generator/label schema after the 25.13 target-v2 `FAIL`. This stage read the 25.12b redesign metrics, 25.13 gate metrics/manifest, and the explicit `comsol_surface_multipit_component_set_pilot_v1` manifest/NPZ. It did not train, tune losses, run COMSOL, mutate data/NPZ files, expand model capacity, export checkpoints/previews/notes, or update `CURRENT_BASELINE.md`.
+- Main finding: near-empty mask collapse is not caused by empty v2 components or broad generator corruption. Target v2 clears duplicate ownership (`297 -> 0`) and overlap-depth-conflict (`271 -> 0`) while keeping existing component masks non-empty.
+- Positive-support audit: active components `236`; v2 foreground pixels mean/min/p05 are `99.851695/47/58.750000`; v2 positive fraction mean is only `0.012188928` of the `64x128` grid; v2/v1 shrink ratio mean/min is `0.985320/0.746032`; empty existing v2 masks `0`, tiny existing v2 masks `<20 px` `0`, and shrink ratio `<0.80` occurs in only `3` components.
+- Collapse evidence from 25.13: recall `0.674419`, missed `0.325581`, extra `0.292683`, merged `0.000000`, component Dice `0.005536`, union Dice `0.002829`, depth RMSE `0.000242891 m`. The zero merged rate is a near-empty mask artifact, not valid component separation.
+- Diagnosis: hard binary ownership-resolved labels remain too sparse and unsupported for stable component-local mask learning. The current schema lacks component-local soft mask/SDF, valid-region masks, overlap-region masks, contact-boundary masks, and ownership/boundary confidence.
+- Acceptance decision: `NEEDS_PINN_LABEL_DERIVATION_V3`; existing raw masks/depths and geometry labels are sufficient to derive v3 labels inside `PINN_project`, so no COMSOL generator/export fix is required yet.
+- Route decision: unique next step is `A. enter 25.14 label-v3 derivation + validator, no training`. Do not continue loss tuning and do not discuss baseline transition.
+
 ## 2026-06-03 Stage 25.13 surface multi-pit component-set target-v2 training gate
 
 - Scope: executed the target-v2 training gate on `comsol_surface_multipit_component_set_pilot_v1`. The architecture, fixed `K=3` component-set representation, fixed split `72/20/20`, Hungarian matching, and `component_set_gate_v1` 25.10 loss mainline were kept unchanged. The 25.11/25.12 rebalance stacks were not used.

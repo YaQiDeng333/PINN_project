@@ -1,5 +1,13 @@
 # PINN 优化路线
 
+## 2026-06-03 route sync: 25.13b surface multi-pit generator/label schema audit after target-v2 collapse
+
+25.13b separates two things that looked mixed after 25.13. The ownership transform is valid as a label-cleaning step, but it is not enough as a training target: it clears duplicate pixels without giving the model richer component-local raster support.
+
+The evidence rules out the simplest generator-corruption story. V2 existing components are not empty: active components are `236`, v2 foreground pixels average `99.851695`, the minimum is `47`, and only `3` components shrink below `0.80` of their v1 area. The problem is that those targets occupy only `0.012188928` of the `64x128` grid on average and remain hard binary masks. That explains why 25.13 reached `merged=0.000000` only by near-empty mask collapse (`component Dice=0.005536`, `union Dice=0.002829`).
+
+The route implication is `NEEDS_PINN_LABEL_DERIVATION_V3`: derive soft/valid-region labels in `PINN_project` before any new training. Label v3 should add soft component masks or SDF, component valid-region masks, overlap/contact masks, and component depth targets with valid regions while keeping union OR/max for evaluation. `CURRENT_BASELINE.md` remains unchanged.
+
 ## 2026-06-03 route sync: 25.13 surface multi-pit component-set target-v2 training gate
 
 25.13 tests whether the 25.12b ownership fix is enough when plugged into the stable 25.10 loss mainline. The answer is no: target v2 is label-cleaning useful, but not a viable training target by itself under the current raster/depth supervision.

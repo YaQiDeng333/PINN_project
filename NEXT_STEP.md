@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-06-03 after Stage 25.13b surface multi-pit generator/label schema audit after target-v2 collapse
+
+Next step: run **A. 25.14 label-v3 derivation + validator, no training**. The 25.13b audit shows the raw labels are sufficient to derive better supervision inside `PINN_project`; do not return to COMSOL yet and do not continue loss tuning.
+
+The core mechanism is sparse hard-target collapse. Target v2 does exactly what it promised (`duplicate ownership 297 -> 0`, overlap-depth-conflict `271 -> 0`), but each component still averages only about `99.85` positive pixels on a `64x128` grid, or `0.012188928` positive fraction. Existing slots are not empty, so the failure is not missing masks; the problem is that hard binary component-local labels lack soft boundary/context support.
+
+25.14 should derive and validate label schema v3 from existing raw labels: preserve raw component masks and ownership maps, add soft mask or SDF targets, component valid-region masks, overlap-region masks, contact-boundary masks, and component depth targets with valid regions. Keep union mask/depth as OR/max evaluation targets. `CURRENT_BASELINE.md` remains unchanged.
+
 ## 2026-06-03 after Stage 25.13 surface multi-pit component-set target-v2 training gate
 
 Next step: run **C. return to generator/label schema; do not continue loss tuning**. Target v2 successfully resolves duplicated ownership in the labels, but the current component-level supervision still does not produce usable raster masks under the 25.10 loss mainline.
