@@ -3482,3 +3482,13 @@ Review agent 已完成只读复核，无 must-fix。review 建议把 audit/decis
 - single vs dual：`mag_x_5line_only` test total MAE `0.504394`、shape F1 `0.500000`、catastrophic `3/5`；`dual_mag_xy_5line` 退化到 total MAE `0.623999`、catastrophic `3/5`。`mag_x_9line_only` test total MAE `0.499454`、shape F1 `0.600000`、catastrophic `2/5`；`dual_mag_xy_9line` 退化到 total MAE `0.558467`、shape F1 `0.500000`、catastrophic `3/5`。
 - route decision：dual magnetization 提供非冗余信号，但没有稳定优于 single-mag reference；23.5 不推荐进入 23.6 multi-magnetization formal training gate。唯一下一步是保留 abstention-only route 并暂停 internal refinement，除非后续重新定义 observation / label 或提出新的诊断假设。
 - review：独立只读 review 通过，无 must-fix；确认无 COMSOL、无 data/NPZ mutation、无 label-as-input leakage、无 forbidden staged artifacts。`CURRENT_BASELINE.md` 保持 surface / near-surface true 3D RBC baseline 不变。
+## 2026-06-03 Stage 25.14 surface RBC targeted +120 top-up calibration
+
+- scope: top-up pack generation/validation branch only. No training, no `CURRENT_BASELINE.md` update, no assembled dataset creation, and no `v3_240 + topup_v1_120` assembly in this stage.
+- plan: generated `comsol_true_3d_rbc_surface_targeted_topup_v1_120` plan with 120 rows, split `80/20/20`, role quotas `balanced_interior=60`, `hard_depth_aspect=24`, `edge_position=24`, `old_distribution_anchor=12`, `sensor_z_m=0.008`, axis order `Bx,By,Bz`, scan lines `[-0.001,0.0,0.001]`, and 201 x points.
+- implementation: added targeted plan, validation, and route-decision scripts in PINN; added chunked COMSOL top-up orchestrator with per-worker temp/log/inventory/partial-NPZ isolation in COMSOL_Multiphysics_MCP.
+- dry run: `workers=4`, 24-row calibration dry-run split to `chunk_00..chunk_03` as expected.
+- calibration: real `workers=1`, 24 rows, mesh pre-stage `24/24` pass, COMSOL forward `22/24` pass. Two sample-level geometry blockers were classified as `sample_geometry_failure`: `surface_rbc_targeted_008_balanced_interior_sharp_medium_narrow` and `surface_rbc_targeted_022_balanced_interior_round_deep_balanced`.
+- blocker decision: calibration is not zero-failure, so full generation was not run. `workers=2/4` calibration and full 120 are blocked until same-signature replacements are proposed and rerun.
+- replacement signatures: 008 requires `balanced_interior|medium|narrow|sharp|interior`; 022 requires `balanced_interior|deep|balanced|round|interior`. Replacement must preserve role, depth_bin, aspect_bin, curvature_template, and edge_position_bin.
+- route decision: `can_enter_plus120_training_gate=false`; `creates_assembled_dataset=false`; `CURRENT_BASELINE_update=false`.

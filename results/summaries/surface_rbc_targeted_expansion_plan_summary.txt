@@ -1,0 +1,47 @@
+surface RBC targeted expansion plan summary
+
+dataset_id: comsol_true_3d_rbc_surface_targeted_topup_v1_120
+source_dataset_id: comsol_true_3d_rbc_imported_watertight_pilot_v3_240
+dataset_role: topup_source
+planned_N: 120
+split_counts: {'train': 80, 'val': 20, 'test': 20}
+targeted_role_counts: {'balanced_interior': 60, 'hard_depth_aspect': 24, 'edge_position': 24, 'old_distribution_anchor': 12}
+depth_counts: {'shallow': 32, 'medium': 44, 'deep': 44}
+aspect_counts: {'compact': 32, 'balanced': 32, 'wide': 24, 'narrow': 32}
+curvature_counts: {'sharp': 36, 'round': 30, 'boxy': 24, 'LD_dominant': 18, 'WD_dominant': 12}
+edge_position_counts: {'interior': 96, 'near_left_roi': 6, 'near_right_roi': 6, 'near_lower_scan_window': 6, 'near_upper_scan_window': 6}
+sensor_z_m: 0.008
+axis_order: [Bx, By, Bz]
+scan_line_y_m: [-0.001, 0.0, 0.001]
+sensor_x_count: 201
+
+Boundary:
+- exact_piao_rbc=False; RBC-style / Piao-inspired approximation only.
+- This plan excludes multi-pit, internal/buried, and free-form polygon branches.
+- This plan creates only a top-up source pack; assembly with v3_240 is a later training gate.
+
+Coverage gates:
+- targeted_role balanced_interior: 60/60 met=True
+- targeted_role hard_depth_aspect: 24/24 met=True
+- targeted_role edge_position: 24/24 met=True
+- targeted_role old_distribution_anchor: 12/12 met=True
+- split train: 80/80 met=True
+- split val: 20/20 met=True
+- split test: 20/20 met=True
+- edge_position_bin interior: 96/96 met=True
+- edge_position_bin near_left_roi: 6/6 met=True
+- edge_position_bin near_right_roi: 6/6 met=True
+- edge_position_bin near_lower_scan_window: 6/6 met=True
+- edge_position_bin near_upper_scan_window: 6/6 met=True
+- depth_bin deep: 44/44 met=True
+- depth_bin medium: 44/44 met=True
+- depth_bin shallow: 32/32 met=True
+- aspect_bin balanced: 32/32 met=True
+- aspect_bin compact: 32/32 met=True
+- aspect_bin narrow: 32/32 met=True
+- aspect_bin wide: 24/24 met=True
+- curvature_template LD_dominant: 18/18 met=True
+- curvature_template WD_dominant: 12/12 met=True
+- curvature_template boxy: 24/24 met=True
+- curvature_template round: 30/30 met=True
+- curvature_template sharp: 36/36 met=True

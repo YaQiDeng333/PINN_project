@@ -840,3 +840,10 @@ assembled dataset 为 `comsol_internal_defect_multi_scan_direction_pack_v1`，`d
 23.3 证明 y_scan 不是冗余观测：D1/D2 paired completeness 为 `30/30`，assembled `delta_b=(60,3,2,9,201)`，D1/D2 的 y/x RMS 接近 1 且方向相关性低。但轻量 probe 没有证明 dual-direction 比 x-only 更稳：best validation-selected test config 是 `single_x_9line`，而 dual_xy_5line 只改善 center tail、牺牲 burial 与 shape，dual_xy_9line 只改善 burial tail、牺牲 center 与 shape。
 
 因此当前瓶颈不应再归因于“缺一个正交扫描方向”本身。下一步应检查更高信息量的源/磁化观测轴；internal branch 继续是 diagnostic / benchmark branch，不是 stable inference model，也不进入 `CURRENT_BASELINE.md`。
+## 2026-06-03 after Stage 25.14 surface RBC targeted top-up calibration
+
+Only next step: create deterministic replacements for the two calibration blockers, preserving the exact coverage signatures, then rerun calibration from zero.
+
+Stage 25.14 generated the 120-row top-up plan and verified the COMSOL orchestrator dry-run/chunk isolation, but real `workers=1` calibration stopped the route: `22/24` samples passed and two sample-level geometry failures were classified as `sample_geometry_failure`. The required replacement signatures are `balanced_interior|medium|narrow|sharp|interior` for `surface_rbc_targeted_008_balanced_interior_sharp_medium_narrow` and `balanced_interior|deep|balanced|round|interior` for `surface_rbc_targeted_022_balanced_interior_round_deep_balanced`.
+
+Do not run full 120, do not run `+120 training gate`, and do not assemble `v3_240 + topup_v1_120` until calibration is zero-failure and validation passes. `CURRENT_BASELINE.md` remains unchanged.

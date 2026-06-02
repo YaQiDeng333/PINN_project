@@ -1,0 +1,10 @@
+surface RBC targeted expansion route decision summary
+
+calibration_pass: False
+full_120_success: False
+validation_pass: False
+can_enter_plus120_training_gate: False
+recommend_continue_plus240_plus480: False
+creates_assembled_dataset: false
+CURRENT_BASELINE_update: false
+next_step: stop; write blocker and replacement proposal before any full generation

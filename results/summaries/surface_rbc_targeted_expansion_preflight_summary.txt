@@ -1,0 +1,11 @@
+surface RBC targeted expansion preflight summary
+
+pinn_root: True
+comsol_root: True
+current_baseline_20_85: True
+source_registry_entry: True
+source_manifest_exists: True
+forbidden_staged_clear: True
+target_dataset_id: comsol_true_3d_rbc_surface_targeted_topup_v1_120
+source_dataset_id: comsol_true_3d_rbc_imported_watertight_pilot_v3_240
+boundary: top-up source only; no training; CURRENT_BASELINE.md unchanged by this script

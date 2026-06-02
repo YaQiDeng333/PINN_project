@@ -1,0 +1,4 @@
+decision_option,selected,condition,observed,next_step
+A_enter_separate_plus120_training_gate,False,"calibration pass, full 120 success, validation pass, no systemic blocker",calibration=False; full=False; validation=False; n=0; systemic=False,stop; write blocker and replacement proposal before any full generation
+B_retry_or_replace_missing_topup_rows,False,calibration pass but full top-up incomplete,full_success=False,same-signature replacement only
+C_stop_for_blocker,True,calibration failure or systemic blocker,calibration=False; systemic=False,do not run full generation
