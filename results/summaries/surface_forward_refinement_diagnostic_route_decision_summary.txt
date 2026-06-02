@@ -1,0 +1,26 @@
+25.5 surface forward-refinement diagnostic route decision
+
+decision: A. lock 25.5 F0/R1 candidate for a formal no-baseline-transition benchmark
+selected_surrogate: ridge_param_only_linear_alpha_10
+target_subset_count: 82
+refinement_candidate_formed: True
+primary_gates_pass: True
+secondary_gates_pass: True
+failure_gates_pass: True
+forward_residual_improved: True
+profile_improved: True
+mask_improved: True
+multi_pit_accounting_ok: True
+CURRENT_BASELINE_unchanged: True
+
+target_baseline_profile_rmse_mean_m: 0.000509518351056
+target_refined_profile_rmse_mean_m: 0.000220386413188
+target_baseline_Dice_mean: 0.480524080842
+target_refined_Dice_mean: 0.709451842351
+target_feature_residual_before_mean: 70.5944261489
+target_feature_residual_after_mean: 0.564105036956
+
+baseline_transition_allowed: false
+COMSOL_allowed_next_without_new_plan: false
+main_neural_training_allowed_next_without_new_plan: false
+decision_matrix: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_forward_refinement_diagnostic_decision_matrix.csv

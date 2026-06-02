@@ -1,0 +1,26 @@
+25.5 surface forward-refinement diagnostic review
+
+review_status: PASS
+must_fix_count: 0
+review_agent: independent read-only review agent
+review_scope: scripts and generated 25.5 summaries/metrics for surface feature-space forward-consistency refinement diagnostic
+
+checks:
+- New scripts are limited to the five requested 25.5 scripts.
+- Explicit registry/manifest loading is used for comsol_surface_shape_extension_pilot_v1; no latest/newest discovery was found.
+- No COMSOL execution, main neural training, data/NPZ mutation, checkpoint, preview, notes, or CURRENT_BASELINE.md update was found.
+- Surrogate fit uses train split only; validation is used for hyperparameter selection; test is final reporting only.
+- Test-time refinement objective uses observed delta_b-derived features and frozen 20.85 predicted six params only.
+- Labels/oracle values are used only for surrogate train targets, validation selection metrics, and final metrics.
+- Multi-pit rows remain excluded_negative_control with no refinement and no success credit.
+- Acceptance gates and route decision are consistent with generated metrics.
+
+review_evidence:
+- selected_surrogate: ridge_param_only_linear_alpha_10
+- target_role_counts: refinement_target=82, already_pass_reference=22, excluded_negative_control=16
+- acceptance_gates: 10 PASS, 0 FAIL
+- route_decision: A. lock 25.5 F0/R1 candidate for a formal no-baseline-transition benchmark
+
+residual_risks:
+- Review did not rerun scripts, train, run COMSOL, or regenerate outputs.
+- Staging scope must remain explicit because result files are ignored and require git add -f.

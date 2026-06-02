@@ -1,0 +1,19 @@
+candidate_id,descriptor_kind,feature_mode,alpha,train_sample_count,val_sample_count,train_feature_mse_norm,val_feature_mse_norm,val_feature_rmse_norm,selected,selection_policy
+ridge_param_only_linear_alpha_0.0001,param_only,linear,0.0001,63,21,0.5585989959192403,0.90366370104513,0.950612276927418,False,minimum_validation_normalized_feature_mse; train_fit_only; no_test_selection
+ridge_param_only_linear_alpha_0.001,param_only,linear,0.001,63,21,0.5601788306433875,0.9018247010566457,0.9496445129924385,False,minimum_validation_normalized_feature_mse; train_fit_only; no_test_selection
+ridge_param_only_linear_alpha_0.01,param_only,linear,0.01,63,21,0.5619752353418999,0.8866264003357103,0.9416084113556497,False,minimum_validation_normalized_feature_mse; train_fit_only; no_test_selection
+ridge_param_only_linear_alpha_0.1,param_only,linear,0.1,63,21,0.5741037174099161,0.8412214472939222,0.9171812510588745,False,minimum_validation_normalized_feature_mse; train_fit_only; no_test_selection
+ridge_param_only_linear_alpha_1,param_only,linear,1.0,63,21,0.6152443704631841,0.7811249968709575,0.883812761206217,False,minimum_validation_normalized_feature_mse; train_fit_only; no_test_selection
+ridge_param_only_linear_alpha_10,param_only,linear,10.0,63,21,0.6765845562475326,0.7648782817421762,0.8745731997621332,True,minimum_validation_normalized_feature_mse; train_fit_only; no_test_selection
+ridge_param_profile_linear_alpha_0.0001,param_profile,linear,0.0001,63,21,0.5451395432822925,0.9213090794052553,0.9598484668973823,False,minimum_validation_normalized_feature_mse; train_fit_only; no_test_selection
+ridge_param_profile_linear_alpha_0.001,param_profile,linear,0.001,63,21,0.5464222077878081,0.9194676436614777,0.9588887545807792,False,minimum_validation_normalized_feature_mse; train_fit_only; no_test_selection
+ridge_param_profile_linear_alpha_0.01,param_profile,linear,0.01,63,21,0.549815372133377,0.9048165387260922,0.9512184495299133,False,minimum_validation_normalized_feature_mse; train_fit_only; no_test_selection
+ridge_param_profile_linear_alpha_0.1,param_profile,linear,0.1,63,21,0.5650364300240776,0.8645493048723738,0.9298114351159453,False,minimum_validation_normalized_feature_mse; train_fit_only; no_test_selection
+ridge_param_profile_linear_alpha_1,param_profile,linear,1.0,63,21,0.6056518558844934,0.8046204559088694,0.897006385656685,False,minimum_validation_normalized_feature_mse; train_fit_only; no_test_selection
+ridge_param_profile_linear_alpha_10,param_profile,linear,10.0,63,21,0.6716925385444676,0.7698320485588048,0.8774007343049155,False,minimum_validation_normalized_feature_mse; train_fit_only; no_test_selection
+ridge_param_profile_squared_alpha_0.0001,param_profile,squared,0.0001,63,21,0.4181280012017328,0.9847219521385504,0.9923315736882257,False,minimum_validation_normalized_feature_mse; train_fit_only; no_test_selection
+ridge_param_profile_squared_alpha_0.001,param_profile,squared,0.001,63,21,0.42476342652061627,0.97117136709315,0.9854802723003389,False,minimum_validation_normalized_feature_mse; train_fit_only; no_test_selection
+ridge_param_profile_squared_alpha_0.01,param_profile,squared,0.01,63,21,0.449878039944863,0.9432358186884177,0.9712032839155856,False,minimum_validation_normalized_feature_mse; train_fit_only; no_test_selection
+ridge_param_profile_squared_alpha_0.1,param_profile,squared,0.1,63,21,0.49938067671873065,0.8867222720516585,0.9416593184648355,False,minimum_validation_normalized_feature_mse; train_fit_only; no_test_selection
+ridge_param_profile_squared_alpha_1,param_profile,squared,1.0,63,21,0.5541750334770691,0.827092007449931,0.9094459892978423,False,minimum_validation_normalized_feature_mse; train_fit_only; no_test_selection
+ridge_param_profile_squared_alpha_10,param_profile,squared,10.0,63,21,0.6207842508922249,0.7765377925680793,0.8812138177355592,False,minimum_validation_normalized_feature_mse; train_fit_only; no_test_selection

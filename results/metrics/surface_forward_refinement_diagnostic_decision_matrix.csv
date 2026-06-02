@@ -1,0 +1,7 @@
+option,selected,decision,evidence,blocked_by
+A. lock 25.5 F0/R1 candidate for a formal no-baseline-transition benchmark,True,selected,candidate_formed=True; primary_pass=True; secondary_pass=True; failure_pass=True; target_count=82; surrogate=ridge_param_only_linear_alpha_10,
+B. diagnose surrogate mismatch before any further six-param refinement,False,not_selected,residual_improved=True; profile_improved=True; mask_improved=True; P1=True; P3=True,surrogate residual/profile relation did not match this branch
+C. switch next diagnostic to profile-basis or contour-aware representation,False,not_selected,profile_improved=True; mask_improved=True; six-param RBC footprint may be the limiting representation for several shape families,profile/mask pattern did not require this as the unique next step
+D. move multi-pit/component-set branch forward,False,not_selected,multi_pit_accounting_ok=True; multi-pit is excluded_negative_control in 25.5,does not address the 82 RBC-representable model-fail rows
+E. rerun feature extraction design with stricter validation gates,False,not_selected,residual_improved=True; profile_improved=True; mask_improved=True,another branch better matches the measured failure
+F. stop the F0/R1 forward-refinement route and return to model-route design,False,not_selected,residual_improved=True; current_baseline_unchanged=True,some forward-refinement signal remains worth diagnosing

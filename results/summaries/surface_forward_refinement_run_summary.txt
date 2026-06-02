@@ -1,0 +1,30 @@
+25.5 surface RBC forward-consistency refinement run
+
+selected_surrogate: ridge_param_only_linear_alpha_10
+selected_lambda_param: 1.0
+optimizer: L-BFGS-B when scipy is available; deterministic coordinate-search fallback otherwise
+objective_inputs: observed delta_b-derived features plus frozen 20.85 predicted six params
+objective_excludes: true depth, true mask, shape labels, oracle params, test labels
+lambda_selection_rows_recorded_in_summary_only: 6
+
+refinement_target_count: 82
+already_pass_reference_count: 22
+excluded_negative_control_count: 16
+target_baseline_profile_rmse_mean_m: 0.000509518351056
+target_refined_profile_rmse_mean_m: 0.000220386413188
+target_profile_rmse_delta_mean_m: -0.000289131937868
+target_baseline_Er_like_mean: 2.80015739379
+target_refined_Er_like_mean: 0.909941363416
+target_baseline_IoU_mean: 0.32360140234
+target_refined_IoU_mean: 0.578523465369
+target_baseline_Dice_mean: 0.480524080842
+target_refined_Dice_mean: 0.709451842351
+target_feature_residual_before_mean: 70.5944261489
+target_feature_residual_after_mean: 0.564105036956
+
+rbc_like_control_baseline_rmse_mean_m: 0.000501181023155
+rbc_like_control_refined_rmse_mean_m: 0.000165198934316
+multi_pit_handling: excluded_negative_control rows are not refined and are not success-credit eligible.
+metrics_csv: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_forward_refinement_metrics.csv
+group_csv: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_forward_refinement_by_group.csv
+failure_cases_csv: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_forward_refinement_failure_cases.csv

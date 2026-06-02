@@ -1,5 +1,17 @@
 # 实验工作日志
 
+## 2026-06-02 Stage 25.5 surface feature-space forward-consistency refinement diagnostic
+
+- Scope: executed the bounded surface feature-space forward-consistency refinement diagnostic. No COMSOL, no main neural training, no data/NPZ mutation, no checkpoint/preview/notes artifact, and no `CURRENT_BASELINE.md` update. The only fitting was the allowed lightweight train-split feature-space ridge surrogate/scaler.
+- Preflight: loaded `comsol_surface_shape_extension_pilot_v1` only through `COMSOL_DATA_REGISTRY.md` plus `results/manifests/comsol_surface_shape_extension_pilot_v1.manifest.json`; the loader sha256-verified the ignored NPZ and kept latest/newest discovery forbidden.
+- Target materialization: carried forward the 25.4 split as `82` refinement targets, `22` already-pass references, and `16` excluded negative controls. Multi-pit / component-set rows were not refined and received no RBC-refinement success credit.
+- Surrogate: validation-only selection chose `ridge_param_only_linear_alpha_10`, trained on `63` train-split RBC-representable rows and selected on `21` validation rows. Test rows were final-reporting only.
+- Refinement: selected `lambda_param=1.0`. The test-time objective used only observed `delta_b`-derived features and frozen 20.85 predicted `L_m/W_m/D_m/wLD/wWD/wLW`; labels/oracle params were used only for validation selection metrics and final reports.
+- Target results: profile RMSE improved from `0.000509518351056 m` to `0.000220386413188 m`; Er-like improved from `2.80015739379` to `0.909941363416`; IoU/Dice improved from `0.32360140234/0.480524080842` to `0.578523465369/0.709451842351`; forward residual improved from `70.5944261489` to `0.564105036956`.
+- Gates: all `10/10` acceptance gates passed. RBC-like control did not degrade: RMSE improved from `0.000501181023155 m` to `0.000165198934316 m`, Dice improved from `0.493556208833` to `0.689754743215`.
+- Route decision: `refinement_candidate_formed=true`; unique next step is `A. lock 25.5 F0/R1 candidate for a formal no-baseline-transition benchmark`. Already-pass references remain a monitoring bucket, and this result still does not authorize a baseline transition.
+- Review: independent read-only review passed with no must-fix. It confirmed explicit manifest loading, split boundaries, test-time input boundaries, multi-pit exclusion, acceptance-gate consistency, and no forbidden artifact or `CURRENT_BASELINE.md` diff.
+
 ## 2026-06-02 Stage 25.4 surface forward-consistency refinement plan
 
 - Scope: completed a plan-only forward-consistency refinement design for the surface shape-extension branch. No training, no COMSOL, no data/NPZ generation or mutation, no checkpoint/preview/notes artifact, and no `CURRENT_BASELINE.md` update.

@@ -1,0 +1,26 @@
+25.5 materialized surface forward-refinement target set
+
+source_25_4_target_set: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_forward_refinement_target_set.csv
+source_25_3_baseline_metrics: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_shape_extension_current_baseline_metrics.csv
+source_25_3_oracle_metrics: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_shape_extension_rbc_oracle_fit_metrics.csv
+sample_count: 120
+split_counts: {'train': 72, 'val': 24, 'test': 24}
+target_role_counts: {'refinement_target': 82, 'already_pass_reference': 22, 'excluded_negative_control': 16}
+refinement_target_count: 82
+already_pass_reference_count: 22
+excluded_negative_control_count: 16
+refinement_targets_by_split: {'train': 51, 'val': 16, 'test': 15}
+refinement_targets_by_shape: {'rbc_like_smooth_pit': 21, 'flat_bottom_pit': 11, 'sharp_wall_boxy_corrosion': 10, 'asymmetric_corrosion': 12, 'elongated_crack_like_surface_defect': 16, 'irregular_corrosion_non_rbc': 12}
+
+target_baseline_profile_rmse_mean_m: 0.000509518351056
+target_oracle_profile_rmse_mean_m: 7.84896954944e-05
+target_baseline_Er_like_mean: 2.80015739379
+target_oracle_Er_like_mean: 0.28925522333
+target_baseline_IoU_mean: 0.32360140234
+target_baseline_Dice_mean: 0.480524080842
+target_oracle_IoU_mean: 0.889664764117
+target_oracle_Dice_mean: 0.940860104629
+
+multi_pit_policy: excluded_negative_control only; no six-param RBC refinement success credit.
+test_split_policy: materialized here for final reporting only; no test labels may drive refinement or hyperparameter selection.
+target_materialized_csv: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_forward_refinement_target_set_materialized.csv

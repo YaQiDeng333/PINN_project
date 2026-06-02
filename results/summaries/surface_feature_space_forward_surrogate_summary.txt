@@ -1,0 +1,28 @@
+25.5 surface feature-space forward surrogate
+
+selected_surrogate: ridge_param_only_linear_alpha_10
+descriptor_kind: param_only
+feature_mode: linear
+alpha: 10
+surrogate_family: closed-form ridge regression on compact delta_b-derived feature vector
+observed_feature_count: 117
+model_feature_count: 18
+
+split_protocol:
+- train_fit_representable_count: 63
+- validation_selection_representable_count: 21
+- test_final_representable_count: 20
+- hyperparameter selection criterion: minimum validation normalized feature MSE.
+- no test split metric is used for candidate selection.
+
+input_boundary:
+- Surrogate training may use oracle six params on train split as supervised surrogate inputs.
+- Test-time refinement will use observed delta_b-derived features and frozen 20.85 predicted six params only.
+- Shape labels, true masks, true depth, and oracle params are not test-time refinement inputs.
+
+refinement_target_count: 82
+target_baseline_profile_rmse_mean_m: 0.000509518351056
+selected_train_feature_mse_norm: 0.676584556248
+selected_val_feature_mse_norm: 0.764878281742
+validation_csv: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_feature_space_forward_surrogate_validation.csv
+metrics_csv: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_feature_space_forward_surrogate_metrics.csv

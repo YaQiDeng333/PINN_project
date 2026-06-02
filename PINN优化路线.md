@@ -1,5 +1,13 @@
 # PINN 优化路线
 
+## 2026-06-02 route sync: 25.5 surface feature-space forward-consistency refinement diagnostic
+
+25.5 proves that the 82 RBC-representable surface shape-extension failures are not just frozen-inverse failures; they can be materially repaired by a no-baseline-transition `F0_feature_space_consistency + R1_low_dim_param_refinement` diagnostic. The selected surrogate is `ridge_param_only_linear_alpha_10`, fit on train rows and selected on validation only. Test-time refinement uses observed `delta_b` features plus frozen 20.85 six-parameter predictions, not labels.
+
+The measured route signal is strong on the intended target subset: profile RMSE `0.000509518351056 -> 0.000220386413188 m`, Er-like `2.80015739379 -> 0.909941363416`, IoU/Dice `0.32360140234/0.480524080842 -> 0.578523465369/0.709451842351`, and forward residual `70.5944261489 -> 0.564105036956`. RBC-like control also improves, and all `10/10` acceptance gates pass.
+
+The boundary remains the same: this is a refinement candidate, not a new current baseline. Multi-pit remains a `component_set` representation branch and gets no RBC success credit. The unique next route is a formal no-baseline-transition benchmark/audit of the 25.5 F0/R1 candidate, with `CURRENT_BASELINE.md` unchanged.
+
 ## 2026-06-02 route sync: 25.4 surface forward-consistency refinement plan
 
 25.4 turns the 25.3 audit into a bounded next route: do not replace the surface RBC representation yet; first test whether the frozen 20.85 inverse can be repaired by six-parameter refinement plus a forward-consistency signal. The key subset is `82` `rbc_representable_but_model_fail` rows. These are not representation failures, because the RBC oracle can fit them; they are inverse/generalization failures under the new shape-extension distribution.

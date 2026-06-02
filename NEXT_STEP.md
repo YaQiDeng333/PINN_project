@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-06-02 after Stage 25.5 surface feature-space forward-consistency refinement diagnostic
+
+Next step: run **A. formal no-baseline-transition benchmark for the 25.5 F0/R1 refinement candidate**. Keep it as a benchmark candidate audit: no COMSOL, no main neural training unless separately approved, no data/NPZ mutation, and no `CURRENT_BASELINE.md` update.
+
+25.5 selected `ridge_param_only_linear_alpha_10` plus `R1_low_dim_param_refinement` with `lambda_param=1.0`. On the 82 `rbc_representable_but_model_fail` targets, profile RMSE improved from `0.000509518351056 m` to `0.000220386413188 m`, Er-like from `2.80015739379` to `0.909941363416`, IoU/Dice from `0.32360140234/0.480524080842` to `0.578523465369/0.709451842351`, and forward residual from `70.5944261489` to `0.564105036956`. All `10/10` gates passed and the RBC-like control did not degrade.
+
+Multi-pit stays outside the RBC-refinement success gate: the 16 `multi_pit_two_component_surface_defect` rows are excluded negative controls and remain a future `component_set` branch. The 22 already-pass references are monitoring rows, not success-credit rows, so the next audit should keep them visible while deciding whether the F0/R1 candidate is stable enough for any later benchmark discussion.
+
 ## 2026-06-02 after Stage 25.4 surface forward-consistency refinement plan
 
 Next step: run **A. execute 25.5 feature-space forward-consistency refinement diagnostic**. Keep it diagnostic-only: no training, no COMSOL, no data/NPZ mutation, and no `CURRENT_BASELINE.md` update.
