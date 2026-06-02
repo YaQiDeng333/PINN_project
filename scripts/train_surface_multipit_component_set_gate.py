@@ -39,6 +39,8 @@ DEFAULT_GATE_MANIFEST = ROOT / "results/manifests/25_10_component_set_training_g
 DEFAULT_REGISTRY = ROOT / "COMSOL_DATA_REGISTRY.md"
 DEFAULT_COMPARISON_METRICS = ROOT / "results/metrics/25_10_component_set_training_gate_metrics.json"
 DEFAULT_COMPARISON_METRICS_25_11 = ROOT / "results/metrics/25_11_mask_depth_loss_rebalance_training_metrics.json"
+DEFAULT_COMPARISON_METRICS_25_12 = ROOT / "results/metrics/25_12_component_separation_rebalance_training_metrics.json"
+DEFAULT_TARGET_REDESIGN_MANIFEST = ROOT / "results/manifests/25_12b_component_raster_depth_target_redesign_manifest.json"
 
 TARGET_SPLIT = {"train": 72, "val": 20, "test": 20}
 K_MAX = 3
@@ -140,9 +142,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--registry", type=Path, default=DEFAULT_REGISTRY)
     parser.add_argument("--comparison-metrics", type=Path, default=DEFAULT_COMPARISON_METRICS)
     parser.add_argument("--comparison-metrics-25-11", type=Path, default=DEFAULT_COMPARISON_METRICS_25_11)
+    parser.add_argument("--comparison-metrics-25-12", type=Path, default=DEFAULT_COMPARISON_METRICS_25_12)
+    parser.add_argument("--target-redesign-manifest", type=Path, default=DEFAULT_TARGET_REDESIGN_MANIFEST)
     parser.add_argument("--stage", default="25.10")
     parser.add_argument("--gate-id", default=GATE_ID)
     parser.add_argument("--loss-config", choices=sorted(LOSS_CONFIGS), default="component_set_gate_v1")
+    parser.add_argument("--target-version", choices=["v1", "v2"], default="v1")
     parser.add_argument("--epochs", type=int, default=180)
     parser.add_argument("--batch-size", type=int, default=12)
     parser.add_argument("--lr", type=float, default=1.0e-3)
@@ -373,6 +378,8 @@ class Arrays:
     shape_target: np.ndarray
     mask_low: np.ndarray
     depth_low_norm: np.ndarray
+    component_masks_full: np.ndarray
+    component_depths_full: np.ndarray
     depth_scale: float
     param_mean: np.ndarray
     param_std: np.ndarray
@@ -380,9 +387,116 @@ class Arrays:
     signal_std: np.ndarray
     shape_classes: list[str]
     split_indices: dict[str, np.ndarray]
+    target_version: str
+    target_transform_summary: dict[str, Any]
 
 
-def build_arrays(pack: dict[str, Any]) -> Arrays:
+def grid_xy(height: int, width: int) -> tuple[np.ndarray, np.ndarray]:
+    x = np.linspace(-0.04, 0.04, width)
+    y = np.linspace(-0.01, 0.01, height)
+    return np.meshgrid(x, y, indexing="xy")
+
+
+def build_target_v2(pack: dict[str, Any]) -> tuple[np.ndarray, np.ndarray, np.ndarray, dict[str, Any]]:
+    exists = np.asarray(pack["component_exists"], dtype=bool)
+    masks = np.asarray(pack["component_projected_masks_2d"], dtype=bool)
+    depths = np.asarray(pack["component_depth_grids_m"], dtype=np.float32)
+    centers = np.asarray(pack["component_center_xy_m"], dtype=np.float64)
+    lwd = np.asarray(pack["component_lwd_m"], dtype=np.float64)
+    n, k, height, width = masks.shape
+    xx, yy = grid_xy(height, width)
+    ownership = np.full((n, height, width), -1, dtype=np.int16)
+    masks_v2 = np.zeros_like(masks, dtype=np.float32)
+    depths_v2 = np.zeros_like(depths, dtype=np.float32)
+    duplicate_before = 0
+    duplicate_after = 0
+    raw_overlap_samples = 0
+    conflict_before = 0
+    conflict_after = 0
+    ownership_resolved_pixels = 0
+    overlap_resolved_pixels = 0
+    by_sample: list[dict[str, Any]] = []
+    for i in range(n):
+        active_slots = np.where(exists[i])[0]
+        comp_sum = masks[i, active_slots].sum(axis=0) if active_slots.size else np.zeros((height, width), dtype=np.int64)
+        raw_duplicate_pixels = int(np.maximum(comp_sum - 1, 0).sum())
+        raw_overlap_pixel_count = int((comp_sum > 1).sum())
+        duplicate_before += raw_duplicate_pixels
+        raw_overlap_samples += int(raw_overlap_pixel_count > 0)
+        sample_conflict_before = 0
+        sample_overlap_resolved = 0
+        for y, x in zip(*np.where(comp_sum > 0)):
+            candidates = [int(slot) for slot in active_slots if masks[i, slot, y, x]]
+            if not candidates:
+                continue
+            if len(candidates) == 1:
+                owner = candidates[0]
+            else:
+                sample_overlap_resolved += 1
+                depth_values = [float(depths[i, slot, y, x]) for slot in candidates if float(depths[i, slot, y, x]) > 0.0]
+                if depth_values and (max(depth_values) - min(depth_values)) > 1.0e-12:
+                    sample_conflict_before += 1
+                scored = []
+                px = float(xx[y, x])
+                py = float(yy[y, x])
+                for slot in candidates:
+                    sx = max(float(lwd[i, slot, 0]), 1.0e-9)
+                    sy = max(float(lwd[i, slot, 1]), 1.0e-9)
+                    dist = math.hypot((px - float(centers[i, slot, 0])) / sx, (py - float(centers[i, slot, 1])) / sy)
+                    scored.append((dist, -float(depths[i, slot, y, x]), int(slot)))
+                owner = min(scored)[2]
+            ownership[i, y, x] = owner
+            masks_v2[i, owner, y, x] = 1.0
+            depths_v2[i, owner, y, x] = depths[i, owner, y, x]
+            ownership_resolved_pixels += 1
+        after_sum = masks_v2[i].sum(axis=0)
+        sample_duplicate_after = int(np.maximum(after_sum - 1.0, 0.0).sum())
+        duplicate_after += sample_duplicate_after
+        conflict_before += sample_conflict_before
+        overlap_resolved_pixels += sample_overlap_resolved
+        by_sample.append(
+            {
+                "sample_id": str(pack["sample_ids"][i]),
+                "source_index": i,
+                "split": str(pack["split"][i]),
+                "component_count": int(pack["component_count"][i]),
+                "separation_type": str(pack["separation_type"][i]),
+                "topology_relation": str(pack["topology_relation"][i]),
+                "raw_overlap_pixel_count": raw_overlap_pixel_count,
+                "duplicate_ownership_before_v2": raw_duplicate_pixels,
+                "duplicate_ownership_after_v2": sample_duplicate_after,
+                "overlap_depth_conflict_before_v2": sample_conflict_before,
+                "overlap_depth_conflict_after_v2": 0,
+                "ownership_resolved_overlap_pixels": sample_overlap_resolved,
+            }
+        )
+    union_v2 = masks_v2.max(axis=1)
+    union_raw = np.asarray(pack["projected_mask_2d"], dtype=np.float32)
+    union_mismatch = int(np.logical_xor(union_v2 > 0.5, union_raw > 0.5).sum())
+    summary = {
+        "target_version": "v2",
+        "component_mask_target_v2": True,
+        "component_depth_target_v2": True,
+        "component_ownership_map": True,
+        "target_loaded_count": int(n),
+        "ownership_resolved_pixel_count": int(ownership_resolved_pixels),
+        "ownership_resolved_overlap_pixel_count": int(overlap_resolved_pixels),
+        "raw_overlap_sample_count": int(raw_overlap_samples),
+        "duplicate_ownership_before_v2": int(duplicate_before),
+        "duplicate_ownership_after_v2": int(duplicate_after),
+        "overlap_depth_conflict_before_v2": int(conflict_before),
+        "overlap_depth_conflict_after_v2": int(conflict_after),
+        "union_mask_mismatch_after_v2_px": int(union_mismatch),
+        "raw_overlap_diagnostics_retained": True,
+        "component_count_3_overlap_samples": int(sum(row["component_count"] == 3 and row["raw_overlap_pixel_count"] > 0 for row in by_sample)),
+        "partially_overlapping_overlap_samples": int(sum(row["separation_type"] == "partially_overlapping" and row["raw_overlap_pixel_count"] > 0 for row in by_sample)),
+        "by_sample_overlap_diagnostics": by_sample,
+        "rule": "ownership-resolved component targets; union mask/depth remain OR/max diagnostics",
+    }
+    return masks_v2.astype(np.float32), depths_v2.astype(np.float32), ownership, summary
+
+
+def build_arrays(pack: dict[str, Any], target_version: str = "v1") -> Arrays:
     n = int(pack["sample_ids"].shape[0])
     split = np.asarray(pack["split"]).astype(str)
     split_counts = {name: int(np.sum(split == name)) for name in ["train", "val", "test"]}
@@ -432,8 +546,20 @@ def build_arrays(pack: dict[str, Any]) -> Arrays:
             if exists[i, slot]:
                 shape_target[i, slot] = shape_to_idx[str(families[i, slot])]
 
-    mask_low = downsample_np(np.asarray(pack["component_projected_masks_2d"], dtype=np.float32))
-    depth_low = downsample_np(np.asarray(pack["component_depth_grids_m"], dtype=np.float32))
+    if target_version == "v2":
+        component_masks_full, component_depths_full, _ownership, target_summary = build_target_v2(pack)
+    else:
+        component_masks_full = np.asarray(pack["component_projected_masks_2d"], dtype=np.float32)
+        component_depths_full = np.asarray(pack["component_depth_grids_m"], dtype=np.float32)
+        target_summary = {
+            "target_version": "v1",
+            "component_mask_target_v2": False,
+            "component_depth_target_v2": False,
+            "component_ownership_map": False,
+            "target_loaded_count": int(n),
+        }
+    mask_low = downsample_np(component_masks_full.astype(np.float32))
+    depth_low = downsample_np(component_depths_full.astype(np.float32))
     active_depth = depth_low[exists]
     depth_scale = float(np.percentile(active_depth[active_depth > 0], 99)) if np.any(active_depth > 0) else 1.0
     depth_scale = max(depth_scale, 1.0e-6)
@@ -452,6 +578,8 @@ def build_arrays(pack: dict[str, Any]) -> Arrays:
         shape_target=shape_target,
         mask_low=mask_low,
         depth_low_norm=depth_low_norm,
+        component_masks_full=component_masks_full.astype(np.float32),
+        component_depths_full=component_depths_full.astype(np.float32),
         depth_scale=depth_scale,
         param_mean=param_mean,
         param_std=param_std,
@@ -459,6 +587,8 @@ def build_arrays(pack: dict[str, Any]) -> Arrays:
         signal_std=signal_std,
         shape_classes=shape_classes,
         split_indices=split_indices,
+        target_version=target_version,
+        target_transform_summary=target_summary,
     )
 
 
@@ -722,8 +852,8 @@ def sample_metrics(arrays: Arrays, pred: dict[str, np.ndarray], threshold: float
         true_centers = np.asarray(raw["component_center_xy_m"][src_idx, true_slots], dtype=np.float64)
         true_lwd = np.asarray(raw["component_lwd_m"][src_idx, true_slots], dtype=np.float64)
         true_rot = np.asarray(raw["component_rotation_angle"][src_idx, true_slots], dtype=np.float64)
-        true_masks = np.asarray(raw["component_projected_masks_2d"][src_idx, true_slots], dtype=np.float64)
-        true_depths = np.asarray(raw["component_depth_grids_m"][src_idx, true_slots], dtype=np.float64)
+        true_masks = np.asarray(arrays.component_masks_full[src_idx, true_slots], dtype=np.float64)
+        true_depths = np.asarray(arrays.component_depths_full[src_idx, true_slots], dtype=np.float64)
 
         pred_centers = params["center"][pos, pred_slots]
         pred_lwd = params["lwd"][pos, pred_slots]
@@ -901,8 +1031,8 @@ def one_slot_prior_baseline(arrays: Arrays, split: str) -> dict[str, Any]:
     mean_center = arrays.raw["component_center_xy_m"][train_idx][active].mean(axis=0)
     mean_lwd = arrays.raw["component_lwd_m"][train_idx][active].mean(axis=0)
     mean_rot = float(arrays.raw["component_rotation_angle"][train_idx][active].mean())
-    mean_mask = arrays.raw["component_projected_masks_2d"][train_idx][active].mean(axis=0)
-    mean_depth = arrays.raw["component_depth_grids_m"][train_idx][active].mean(axis=0)
+    mean_mask = arrays.component_masks_full[train_idx][active].mean(axis=0)
+    mean_depth = arrays.component_depths_full[train_idx][active].mean(axis=0)
     rows = []
     raw = arrays.raw
     for idx in arrays.split_indices[split]:
@@ -910,8 +1040,8 @@ def one_slot_prior_baseline(arrays: Arrays, split: str) -> dict[str, Any]:
         true_centers = raw["component_center_xy_m"][idx, true_slots]
         true_lwd = raw["component_lwd_m"][idx, true_slots]
         true_rot = raw["component_rotation_angle"][idx, true_slots]
-        true_masks = raw["component_projected_masks_2d"][idx, true_slots]
-        true_depths = raw["component_depth_grids_m"][idx, true_slots]
+        true_masks = arrays.component_masks_full[idx, true_slots]
+        true_depths = arrays.component_depths_full[idx, true_slots]
         matches = match_components(true_centers, true_masks, mean_center.reshape(1, 2), (mean_mask >= 0.5).reshape(1, 64, 128))
         center_errors = []
         lwd_errors = []
@@ -1358,6 +1488,104 @@ def decide_component_separation_gate(
     }
 
 
+def decide_target_v2_gate(
+    history: list[dict[str, Any]],
+    split_metrics: dict[str, Any],
+    comparison_25_10: dict[str, Any],
+    comparison_25_11: dict[str, Any],
+    comparison_25_12: dict[str, Any],
+    target_summary: dict[str, Any],
+) -> dict[str, Any]:
+    first_train = float(history[0]["train_loss"])
+    final_train = float(history[-1]["train_loss"])
+    best_val = min(float(row["val_loss"]) for row in history)
+    test = split_metrics["test"]
+    d10 = comparison_25_10["test_deltas"]
+    d11 = comparison_25_11["test_deltas"]
+    d12 = comparison_25_12["test_deltas"]
+
+    component_dice_delta_vs_25_10 = float(d10["component_mask_dice_mean"]["delta"])
+    depth_delta_vs_25_10 = float(d10["depth_grid_rmse_m_mean"]["delta"])
+    merged_delta_vs_25_10 = float(d10["merged_rate"]["delta"])
+    recall_delta_vs_25_10 = float(d10["component_recall"]["delta"])
+    missed_delta_vs_25_10 = float(d10["missed_rate"]["delta"])
+    extra_delta_vs_25_10 = float(d10["extra_rate"]["delta"])
+    merged_delta_vs_25_11 = float(d11["merged_rate"]["delta"])
+    merged_delta_vs_25_12 = float(d12["merged_rate"]["delta"])
+    component_dice_delta_vs_25_12 = float(d12["component_mask_dice_mean"]["delta"])
+    depth_delta_vs_25_12 = float(d12["depth_grid_rmse_m_mean"]["delta"])
+    three_component = test.get("groups", {}).get("component_count", {}).get("3", {})
+    partially_overlapping = test.get("groups", {}).get("separation_type", {}).get("partially_overlapping", {})
+
+    loss_descended = final_train < 0.85 * first_train and best_val < first_train
+    target_v2_loaded = (
+        target_summary.get("component_mask_target_v2") is True
+        and target_summary.get("component_depth_target_v2") is True
+        and target_summary.get("component_ownership_map") is True
+        and int(target_summary.get("duplicate_ownership_after_v2", -1)) == 0
+        and int(target_summary.get("overlap_depth_conflict_after_v2", -1)) == 0
+    )
+    merged_close_to_25_10 = float(test["merged_rate"]) <= 0.30 and merged_delta_vs_25_10 <= 0.10
+    component_or_depth_better_than_25_10 = component_dice_delta_vs_25_10 >= 0.02 or depth_delta_vs_25_10 <= -0.00005
+    recall_missed_extra_not_collapsed_vs_25_10 = recall_delta_vs_25_10 >= -0.06 and missed_delta_vs_25_10 <= 0.06 and extra_delta_vs_25_10 <= 0.08
+    merged_alleviated_vs_rebalance = merged_delta_vs_25_11 <= -0.20 or merged_delta_vs_25_12 <= -0.20
+    component_or_depth_alleviated_vs_25_12 = component_dice_delta_vs_25_12 >= 0.005 or depth_delta_vs_25_12 <= -0.00010
+    no_severe_collapse = float(test["component_recall"]) >= 0.65 and float(test["missed_rate"]) <= 0.35 and float(test["extra_rate"]) <= 0.35
+    no_mask_union_collapse = float(test["component_mask_dice_mean"]) >= 0.07 and float(test["union_mask_dice_mean"]) >= 0.05
+    three_component_still_failed = bool(three_component and float(three_component.get("merged_rate", 0.0)) >= 0.75)
+    partially_overlapping_still_failed = bool(partially_overlapping and float(partially_overlapping.get("merged_rate", 0.0)) >= 0.50)
+
+    if (
+        loss_descended
+        and target_v2_loaded
+        and merged_close_to_25_10
+        and component_or_depth_better_than_25_10
+        and recall_missed_extra_not_collapsed_vs_25_10
+    ):
+        decision = "IMPROVED"
+        next_route = "A. enter 25.14 topology/three-component focused training gate, no baseline transition"
+    elif (
+        loss_descended
+        and target_v2_loaded
+        and no_severe_collapse
+        and no_mask_union_collapse
+        and (merged_alleviated_vs_rebalance or component_or_depth_alleviated_vs_25_12)
+    ):
+        decision = "PARTIAL"
+        next_route = "B. enter 25.13b target-v2 failure audit focused on three-component and partially_overlapping subsets"
+    else:
+        decision = "FAIL"
+        next_route = "C. return to generator/label schema; do not continue loss tuning"
+
+    return {
+        "decision": decision,
+        "next_route": next_route,
+        "criteria": {
+            "loss_descended": loss_descended,
+            "target_v2_loaded": target_v2_loaded,
+            "merged_close_to_25_10": merged_close_to_25_10,
+            "component_or_depth_better_than_25_10": component_or_depth_better_than_25_10,
+            "recall_missed_extra_not_collapsed_vs_25_10": recall_missed_extra_not_collapsed_vs_25_10,
+            "merged_alleviated_vs_rebalance": merged_alleviated_vs_rebalance,
+            "component_or_depth_alleviated_vs_25_12": component_or_depth_alleviated_vs_25_12,
+            "no_severe_collapse": no_severe_collapse,
+            "no_mask_union_collapse": no_mask_union_collapse,
+            "three_component_still_failed": three_component_still_failed,
+            "partially_overlapping_still_failed": partially_overlapping_still_failed,
+            "component_mask_dice_delta_vs_25_10": component_dice_delta_vs_25_10,
+            "component_mask_dice_delta_vs_25_12": component_dice_delta_vs_25_12,
+            "depth_grid_rmse_delta_vs_25_10_m": depth_delta_vs_25_10,
+            "depth_grid_rmse_delta_vs_25_12_m": depth_delta_vs_25_12,
+            "merged_rate_delta_vs_25_10": merged_delta_vs_25_10,
+            "merged_rate_delta_vs_25_11": merged_delta_vs_25_11,
+            "merged_rate_delta_vs_25_12": merged_delta_vs_25_12,
+            "component_recall_delta_vs_25_10": recall_delta_vs_25_10,
+            "missed_rate_delta_vs_25_10": missed_delta_vs_25_10,
+            "extra_rate_delta_vs_25_10": extra_delta_vs_25_10,
+        },
+    }
+
+
 def update_registry_note(path: Path, gate_manifest: dict[str, Any]) -> None:
     text = path.read_text(encoding="utf-8")
     marker = f"## {DATASET_ID}"
@@ -1396,10 +1624,14 @@ def write_summary(path: Path, payload: dict[str, Any]) -> None:
     val = payload["metrics_by_split"]["val"]
     comparison = payload.get("comparison_to_25_10", {})
     comparison_25_11 = payload.get("comparison_to_25_11", {})
+    comparison_25_12 = payload.get("comparison_to_25_12", {})
     deltas = comparison.get("test_deltas", {})
     deltas_25_11 = comparison_25_11.get("test_deltas", {})
+    deltas_25_12 = comparison_25_12.get("test_deltas", {})
     if payload["stage"] == "25.12":
         title = "25.12 Component-Separation-Aware Rebalance Training"
+    elif payload["stage"] == "25.13":
+        title = "25.13 Target-V2 Component-Set Training Gate"
     elif payload["stage"] == "25.11":
         title = "25.11 Mask/Depth Loss Rebalance Training"
     else:
@@ -1411,6 +1643,7 @@ def write_summary(path: Path, payload: dict[str, Any]) -> None:
         f"- dataset_id: `{payload['dataset_id']}`",
         f"- model_route: `{payload['model']['route']}`",
         f"- loss_config: `{payload['model']['loss_config']}`",
+        f"- target_version: `{payload['target_v2']['target_version']}`",
         f"- split: `{payload['data']['split_counts']}`",
         f"- selected_existence_threshold: `{payload['selection']['selected_threshold']}`",
         f"- best_epoch: `{payload['training']['best_epoch']}`",
@@ -1422,6 +1655,19 @@ def write_summary(path: Path, payload: dict[str, Any]) -> None:
         f"- final_train_component_separation_weighted_ratio: `{fmt_metric(payload['training'].get('final_train_component_separation_weighted_ratio'))}`",
         f"- final_val_component_separation_weighted_ratio: `{fmt_metric(payload['training'].get('final_val_component_separation_weighted_ratio'))}`",
         f"- final_train_component_mask_to_union_mask_weighted_ratio: `{fmt_metric(payload['training'].get('final_train_component_mask_to_union_mask_weighted_ratio'))}`",
+        "",
+        "## Target V2 Usage",
+        "",
+        f"- component_mask_target_v2: `{payload['target_v2'].get('component_mask_target_v2')}`",
+        f"- component_depth_target_v2: `{payload['target_v2'].get('component_depth_target_v2')}`",
+        f"- component_ownership_map: `{payload['target_v2'].get('component_ownership_map')}`",
+        f"- target_loaded_count: `{payload['target_v2'].get('target_loaded_count')}`",
+        f"- ownership_resolved_pixel_count: `{payload['target_v2'].get('ownership_resolved_pixel_count')}`",
+        f"- ownership_resolved_overlap_pixel_count: `{payload['target_v2'].get('ownership_resolved_overlap_pixel_count')}`",
+        f"- duplicate_ownership_before_v2: `{payload['target_v2'].get('duplicate_ownership_before_v2')}`",
+        f"- duplicate_ownership_after_v2: `{payload['target_v2'].get('duplicate_ownership_after_v2')}`",
+        f"- overlap_depth_conflict_before_v2: `{payload['target_v2'].get('overlap_depth_conflict_before_v2')}`",
+        f"- overlap_depth_conflict_after_v2: `{payload['target_v2'].get('overlap_depth_conflict_after_v2')}`",
         "",
         "## Validation Metrics",
         "",
@@ -1464,11 +1710,22 @@ def write_summary(path: Path, payload: dict[str, Any]) -> None:
         f"- union_mask_dice_delta: `{fmt_metric(deltas_25_11.get('union_mask_dice_mean', {}).get('delta'))}`",
         f"- depth_grid_RMSE_delta_m: `{fmt_metric(deltas_25_11.get('depth_grid_rmse_m_mean', {}).get('delta'), 9)}`",
         "",
+        "## 25.12 Comparison",
+        "",
+        f"- component_recall_delta: `{fmt_metric(deltas_25_12.get('component_recall', {}).get('delta'))}`",
+        f"- missed_rate_delta: `{fmt_metric(deltas_25_12.get('missed_rate', {}).get('delta'))}`",
+        f"- extra_rate_delta: `{fmt_metric(deltas_25_12.get('extra_rate', {}).get('delta'))}`",
+        f"- merged_rate_delta: `{fmt_metric(deltas_25_12.get('merged_rate', {}).get('delta'))}`",
+        f"- component_mask_dice_delta: `{fmt_metric(deltas_25_12.get('component_mask_dice_mean', {}).get('delta'))}`",
+        f"- union_mask_dice_delta: `{fmt_metric(deltas_25_12.get('union_mask_dice_mean', {}).get('delta'))}`",
+        f"- depth_grid_RMSE_delta_m: `{fmt_metric(deltas_25_12.get('depth_grid_rmse_m_mean', {}).get('delta'), 9)}`",
+        "",
         "## Boundary",
         "",
         "- This is a training gate, not a baseline replacement.",
         "- No `CURRENT_BASELINE.md` transition is authorized.",
         "- Model architecture, K=3 component-set representation, fixed split, and Hungarian matching are unchanged.",
+        "- 25.13 uses the 25.10 loss mainline with target-v2 loader targets, not the 25.11/25.12 rebalance stack.",
         "- No checkpoint or generated data artifact is committed by this gate.",
         f"- next_route: `{payload['route_decision']}`",
     ]
@@ -1480,9 +1737,17 @@ def main() -> int:
     args = parse_args()
     set_seed(args.seed)
     loss_config = LOSS_CONFIGS[args.loss_config]
+    if args.stage == "25.13":
+        redesign = read_json(args.target_redesign_manifest)
+        if redesign.get("target_redesign_acceptance_decision") != "READY_FOR_25.13_TRAINING":
+            raise ValueError("25.13 requires 25.12b READY_FOR_25.13_TRAINING target-redesign manifest")
+        if args.loss_config != "component_set_gate_v1":
+            raise ValueError("25.13 must use the 25.10 component_set_gate_v1 loss mainline")
+        if args.target_version != "v2":
+            raise ValueError("25.13 must use --target-version v2")
     manifest, npz_path = assert_manifest_and_registry(args.manifest, args.registry)
     pack = load_npz(npz_path)
-    arrays = build_arrays(pack)
+    arrays = build_arrays(pack, target_version=args.target_version)
     device = torch.device("cuda" if torch.cuda.is_available() and not args.cpu else "cpu")
     model, history, training_info = train_model(args, arrays, device, loss_config)
     val_pred = predict(model, arrays, arrays.split_indices["val"], device, args.batch_size)
@@ -1497,9 +1762,20 @@ def main() -> int:
         "empty": {split: empty_baseline(arrays, split) for split in ["train", "val", "test"]},
         "one_slot_prior": {split: one_slot_prior_baseline(arrays, split) for split in ["train", "val", "test"]},
     }
-    comparison = compare_to_previous(metrics_by_split, args.comparison_metrics) if args.loss_config in {"mask_depth_rebalance_v1", "component_separation_rebalance_v1"} else {}
-    comparison_25_11 = compare_to_previous(metrics_by_split, args.comparison_metrics_25_11) if args.loss_config == "component_separation_rebalance_v1" else {}
-    if args.loss_config == "component_separation_rebalance_v1":
+    comparison = (
+        compare_to_previous(metrics_by_split, args.comparison_metrics)
+        if args.loss_config in {"mask_depth_rebalance_v1", "component_separation_rebalance_v1"} or args.stage == "25.13"
+        else {}
+    )
+    comparison_25_11 = (
+        compare_to_previous(metrics_by_split, args.comparison_metrics_25_11)
+        if args.loss_config == "component_separation_rebalance_v1" or args.stage == "25.13"
+        else {}
+    )
+    comparison_25_12 = compare_to_previous(metrics_by_split, args.comparison_metrics_25_12) if args.stage == "25.13" else {}
+    if args.stage == "25.13":
+        gate = decide_target_v2_gate(history, metrics_by_split, comparison, comparison_25_11, comparison_25_12, arrays.target_transform_summary)
+    elif args.loss_config == "component_separation_rebalance_v1":
         gate = decide_component_separation_gate(history, metrics_by_split, comparison, comparison_25_11)
     elif args.loss_config == "mask_depth_rebalance_v1":
         gate = decide_rebalance_gate(history, metrics_by_split, comparison)
@@ -1509,8 +1785,9 @@ def main() -> int:
         {
             "vs_25_10": compare_sample_rows(sample_rows, args.comparison_metrics, "25.10"),
             "vs_25_11": compare_sample_rows(sample_rows, args.comparison_metrics_25_11, "25.11"),
+            **({"vs_25_12": compare_sample_rows(sample_rows, args.comparison_metrics_25_12, "25.12")} if args.stage == "25.13" else {}),
         }
-        if args.loss_config == "component_separation_rebalance_v1"
+        if args.loss_config == "component_separation_rebalance_v1" or args.stage == "25.13"
         else {}
     )
     split_counts = {split: int(indices.size) for split, indices in arrays.split_indices.items()}
@@ -1527,7 +1804,9 @@ def main() -> int:
         "criteria": gate["criteria"],
         "comparison_to_25_10": comparison,
         "comparison_to_25_11": comparison_25_11,
+        "comparison_to_25_12": comparison_25_12,
         "sample_comparisons": sample_comparisons,
+        "target_v2": arrays.target_transform_summary,
         "data": {
             "n_samples": int(arrays.raw["sample_ids"].shape[0]),
             "split_counts": split_counts,
@@ -1557,6 +1836,9 @@ def main() -> int:
             "architecture_changed_from_25_10": False,
             "component_set_representation_changed": False,
             "hungarian_matching_changed": False,
+            "uses_25_10_loss_mainline": loss_config.name == "component_set_gate_v1",
+            "uses_25_11_rebalance_stack": loss_config.name == "mask_depth_rebalance_v1",
+            "uses_25_12_rebalance_stack": loss_config.name == "component_separation_rebalance_v1",
         },
         "training": {
             "seed": args.seed,
@@ -1616,6 +1898,9 @@ def main() -> int:
         "gate_decision": gate["decision"],
         "route_decision": gate["next_route"],
         "loss_config": loss_config.name,
+        "target_version": args.target_version,
+        "target_redesign_manifest": str(args.target_redesign_manifest),
+        "target_v2_loaded": arrays.target_transform_summary.get("component_mask_target_v2") is True,
         "model_capacity_expanded": False,
         "component_set_representation_changed": False,
         "train_ready_candidate_consumed": True,
@@ -1623,7 +1908,7 @@ def main() -> int:
         "current_baseline_updated": False,
         "checkpoint_saved": False,
         "inference_artifact_exported": False,
-        "allowed_use": ["component_set_training_gate_evaluation", "mask_depth_loss_rebalance_training", "failure_audit_input"],
+        "allowed_use": ["component_set_training_gate_evaluation", "target_v2_training_gate_evaluation", "mask_depth_loss_rebalance_training", "failure_audit_input"],
         "forbidden_use": ["baseline_update", "current_baseline_replacement", "automatic_mainline_training", "formal_inference_artifact"],
     }
     write_json(args.gate_manifest, gate_manifest)

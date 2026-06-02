@@ -1,5 +1,16 @@
 # 实验工作日志
 
+## 2026-06-03 Stage 25.13 surface multi-pit component-set target-v2 training gate
+
+- Scope: executed the target-v2 training gate on `comsol_surface_multipit_component_set_pilot_v1`. The architecture, fixed `K=3` component-set representation, fixed split `72/20/20`, Hungarian matching, and `component_set_gate_v1` 25.10 loss mainline were kept unchanged. The 25.11/25.12 rebalance stacks were not used.
+- Boundary: no COMSOL, no data/NPZ mutation, no checkpoint/preview/notes artifact commit, no model-capacity expansion, no formal inference artifact export, no baseline transition, and no `CURRENT_BASELINE.md` update.
+- Target v2 usage: `component_mask_target_v2=true`, `component_depth_target_v2=true`, and `component_ownership_map=true`; loaded `112` samples, resolved `23565` foreground ownership pixels and `290` raw overlap pixels; duplicate ownership moved `297 -> 0`, and overlap-depth-conflict moved `271 -> 0`.
+- Gate decision: `FAIL`. Target v2 removed ownership conflicts, but the 25.10 loss mainline learned near-empty component/union masks rather than useful component-level separation.
+- Test metrics: recall `0.674419`, missed `0.325581`, extra `0.292683`, merged `0.000000`, component Dice `0.005536`, union Dice `0.002829`, depth RMSE `0.000242891 m`.
+- Comparison: versus 25.10, recall worsened by `-0.162791`, missed worsened by `+0.162791`, extra worsened by `+0.149826`, component Dice collapsed by `-0.104026`, union Dice collapsed by `-0.127651`, while depth RMSE was effectively unchanged (`-0.000000424 m`). Versus 25.11/25.12, merged rate improves numerically, but this is not success because mask/union Dice collapsed.
+- Subsets: component_count=3 test rows have merged `0.000000` but component Dice `0.000000` and union Dice `0.000000`; partially_overlapping rows have recall `0.555556`, missed `0.444444`, component Dice `0.004950`, and union Dice `0.002463`.
+- Route decision: unique next step is `C. return to generator/label schema; do not continue loss tuning`. Treat the v2 ownership transform as diagnostically useful but insufficient as a training target under the current component-level supervision.
+
 ## 2026-06-03 Stage 25.12b surface multi-pit component raster/depth target redesign
 
 - Scope: audited and redesigned component raster/depth targets after the 25.12 `FAIL`. This stage read the 25.10/25.10b/25.11/25.11b/25.12 metrics and the explicit `comsol_surface_multipit_component_set_pilot_v1` manifest only; it did not train, run COMSOL, mutate data/NPZ files, expand model capacity, export checkpoints/previews/notes, or update `CURRENT_BASELINE.md`.

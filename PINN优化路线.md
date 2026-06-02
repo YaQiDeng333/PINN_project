@@ -1,5 +1,13 @@
 # PINN 优化路线
 
+## 2026-06-03 route sync: 25.13 surface multi-pit component-set target-v2 training gate
+
+25.13 tests whether the 25.12b ownership fix is enough when plugged into the stable 25.10 loss mainline. The answer is no: target v2 is label-cleaning useful, but not a viable training target by itself under the current raster/depth supervision.
+
+The evidence is direct. Target v2 clears the label conflicts (`duplicate ownership 297 -> 0`, overlap-depth-conflict `271 -> 0`) while keeping model architecture, `K=3`, split, Hungarian matching, and `component_set_gate_v1` unchanged. But the learned masks collapse: test component Dice is `0.005536`, union Dice is `0.002829`, recall falls to `0.674419`, missed rises to `0.325581`, and extra rises to `0.292683`. Merged rate `0.000000` is not success because it comes from near-empty masks.
+
+The route implication is to stop loss-stack training. The unique next route is `C. return to generator/label schema; do not continue loss tuning`: component-level supervision probably needs a generator/schema redesign that supplies stronger positive raster/depth support, not just ownership-resolved hard masks. `CURRENT_BASELINE.md` remains unchanged.
+
 ## 2026-06-03 route sync: 25.12b surface multi-pit component raster/depth target redesign
 
 25.12b narrows the blocker from "mask/depth loss is weak" to a target-semantics issue. The v1 dataset is not broadly corrupt: component OR equals the sample union mask, max(component depth) equals union depth, empty slots are clean, and component centers agree with mask centroids. That rules out the main generator/evaluator bug path.

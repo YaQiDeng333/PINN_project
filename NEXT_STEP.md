@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-06-03 after Stage 25.13 surface multi-pit component-set target-v2 training gate
+
+Next step: run **C. return to generator/label schema; do not continue loss tuning**. Target v2 successfully resolves duplicated ownership in the labels, but the current component-level supervision still does not produce usable raster masks under the 25.10 loss mainline.
+
+The decisive failure is mask collapse, not merge recovery. Duplicate component ownership is cleared (`297 -> 0`) and overlap-depth-conflict is cleared (`271 -> 0`), but test component Dice falls to `0.005536` and union Dice to `0.002829`; merged rate `0.000000` is therefore a degenerate near-empty-mask effect, not healthy component separation. Recall also drops to `0.674419`, missed rises to `0.325581`, and extra rises to `0.292683` versus the 25.10 mainline.
+
+The next design stage should revisit generator/label schema semantics before more training: component-level mask/depth targets likely need stronger positive support or alternate supervision beyond ownership-resolved hard masks. Do not keep tuning loss weights, and do not update `CURRENT_BASELINE.md`.
+
 ## 2026-06-03 after Stage 25.12b surface multi-pit component raster/depth target redesign
 
 Next step: run **A. 25.13 target-v2 training gate using the 25.10 loss mainline**. Do not continue the 25.11/25.12 rebalance stack: target ownership, not more loss pressure, is the next controlled variable.
