@@ -1,24 +1,32 @@
-20.99 internal / buried defect COMSOL smoke pack 设计
+20.99 internal / buried defect COMSOL smoke pack plan
 
-scope: 只做设计，不运行 COMSOL，不生成 data/NPZ，不训练，不更新 CURRENT_BASELINE.md。
-recommended_size: 12 samples
-minimum_size: 6 samples
+scope: design only; no COMSOL, no training, no data/NPZ generation, no CURRENT_BASELINE update.
+recommended_size: 6-12 samples
 selected_plan_size: 12 samples
-shape_type_coverage: internal_cuboid=4, internal_ellipsoid=4, sphere_like=4
-burial_depth_coverage: deep=3, deep_plus=3, medium=3, shallow=3
-sensor_z_m: 0.008 nominal smoke first; later liftoff variation should be a separate pack.
+shape_types: internal_ellipsoid, internal_cuboid, sphere_like
+burial_depth_levels: shallow, medium, deep
+required_outputs: Bx/By/Bz, b_defect, b_no_defect, delta_b=b_defect-b_no_defect
+required_reference: matched no-defect reference for every defect row
+required_labels: L_m, W_m, D_m_or_cavity_size_m, burial_depth_m, depth_to_surface_m, defect_center_xyz_m, shape_type, profile_descriptor_or_cavity_mask, ground_truth_method
+sensor_z_m: 0.008 nominal first smoke; liftoff sweep belongs to a later pack
 axis_order: [Bx, By, Bz]
 scan_line_y_m: [-0.001, 0.0, 0.001]
 sensor_x_count: 201
+shape_type_coverage: {'internal_ellipsoid': 4, 'internal_cuboid': 4, 'sphere_like': 4}
+burial_depth_coverage: {'shallow': 6, 'medium': 3, 'deep': 3}
+size_level_coverage: {'small': 3, 'medium': 6, 'large': 3}
 
-required_outputs:
-- `b_defect`, `b_no_defect`, `delta_b=b_defect-b_no_defect`
-- three-axis `Bx/By/Bz`
-- labels: `L_m`, `W_m`, `D_m_or_cavity_size_m`, `burial_depth_m`, `defect_center_xyz_m`, `shape_type`, `ground_truth_method`
+generation_gates_for_later_stage:
+- closed internal cavity fully inside the specimen
+- Boolean subtract succeeds
+- mesh and solver succeed
+- finite Bx/By/Bz exports are present
+- no-defect reference is paired and reusable
+- delta_b equality check passes
+- internal labels include L/W/D, burial depth, center, shape_type, and ground_truth_method
 
 route_boundary:
-- 该 pack 是 internal defect feasibility smoke，不是 surface RBC baseline top-up。
-- 如果 smoke 通过，下一步才设计 internal-specific training gate。
-- Bz-only 只能作为低能力诊断分支，不是默认主线。
-
-plan_csv: results\metrics\internal_defect_comsol_smoke_pack_plan.csv
+- This pack is not a surface RBC top-up.
+- This pack is not train-ready by design.
+- Bz-only is a low-capability diagnostic branch only, not the mainline.
+plan_csv: C:\Users\19166\Desktop\PINN_project\results\metrics\internal_defect_comsol_smoke_pack_plan.csv

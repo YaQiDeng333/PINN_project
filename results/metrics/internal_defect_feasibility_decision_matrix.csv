@@ -1,7 +1,7 @@
-question,answer,evidence,decision
-can_transfer_from_surface_rbc_baseline,False,internal/buried defect needs burial_depth_m and volumetric labels,不能直接从当前 surface RBC baseline 迁移，只能借用三轴输入规范和部分 preprocessing 约定
-need_independent_comsol_generator,True,internal cavity geometry and no-defect reference semantics differ from surface RBC,需要独立 internal defect COMSOL generator / smoke pack
-first_model_family_if_smoke_passes,shape_type_conditioned_sizing,"planned shape_types=['internal_cuboid', 'internal_ellipsoid', 'sphere_like']",先做 shape_type + L/W/D + burial_depth 的 sizing，不直接做自由 3D occupancy
-need_bx_by_bz,True,current true 3D MFL route and 20.98 blockers require tri-axis availability,默认主线需要 Bx/By/Bz；Bz-only 不作为主线
-bz_only_feasible,limited_diagnostic_only,Bz-only loses lateral/vector information and was a 20.98 blocker for current route,Bz-only 可以做低能力 feasibility 对照，但不能替代三轴主线
-next_unique_step,generate internal COMSOL smoke pack,"planned_rows=12, burial_bins=['deep', 'deep_plus', 'medium', 'shallow']",下一步进入 6-12 sample internal COMSOL smoke pack；本轮不执行
+question,answer,decision,evidence,gate_status
+can_migrate_from_surface_rbc_baseline,no,Do not migrate directly from the current surface RBC baseline.,"surface RBC has no burial_depth_m target and represents surface profile/depth, not buried cavity geometry",blocked
+need_independent_comsol_generator,yes,Use an independent internal-cavity COMSOL generator in a later stage.,"internal cavity geometry, no-defect reference semantics, and labels differ from surface RBC",required
+first_model_route_if_smoke_passes,shape_type_conditioned_sizing,"If a later smoke pack passes, first evaluate shape_type + L/W/D + burial_depth + center_xyz, not free-form occupancy.","planned shape_types=['internal_cuboid', 'internal_ellipsoid', 'sphere_like']; planned_rows=12",future_only_no_training_this_stage
+need_Bx_By_Bz,yes,Keep tri-axis Bx/By/Bz as the mainline input requirement.,20.98 dry-run blockers and current true 3D MFL tooling both require tri-axis input for mainline claims,required
+Bz_only_feasible,limited_diagnostic_only,"Bz-only may be recorded as a low-capability diagnostic branch, not as the internal mainline.",Bz-only loses vector and lateral response information and was a blocker for the current route,degraded_branch_only
+enter_internal_COMSOL_smoke_pack_next,yes_after_metadata_confirmation,Unique next step: A. execute internal COMSOL smoke pack after confirming required metadata and labels.,"schema exists; plan rows=12; burial_levels=['deep', 'medium', 'shallow']; this stage did not run COMSOL",recommended_next

@@ -1,13 +1,25 @@
-20.99 internal / buried defect feasibility schema 只读 review
+20.99 internal / buried defect feasibility schema read-only review
 
-必须修复：无。
+review_status: PASS
+must_fix_findings: none
 
-建议修复：无。提交前需要显式确认 `results/` 下 20.99 summary/metrics 使用 `git add -f`，因为这些文件通常被 `.gitignore` 忽略。
+checked_scope:
+- Reviewed working-tree diff only; no edits, staging, or commits were performed by the review agent.
+- CURRENT_BASELINE.md had no diff.
+- No COMSOL execution, no training, no data/NPZ mutation, and no forbidden artifact path was found in the reviewed diff.
 
-可以接受：可以接受。脚本 `py_compile` 通过；未发现训练、COMSOL 运行、data/NPZ 修改、`CURRENT_BASELINE.md` 或 baseline docs 修改。
+evidence:
+- INTERNAL_DEFECT_SCHEMA.md clearly separates surface / near-surface defects from internal / buried defects.
+- burial_depth_m and depth_to_surface_m are required labels.
+- Bx/By/Bz is the mainline input requirement.
+- Bz-only is explicitly limited to a degraded diagnostic branch.
+- The smoke pack plan has 12 design rows, within the requested 6-12 range.
+- Smoke plan coverage is internal_ellipsoid=4, internal_cuboid=4, sphere_like=4.
+- Burial coverage is shallow=6, medium=3, deep=3.
+- Route decision uniquely recommends a later internal COMSOL smoke pack after metadata confirmation.
+- Scripts compile under C:\Users\19166\anaconda3\envs\pinn_mfl\python.exe.
+- Script defaults write only results/summaries/*.txt and results/metrics/*.csv.
 
-internal schema 是否合格：合格。`INTERNAL_DEFECT_SCHEMA.md` 清楚区分 internal/buried defect 与 surface RBC baseline，定义了 `burial_depth_m` / `depth_to_surface_m`、`defect_center_xyz_m`、`shape_type`、ground truth method，并明确 current surface RBC baseline 不能直接使用。
-
-是否建议进入 internal COMSOL smoke pack：建议进入，但只在确认可采 metadata 后执行。当前设计的 12 sample smoke pack 覆盖 `internal_ellipsoid / internal_cuboid / sphere_like` 和 shallow / medium / deep / deep_plus，规模合理；`Bx/By/Bz` 作为主线，`Bz-only` 标为低能力诊断分支，口径正确。
-
-简短原因：20.99 文件把内部缺陷的核心差异落在埋深、体积/空腔语义和独立 ground truth 上，没有把它混入 surface RBC baseline；同时明确本轮只是 schema/plan，不训练、不跑 COMSOL、不生成数据。
+review_conclusion:
+- The 20.99 schema/design stage is acceptable as plan-only work.
+- It does not authorize COMSOL execution, training, data/NPZ generation, CURRENT_BASELINE.md updates, or baseline transition.

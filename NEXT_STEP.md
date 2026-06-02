@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-06-02 after Stage 20.99 internal / buried defect feasibility schema
+
+Next step: run **A. execute internal COMSOL smoke pack after metadata confirmation**. First confirm the required metadata and labels, then in a later approved stage generate only the 6-12 sample internal smoke pack; do not train and do not update `CURRENT_BASELINE.md`.
+
+20.99 fixed the boundary: internal / buried defects are not surface RBC defects. The required internal labels are `L_m`, `W_m`, `D_m` or cavity size, `burial_depth_m` / `depth_to_surface_m`, `defect_center_xyz_m`, `shape_type`, profile descriptor or cavity mask, and `ground_truth_method`. Hard blockers remain missing burial depth, no no-defect reference, Bz-only without a degraded-branch declaration, unknown coordinates relative to the scan surface, missing `sensor_z_m`, and missing ground truth.
+
+The recommended first representation is `shape_type + L/W/D + burial_depth + center_xyz`. The smoke plan is 12 rows across `internal_ellipsoid`, `internal_cuboid`, and `sphere_like`, with shallow/medium/deep burial levels and required Bx/By/Bz plus `delta_b=b_defect-b_no_defect`. Bz-only is allowed only as a low-capability diagnostic branch.
+
 ## 2026-06-02 after Stage 25.3 current baseline generalization audit
 
 Next step: run **D. forward-consistency refinement plan** for the surface shape-extension branch. Keep `component_set` as a required sub-branch for multi-pit, but do not jump straight into training a 20.85-style six-parameter model.

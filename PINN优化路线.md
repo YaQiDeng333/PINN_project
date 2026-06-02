@@ -1,5 +1,13 @@
 # PINN 优化路线
 
+## 2026-06-02 route sync: 20.99 internal / buried defect feasibility schema
+
+20.99 fixes the internal / buried defect branch as a separate feasibility schema, not a robustness case of the current surface RBC baseline. The current `CURRENT_BASELINE.md` route still predicts six RBC-style surface parameters and surface profile/depth. Internal cavities need `burial_depth_m` / `depth_to_surface_m`, `defect_center_xyz_m`, `shape_type`, and a ground-truth method, so forcing them into the surface RBC output would confuse burial depth with surface profile or curvature.
+
+The first internal representation should be `shape_type + L/W/D + burial_depth + center_xyz`. `internal_ellipsoid_params` and `internal_cuboid_params` are the first parametric extensions; 3D occupancy / cavity mask is a later target; surface-equivalent projected profile is only QA/comparator output. Bx/By/Bz remains the mainline input. Bz-only can be kept as a low-capability diagnostic branch, not a true 3D internal mainline.
+
+The selected route is `A. execute internal COMSOL smoke pack after metadata confirmation`: a later 6-12 sample smoke pack, currently planned as 12 rows across ellipsoid/cuboid/sphere-like and shallow/medium/deep burial. This stage did not run COMSOL, did not train, did not generate data/NPZ, and did not update `CURRENT_BASELINE.md`.
+
 ## 2026-06-02 route sync: 25.3 current baseline generalization audit
 
 25.3 separates representation failure from model inversion failure. The RBC oracle fit is strong for most single-component families: `104/120` total samples and `80/96` non-RBC samples are representable by the old six-parameter RBC profile under the audit thresholds. The clear representation failure is multi-pit: `multi_pit_two_component_surface_defect` has `0/16` representable and component merge proxy `1.000000`.

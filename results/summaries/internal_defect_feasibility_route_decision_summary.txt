@@ -3,19 +3,23 @@
 surface_rbc_direct_use: false
 need_independent_schema: true
 need_independent_comsol_generator: true
-recommended_first_output: shape_type + L/W/D + burial_depth + center_xyz
+first_model_route_if_smoke_passes: shape_type_conditioned_sizing
+recommended_output_representation: shape_type + L/W/D + burial_depth + center_xyz
 recommended_smoke_pack_size: 12 samples
-minimum_smoke_pack_size: 6 samples
+smoke_pack_size_range: 6-12 samples
 need_Bx_By_Bz: true
 Bz_only_status: limited diagnostic branch only
-
-why:
-- internal / buried defect 的核心标签是 `burial_depth_m` / `depth_to_surface_m`，当前 surface RBC 六参数没有这个语义。
-- 如果直接使用 surface RBC baseline，模型会把埋深变化误解释成 surface profile / curvature 变化。
-- 三轴 `Bx/By/Bz` 是默认主线；只有 `Bz` 时可做低能力诊断，但不能宣称进入 true 3D internal baseline。
-
-next_unique_step: 生成 internal COMSOL smoke pack 之前先确认 schema 字段和实验可采 metadata；确认后再运行 COMSOL。
-COMSOL_run_this_stage: false
-training_run_this_stage: false
-data_npz_generation_this_stage: false
+training_allowed_this_stage: false
+COMSOL_allowed_this_stage: false
+data_npz_generation_allowed_this_stage: false
 CURRENT_BASELINE_update: false
+baseline_transition_allowed: false
+
+rationale:
+- Internal defects require burial_depth_m / depth_to_surface_m, which the surface RBC six-parameter output does not encode.
+- Direct surface RBC inference would confuse burial-depth changes with surface profile, footprint, or curvature changes.
+- Tri-axis Bx/By/Bz remains the mainline because Bz-only is underdetermined for true 3D internal geometry claims.
+- The first later smoke pack should prove geometry/reference/label feasibility before any training gate.
+
+next_unique_step: A. execute internal COMSOL smoke pack after metadata confirmation
+decision_matrix: C:\Users\19166\Desktop\PINN_project\results\metrics\internal_defect_feasibility_decision_matrix.csv

@@ -1,91 +1,106 @@
 # Internal / Buried Defect Feasibility Schema
 
-阶段：20.99 internal / buried defect feasibility schema for true 3D MFL。
+Stage: 20.99 internal / buried defect feasibility schema for true 3D MFL.
 
-本 schema 是独立分支，不替换 `CURRENT_BASELINE.md`。当前 `CURRENT_BASELINE` 仍是 20.85 true 3D RBC surface / near-surface profile-depth baseline；A2 仍只是 liftoff robustness companion module。内部/埋藏缺陷不能直接混入当前 surface RBC schema，因为它的标签语义、可观测性和评价目标都不同。
+This document defines an independent internal-defect branch. It does not replace or update `CURRENT_BASELINE.md`. The current baseline remains the 20.85/20.86 surface or near-surface true 3D RBC profile-depth baseline, with `delta_b` Bx/By/Bz input and six RBC-style output parameters.
 
-## internal defect 与 surface defect 的分界
+## Boundary
 
-surface / near-surface defect = 缺陷与扫描表面相交或足够接近表面，当前 RBC-style baseline 用 `L_m, W_m, D_m, wLD, wWD, wLW` 表示表面缺陷 profile，并生成 surface depth/profile 与 projected mask。
+Surface / near-surface defect = a defect that intersects the scan surface or is close enough to be represented as a surface profile/depth field. The current surface RBC baseline represents this branch with `L_m`, `W_m`, `D_m`, `wLD`, `wWD`, and `wLW`, then generates a surface profile/depth grid and projected mask.
 
-internal / buried defect = 缺陷不直接暴露在扫描表面，磁场扰动来自埋藏空腔或材料不连续体。此时 `D_m` 不再等价于表面缺陷深度，必须额外定义 `burial_depth_m` 或 `depth_to_surface_m`。当前 surface RBC 的 profile/depth/mask 语义不能直接复用。
+Internal / buried defect = a cavity or material discontinuity that does not break the scan surface. Its MFL response depends on cavity geometry, burial depth, center position, material path, liftoff, and sensor alignment. `D_m` is not a surface depth label in this branch; it is a cavity dimension. The branch must define `burial_depth_m` or `depth_to_surface_m` explicitly.
 
-## required inputs
+Internal / buried defects must not be mixed into the current surface RBC schema. The semantic target is volumetric or buried cavity geometry, not a surface pit profile.
 
-真实采集或 COMSOL smoke pack 必须提供：
+## Required Inputs
 
-- `Bx/By/Bz` 三轴 MFL 输入；如果只有 `Bz`，必须进入低能力 `Bz-only` 分支，不能使用当前 true 3D RBC 主分支。
-- `sensor_z_m`，单位 m，记录传感器 liftoff。
-- `no_defect_reference_id` 和 `no_defect_reference_method`，用于计算可信 `delta_b = b_defect - b_no_defect`。
-- `axis_order`，推荐固定为 `["Bx", "By", "Bz"]`。
-- `scan_line_y_m`，至少三条扫描线；若真实实验只有单线，需要单独定义低能力分支。
-- `sensor_x_m`，需要能重采样到项目标准长度 `201`。
-- `unit`，磁场单位必须可换算到 `Tesla`。
-- `material` 与 `specimen_geometry`，包括试件长宽厚、扫描面定义、材料牌号或磁性参数来源。
-- `coordinate_system`，必须定义 x 扫描方向、y 横向线方向、z liftoff / depth 方向。
-- `sensor_alignment_status`，记录三轴是否完成空间对齐。
-- `gain_calibration_status`，记录幅值/gain 是否可追溯。
+The main internal branch requires:
 
-## required labels
+- `Bx/By/Bz`: tri-axis MFL signal. Shape may reuse `(N, 3, 3, 201)` for the first smoke pack, but axis and scan-line metadata must be explicit.
+- `Bz-only branch`: allowed only as a degraded diagnostic branch. It cannot be called the true 3D internal mainline and cannot replace tri-axis `Bx/By/Bz`.
+- `sensor_z_m`: sensor liftoff from the scan surface, in meters.
+- `b_defect`, `b_no_defect`, or a validated `delta_b`: a matched no-defect reference is required to compute `delta_b = b_defect - b_no_defect`.
+- `no_defect_reference_id`: identifier for the matching reference scan or COMSOL run.
+- `no_defect_reference_method`: how the reference was acquired or generated and how it was aligned to the defect run.
+- `axis_order`: explicit channel order, recommended `["Bx", "By", "Bz"]`.
+- `scan_line_y_m`: y positions of scan lines, recommended `[-0.001, 0.0, 0.001]` for the first smoke pack.
+- `sensor_x_m`: x positions of scan samples, recommended 201 ordered samples for compatibility with current Conv1D tooling.
+- `units`: magnetic field units convertible to `Tesla`; geometry in meters.
+- `material`: material name or source for magnetic properties.
+- `specimen_geometry`: block length, width, thickness, scan surface definition, and steel interior direction.
+- `coordinate_system`: x scan direction, y transverse direction, z liftoff/depth direction, origin, and sign convention.
+- `sensor_alignment_status`: whether Bx/By/Bz are spatially aligned.
+- `gain_calibration_status`: whether channel gain/amplitude calibration is known.
+- `magnetization_setup`: source current/magnetization direction and magnitude when known.
 
-internal / buried defect 至少需要这些标签；没有这些标签时只能做采集 schema 检查，不能做监督训练或定量 benchmark。
+## Required Labels
 
-- `L_m`：缺陷沿 x 或主扫描方向的长度。
-- `W_m`：缺陷沿 y 或横向方向的宽度。
-- `D_m` 或 `cavity_size_m`：空腔尺寸或缺陷体在 z 方向的厚度。注意它不是 surface RBC 的表面深度。
-- `burial_depth_m`：从扫描表面到缺陷上表面或最近点的深度。
-- `depth_to_surface_m`：同 `burial_depth_m`，若定义不同必须写清参考点。
-- `defect_center_xyz_m`：缺陷中心在统一坐标系下的位置。
-- `shape_type`：例如 `internal_ellipsoid`、`internal_cuboid`、`sphere_like`。
-- `profile_descriptor` 或 `cavity_mask`：用于描述缺陷体形状的参数、体素 mask 或可投影描述。
-- `ground_truth_method`：标签来源，例如机械加工设计值、CT、切片测量、CAD、COMSOL 参数表。
+Internal supervised training, quantitative benchmarking, or a COMSOL smoke pack must provide:
 
-## output representation candidates
+- `L_m`: cavity length in the x or major scan direction.
+- `W_m`: cavity width in the y or transverse direction.
+- `D_m` or `cavity_size_m`: cavity dimension in the z direction. This is not surface pit depth.
+- `burial_depth_m`: distance from scan surface to the nearest cavity surface, in meters.
+- `depth_to_surface_m`: equivalent to `burial_depth_m` unless the manifest defines a different reference point.
+- `defect_center_xyz_m`: cavity center in the declared coordinate system.
+- `shape_type`: for example `internal_ellipsoid`, `internal_cuboid`, or `sphere_like`.
+- `profile_descriptor` or `cavity_mask`: parametric descriptor, voxel/occupancy mask, or projected equivalent used to describe cavity geometry.
+- `ground_truth_method`: source of truth, for example COMSOL parameter table, machining plan, CT, sectioning, CAD, or measurement log.
 
-推荐候选按优先级从简单到复杂排列：
+Optional but recommended labels:
+
+- `rotation_angle_rad` or orientation matrix for non-axis-aligned cavities.
+- `size_level` and `burial_depth_level` for stratified smoke or pilot coverage.
+- `specimen_id`, `scan_id`, and `reference_scan_id` for traceability.
+
+## Output Representation Candidates
+
+Recommended order for early work:
 
 1. `shape_type + L/W/D + burial_depth + center_xyz`
-   - 最小可执行表示，适合 6-12 个样本的 COMSOL smoke。
-   - 风险是只覆盖规则几何，不能表示自由形状。
+   - Minimal smoke-pack representation.
+   - Best first target for 6-12 samples.
+   - Covers sizing, center, and burial without claiming free-form geometry.
 
 2. `internal_ellipsoid_params`
-   - 输出椭球中心、三轴半径、埋深和姿态。
-   - 适合模拟球状/椭球状内孔，标签稳定。
+   - Center, three axes, burial depth, and orientation.
+   - Suitable for sphere-like and ellipsoid cavities.
 
 3. `internal_cuboid_params`
-   - 输出长方体空腔中心、尺寸、埋深和姿态。
-   - 与加工块状缺陷更接近，但边角导致场响应更尖锐。
+   - Center, three dimensions, burial depth, and orientation.
+   - Suitable for machined box-like cavities.
 
 4. `3D occupancy / cavity mask`
-   - 输出体素化空腔 mask。
-   - 表达力强，但需要更多数据和明确体素坐标系，不能作为第一轮 smoke 的主目标。
+   - Stronger representation for arbitrary internal cavities.
+   - Requires a declared voxel grid, more data, and stronger validation.
 
 5. `surface_equivalent_projected_profile`
-   - 把内部缺陷投影成表面等效 footprint 或等效 profile。
-   - 只能作为 QA / comparator，不应作为唯一监督目标，因为它会丢失 `burial_depth_m`。
+   - A QA or comparator view only.
+   - It should not be the sole target because it discards burial-depth semantics.
 
-## blockers
+## Hard Blockers
 
-以下任一条件成立时，不能进入 internal defect supervised training gate：
+The internal supervised branch is blocked if any of these are true:
 
-- 无 `burial_depth_m` 或 `depth_to_surface_m`。
-- 无可信 `no_defect_reference`，无法构造稳定 `delta_b`。
-- 只有 `Bz`，且没有明确的 `Bz-only` 低能力分支。
-- 不知道缺陷相对扫描面的坐标或坐标系。
-- 没有 ground truth，或 ground truth 来源不明。
-- 不知道 `sensor_z_m`。
-- 不知道材料、试件尺寸、励磁设置或传感器对齐/gain 状态。
+- No `burial_depth_m` or `depth_to_surface_m`.
+- No matched no-defect reference or no reliable `delta_b`.
+- Only `Bz` is available and no explicit low-capability Bz-only route is declared.
+- Defect location relative to the scan surface is unknown.
+- Coordinate system or z sign convention is unknown.
+- No ground truth, or ground-truth source is not documented.
+- Missing `sensor_z_m`.
+- Unknown material, specimen geometry, magnetization setup, sensor alignment, or gain status.
 
-## 为什么不能直接用当前 surface RBC baseline
+## Why Current Surface RBC Baseline Is Not Enough
 
-当前 surface RBC baseline 学的是：
+Current surface RBC route:
 
-`delta_b + sensor_z_m -> surface RBC six params -> surface profile/depth -> projected mask`
+`delta_b + sensor_z_m -> six RBC-style surface parameters -> surface profile/depth -> projected mask`
 
-internal / buried defect 的真实问题是：
+Internal defect route:
 
-`delta_b + sensor_z_m + specimen/material context -> buried cavity geometry + burial depth + center -> volumetric or equivalent response`
+`delta_b + sensor_z_m + specimen/material context -> buried cavity geometry + burial_depth + center_xyz`
 
-两者的关键差异在 `burial_depth_m` 和缺陷体积语义。内部缺陷的磁场幅值和形状会同时受尺寸、埋深、材料路径、liftoff 和传感器对齐影响；如果直接套 surface RBC 六参数，模型会把埋深变化误解释为表面 profile 或 curvature 变化，得到物理含义错误的输出。
+The current six RBC-style parameters have no `burial_depth_m` field and encode a surface profile, not a volumetric cavity. If internal samples are forced into that output space, the model can confuse burial-depth changes with surface profile depth, curvature, or footprint changes. That would produce physically wrong outputs even when the signal is finite.
 
-因此 20.99 的结论是：internal / buried defect 必须先走独立 feasibility schema 和 COMSOL smoke pack，再决定是否训练 internal-specific model。
+Therefore 20.99 only authorizes schema, label, and data-generation design. It does not authorize COMSOL execution, training, data/NPZ generation, or a `CURRENT_BASELINE.md` update.

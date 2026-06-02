@@ -1,5 +1,14 @@
 # 实验工作日志
 
+## 2026-06-02 Stage 20.99 internal / buried defect feasibility schema
+
+- Scope: defined the internal / buried defect feasibility schema and data-generation design only. No COMSOL, no training, no data/NPZ generation or mutation, and no `CURRENT_BASELINE.md` update.
+- Preflight: carried forward the 20.98 dry-run blocker state: `ready_for_inference=false`; the user specimen is `internal_or_buried`; required Bx/By/Bz, no-defect reference, `sensor_z_m`, axis order, scan geometry, units, coordinate system, alignment/gain metadata, and internal ground truth are missing.
+- Schema: `INTERNAL_DEFECT_SCHEMA.md` now separates surface / near-surface RBC defects from buried cavity defects. Internal labels require `L_m`, `W_m`, `D_m` or cavity size, `burial_depth_m` / `depth_to_surface_m`, `defect_center_xyz_m`, `shape_type`, profile descriptor or cavity mask, and `ground_truth_method`.
+- Smoke-pack design: `scripts/design_internal_defect_comsol_smoke_pack_plan.py` writes a 12-row plan covering `internal_ellipsoid`, `internal_cuboid`, and `sphere_like`, with shallow/medium/deep burial levels, required Bx/By/Bz, no-defect reference, and `delta_b=b_defect-b_no_defect`. It is design-only and does not run COMSOL.
+- Route decision: `scripts/decide_internal_defect_feasibility_route.py` forbids direct migration from the surface RBC baseline, requires an independent internal COMSOL generator, keeps Bx/By/Bz as the mainline, marks Bz-only as a limited diagnostic branch, and selects the unique next step `A. execute internal COMSOL smoke pack after metadata confirmation`.
+- Review: independent read-only review passed with no must-fix and confirmed the internal/surface boundary, burial-depth labels, script compilation, output whitelist, no `CURRENT_BASELINE.md` diff, and no COMSOL/training/data mutation.
+
 ## 2026-06-02 Stage 25.3 current surface RBC baseline generalization audit
 
 - Scope: audited frozen 20.85/20.86 surface RBC baseline on `comsol_surface_shape_extension_pilot_v1`. No training, no COMSOL, no data/NPZ mutation, no checkpoint/preview/notes artifact, and no `CURRENT_BASELINE.md` update.
