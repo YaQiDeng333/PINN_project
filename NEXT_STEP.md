@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-06-03 after Stage 25.15 surface multi-pit label-v3 training gate
+
+Next step: run **C. return to label-v3 derivation or generator/export schema; do not continue loss tuning**. The 25.15 gate used the 25.10 loss mainline plus label-v3 supervision, so this failure should not be answered by reusing the 25.11/25.12 rebalance stack or by increasing model capacity.
+
+The decisive mechanism is a trade from near-empty collapse to merge collapse. Label v3 improved raster support enough that component Dice rose from `0.005536` to `0.034245` and union Dice from `0.002829` to `0.061694` versus 25.13, but merged rate became `1.000000`, depth RMSE worsened to `0.001106223 m`, and recall stayed at `0.674419`. Component_count=3, partially_overlapping, and touching_boundary test slices all have merged rate `1.000000`.
+
+The next audit should check whether v3 soft bands/SDF/valid regions are too permissive, whether overlap/contact targets need explicit non-merge ownership confidence, and whether generator/export schema must provide component-local separation fields beyond soft support. `CURRENT_BASELINE.md` remains unchanged.
+
 ## 2026-06-03 after Stage 25.14 surface multi-pit label-v3 derivation + validator
 
 Next step: run **A. 25.15 label-v3 training gate using the 25.10 loss mainline + label-v3 supervision**. Do not use the 25.11/25.12 rebalance stack, do not update `CURRENT_BASELINE.md`, and do not frame this as a baseline transition.

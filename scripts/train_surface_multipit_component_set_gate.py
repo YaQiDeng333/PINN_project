@@ -40,7 +40,9 @@ DEFAULT_REGISTRY = ROOT / "COMSOL_DATA_REGISTRY.md"
 DEFAULT_COMPARISON_METRICS = ROOT / "results/metrics/25_10_component_set_training_gate_metrics.json"
 DEFAULT_COMPARISON_METRICS_25_11 = ROOT / "results/metrics/25_11_mask_depth_loss_rebalance_training_metrics.json"
 DEFAULT_COMPARISON_METRICS_25_12 = ROOT / "results/metrics/25_12_component_separation_rebalance_training_metrics.json"
+DEFAULT_COMPARISON_METRICS_25_13 = ROOT / "results/metrics/25_13_target_v2_training_gate_metrics.json"
 DEFAULT_TARGET_REDESIGN_MANIFEST = ROOT / "results/manifests/25_12b_component_raster_depth_target_redesign_manifest.json"
+DEFAULT_LABEL_V3_MANIFEST = ROOT / "results/manifests/25_14_label_v3_derivation_validator_manifest.json"
 
 TARGET_SPLIT = {"train": 72, "val": 20, "test": 20}
 K_MAX = 3
@@ -143,11 +145,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--comparison-metrics", type=Path, default=DEFAULT_COMPARISON_METRICS)
     parser.add_argument("--comparison-metrics-25-11", type=Path, default=DEFAULT_COMPARISON_METRICS_25_11)
     parser.add_argument("--comparison-metrics-25-12", type=Path, default=DEFAULT_COMPARISON_METRICS_25_12)
+    parser.add_argument("--comparison-metrics-25-13", type=Path, default=DEFAULT_COMPARISON_METRICS_25_13)
     parser.add_argument("--target-redesign-manifest", type=Path, default=DEFAULT_TARGET_REDESIGN_MANIFEST)
+    parser.add_argument("--label-v3-manifest", type=Path, default=DEFAULT_LABEL_V3_MANIFEST)
     parser.add_argument("--stage", default="25.10")
     parser.add_argument("--gate-id", default=GATE_ID)
     parser.add_argument("--loss-config", choices=sorted(LOSS_CONFIGS), default="component_set_gate_v1")
-    parser.add_argument("--target-version", choices=["v1", "v2"], default="v1")
+    parser.add_argument("--target-version", choices=["v1", "v2", "v3"], default="v1")
     parser.add_argument("--epochs", type=int, default=180)
     parser.add_argument("--batch-size", type=int, default=12)
     parser.add_argument("--lr", type=float, default=1.0e-3)
@@ -377,7 +381,10 @@ class Arrays:
     params_norm: np.ndarray
     shape_target: np.ndarray
     mask_low: np.ndarray
+    sdf_low: np.ndarray
+    mask_valid_low: np.ndarray
     depth_low_norm: np.ndarray
+    depth_valid_low: np.ndarray
     component_masks_full: np.ndarray
     component_depths_full: np.ndarray
     depth_scale: float
@@ -395,6 +402,42 @@ def grid_xy(height: int, width: int) -> tuple[np.ndarray, np.ndarray]:
     x = np.linspace(-0.04, 0.04, width)
     y = np.linspace(-0.01, 0.01, height)
     return np.meshgrid(x, y, indexing="xy")
+
+
+def dilate_bool(mask: np.ndarray, radius: int = 1) -> np.ndarray:
+    result = np.asarray(mask, dtype=bool).copy()
+    for _ in range(radius):
+        padded = np.pad(result, 1, mode="constant", constant_values=False)
+        expanded = np.zeros_like(result)
+        for dy in range(3):
+            for dx in range(3):
+                expanded |= padded[dy : dy + result.shape[0], dx : dx + result.shape[1]]
+        result = expanded
+    return result
+
+
+def normalized_signed_distance(mask: np.ndarray, clip_radius_px: float = 4.0) -> np.ndarray:
+    fg = np.argwhere(mask)
+    bg = np.argwhere(~mask)
+    sdf = np.zeros(mask.shape, dtype=np.float32)
+    if fg.size == 0:
+        return sdf
+    if bg.size == 0:
+        return np.ones(mask.shape, dtype=np.float32)
+
+    def nearest_distance(points: np.ndarray, targets: np.ndarray) -> np.ndarray:
+        out = np.empty(points.shape[0], dtype=np.float32)
+        target = targets.astype(np.float32)
+        chunk = 1024
+        for start in range(0, points.shape[0], chunk):
+            pts = points[start : start + chunk].astype(np.float32)
+            diff = pts[:, None, :] - target[None, :, :]
+            out[start : start + chunk] = np.sqrt(np.min(np.sum(diff * diff, axis=2), axis=1))
+        return out
+
+    sdf[tuple(fg.T)] = nearest_distance(fg, bg)
+    sdf[tuple(bg.T)] = -nearest_distance(bg, fg)
+    return np.clip(sdf / float(clip_radius_px), -1.0, 1.0).astype(np.float32)
 
 
 def build_target_v2(pack: dict[str, Any]) -> tuple[np.ndarray, np.ndarray, np.ndarray, dict[str, Any]]:
@@ -496,6 +539,113 @@ def build_target_v2(pack: dict[str, Any]) -> tuple[np.ndarray, np.ndarray, np.nd
     return masks_v2.astype(np.float32), depths_v2.astype(np.float32), ownership, summary
 
 
+def build_target_v3(pack: dict[str, Any]) -> tuple[dict[str, np.ndarray], dict[str, Any]]:
+    masks_v2, _depths_v2, ownership, v2_summary = build_target_v2(pack)
+    exists = np.asarray(pack["component_exists"], dtype=bool)
+    raw_masks = np.asarray(pack["component_projected_masks_2d"], dtype=bool)
+    raw_depths = np.asarray(pack["component_depth_grids_m"], dtype=np.float32)
+    n, k, height, width = raw_masks.shape
+    soft = np.zeros((n, k, height, width), dtype=np.float32)
+    sdf = np.zeros_like(soft, dtype=np.float32)
+    valid = np.zeros_like(raw_masks, dtype=bool)
+    depth_v3 = np.zeros_like(raw_depths, dtype=np.float32)
+    depth_valid = np.zeros_like(raw_masks, dtype=bool)
+    overlap_region = raw_masks.sum(axis=1) > 1
+    contact_boundary = np.zeros((n, height, width), dtype=bool)
+    rows: list[dict[str, Any]] = []
+
+    for i in range(n):
+        active_slots = [int(slot) for slot in np.where(exists[i])[0]]
+        for slot in active_slots:
+            raw = raw_masks[i, slot]
+            owned = ownership[i] == slot
+            band1 = dilate_bool(raw, radius=1)
+            band2 = dilate_bool(raw, radius=2)
+            component_soft = np.zeros((height, width), dtype=np.float32)
+            component_soft[band2] = 0.25
+            component_soft[band1] = 0.50
+            component_soft[raw] = 0.80
+            component_soft[owned] = 1.00
+            soft[i, slot] = component_soft
+            sdf[i, slot] = normalized_signed_distance(raw)
+            valid[i, slot] = band2
+            depth_v3[i, slot, raw] = raw_depths[i, slot, raw]
+            depth_valid[i, slot] = raw
+            hard_px = int(masks_v2[i, slot].sum())
+            soft_px = int((component_soft > 0.0).sum())
+            rows.append(
+                {
+                    "sample_id": str(pack["sample_ids"][i]),
+                    "source_index": int(i),
+                    "slot": int(slot),
+                    "split": str(pack["split"][i]),
+                    "component_count": int(pack["component_count"][i]),
+                    "separation_type": str(pack["separation_type"][i]),
+                    "topology_relation": str(pack["topology_relation"][i]),
+                    "v2_hard_foreground_px": hard_px,
+                    "v3_soft_positive_px": soft_px,
+                    "v3_valid_region_px": int(valid[i, slot].sum()),
+                    "v3_depth_valid_px": int(depth_valid[i, slot].sum()),
+                    "v3_vs_v2_positive_ratio": float(soft_px / max(hard_px, 1)),
+                    "existing_v3_empty_or_tiny": bool(soft_px < 20),
+                }
+            )
+        for left_index, left in enumerate(active_slots):
+            left_band = dilate_bool(raw_masks[i, left], radius=1)
+            for right in active_slots[left_index + 1 :]:
+                right_band = dilate_bool(raw_masks[i, right], radius=1)
+                contact_boundary[i] |= left_band & right_band
+        contact_boundary[i] &= ~overlap_region[i]
+
+    inactive = ~exists
+    inactive_violations = int(np.logical_or(soft[inactive] > 0.0, valid[inactive]).sum()) if inactive.any() else 0
+    ratios = [float(row["v3_vs_v2_positive_ratio"]) for row in rows]
+    soft_px_values = [int(row["v3_soft_positive_px"]) for row in rows]
+    valid_px_values = [int(row["v3_valid_region_px"]) for row in rows]
+    depth_valid_px_values = [int(row["v3_depth_valid_px"]) for row in rows]
+    summary = {
+        **v2_summary,
+        "target_version": "v3",
+        "component_mask_target_v2": False,
+        "component_depth_target_v2": False,
+        "component_mask_target_v3_soft": True,
+        "component_sdf_target_v3": True,
+        "component_valid_region_mask": True,
+        "component_depth_target_v3": True,
+        "component_depth_valid_region_mask": True,
+        "overlap_region_mask": True,
+        "contact_boundary_mask": True,
+        "raw_component_mask_raw": True,
+        "component_ownership_map": True,
+        "v3_target_loaded_count": int(n),
+        "v3_active_component_count": int(len(rows)),
+        "v3_soft_support_pixel_mean": float(np.mean(soft_px_values)) if soft_px_values else math.nan,
+        "v3_soft_support_pixel_min": int(min(soft_px_values)) if soft_px_values else 0,
+        "v3_valid_region_pixel_mean": float(np.mean(valid_px_values)) if valid_px_values else math.nan,
+        "v3_valid_region_pixel_min": int(min(valid_px_values)) if valid_px_values else 0,
+        "v3_depth_valid_region_pixel_mean": float(np.mean(depth_valid_px_values)) if depth_valid_px_values else math.nan,
+        "v3_depth_valid_region_pixel_min": int(min(depth_valid_px_values)) if depth_valid_px_values else 0,
+        "v3_vs_v2_support_ratio_mean": float(np.mean(ratios)) if ratios else math.nan,
+        "v3_vs_v2_support_ratio_min": float(np.min(ratios)) if ratios else math.nan,
+        "empty_slot_violation_count": inactive_violations,
+        "existing_v3_empty_or_tiny_count": int(sum(bool(row["existing_v3_empty_or_tiny"]) for row in rows)),
+        "overlap_region_pixel_sum": int(overlap_region.sum()),
+        "contact_boundary_pixel_sum": int(contact_boundary.sum()),
+        "label_v3_training_rule": "25.10 loss weights; soft/SDF/valid-region component supervision; union mask/depth not weighted in training",
+        "by_component_rows": rows,
+    }
+    return (
+        {
+            "soft_mask": soft,
+            "sdf": sdf,
+            "valid_region": valid.astype(np.float32),
+            "depth": depth_v3,
+            "depth_valid": depth_valid.astype(np.float32),
+        },
+        summary,
+    )
+
+
 def build_arrays(pack: dict[str, Any], target_version: str = "v1") -> Arrays:
     n = int(pack["sample_ids"].shape[0])
     split = np.asarray(pack["split"]).astype(str)
@@ -546,11 +696,34 @@ def build_arrays(pack: dict[str, Any], target_version: str = "v1") -> Arrays:
             if exists[i, slot]:
                 shape_target[i, slot] = shape_to_idx[str(families[i, slot])]
 
+    sdf_full = np.zeros_like(np.asarray(pack["component_projected_masks_2d"], dtype=np.float32))
+    mask_valid_full = np.ones_like(sdf_full, dtype=np.float32)
+    depth_valid_full = np.asarray(pack["component_projected_masks_2d"], dtype=np.float32)
     if target_version == "v2":
         component_masks_full, component_depths_full, _ownership, target_summary = build_target_v2(pack)
+        training_masks_full = component_masks_full
+        training_depths_full = component_depths_full
+        mask_valid_full = (component_masks_full > 0.0).astype(np.float32)
+        sdf_full = 2.0 * component_masks_full - 1.0
+        eval_component_masks_full = component_masks_full
+        eval_component_depths_full = component_depths_full
+    elif target_version == "v3":
+        v3_targets, target_summary = build_target_v3(pack)
+        training_masks_full = v3_targets["soft_mask"].astype(np.float32)
+        training_depths_full = v3_targets["depth"].astype(np.float32)
+        sdf_full = v3_targets["sdf"].astype(np.float32)
+        mask_valid_full = v3_targets["valid_region"].astype(np.float32)
+        depth_valid_full = v3_targets["depth_valid"].astype(np.float32)
+        eval_component_masks_full = np.asarray(pack["component_projected_masks_2d"], dtype=np.float32)
+        eval_component_depths_full = np.asarray(pack["component_depth_grids_m"], dtype=np.float32)
     else:
-        component_masks_full = np.asarray(pack["component_projected_masks_2d"], dtype=np.float32)
-        component_depths_full = np.asarray(pack["component_depth_grids_m"], dtype=np.float32)
+        training_masks_full = np.asarray(pack["component_projected_masks_2d"], dtype=np.float32)
+        training_depths_full = np.asarray(pack["component_depth_grids_m"], dtype=np.float32)
+        eval_component_masks_full = training_masks_full
+        eval_component_depths_full = training_depths_full
+        sdf_full = 2.0 * training_masks_full - 1.0
+        mask_valid_full = np.ones_like(training_masks_full, dtype=np.float32)
+        depth_valid_full = training_masks_full
         target_summary = {
             "target_version": "v1",
             "component_mask_target_v2": False,
@@ -558,8 +731,11 @@ def build_arrays(pack: dict[str, Any], target_version: str = "v1") -> Arrays:
             "component_ownership_map": False,
             "target_loaded_count": int(n),
         }
-    mask_low = downsample_np(component_masks_full.astype(np.float32))
-    depth_low = downsample_np(component_depths_full.astype(np.float32))
+    mask_low = downsample_np(training_masks_full.astype(np.float32))
+    sdf_low = downsample_np(sdf_full.astype(np.float32))
+    mask_valid_low = (downsample_np(mask_valid_full.astype(np.float32)) > 0.0).astype(np.float32)
+    depth_valid_low = (downsample_np(depth_valid_full.astype(np.float32)) > 0.0).astype(np.float32)
+    depth_low = downsample_np(training_depths_full.astype(np.float32))
     active_depth = depth_low[exists]
     depth_scale = float(np.percentile(active_depth[active_depth > 0], 99)) if np.any(active_depth > 0) else 1.0
     depth_scale = max(depth_scale, 1.0e-6)
@@ -577,9 +753,12 @@ def build_arrays(pack: dict[str, Any], target_version: str = "v1") -> Arrays:
         params_norm=params_norm,
         shape_target=shape_target,
         mask_low=mask_low,
+        sdf_low=sdf_low,
+        mask_valid_low=mask_valid_low,
         depth_low_norm=depth_low_norm,
-        component_masks_full=component_masks_full.astype(np.float32),
-        component_depths_full=component_depths_full.astype(np.float32),
+        depth_valid_low=depth_valid_low,
+        component_masks_full=eval_component_masks_full.astype(np.float32),
+        component_depths_full=eval_component_depths_full.astype(np.float32),
         depth_scale=depth_scale,
         param_mean=param_mean,
         param_std=param_std,
@@ -610,7 +789,11 @@ class ComponentSetDataset(Dataset):
             "params": torch.from_numpy(self.arrays.params_norm[i]).float(),
             "shape": torch.from_numpy(self.arrays.shape_target[i]).long(),
             "mask": torch.from_numpy(self.arrays.mask_low[i]).float(),
+            "sdf": torch.from_numpy(self.arrays.sdf_low[i]).float(),
+            "mask_valid": torch.from_numpy(self.arrays.mask_valid_low[i]).float(),
             "depth": torch.from_numpy(self.arrays.depth_low_norm[i]).float(),
+            "depth_valid": torch.from_numpy(self.arrays.depth_valid_low[i]).float(),
+            "label_v3": torch.tensor(1.0 if self.arrays.target_version == "v3" else 0.0, dtype=torch.float32),
         }
 
 
@@ -665,6 +848,10 @@ def loss_terms_for_perm(pred: dict[str, torch.Tensor], batch: dict[str, torch.Te
     shape = batch["shape"][:, perm]
     mask = batch["mask"][:, perm]
     depth = batch["depth"][:, perm]
+    sdf = batch["sdf"][:, perm]
+    mask_valid = batch["mask_valid"][:, perm]
+    depth_valid = batch["depth_valid"][:, perm]
+    label_v3 = bool(batch.get("label_v3", torch.zeros(1, device=exists.device))[0].detach().item() > 0.5)
     b = exists.shape[0]
     active_count = exists.sum(dim=1).clamp_min(1.0)
 
@@ -681,6 +868,11 @@ def loss_terms_for_perm(pred: dict[str, torch.Tensor], batch: dict[str, torch.Te
     shape_loss = (shape_flat * exists).sum(dim=1) / active_count
 
     depth_pred = F.softplus(pred["depth_raw"])
+    label_v3_sdf_loss = torch.zeros_like(exist_loss)
+    label_v3_soft_bce_loss = torch.zeros_like(exist_loss)
+    label_v3_soft_dice_loss = torch.zeros_like(exist_loss)
+    label_v3_valid_depth_loss = torch.zeros_like(exist_loss)
+
     if loss_config.name in {"mask_depth_rebalance_v1", "component_separation_rebalance_v1"}:
         mask_bce = balanced_bce_from_logits(pred["mask_logits"], mask)
         mask_dice = soft_dice_loss(pred["mask_logits"], mask)
@@ -711,6 +903,31 @@ def loss_terms_for_perm(pred: dict[str, torch.Tensor], batch: dict[str, torch.Te
         else:
             separation_loss = torch.zeros_like(component_mask_loss)
             merge_loss = torch.zeros_like(component_mask_loss)
+    elif label_v3:
+        valid_mask = (mask_valid > 0.0).float()
+        valid_depth = (depth_valid > 0.0).float()
+        mask_prob = torch.sigmoid(pred["mask_logits"])
+        mask_bce_raw = F.binary_cross_entropy_with_logits(pred["mask_logits"], mask, reduction="none")
+        mask_bce = (mask_bce_raw * valid_mask).sum(dim=(-2, -1)) / valid_mask.sum(dim=(-2, -1)).clamp_min(1.0e-6)
+        mask_dice = soft_dice_loss_prob(mask_prob * valid_mask, mask * valid_mask)
+        sdf_pred = torch.tanh(pred["mask_logits"] / 3.0)
+        sdf_raw = F.smooth_l1_loss(sdf_pred, sdf, reduction="none")
+        sdf_loss = (sdf_raw * valid_mask).sum(dim=(-2, -1)) / valid_mask.sum(dim=(-2, -1)).clamp_min(1.0e-6)
+        component_mask_raw = mask_bce + mask_dice + 0.25 * sdf_loss
+        component_mask_loss = (component_mask_raw * exists).sum(dim=1) / active_count
+        union_mask_loss = torch.zeros_like(component_mask_loss)
+
+        component_depth_raw = valid_region_smooth_l1(depth_pred, depth, valid_depth)
+        component_depth_loss = (component_depth_raw * exists).sum(dim=1) / active_count
+        union_depth_loss = torch.zeros_like(component_depth_loss)
+        component_depth_background_loss = torch.zeros_like(component_depth_loss)
+        union_depth_background_loss = torch.zeros_like(component_depth_loss)
+        separation_loss = torch.zeros_like(component_depth_loss)
+        merge_loss = torch.zeros_like(component_depth_loss)
+        label_v3_sdf_loss = (sdf_loss * exists).sum(dim=1) / active_count
+        label_v3_soft_bce_loss = (mask_bce * exists).sum(dim=1) / active_count
+        label_v3_soft_dice_loss = (mask_dice * exists).sum(dim=1) / active_count
+        label_v3_valid_depth_loss = component_depth_loss
     else:
         mask_bce = F.binary_cross_entropy_with_logits(pred["mask_logits"], mask, reduction="none").mean(dim=(-2, -1))
         mask_dice = soft_dice_loss(pred["mask_logits"], mask)
@@ -738,6 +955,10 @@ def loss_terms_for_perm(pred: dict[str, torch.Tensor], batch: dict[str, torch.Te
         "union_depth_background": union_depth_background_loss,
         "separation_penalty": separation_loss,
         "merge_penalty": merge_loss,
+        "label_v3_sdf": label_v3_sdf_loss,
+        "label_v3_soft_bce": label_v3_soft_bce_loss,
+        "label_v3_soft_dice": label_v3_soft_dice_loss,
+        "label_v3_valid_depth": label_v3_valid_depth_loss,
     }
 
 
@@ -751,7 +972,7 @@ def hungarian_loss_breakdown(pred: dict[str, torch.Tensor], batch: dict[str, tor
     best_idx = weighted_stack.argmin(dim=1)
     selected_total = weighted_stack.gather(1, best_idx[:, None]).squeeze(1)
     selected_terms: dict[str, torch.Tensor] = {}
-    for name in weights:
+    for name in per_perm_terms[0]:
         stack = torch.stack([terms[name] for terms in per_perm_terms], dim=1)
         selected_terms[name] = stack.gather(1, best_idx[:, None]).squeeze(1)
     loss = selected_total.mean()
@@ -1109,14 +1330,15 @@ def average_loss_records(records: list[dict[str, Any]]) -> dict[str, Any]:
     if not records:
         return {"loss": math.nan, "unweighted": {}, "weighted": {}, "mask_depth_weighted_ratio": math.nan}
     total_n = sum(int(record["batch_size"]) for record in records)
-    term_names = list(records[0]["unweighted"].keys())
+    unweighted_names = list(records[0]["unweighted"].keys())
+    weighted_names = list(records[0]["weighted"].keys())
     unweighted = {
         name: float(sum(float(record["unweighted"][name]) * int(record["batch_size"]) for record in records) / total_n)
-        for name in term_names
+        for name in unweighted_names
     }
     weighted = {
         name: float(sum(float(record["weighted"][name]) * int(record["batch_size"]) for record in records) / total_n)
-        for name in term_names
+        for name in weighted_names
     }
     loss = float(sum(float(record["loss"]) * int(record["batch_size"]) for record in records) / total_n)
     total_weighted = float(sum(weighted.values()))
@@ -1586,6 +1808,114 @@ def decide_target_v2_gate(
     }
 
 
+def decide_label_v3_gate(
+    history: list[dict[str, Any]],
+    split_metrics: dict[str, Any],
+    comparison_25_10: dict[str, Any],
+    comparison_25_13: dict[str, Any],
+    target_summary: dict[str, Any],
+) -> dict[str, Any]:
+    first_train = float(history[0]["train_loss"])
+    final_train = float(history[-1]["train_loss"])
+    best_val = min(float(row["val_loss"]) for row in history)
+    test = split_metrics["test"]
+    d10 = comparison_25_10["test_deltas"]
+    d13 = comparison_25_13["test_deltas"]
+
+    component_dice_delta_vs_25_13 = float(d13["component_mask_dice_mean"]["delta"])
+    union_dice_delta_vs_25_13 = float(d13["union_mask_dice_mean"]["delta"])
+    recall_delta_vs_25_13 = float(d13["component_recall"]["delta"])
+    missed_delta_vs_25_13 = float(d13["missed_rate"]["delta"])
+    extra_delta_vs_25_13 = float(d13["extra_rate"]["delta"])
+    depth_delta_vs_25_13 = float(d13["depth_grid_rmse_m_mean"]["delta"])
+    component_dice_delta_vs_25_10 = float(d10["component_mask_dice_mean"]["delta"])
+    union_dice_delta_vs_25_10 = float(d10["union_mask_dice_mean"]["delta"])
+    recall_delta_vs_25_10 = float(d10["component_recall"]["delta"])
+    missed_delta_vs_25_10 = float(d10["missed_rate"]["delta"])
+    extra_delta_vs_25_10 = float(d10["extra_rate"]["delta"])
+    depth_delta_vs_25_10 = float(d10["depth_grid_rmse_m_mean"]["delta"])
+    merged_delta_vs_25_10 = float(d10["merged_rate"]["delta"])
+    three_component = test.get("groups", {}).get("component_count", {}).get("3", {})
+    partially_overlapping = test.get("groups", {}).get("separation_type", {}).get("partially_overlapping", {})
+    touching_boundary = test.get("groups", {}).get("topology_relation", {}).get("touching_boundary", {})
+
+    label_v3_loaded = (
+        target_summary.get("component_mask_target_v3_soft") is True
+        and target_summary.get("component_sdf_target_v3") is True
+        and target_summary.get("component_valid_region_mask") is True
+        and target_summary.get("component_depth_target_v3") is True
+        and int(target_summary.get("empty_slot_violation_count", -1)) == 0
+        and int(target_summary.get("duplicate_ownership_after_v2", -1)) == 0
+    )
+    loss_descended = final_train < 0.85 * first_train and best_val < first_train
+    near_empty_alleviated = (
+        float(test["component_mask_dice_mean"]) >= 0.03
+        and float(test["union_mask_dice_mean"]) >= 0.03
+        and component_dice_delta_vs_25_13 >= 0.025
+        and union_dice_delta_vs_25_13 >= 0.025
+        and float(test["pred_component_count_mean"]) >= 1.5
+    )
+    merged_collapse_not_back = float(test["merged_rate"]) < 0.70
+    recall_not_collapsed_vs_25_10 = recall_delta_vs_25_10 >= -0.12 and float(test["component_recall"]) >= 0.70
+    missed_extra_not_collapsed_vs_25_10 = missed_delta_vs_25_10 <= 0.13 and extra_delta_vs_25_10 <= 0.18
+    depth_not_clearly_worse_vs_25_10 = depth_delta_vs_25_10 <= 0.00015
+    component_or_union_not_worse_than_25_10 = component_dice_delta_vs_25_10 >= -0.03 or union_dice_delta_vs_25_10 >= -0.03
+    three_component_still_failed = bool(three_component and (float(three_component.get("merged_rate", 0.0)) >= 0.75 or float(three_component.get("component_mask_dice_mean", 0.0)) < 0.03))
+    partially_overlapping_still_failed = bool(partially_overlapping and float(partially_overlapping.get("component_mask_dice_mean", 0.0)) < 0.03)
+    touching_boundary_still_failed = bool(touching_boundary and float(touching_boundary.get("component_mask_dice_mean", 0.0)) < 0.03)
+
+    if (
+        label_v3_loaded
+        and loss_descended
+        and near_empty_alleviated
+        and merged_collapse_not_back
+        and recall_not_collapsed_vs_25_10
+        and missed_extra_not_collapsed_vs_25_10
+        and depth_not_clearly_worse_vs_25_10
+        and component_or_union_not_worse_than_25_10
+        and not three_component_still_failed
+    ):
+        decision = "IMPROVED"
+        next_route = "A. enter 25.16 topology/three-component focused training gate, no baseline transition"
+    elif label_v3_loaded and loss_descended and near_empty_alleviated and merged_collapse_not_back:
+        decision = "PARTIAL"
+        next_route = "B. enter 25.15b label-v3 failure audit focused on soft/SDF/valid-region loss usage"
+    else:
+        decision = "FAIL"
+        next_route = "C. return to label-v3 derivation or generator/export schema; do not continue loss tuning"
+
+    return {
+        "decision": decision,
+        "next_route": next_route,
+        "criteria": {
+            "label_v3_loaded": label_v3_loaded,
+            "loss_descended": loss_descended,
+            "near_empty_alleviated": near_empty_alleviated,
+            "merged_collapse_not_back": merged_collapse_not_back,
+            "recall_not_collapsed_vs_25_10": recall_not_collapsed_vs_25_10,
+            "missed_extra_not_collapsed_vs_25_10": missed_extra_not_collapsed_vs_25_10,
+            "depth_not_clearly_worse_vs_25_10": depth_not_clearly_worse_vs_25_10,
+            "component_or_union_not_worse_than_25_10": component_or_union_not_worse_than_25_10,
+            "three_component_still_failed": three_component_still_failed,
+            "partially_overlapping_still_failed": partially_overlapping_still_failed,
+            "touching_boundary_still_failed": touching_boundary_still_failed,
+            "component_mask_dice_delta_vs_25_13": component_dice_delta_vs_25_13,
+            "union_mask_dice_delta_vs_25_13": union_dice_delta_vs_25_13,
+            "component_recall_delta_vs_25_13": recall_delta_vs_25_13,
+            "missed_rate_delta_vs_25_13": missed_delta_vs_25_13,
+            "extra_rate_delta_vs_25_13": extra_delta_vs_25_13,
+            "depth_grid_rmse_delta_vs_25_13_m": depth_delta_vs_25_13,
+            "component_mask_dice_delta_vs_25_10": component_dice_delta_vs_25_10,
+            "union_mask_dice_delta_vs_25_10": union_dice_delta_vs_25_10,
+            "component_recall_delta_vs_25_10": recall_delta_vs_25_10,
+            "missed_rate_delta_vs_25_10": missed_delta_vs_25_10,
+            "extra_rate_delta_vs_25_10": extra_delta_vs_25_10,
+            "merged_rate_delta_vs_25_10": merged_delta_vs_25_10,
+            "depth_grid_rmse_delta_vs_25_10_m": depth_delta_vs_25_10,
+        },
+    }
+
+
 def update_registry_note(path: Path, gate_manifest: dict[str, Any]) -> None:
     text = path.read_text(encoding="utf-8")
     marker = f"## {DATASET_ID}"
@@ -1622,6 +1952,10 @@ def write_summary(path: Path, payload: dict[str, Any]) -> None:
     decision = payload["gate_decision"]
     test = payload["metrics_by_split"]["test"]
     val = payload["metrics_by_split"]["val"]
+    test_groups = test.get("groups", {})
+    three_component = test_groups.get("component_count", {}).get("3", {})
+    partially_overlapping = test_groups.get("separation_type", {}).get("partially_overlapping", {})
+    touching_boundary = test_groups.get("topology_relation", {}).get("touching_boundary", {})
     comparison = payload.get("comparison_to_25_10", {})
     comparison_25_11 = payload.get("comparison_to_25_11", {})
     comparison_25_12 = payload.get("comparison_to_25_12", {})
@@ -1632,6 +1966,8 @@ def write_summary(path: Path, payload: dict[str, Any]) -> None:
         title = "25.12 Component-Separation-Aware Rebalance Training"
     elif payload["stage"] == "25.13":
         title = "25.13 Target-V2 Component-Set Training Gate"
+    elif payload["stage"] == "25.15":
+        title = "25.15 Label-V3 Component-Set Training Gate"
     elif payload["stage"] == "25.11":
         title = "25.11 Mask/Depth Loss Rebalance Training"
     else:
@@ -1655,9 +1991,24 @@ def write_summary(path: Path, payload: dict[str, Any]) -> None:
         f"- final_train_component_separation_weighted_ratio: `{fmt_metric(payload['training'].get('final_train_component_separation_weighted_ratio'))}`",
         f"- final_val_component_separation_weighted_ratio: `{fmt_metric(payload['training'].get('final_val_component_separation_weighted_ratio'))}`",
         f"- final_train_component_mask_to_union_mask_weighted_ratio: `{fmt_metric(payload['training'].get('final_train_component_mask_to_union_mask_weighted_ratio'))}`",
+        f"- final_train_label_v3_sdf_loss: `{fmt_metric(payload['training']['final_train_unweighted_terms'].get('label_v3_sdf'))}`",
+        f"- final_val_label_v3_sdf_loss: `{fmt_metric(payload['training']['final_val_unweighted_terms'].get('label_v3_sdf'))}`",
+        f"- final_train_label_v3_soft_bce_loss: `{fmt_metric(payload['training']['final_train_unweighted_terms'].get('label_v3_soft_bce'))}`",
+        f"- final_val_label_v3_soft_bce_loss: `{fmt_metric(payload['training']['final_val_unweighted_terms'].get('label_v3_soft_bce'))}`",
+        f"- final_train_label_v3_valid_depth_loss: `{fmt_metric(payload['training']['final_train_unweighted_terms'].get('label_v3_valid_depth'))}`",
+        f"- final_val_label_v3_valid_depth_loss: `{fmt_metric(payload['training']['final_val_unweighted_terms'].get('label_v3_valid_depth'))}`",
         "",
-        "## Target V2 Usage",
+        "## Target Transform Usage",
         "",
+        f"- component_mask_target_v3_soft: `{payload['target_v2'].get('component_mask_target_v3_soft')}`",
+        f"- component_sdf_target_v3: `{payload['target_v2'].get('component_sdf_target_v3')}`",
+        f"- component_valid_region_mask: `{payload['target_v2'].get('component_valid_region_mask')}`",
+        f"- component_depth_target_v3: `{payload['target_v2'].get('component_depth_target_v3')}`",
+        f"- v3_target_loaded_count: `{payload['target_v2'].get('v3_target_loaded_count')}`",
+        f"- v3_soft_support_pixel_mean/min: `{fmt_metric(payload['target_v2'].get('v3_soft_support_pixel_mean'))}` / `{payload['target_v2'].get('v3_soft_support_pixel_min')}`",
+        f"- v3_valid_region_pixel_mean/min: `{fmt_metric(payload['target_v2'].get('v3_valid_region_pixel_mean'))}` / `{payload['target_v2'].get('v3_valid_region_pixel_min')}`",
+        f"- v3_depth_valid_region_pixel_mean/min: `{fmt_metric(payload['target_v2'].get('v3_depth_valid_region_pixel_mean'))}` / `{payload['target_v2'].get('v3_depth_valid_region_pixel_min')}`",
+        f"- empty_slot_violation_count: `{payload['target_v2'].get('empty_slot_violation_count')}`",
         f"- component_mask_target_v2: `{payload['target_v2'].get('component_mask_target_v2')}`",
         f"- component_depth_target_v2: `{payload['target_v2'].get('component_depth_target_v2')}`",
         f"- component_ownership_map: `{payload['target_v2'].get('component_ownership_map')}`",
@@ -1691,6 +2042,12 @@ def write_summary(path: Path, payload: dict[str, Any]) -> None:
         f"- union_mask_dice: `{test['union_mask_dice_mean']:.6f}`",
         f"- depth_grid_RMSE_m: `{test['depth_grid_rmse_m_mean']:.9f}`",
         "",
+        "## Required Test Subsets",
+        "",
+        f"- component_count=3: recall `{fmt_metric(three_component.get('component_recall'))}`, merged `{fmt_metric(three_component.get('merged_rate'))}`, component Dice `{fmt_metric(three_component.get('component_mask_dice_mean'))}`, union Dice `{fmt_metric(three_component.get('union_mask_dice_mean'))}`",
+        f"- partially_overlapping: recall `{fmt_metric(partially_overlapping.get('component_recall'))}`, merged `{fmt_metric(partially_overlapping.get('merged_rate'))}`, component Dice `{fmt_metric(partially_overlapping.get('component_mask_dice_mean'))}`, union Dice `{fmt_metric(partially_overlapping.get('union_mask_dice_mean'))}`",
+        f"- touching_boundary: recall `{fmt_metric(touching_boundary.get('component_recall'))}`, merged `{fmt_metric(touching_boundary.get('merged_rate'))}`, component Dice `{fmt_metric(touching_boundary.get('component_mask_dice_mean'))}`, union Dice `{fmt_metric(touching_boundary.get('union_mask_dice_mean'))}`",
+        "",
         "## 25.10 Comparison",
         "",
         f"- component_recall_delta: `{fmt_metric(deltas.get('component_recall', {}).get('delta'))}`",
@@ -1720,12 +2077,22 @@ def write_summary(path: Path, payload: dict[str, Any]) -> None:
         f"- union_mask_dice_delta: `{fmt_metric(deltas_25_12.get('union_mask_dice_mean', {}).get('delta'))}`",
         f"- depth_grid_RMSE_delta_m: `{fmt_metric(deltas_25_12.get('depth_grid_rmse_m_mean', {}).get('delta'), 9)}`",
         "",
+        "## 25.13 Comparison",
+        "",
+        f"- component_recall_delta: `{fmt_metric(payload.get('comparison_to_25_13', {}).get('test_deltas', {}).get('component_recall', {}).get('delta'))}`",
+        f"- missed_rate_delta: `{fmt_metric(payload.get('comparison_to_25_13', {}).get('test_deltas', {}).get('missed_rate', {}).get('delta'))}`",
+        f"- extra_rate_delta: `{fmt_metric(payload.get('comparison_to_25_13', {}).get('test_deltas', {}).get('extra_rate', {}).get('delta'))}`",
+        f"- merged_rate_delta: `{fmt_metric(payload.get('comparison_to_25_13', {}).get('test_deltas', {}).get('merged_rate', {}).get('delta'))}`",
+        f"- component_mask_dice_delta: `{fmt_metric(payload.get('comparison_to_25_13', {}).get('test_deltas', {}).get('component_mask_dice_mean', {}).get('delta'))}`",
+        f"- union_mask_dice_delta: `{fmt_metric(payload.get('comparison_to_25_13', {}).get('test_deltas', {}).get('union_mask_dice_mean', {}).get('delta'))}`",
+        f"- depth_grid_RMSE_delta_m: `{fmt_metric(payload.get('comparison_to_25_13', {}).get('test_deltas', {}).get('depth_grid_rmse_m_mean', {}).get('delta'), 9)}`",
+        "",
         "## Boundary",
         "",
         "- This is a training gate, not a baseline replacement.",
         "- No `CURRENT_BASELINE.md` transition is authorized.",
         "- Model architecture, K=3 component-set representation, fixed split, and Hungarian matching are unchanged.",
-        "- 25.13 uses the 25.10 loss mainline with target-v2 loader targets, not the 25.11/25.12 rebalance stack.",
+        "- 25.15 uses the 25.10 loss mainline with label-v3 loader targets, not the 25.11/25.12 rebalance stack.",
         "- No checkpoint or generated data artifact is committed by this gate.",
         f"- next_route: `{payload['route_decision']}`",
     ]
@@ -1745,6 +2112,14 @@ def main() -> int:
             raise ValueError("25.13 must use the 25.10 component_set_gate_v1 loss mainline")
         if args.target_version != "v2":
             raise ValueError("25.13 must use --target-version v2")
+    if args.stage == "25.15":
+        label_v3_manifest = read_json(args.label_v3_manifest)
+        if label_v3_manifest.get("acceptance_decision") != "READY_FOR_25.15_TRAINING":
+            raise ValueError("25.15 requires 25.14 READY_FOR_25.15_TRAINING label-v3 manifest")
+        if args.loss_config != "component_set_gate_v1":
+            raise ValueError("25.15 must use the 25.10 component_set_gate_v1 loss mainline")
+        if args.target_version != "v3":
+            raise ValueError("25.15 must use --target-version v3")
     manifest, npz_path = assert_manifest_and_registry(args.manifest, args.registry)
     pack = load_npz(npz_path)
     arrays = build_arrays(pack, target_version=args.target_version)
@@ -1764,7 +2139,7 @@ def main() -> int:
     }
     comparison = (
         compare_to_previous(metrics_by_split, args.comparison_metrics)
-        if args.loss_config in {"mask_depth_rebalance_v1", "component_separation_rebalance_v1"} or args.stage == "25.13"
+        if args.loss_config in {"mask_depth_rebalance_v1", "component_separation_rebalance_v1"} or args.stage in {"25.13", "25.15"}
         else {}
     )
     comparison_25_11 = (
@@ -1773,8 +2148,11 @@ def main() -> int:
         else {}
     )
     comparison_25_12 = compare_to_previous(metrics_by_split, args.comparison_metrics_25_12) if args.stage == "25.13" else {}
+    comparison_25_13 = compare_to_previous(metrics_by_split, args.comparison_metrics_25_13) if args.stage == "25.15" else {}
     if args.stage == "25.13":
         gate = decide_target_v2_gate(history, metrics_by_split, comparison, comparison_25_11, comparison_25_12, arrays.target_transform_summary)
+    elif args.stage == "25.15":
+        gate = decide_label_v3_gate(history, metrics_by_split, comparison, comparison_25_13, arrays.target_transform_summary)
     elif args.loss_config == "component_separation_rebalance_v1":
         gate = decide_component_separation_gate(history, metrics_by_split, comparison, comparison_25_11)
     elif args.loss_config == "mask_depth_rebalance_v1":
@@ -1786,8 +2164,9 @@ def main() -> int:
             "vs_25_10": compare_sample_rows(sample_rows, args.comparison_metrics, "25.10"),
             "vs_25_11": compare_sample_rows(sample_rows, args.comparison_metrics_25_11, "25.11"),
             **({"vs_25_12": compare_sample_rows(sample_rows, args.comparison_metrics_25_12, "25.12")} if args.stage == "25.13" else {}),
+            **({"vs_25_13": compare_sample_rows(sample_rows, args.comparison_metrics_25_13, "25.13")} if args.stage == "25.15" else {}),
         }
-        if args.loss_config == "component_separation_rebalance_v1" or args.stage == "25.13"
+        if args.loss_config == "component_separation_rebalance_v1" or args.stage in {"25.13", "25.15"}
         else {}
     )
     split_counts = {split: int(indices.size) for split, indices in arrays.split_indices.items()}
@@ -1805,6 +2184,7 @@ def main() -> int:
         "comparison_to_25_10": comparison,
         "comparison_to_25_11": comparison_25_11,
         "comparison_to_25_12": comparison_25_12,
+        "comparison_to_25_13": comparison_25_13,
         "sample_comparisons": sample_comparisons,
         "target_v2": arrays.target_transform_summary,
         "data": {
@@ -1879,6 +2259,9 @@ def main() -> int:
             "data_npz_committed": False,
             "model_capacity_expanded": False,
             "component_set_representation_changed": False,
+            "uses_25_10_loss_mainline": loss_config.name == "component_set_gate_v1",
+            "uses_25_11_rebalance_stack": loss_config.name == "mask_depth_rebalance_v1",
+            "uses_25_12_rebalance_stack": loss_config.name == "component_separation_rebalance_v1",
         },
         "git": {
             "branch": git_value(["branch", "--show-current"]),
@@ -1900,7 +2283,9 @@ def main() -> int:
         "loss_config": loss_config.name,
         "target_version": args.target_version,
         "target_redesign_manifest": str(args.target_redesign_manifest),
+        "label_v3_manifest": str(args.label_v3_manifest),
         "target_v2_loaded": arrays.target_transform_summary.get("component_mask_target_v2") is True,
+        "target_v3_loaded": arrays.target_transform_summary.get("component_mask_target_v3_soft") is True,
         "model_capacity_expanded": False,
         "component_set_representation_changed": False,
         "train_ready_candidate_consumed": True,
@@ -1908,7 +2293,7 @@ def main() -> int:
         "current_baseline_updated": False,
         "checkpoint_saved": False,
         "inference_artifact_exported": False,
-        "allowed_use": ["component_set_training_gate_evaluation", "target_v2_training_gate_evaluation", "mask_depth_loss_rebalance_training", "failure_audit_input"],
+        "allowed_use": ["component_set_training_gate_evaluation", "target_v2_training_gate_evaluation", "label_v3_training_gate_evaluation", "mask_depth_loss_rebalance_training", "failure_audit_input"],
         "forbidden_use": ["baseline_update", "current_baseline_replacement", "automatic_mainline_training", "formal_inference_artifact"],
     }
     write_json(args.gate_manifest, gate_manifest)

@@ -1,5 +1,13 @@
 # PINN 优化路线
 
+## 2026-06-03 route sync: 25.15 surface multi-pit label-v3 training gate
+
+25.15 tests the cleanest answer to 25.13: keep the 25.10 component-set model and loss mainline, but replace the brittle hard target with label-v3 soft/SDF/valid-region supervision. The result is a useful `FAIL`, because it proves support sparsity was only part of the problem.
+
+The mask no longer collapses to near-empty: versus 25.13, component Dice improves `0.005536 -> 0.034245` and union Dice improves `0.002829 -> 0.061694`. But that improvement is a merged-mask solution, not component separation. Test merged rate is `1.000000`, depth RMSE worsens to `0.001106223 m`, recall stays at `0.674419`, and all required hard slices still merge: component_count=3, partially_overlapping, and touching_boundary each report merged `1.000000`.
+
+The route implication is no more loss-stack tuning. The unique next route is `C. return to label-v3 derivation or generator/export schema; do not continue loss tuning`: inspect whether the soft band/SDF targets are too permissive, whether overlap/contact regions need explicit ownership confidence or anti-merge labels, and whether the generator/export schema needs component-local separation support. `CURRENT_BASELINE.md` remains unchanged.
+
 ## 2026-06-03 route sync: 25.14 surface multi-pit label-v3 derivation + validator
 
 25.14 turns the 25.13b schema diagnosis into a concrete loader-side target design. The important result is that the existing raw component labels are sufficient: no COMSOL generator/export fix is needed yet, and no NPZ/data mutation is required to test the next route.

@@ -1,5 +1,16 @@
 # 实验工作日志
 
+## 2026-06-03 Stage 25.15 surface multi-pit label-v3 training gate
+
+- Scope: executed the label-v3 training gate on `comsol_surface_multipit_component_set_pilot_v1`. The model architecture, fixed `K=3` component-set representation, fixed split `72/20/20`, Hungarian matching, and `component_set_gate_v1` 25.10 loss mainline were kept unchanged. This stage did not use the 25.11/25.12 rebalance stack, did not run COMSOL, did not mutate data/NPZ files, did not export a formal inference artifact, and did not update `CURRENT_BASELINE.md`.
+- Label-v3 usage: loaded `component_mask_target_v3_soft`, `component_sdf_target_v3`, `component_valid_region_mask`, and `component_depth_target_v3`; active samples `112`, soft support mean/min `210.110169/126 px`, valid-region mean/min `210.110169/126 px`, depth-valid mean/min `101.110169/58 px`, empty slot violations `0`, duplicate hard ownership `297 -> 0`.
+- Training diagnostics: fixed seed `42`, `180` epochs, selected threshold `0.25`, best epoch `3`, first/final train loss `2.670443 -> 0.468332`, best val loss `2.113839`. Final label-v3 diagnostics were train/val SDF loss `0.055944/0.255177`, soft-BCE `0.362142/0.896596`, and valid-depth loss `0.000829/0.044922`.
+- Gate decision: `FAIL`. Label v3 partly escaped 25.13 near-empty collapse (`component Dice 0.005536 -> 0.034245`, `union Dice 0.002829 -> 0.061694`), but the learned masks became merged blobs instead of separated components.
+- Test metrics: recall `0.674419`, missed `0.325581`, extra `0.340909`, merged `1.000000`, center error `0.004201829 m`, L/W/D relative error `0.170478`, rotation error `0.598689 rad`, component Dice `0.034245`, union Dice `0.061694`, depth RMSE `0.001106223 m`.
+- Comparison: versus 25.10, recall worsened by `-0.162791`, component Dice by `-0.075316`, union Dice by `-0.068785`, merged by `+0.800000`, and depth RMSE by `+0.000862908 m`. Versus 25.13, component/union Dice improved but merged worsened by `+1.000000` and depth RMSE worsened by `+0.000863332 m`.
+- Required subsets: component_count=3 merged `1.000000`, partially_overlapping merged `1.000000`, and touching_boundary merged `1.000000`, so topology/component separation remains unresolved.
+- Route decision: unique next step is `C. return to label-v3 derivation or generator/export schema; do not continue loss tuning`. This is not a baseline transition.
+
 ## 2026-06-03 Stage 25.14 surface multi-pit label-v3 derivation + validator
 
 - Scope: derived and validated label schema v3 targets in memory from `comsol_surface_multipit_component_set_pilot_v1`. This stage read 25.12b/25.13/25.13b evidence and the explicit dataset manifest/NPZ; it did not train, tune losses, run COMSOL, mutate data/NPZ files, expand model capacity, export checkpoints/previews/notes, or update `CURRENT_BASELINE.md`.
