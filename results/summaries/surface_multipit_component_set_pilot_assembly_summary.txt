@@ -1,0 +1,21 @@
+surface multi-pit component-set pilot assembly summary
+stage: 25.9b
+
+dataset_id: comsol_surface_multipit_component_set_pilot_v1
+assembled_N: 112
+split_counts: {'train': 72, 'val': 20, 'test': 20}
+component_count_counts: {'2': 100, '3': 12}
+separation_counts: {'separated': 40, 'close': 24, 'touching': 24, 'partially_overlapping': 24}
+topology_counts: {'disconnected': 64, 'touching_boundary': 24, 'partially_overlapping': 24}
+orientation_counts: {'aligned_x': 48, 'aligned_y': 32, 'diagonal': 32}
+source_dataset_counts: {'comsol_surface_shape_extension_pilot_v1': 16, 'comsol_surface_multipit_topup_pack_v1': 96}
+K_max: 3
+assembled_npz: C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\prepared\experimental\surface_multipit_component_set\comsol_surface_multipit_component_set_pilot_v1.npz
+
+component_label_policy:
+- Old 25.2 multi-pit seed rows are reconstructed from component layers into component-level masks/depth grids.
+- New 25.9b top-up rows carry native component masks/depth grids and explicit separation/topology labels.
+- The generated assembled NPZ is data and must not be committed.
+
+metadata: {"K_max": 3, "component_schema_version": "surface_multipit_component_schema_v1", "created_at": "2026-06-02T21:43:04", "dataset_id": "comsol_surface_multipit_component_set_pilot_v1", "notes": "Generated NPZ is ignored data and must not be committed.", "route": "surface_multipit_component_set", "schema_version": "surface_multipit_component_set_pilot_v1", "source_dataset_ids": ["comsol_surface_shape_extension_pilot_v1", "comsol_surface_multipit_topup_pack_v1"], "source_manifest": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\manifests\\comsol_surface_shape_extension_pilot_v1.manifest.json", "stage": "25.9b", "topology_schema_version": "surface_multipit_topology_schema_v1", "topup_npz": "C:\\Users\\19166\\Desktop\\PINN_project\\data\\comsol_mfl\\generated\\surface_multipit_topup_pack_v1\\surface_multipit_topup_pack_v1.npz"}
+metrics_csv: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_multipit_component_set_pilot_assembly_metrics.csv

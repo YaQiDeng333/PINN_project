@@ -1,5 +1,13 @@
 # PINN 优化路线
 
+## 2026-06-02 route sync: 25.9b surface multi-pit component-set top-up pack
+
+25.9b converts the multi-pit component-set plan into a validated dataset candidate. The generated top-up pack is `comsol_surface_multipit_topup_pack_v1`: `96/96` successful COMSOL rows, split `63/17/16`, component counts `2=84` and `3=12`, balanced separation across separated/close/touching/partially-overlapping cases, and explicit component masks/depth grids.
+
+The assembled training-gate candidate is `comsol_surface_multipit_component_set_pilot_v1`, built from the old 25.2 multi-pit seed `16` plus top-up `96`, for `N=112`, split `72/20/20`, fixed `K=3`, and complete component labels. Registry and manifest keep the boundary explicit: `train_ready_candidate=true`, `baseline_ready=false`, no latest/newest discovery, no `CURRENT_BASELINE.md` transition, and no six-parameter RBC success credit.
+
+The unique next route is `A. enter 25.10 component-set training gate`. That gate should train/evaluate a component-set branch with Hungarian matching and permutation-invariant losses; frozen 20.85 and the surface forward-refinement runner are negative/control comparators for multi-pit, not replacement baselines.
+
 ## 2026-06-02 route sync: 25.9 surface multi-pit component-set branch plan
 
 25.9 turns the 25.8 route decision into a concrete plan for the multi-pit representation branch. The central boundary is that `multi_pit_two_component_surface_defect` is not a six-parameter RBC failure case; it is a component-set representation problem. Frozen 20.85 and the 25.7/25.8 forward-refinement runner remain useful comparators, but they receive no multi-pit success credit.

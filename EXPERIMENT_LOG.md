@@ -1,5 +1,17 @@
 # 实验工作日志
 
+## 2026-06-02 Stage 25.9b surface multi-pit component-set top-up pack
+
+- Scope: executed the approved surface multi-pit component-set COMSOL top-up generation and validation. No training, no model gate, no checkpoint/preview/notes artifact commit, and no `CURRENT_BASELINE.md` update.
+- COMSOL result: generated `comsol_surface_multipit_topup_pack_v1` with planned/success `96/96`, failed `0`, split `63/17/16`, finite `Bx/By/Bz`, no-defect reference reuse, and `delta_b=b_defect-b_no_defect`.
+- Coverage: top-up component counts are `2=84` and `3=12`; separation is balanced across `separated/close/touching/partially_overlapping=24` each; topology covers `disconnected=48`, `touching_boundary=24`, and `partially_overlapping=24`; orientation covers `aligned_x/aligned_y/diagonal=32` each.
+- Assembly: created explicit dataset identity `comsol_surface_multipit_component_set_pilot_v1` from the old 25.2 multi-pit seed `16` plus top-up `96`, for assembled `N=112`, split `72/20/20`, fixed `K=3`, and source counts `16/96`.
+- Label completeness: validation found `component_label_missing_count=0`; per-component centers, L/W/D, rotation, shape family, component masks, component depth grids, union masks, and union depth grids passed.
+- Registry/manifest: `COMSOL_DATA_REGISTRY.md` and `results/manifests/comsol_surface_multipit_component_set_pilot_v1.manifest.json` mark `train_ready_candidate=true`, `baseline_ready=false`, `auto_discovery_allowed=false`, and forbid baseline replacement, latest/newest discovery, and six-parameter RBC success credit.
+- Data policy: generated NPZ/data remain ignored and uncommitted. The committed record is limited to generator, inventory/summary, validation/assembly/decision scripts, registry/manifest, and this run's summaries/metrics.
+- Review: independent read-only review passed after one scope-control fix. The COMSOL repo had pre-existing unrelated dirty files; they were left untouched and excluded from the staged 25.9b commit boundary.
+- Route decision: unique next step is `A. enter 25.10 component-set training gate`. This next step is an explicit future gate, not an automatic training run or baseline transition.
+
 ## 2026-06-02 Stage 25.9 surface multi-pit component-set branch plan
 
 - Scope: completed a plan-only component-set branch design for `multi_pit_two_component_surface_defect`. No COMSOL, no training, no data/NPZ generation or mutation, no checkpoint/preview/notes artifact, and no `CURRENT_BASELINE.md` update.

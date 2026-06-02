@@ -1,0 +1,5 @@
+option,selected,decision,evidence,blocked_by
+A. enter 25.10 component-set training gate,True,selected,topup_pass=True; pilot_pass=True; train_ready_candidate=True; baseline_ready=False; assembled_N=112,
+B. generate failed/missing multi-pit top-up strata,False,not_selected,topup_pass=True; topup_N=96,top-up generated full 96/96 with required coverage
+C. revise component-set assembly/label extraction,False,not_selected,pilot_pass=True; train_ready_candidate=True; component_check=0,assembled pilot validation passed
+D. pause before any training gate,False,not_selected,CURRENT_BASELINE_diff=False; forbidden_diff=False; data_staged=False,route has a single explicit next gate

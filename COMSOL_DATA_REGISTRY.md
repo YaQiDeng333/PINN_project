@@ -440,3 +440,34 @@ This registry records generated COMSOL dataset identities and allowed usage. It 
 - validation_script: `scripts/validate_surface_shape_extension_pilot_pack.py`
 - npz_sha256: d054b7e24f32fffcd20cc3a2303d894791b9c2dab1a3a67171edf58dbb75a132
 - notes: Metadata only. Generated NPZ/data files are not committed and must be loaded only by explicit dataset_id + manifest.
+
+## comsol_surface_multipit_component_set_pilot_v1
+
+- dataset_role: surface_multipit_component_set_pilot
+- status: pilot_generated
+- route: surface_multipit_component_set
+- stage: 25.9b
+- schema_version: surface_multipit_component_set_pilot_v1
+- component_schema_version: surface_multipit_component_schema_v1
+- topology_schema_version: surface_multipit_topology_schema_v1
+- representation: fixed_K_component_set
+- K_max: 3
+- path: `C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\prepared\experimental\surface_multipit_component_set\comsol_surface_multipit_component_set_pilot_v1.npz`
+- manifest_path: `C:\Users\19166\Desktop\PINN_project\results\manifests\comsol_surface_multipit_component_set_pilot_v1.manifest.json`
+- n_samples: 112
+- split_counts: {'train': 72, 'val': 20, 'test': 20}
+- component_count_counts: {'2': 100, '3': 12}
+- separation_counts: {'separated': 40, 'close': 24, 'touching': 24, 'partially_overlapping': 24}
+- topology_counts: {'disconnected': 64, 'touching_boundary': 24, 'partially_overlapping': 24}
+- orientation_counts: {'aligned_x': 48, 'aligned_y': 32, 'diagonal': 32}
+- train_ready_candidate: true
+- baseline_ready: false
+- auto_discovery_allowed: false
+- latest_newest_discovery_allowed: false
+- allowed_use: schema_validation, explicit_component_set_training_gate
+- forbidden_use: automatic_mainline_training, baseline_update, current_baseline_replacement, latest_newest_auto_discovery, direct_training_without_manifest_gate, six_parameter_rbc_success_credit
+- source_dataset_ids: comsol_surface_shape_extension_pilot_v1, comsol_surface_multipit_topup_pack_v1
+- generator_script: `scripts/generate_mfl_surface_multipit_topup_pack.py`
+- validation_script: `scripts/validate_surface_multipit_component_set_pilot_pack.py`
+- npz_sha256: 80508a51600d68d12a7a202688d9826bf9f2382230b840ea149f801ac9dde197
+- notes: Metadata only. Generated NPZ/data files are not committed; multi-pit is component-set data, not a CURRENT_BASELINE transition.

@@ -1,0 +1,11 @@
+surface multi-pit component-set pilot registry summary
+stage: 25.9b
+
+dataset_id: comsol_surface_multipit_component_set_pilot_v1
+manifest_path: C:\Users\19166\Desktop\PINN_project\results\manifests\comsol_surface_multipit_component_set_pilot_v1.manifest.json
+registry_path: C:\Users\19166\Desktop\PINN_project\COMSOL_DATA_REGISTRY.md
+train_ready_candidate: True
+baseline_ready: false
+auto_discovery_allowed: false
+latest_newest_discovery_allowed: false
+forbidden_use: automatic_mainline_training, baseline_update, current_baseline_replacement, six_parameter_rbc_success_credit

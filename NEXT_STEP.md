@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-06-02 after Stage 25.9b surface multi-pit component-set top-up pack
+
+Next step: run **A. enter 25.10 component-set training gate**. This is the only recommended next step after the 25.9b pack validation, but it must be a separately gated training stage; do not auto-train and do not update `CURRENT_BASELINE.md`.
+
+25.9b generated the approved top-up `comsol_surface_multipit_topup_pack_v1` with `96/96` successful COMSOL rows and split `63/17/16`. The assembled component-set pilot is `comsol_surface_multipit_component_set_pilot_v1`, with `N=112`, split `72/20/20`, fixed `K=3`, old seed `16`, top-up `96`, `train_ready_candidate=true`, and `baseline_ready=false`.
+
+The training gate should use Hungarian matching and permutation-invariant component losses over existence, center, `L/W/D`, rotation, shape family/local profile, projected mask, and depth-grid targets. Multi-pit still receives no six-parameter RBC success credit; frozen 20.85 and the forward-refinement runner remain comparators only.
+
 ## 2026-06-02 after Stage 25.9 surface multi-pit component-set branch plan
 
 Next step: run **A. execute multi-pit COMSOL top-up generation**. This is the only recommended route after the 25.9 plan, and it should remain a future generation stage with explicit approval, not training and not a baseline transition.

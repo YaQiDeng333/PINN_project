@@ -1,0 +1,9 @@
+metric_name,value,notes
+assembled_N,112,target is 112
+split_counts,"{""test"": 20, ""train"": 72, ""val"": 20}",target 72/20/20
+component_count_counts,"{""2"": 100, ""3"": 12}",expected 100 two-component and 12 three-component after adding old seed
+separation_counts,"{""close"": 24, ""partially_overlapping"": 24, ""separated"": 40, ""touching"": 24}",old seed contributes disconnected/separated cases
+topology_counts,"{""disconnected"": 64, ""partially_overlapping"": 24, ""touching_boundary"": 24}",component-set topology relation coverage
+orientation_counts,"{""aligned_x"": 48, ""aligned_y"": 32, ""diagonal"": 32}",top-up balances x/y/diagonal; old seed is aligned_x
+source_dataset_counts,"{""comsol_surface_multipit_topup_pack_v1"": 96, ""comsol_surface_shape_extension_pilot_v1"": 16}",old 16 plus top-up 96
+train_ready_shape,True,full readiness is checked by validation script
