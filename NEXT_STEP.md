@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-06-02 after Stage 25.10b surface multi-pit component-set failure audit
+
+Next step: run **B. enter 25.11 mask/depth loss rebalance training**. The audit found that component existence and coarse geometry have learning signal, while projected-mask/depth supervision is not being converted into aligned component masks; do not jump to a larger model or baseline transition.
+
+25.10b ruled out the most likely implementation bugs first. Target component masks reconstruct the union mask with IoU `1.000000`, center-to-mask centroid error is only `0.000059604 m`, and empty-slot mask/depth sums are `0.0`. The training script also uses min-over-slot-permutations and masks parameter, shape, mask, and depth losses by existing slots, so slot permutation and empty-slot punishment are not the leading failure mode.
+
+The failure ranking is: primary `loss imbalance`, secondary `data scarcity failure` for three-component rows, tertiary `genuine hard topology failure` on touching/overlap. Three-component test coverage is only `3` rows and all predicted two components (`merged_rate=1.0`), so 25.11 should keep a three-component/topology audit slice, but the first route should rebalance mask/depth loss and diagnostics before changing representation or expanding training scale. `CURRENT_BASELINE.md` remains unchanged.
+
 ## 2026-06-02 after Stage 25.10 surface multi-pit component-set training gate
 
 Next step: run **B. 25.10b failure audit for merged/missed, overlap/touching, slot permutation, and three-component rows**. Do not continue directly to stronger training until the audit explains why component existence/geometry learned while mask/depth and merged-component behavior stayed weak.

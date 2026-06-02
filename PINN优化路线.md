@@ -1,5 +1,13 @@
 # PINN 优化路线
 
+## 2026-06-02 route sync: 25.10b surface multi-pit component-set failure audit
+
+25.10b explains the 25.10 `PARTIAL` result without changing the baseline boundary. The component-set gate learned existence and coarse geometry (`test recall=0.837209`, `center_error_mean=0.004284 m`, `L/W/D relative error=0.154552`), but it did not learn useful raster masks (`component Dice=0.109562`, `union Dice=0.130480`) and depth-grid RMSE only marginally beat degenerate baselines.
+
+The audit separates implementation bugs from route problems. Target masks and union masks are internally aligned (`target_union_mask_iou_mean=1.000000`), center labels agree with mask centroids (`0.000059604 m` mean error), and empty component slots have zero mask/depth target. Slot matching is also structurally correct: the trainer uses min-over-slot-permutations and masks non-existence slots out of parameter, shape, mask, and depth losses.
+
+The route implication is direct: first fix the learning objective, not the representation. The unique next route is `B. enter 25.11 mask/depth loss rebalance training`, with three-component scarcity and touching/overlap topology tracked as required audit slices. Multi-pit remains outside six-parameter RBC success credit, and `CURRENT_BASELINE.md` remains unchanged.
+
 ## 2026-06-02 route sync: 25.10 surface multi-pit component-set training gate
 
 25.10 answers the first component-set learning-signal question: the `C1_fixed_K_component_set` route is not dead, but it is not yet a stable model route. The lightweight gate trained on `comsol_surface_multipit_component_set_pilot_v1` learns component existence and coarse geometry better than empty or one-slot degenerate predictors; test recall is `0.837209`, missed rate `0.162791`, extra rate `0.142857`, and mean predicted component count is `2.1`.

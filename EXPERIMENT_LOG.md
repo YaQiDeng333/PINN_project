@@ -1,5 +1,15 @@
 # 实验工作日志
 
+## 2026-06-02 Stage 25.10b surface multi-pit component-set failure audit
+
+- Scope: audited the 25.10 `PARTIAL` component-set training gate only. No new training, no COMSOL, no data/NPZ mutation, no checkpoint/preview/notes artifact commit, no baseline transition, and no `CURRENT_BASELINE.md` update.
+- Inputs: read `results/metrics/25_10_component_set_training_gate_metrics.json`, `results/manifests/25_10_component_set_training_gate_manifest.json`, `results/summaries/25_10_component_set_training_gate_summary.md`, and the explicit dataset manifest for `comsol_surface_multipit_component_set_pilot_v1`.
+- Main finding: the primary failure is mask/depth loss imbalance, not slot matching or target-coordinate corruption. Component existence and coarse geometry learned (`test component_recall=0.837209`, `center_error_mean=0.004284 m`, `L/W/D relative error=0.154552`), while component mask Dice stayed `0.109562`, union mask Dice `0.130480`, and depth RMSE barely beat degenerate baselines.
+- Target integrity: component-union target masks are aligned (`target_union_mask_iou_mean=1.000000`), center-to-mask centroid error is `0.000059604 m`, and empty-slot mask/depth sums are `0.0`, so a raster/coordinate bug is not the leading explanation.
+- Slot/matching audit: the 25.10 training script uses min-over-slot-permutations and masks parameter, shape, mask, and depth losses by existing slots. Empty slots are included for existence BCE only, which keeps empty-slot treatment structurally correct.
+- Three-component audit: three-component coverage is small (`train=7`, `val=2`, `test=3`), and all three test rows predicted two components, giving `merged_rate=1.0`. This is a secondary data-scarcity/topology issue rather than the primary global failure.
+- Route decision: unique next step is `B. enter 25.11 mask/depth loss rebalance training`. Do not simply increase model size, and do not discuss baseline replacement before a later formal benchmark and review.
+
 ## 2026-06-02 Stage 25.10 surface multi-pit component-set training gate
 
 - Scope: executed a minimal component-set training gate on `comsol_surface_multipit_component_set_pilot_v1`. This trained and evaluated a lightweight C1 fixed-K component-set model only; it did not update `CURRENT_BASELINE.md`, did not export an inference artifact, and did not commit checkpoint/data/NPZ artifacts.

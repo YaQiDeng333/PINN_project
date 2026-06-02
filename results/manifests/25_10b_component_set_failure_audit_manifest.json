@@ -1,0 +1,23 @@
+{
+  "allowed_use": [
+    "failure_audit_input",
+    "25_11_route_selection"
+  ],
+  "audit_conclusion": "Primary failure is loss imbalance: component existence and coarse geometry learned, but raster/depth supervision did not translate into aligned masks.",
+  "audit_id": "25_10b_surface_multipit_component_set_failure_audit",
+  "baseline_ready": false,
+  "current_baseline_updated": false,
+  "dataset_id": "comsol_surface_multipit_component_set_pilot_v1",
+  "forbidden_use": [
+    "baseline_update",
+    "current_baseline_replacement",
+    "automatic_training_expansion"
+  ],
+  "gate_decision": "failure_audit_complete",
+  "metrics_path": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\metrics\\25_10b_component_set_failure_audit.json",
+  "new_training_run": false,
+  "route_decision": "B. enter 25.11 mask/depth loss rebalance training",
+  "source_gate_metrics": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\metrics\\25_10_component_set_training_gate_metrics.json",
+  "stage": "25.10b",
+  "summary_path": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\summaries\\25_10b_component_set_failure_audit_summary.md"
+}
