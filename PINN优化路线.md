@@ -1,5 +1,13 @@
 # PINN 优化路线
 
+## 2026-06-02 route sync: 25.8 surface forward-refinement report package
+
+25.8 turns the verified 25.7 runner into a report and visualization package. The important route judgment is unchanged: frozen 20.85 remains the current surface RBC baseline, the forward-refinement runner is a companion/post-hoc repair layer, and the RBC oracle is an evaluation ceiling, not a runtime model or baseline replacement.
+
+The report confirms the companion runner is useful where the RBC representation is valid but the frozen inverse fails. On `82` `rbc_representable_but_model_fail` rows, profile RMSE is `0.000509518351056 -> 0.000220386413188 m`, Er-like is `2.80015739379 -> 0.909941363416`, IoU/Dice is `0.32360140234/0.480524080842 -> 0.578523465369/0.709451842351`, and forward residual is `70.5944261489 -> 0.564105036956`. RBC-like control stays stable, while the audit keeps local non-improvement visible with `17` degraded target rows.
+
+The remaining surface problem is now clearer: multi-pit / component-set rows are not suitable for six-parameter RBC refinement and get no RBC success credit. The unique next route is `A. component-set branch for multi-pit`; `CURRENT_BASELINE.md` remains unchanged and any baseline transition still requires a separate explicit request and review.
+
 ## 2026-06-02 route sync: 25.7 surface forward-refinement inference runner
 
 25.7 locks the 25.6 F0/R1 result into a concrete companion runner, not a new baseline. The runtime chain is frozen 20.85 baseline prediction, observed `delta_b` feature extraction, exported `ridge_param_only_linear_alpha_10` artifact, and post-hoc refinement of `L_m/W_m/D_m/wLD/wWD/wLW` with `lambda_profile=1.0` and `lambda_param=1.0`. The artifact body stays ignored under `checkpoints/`; the committed manifest only records identity, sha256, protocol, feature columns, bounds, and allowed/forbidden use.

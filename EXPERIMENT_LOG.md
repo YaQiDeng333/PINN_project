@@ -1,5 +1,17 @@
 # 实验工作日志
 
+## 2026-06-02 Stage 25.8 surface forward-refinement report / visualization package
+
+- Scope: prepared the surface forward-refinement report / visualization package from the locked 25.7 inference runner outputs. No COMSOL, no training, no data/NPZ mutation, no checkpoint artifact commit, no preview PNG commit, no notes artifact, and no `CURRENT_BASELINE.md` update.
+- Report package: `scripts/build_surface_forward_refinement_report_package.py` wrote the preflight, report summary, report metrics, and candidate comparison matrix. The report keeps the roles separate: frozen 20.85 is the current baseline, the 25.7 runner is a post-hoc companion, and RBC oracle is an evaluation ceiling only.
+- Improvement audit: `scripts/audit_surface_forward_refinement_improvement_cases.py` recorded best improvements, worst remaining target failures, degraded rows, RBC-like controls, multi-pit negative controls, and group audits by `shape_type`, `representation_target`, and failure reason.
+- Gallery: `scripts/export_surface_forward_refinement_gallery.py` wrote `results/metrics/surface_forward_refinement_gallery_index.csv` with `42` gallery rows and generated `42` preview PNGs under ignored `results/previews/surface_forward_refinement_gallery/`. PNG previews are not committed.
+- Reported results: target subset remained `82` rows. Profile RMSE was `0.000509518351056 -> 0.000220386413188 m`, Er-like was `2.80015739379 -> 0.909941363416`, IoU/Dice moved from `0.32360140234/0.480524080842` to `0.578523465369/0.709451842351`, and forward residual moved from `70.5944261489` to `0.564105036956`.
+- Case audit: best profile RMSE improvements were led by `surf_shape_003_rbc_like_smooth_pit`, `surf_shape_005_rbc_like_smooth_pit`, and `surf_shape_065_asymmetric_corrosion`. Worst remaining target failures were led by `surf_shape_073_elongated_crack_like_surface_defect`, `surf_shape_031_flat_bottom_pit`, and `surf_shape_083_elongated_crack_like_surface_defect`.
+- Controls and failures: RBC-like control stayed stable (`RMSE 0.000501181023155 -> 0.000165198934316`, `Dice 0.493556208833 -> 0.689754743215`). The audit recorded `17` degraded target rows and `37` degraded-any rows. Multi-pit/component-set rows remain `not_suitable_for_rbc_refinement` and receive no RBC success credit.
+- Route decision: unique next step is `A. component-set branch for multi-pit`. Baseline transition remains forbidden unless separately requested and reviewed; `CURRENT_BASELINE.md` remains the 20.85 surface RBC baseline.
+- Review: independent read-only review passed with no must-fix. It confirmed no COMSOL/training/data mutation, no `CURRENT_BASELINE.md` diff, no preview PNG staging, clear baseline/companion/oracle roles, and no multi-pit RBC success claim.
+
 ## 2026-06-02 Stage 25.7 surface forward-refinement inference artifact / runner
 
 - Scope: exported the fixed 25.6 surface forward-refinement inference artifact and implemented the runtime runner. No COMSOL, no main neural training, no data/NPZ mutation, no checkpoint artifact commit, no preview/notes artifact, and no `CURRENT_BASELINE.md` update.

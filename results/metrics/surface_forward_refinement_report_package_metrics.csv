@@ -1,0 +1,11 @@
+section,metric,sample_count,baseline_value,refined_value,oracle_value,delta_baseline_to_refined,interpretation
+target_subset_82,profile_rmse_m,82,0.0005095183510563877,0.00022038641318798514,7.848969549441313e-05,-0.0002891319378684025,RBC-representable model failures are materially repaired by the companion runner.
+target_subset_82,Er_like,82,2.8001573937890787,0.9099413634161813,0.2892552233304937,-1.8902160303728974,Er-like profile error decreases.
+target_subset_82,IoU,82,0.3236014023399166,0.5785234653693038,0.8896647641172107,0.2549220630293872,Projected-mask IoU increases.
+target_subset_82,Dice,82,0.480524080842404,0.709451842350591,0.9408601046285133,0.228927761508187,Projected-mask Dice increases.
+target_subset_82,forward_residual,82,70.59442614894292,0.5641050369556577,nan,-70.03032111198726,Forward feature residual decreases.
+rbc_like_control,profile_rmse_m,24,0.0005011810231545006,0.00016519893431601588,4.089406676058101e-05,-0.0003359820888384847,RBC-like control remains stable; no collapse.
+rbc_like_control,Dice,24,0.49355620883261464,0.6897547432153187,0.9656262234493874,0.19619853438270407,RBC-like control mask quality does not degrade.
+already_pass_reference,profile_rmse_m,22,0.0002532913497005759,0.0003391026600390606,0.0001304324134842716,8.581131033848471e-05,Monitoring bucket; not success-credit target.
+negative_control_multi_pit,profile_rmse_m,16,0.0007183633569005014,0.000707711936309516,0.00028126370737191405,-1.065142059098541e-05,Multi-pit/component-set rows are not suitable for six-parameter RBC refinement.
+negative_control_multi_pit,Dice,16,0.33422720299978764,0.33422720299978764,0.34303849580876594,0.0,No RBC success credit is assigned to multi-pit rows.

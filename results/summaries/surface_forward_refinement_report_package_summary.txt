@@ -1,0 +1,30 @@
+25.8 surface forward-refinement report package
+
+current_baseline: frozen 20.85 surface RBC baseline
+forward_refinement_runner: post-hoc companion refinement, not baseline replacement
+artifact_manifest: C:\Users\19166\Desktop\PINN_project\results\manifests\surface_forward_refinement_inference_artifact_manifest.json
+artifact_id: surface_forward_refinement_inference_artifact_v1
+selected_surrogate: ridge_param_only_linear_alpha_10
+lambda_param: 1.0
+runtime_input_boundary: observed delta_b-derived features + frozen 20.85 predicted six params + exported artifact; labels only annotate metrics/visualization.
+
+sample_count: 120
+target_subset_count: 82
+rbc_like_control_count: 24
+negative_control_count: 16
+degraded_target_count: 17
+
+target_profile_rmse_m: 0.000509518351056 -> 0.000220386413188 (oracle 7.84896954944e-05)
+target_Er_like: 2.80015739379 -> 0.909941363416 (oracle 0.28925522333)
+target_IoU_Dice: 0.32360140234/0.480524080842 -> 0.578523465369/0.709451842351
+target_forward_residual: 70.5944261489 -> 0.564105036956
+
+rbc_like_control_rmse_m: 0.000501181023155 -> 0.000165198934316
+rbc_like_control_Dice: 0.493556208833 -> 0.689754743215
+negative_control_policy: multi-pit / rbc_not_representable rows are marked not_suitable_for_rbc_refinement and receive no RBC success credit.
+model_failure_vs_representation_failure: rbc_representable_but_model_fail rows are repairable model/inversion failures; multi-pit rows remain representation failures requiring component-set output.
+why_not_baseline_transition: the runner is a companion over 20.85, not a replacement; CURRENT_BASELINE.md remains unchanged.
+remaining_problem: multi-pit component-set branch.
+
+report_metrics_csv: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_forward_refinement_report_package_metrics.csv
+comparison_matrix_csv: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_forward_refinement_candidate_comparison_matrix.csv

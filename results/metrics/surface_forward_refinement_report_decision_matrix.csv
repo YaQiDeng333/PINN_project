@@ -1,0 +1,7 @@
+option,selected,decision,evidence,blocked_by
+A. component-set branch for multi-pit,True,selected,runner_stable=True; multipit_remaining=True; multipit_no_success_credit=True; report_complete=True; multi_pit_rows=16,
+B. formal surface refinement artifact lock,False,already_satisfied_by_25_7,25.7 artifact manifest records sha256/protocol and verification reproduces 25.6,not the immediate next route after this report package
+C. real-sample metadata alignment,False,defer,unknown real samples still need metadata/oracle/human representability confirmation before success claims,multi-pit representation branch is the clearer remaining surface modeling gap
+D. final benchmark/report package,False,current_stage_completed,report_complete=True; gallery_index_rows=42,25.8 already prepared the report package; next work should address the residual branch
+E. baseline transition request,False,forbidden_this_stage,CURRENT_BASELINE_unchanged=True; runner is companion only,requires separate explicit user request and baseline-transition review
+F. stop surface refinement,False,not_selected,runner_stable=True; report_complete=True,report confirms a concrete remaining component-set branch

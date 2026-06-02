@@ -1,0 +1,22 @@
+25.8 surface forward-refinement report package review
+
+review_result: PASS
+must_fix_findings: none
+
+Scope reviewed:
+- Stage 25.8 report / visualization package working tree.
+- Read-only git/search review only; no file edits, no staging, no COMSOL, no training.
+
+Checks passed:
+- Staged area was empty during review.
+- Forbidden staged paths check returned empty for PNG, NPZ, CURRENT_BASELINE.md, data, and results/previews.
+- CURRENT_BASELINE.md has no working-tree diff.
+- New scripts do not run COMSOL, train, or mutate data/NPZ. Their writes are limited to results/summaries and results/metrics, plus optional ignored gallery previews.
+- Multi-pit / rbc_not_representable rows are not claimed as RBC success.
+- Baseline, companion runner, and oracle roles are clear in the comparison matrix.
+- Preview PNGs are not staged/tracked. The gallery script writes previews only under ignored results/previews/surface_forward_refinement_gallery and records preview_png_commit_allowed=false.
+
+Residual risks:
+- Review did not run Stage 25.8 scripts; local verification separately ran py_compile and the full 25.8 script sequence.
+- Ignored preview PNGs exist under results/previews/surface_forward_refinement_gallery and must not be force-added.
+- Review scope was the current Stage 25.8 working tree; prior committed Stage 25.1-25.7 branch contents were not re-reviewed.

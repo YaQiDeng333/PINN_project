@@ -1,0 +1,15 @@
+25.8 surface forward-refinement gallery
+
+gallery_index_csv: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_forward_refinement_gallery_index.csv
+ignored_preview_dir: C:\Users\19166\Desktop\PINN_project\results\previews\surface_forward_refinement_gallery
+index_row_count: 42
+preview_png_generated_count: 42
+preview_png_commit_allowed: false
+matplotlib_available: True
+bucket_counts: {'best_5_profile_rmse_improvement': 5, 'best_5_dice_improvement': 5, 'worst_5_remaining_failures': 5, 'all_degraded_target_rows': 17, 'representative_rbc_like_control_rows': 5, 'representative_multi_pit_negative_controls': 5}
+
+gallery_policy:
+- PNG previews, when generated, live only in ignored results/previews/surface_forward_refinement_gallery/.
+- Index rows are the commit-safe artifact.
+- Labels/masks/depth maps are used only for visualization annotation and comparison panels.
+- Multi-pit rows are displayed as negative controls, not RBC refinement success.

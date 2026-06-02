@@ -1,0 +1,19 @@
+25.8 surface forward-refinement report route decision
+
+decision: A. component-set branch for multi-pit
+runner_stable: True
+report_complete: True
+CURRENT_BASELINE_unchanged: True
+multi_pit_remaining_representation_gap: True
+multi_pit_no_rbc_success_credit: True
+baseline_transition_allowed: false
+
+target_subset_count: 82
+multi_pit_count: 16
+gallery_index_rows: 42
+target_profile_rmse_m: 0.000509518351056 -> 0.000220386413188
+target_Dice: 0.480524080842 -> 0.709451842351
+rbc_like_control_rmse_m: 0.000501181023155 -> 0.000165198934316
+
+interpretation: the companion runner is stable for RBC-representable surface model failures; multi-pit remains a representation problem requiring component-set output.
+decision_matrix: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_forward_refinement_report_decision_matrix.csv

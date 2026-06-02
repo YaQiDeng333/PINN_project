@@ -1,0 +1,27 @@
+25.8 surface forward-refinement improvement audit
+
+sample_count: 120
+target_subset_count: 82
+rbc_like_control_count: 24
+multi_pit_negative_control_count: 16
+degraded_any_row_count: 37
+
+best_profile_rmse_improvement_top3:
+- surf_shape_003_rbc_like_smooth_pit: improvement_m=0.000795715630804 shape=rbc_like_smooth_pit
+- surf_shape_005_rbc_like_smooth_pit: improvement_m=0.000782694472379 shape=rbc_like_smooth_pit
+- surf_shape_065_asymmetric_corrosion: improvement_m=0.000752661164403 shape=asymmetric_corrosion
+
+worst_remaining_target_failures_top3:
+- surf_shape_073_elongated_crack_like_surface_defect: refined_rmse_m=0.000623327736517 baseline_rmse_m=0.000709653200101 shape=elongated_crack_like_surface_defect
+- surf_shape_031_flat_bottom_pit: refined_rmse_m=0.000512971824042 baseline_rmse_m=0.000361749968439 shape=flat_bottom_pit
+- surf_shape_083_elongated_crack_like_surface_defect: refined_rmse_m=0.00048846139312 baseline_rmse_m=0.000403304978161 shape=elongated_crack_like_surface_defect
+
+interpretation:
+- Most rbc_representable_but_model_fail rows are repaired by the companion runner.
+- Remaining target failures are local non-improvement or high residual profile errors, not multi-pit representation successes.
+- Multi-pit rows stay negative controls and should move to a component-set branch.
+- Labels are used only for audit/report annotation.
+
+improvement_cases_csv: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_forward_refinement_improvement_cases.csv
+group_audit_csv: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_forward_refinement_group_audit.csv
+degraded_cases_csv: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_forward_refinement_degraded_cases.csv

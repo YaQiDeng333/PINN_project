@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-06-02 after Stage 25.8 surface forward-refinement report package
+
+Next step: run **A. component-set branch for multi-pit**. The report package confirms the 25.7 forward-refinement runner is stable as a companion for RBC-representable surface model failures, while multi-pit remains a representation problem that needs component-set output.
+
+25.8 did not train, did not run COMSOL, did not mutate data/NPZ, did not commit preview PNGs, and did not update `CURRENT_BASELINE.md`. The report keeps the boundaries fixed: frozen 20.85 is still the current baseline, the forward-refinement runner is post-hoc companion refinement, and the oracle is an evaluation ceiling only.
+
+The report target subset remains `82` rows, with profile RMSE `0.000509518351056 -> 0.000220386413188 m`, Er-like `2.80015739379 -> 0.909941363416`, IoU/Dice `0.32360140234/0.480524080842 -> 0.578523465369/0.709451842351`, and forward residual `70.5944261489 -> 0.564105036956`. Multi-pit/component-set rows stay `not_suitable_for_rbc_refinement` and receive no RBC success credit.
+
 ## 2026-06-02 after Stage 25.7 surface forward-refinement inference runner
 
 Next step: run **A. surface refinement visualization/report package**. Keep it as a reporting package around the verified companion runner: no COMSOL, no main neural training, no data/NPZ mutation, no checkpoint artifact commit, and no `CURRENT_BASELINE.md` update.
