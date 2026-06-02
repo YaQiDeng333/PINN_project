@@ -1,0 +1,19 @@
+25.9 surface multi-pit COMSOL generation plan
+
+plan_only: true
+COMSOL_run: false
+data_or_NPZ_generation: false
+source_dataset_id: comsol_surface_shape_extension_pilot_v1
+read_only_generator_reference_exists: True
+read_only_generator_reference: C:\Users\19166\Desktop\COMSOL_Multiphysics_MCP\scripts\generate_mfl_surface_shape_extension_pilot_pack.py
+25.1_preferred_route: multi-component Boolean subtract
+25.1_boolean_feasibility: known_feasible_for_two_rect_rotated_components_Bz_branch
+25.1_mesh_risk: medium_high_when_components_close
+25.1_solver_risk: medium_high
+
+recommended_generation_route: G1 two_or_three_component_boolean_subtract
+required_exports: Bx, By, Bz, b_no_defect, delta_b, union projected_mask_2d, union depth_grid_m, component_params_json, component-level masks/depth grids.
+required_failure_ledger: Boolean, mesh, solver, component-count mismatch, merged-domain, label/union mismatch.
+no_defect_reference_policy: reusable across component top-up rows only when material/domain/solver settings match.
+20.70_material_domain_solver_fix_applies: true
+feasibility_csv: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_multipit_comsol_generation_feasibility.csv

@@ -1,0 +1,21 @@
+25.9 surface multi-pit component branch route decision
+
+decision: A. execute multi-pit COMSOL top-up generation
+multi_pit_audit_rows: 16
+split_counts: {'train': 9, 'val': 3, 'test': 4}
+separation_counts: {'separated': 16}
+topology_counts: {'disconnected': 16}
+C1_seed_ready: True
+component_fields_present: True
+C1_recommended: True
+topup_ready: True
+COMSOL_feasibility_ready: True
+depth_grid_complete: True
+acceptance_gate_count: 7
+CURRENT_BASELINE_unchanged: True
+forbidden_diff_present: False
+blocking_schema_gaps: []
+
+interpretation: existing 16 multi-pit rows are enough to define and audit C1, but insufficient for training; next stage should generate the multi-pit top-up pack if review passes.
+baseline_policy: no CURRENT_BASELINE.md transition and no six-parameter RBC success credit for multi-pit.
+decision_matrix: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_multipit_component_branch_decision_matrix.csv

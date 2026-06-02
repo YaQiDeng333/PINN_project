@@ -1,0 +1,8 @@
+gate_id,gate_name,applies_to,threshold_or_rule,success_credit_policy,failure_action
+M1,component_recall,assembled multi-pit test split,mean recall >= 0.85 and close/touching subset recall >= 0.75,component-set branch success only; no six-param RBC credit,inspect missed secondary pits and close/touching strata before more training
+M2,missed_merged_extra_rates,all multi-pit topology strata,missed <= 0.15; merged <= 0.20; extra fragments reported and must not dominate any split,multi-pit metric only,route to C2/C3 or revise top-up coverage
+M3,matched_component_geometry_error,Hungarian-matched active components,center error mean <= 2.0 mm; L/W/D relative MAE <= 25%,component geometry success only,audit scale/coordinate labels and per-component rotation
+M4,union_mask_depth_quality,union projected_mask_2d and depth_grid_m,projected mask Dice >= 0.70 or IoU >= 0.55; depth-grid RMSE better than single-RBC comparator,component-set branch success only,add C2 raster auxiliary loss or C4 fallback comparator
+M5,single_component_control_noncollapse,RBC-like and single-component non-RBC controls from shape-extension pilot,component-set work must not degrade established single-component control metrics,control gate only,do not promote component branch; isolate branch-specific head/training
+M6,negative_control_boundary,20.85 baseline and 25.5/25.8 forward-refinement runner,single-RBC/refinement comparators cannot claim multi-pit success even if union mask improves,no RBC success credit for multi-pit,fix report accounting before any route transition
+M7,baseline_transition_block,CURRENT_BASELINE.md and roadmap docs,no CURRENT_BASELINE.md update without later formal benchmark plus explicit user confirmation,none in 25.9,revert baseline doc change and rerun review

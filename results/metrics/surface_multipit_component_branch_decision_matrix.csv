@@ -1,0 +1,6 @@
+option,selected,decision,evidence,blocked_by
+A. execute multi-pit COMSOL top-up generation,True,selected,c1_seed_ready=True; topup_ready=True; comsol_ready=True; CURRENT_BASELINE_diff=False,
+B. revise component label schema,False,not_selected,hard_label_blocker=False; c1_seed_ready=True; component_fields_present=True,existing labels are sufficient for seed audit; gaps are documented for top-up
+C. implement component-set decoder before more data,False,not_selected,c1_recommended=True; audit_rows=16,current 16 samples are too small; top-up should precede training/decoder implementation
+D. use depth-grid decoder instead,False,not_selected,depth_grid_complete=True; comsol_ready=True,component labels and COMSOL feasibility are adequate for component-set top-up
+E. pause multi-pit branch,False,not_selected,gates_defined=7; missing_field_rows=5; forbidden_diff=False,route has a concrete next generation step

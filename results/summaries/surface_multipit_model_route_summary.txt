@@ -1,0 +1,13 @@
+25.9 surface multi-pit model route and acceptance gates
+
+route_1: component-set training gate on future top-up assembled dataset; first trainable route after data generation, not in 25.9.
+route_2: current 20.85 baseline plus surface forward-refinement runner remains negative/control comparator only.
+route_3: depth-grid fallback if component labels remain unstable after top-up audit.
+
+recommended_first_model_route_after_topup: C1 fixed-K component-set with K=3 and Hungarian matching.
+training_in_this_stage: false
+CURRENT_BASELINE_transition_allowed: false
+multi_pit_rbc_success_credit_allowed: false
+
+required_metrics: component recall, missed rate, merged rate, extra fragment rate, matched center error, L/W/D relative MAE, projected mask Dice/IoU, depth-grid RMSE.
+acceptance_gate_matrix: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_multipit_acceptance_gate_matrix.csv

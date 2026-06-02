@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-06-02 after Stage 25.9 surface multi-pit component-set branch plan
+
+Next step: run **A. execute multi-pit COMSOL top-up generation**. This is the only recommended route after the 25.9 plan, and it should remain a future generation stage with explicit approval, not training and not a baseline transition.
+
+25.9 kept the branch plan-only: no COMSOL, no training, no data/NPZ mutation, no checkpoint/preview/notes artifact, and no `CURRENT_BASELINE.md` update. The label audit found `16` existing multi-pit seed rows, all `component_count=2`, split `9/3/4`, with enough component JSON, union mask, and union depth labels for a C1 seed audit. The gaps are per-component rotation, component-level masks/depth grids, and explicit separation/touching/overlap/topology labels.
+
+The selected representation is `C1 fixed_K_component_set` with `K=3` and Hungarian matching. The planned top-up is `N=96` with assembled `N=112` and split `72/20/20`; coverage must add close, touching, partially overlapping, mixed-depth, mixed-size, x/y/diagonal, and disconnected/merged/touching topology cases. Multi-pit remains outside six-parameter RBC success credit, and frozen 20.85 plus forward-refinement runner are comparator-only for this branch.
+
 ## 2026-06-02 after Stage 25.8 surface forward-refinement report package
 
 Next step: run **A. component-set branch for multi-pit**. The report package confirms the 25.7 forward-refinement runner is stable as a companion for RBC-representable surface model failures, while multi-pit remains a representation problem that needs component-set output.

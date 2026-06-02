@@ -1,0 +1,7 @@
+plan_item,value,train,val,test,notes
+existing_seed_samples,16,9,3,4,from 25.2 pilot manifest/audit; read-only seed
+target_topup_samples,96,63,17,16,default top-up to reach assembled 72/20/20 split
+assembled_target_samples,112,72,20,20,default train/val/test split for first component-set branch
+fallback_topup_samples,60,39,11,10,fallback assembled N=76 with 48/14/14 split; feasibility only
+primary_component_count,2,56,15,13,main training coverage for current two-pit branch
+future_negative_component_count,3,7,2,3,small amount of K=3 future/negative coverage inside K=3 output contract

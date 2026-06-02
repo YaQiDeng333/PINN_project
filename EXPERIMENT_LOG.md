@@ -1,5 +1,18 @@
 # 实验工作日志
 
+## 2026-06-02 Stage 25.9 surface multi-pit component-set branch plan
+
+- Scope: completed a plan-only component-set branch design for `multi_pit_two_component_surface_defect`. No COMSOL, no training, no data/NPZ generation or mutation, no checkpoint/preview/notes artifact, and no `CURRENT_BASELINE.md` update.
+- Preflight: used explicit 25.1 taxonomy/schema/COMSOL feasibility, the 25.2 `comsol_surface_shape_extension_pilot_v1` manifest, the 25.3 oracle-vs-baseline diagnosis, and the 25.8 report route decision. `COMSOL_Multiphysics_MCP` was used only as read-only generator context.
+- Label audit: existing multi-pit seed rows are `16` samples with split `9/3/4`; all have `component_count=2`, two component JSON entries, component centers, L/W/depth, union `projected_mask_2d`, and union `depth_grid_m`. They are usable as `C1` fixed-K seed rows but not sufficient for training.
+- Schema gaps: top-up must add per-component `rotation_angle`, component-level projected masks, component-level depth grids, and explicit separation/touching/overlap/topology labels. Current seed coverage is all separated/aligned_x/disconnected, so close/touching/overlap coverage is missing.
+- Representation: selected `C1 fixed_K_component_set` with `K=3` as first route. Per slot output is `existence_prob`, `center_x_m`, `center_y_m`, `L_m`, `W_m`, `D_m`, `rotation_angle`, `shape_family`, and local profile parameters. Training should use Hungarian matching and permutation-invariant component losses in a later stage.
+- Top-up plan: target top-up `N=96`, fallback `N=60`, assembled target `N=112`, default split `72/20/20`, top-up split `63/17/16`. Coverage must balance component count, separation, relative depth, size pair, orientation, topology, and primitive mix.
+- COMSOL feasibility: preferred future route is two/three-component Boolean subtract with Bx/By/Bz export, no-defect reference reuse when solver/domain settings match, and explicit failure ledger for Boolean, mesh, solver, component-count, merged-domain, and label/union mismatch.
+- Acceptance gates: component recall, missed/merged/extra rates, matched center and L/W/D errors, projected mask Dice/IoU, depth-grid RMSE, single-component control non-collapse, and no six-parameter RBC success credit for multi-pit. Baseline transition remains blocked.
+- Route decision: unique next step is `A. execute multi-pit COMSOL top-up generation`. This is a later approved generation stage, not part of 25.9.
+- Review: independent read-only review passed with no must-fix and confirmed no COMSOL/training/data mutation, no `CURRENT_BASELINE.md` diff, clear component-set boundary, route uniqueness, and no forbidden artifacts.
+
 ## 2026-06-02 Stage 25.8 surface forward-refinement report / visualization package
 
 - Scope: prepared the surface forward-refinement report / visualization package from the locked 25.7 inference runner outputs. No COMSOL, no training, no data/NPZ mutation, no checkpoint artifact commit, no preview PNG commit, no notes artifact, and no `CURRENT_BASELINE.md` update.

@@ -1,5 +1,13 @@
 # PINN 优化路线
 
+## 2026-06-02 route sync: 25.9 surface multi-pit component-set branch plan
+
+25.9 turns the 25.8 route decision into a concrete plan for the multi-pit representation branch. The central boundary is that `multi_pit_two_component_surface_defect` is not a six-parameter RBC failure case; it is a component-set representation problem. Frozen 20.85 and the 25.7/25.8 forward-refinement runner remain useful comparators, but they receive no multi-pit success credit.
+
+The current 16 multi-pit rows are enough to audit labels, not enough to train. They all have `component_count=2`, component centers and L/W/depth in `component_params_json`, plus union `projected_mask_2d` and `depth_grid_m`. The missing schema pieces for the next pack are per-component rotation, component-level masks/depth grids, and explicit separation/touching/overlap topology labels. The first representation route is `C1 fixed_K_component_set` with `K=3`, Hungarian matching, component existence/geometry losses, and union mask/depth losses.
+
+The next route is `A. execute multi-pit COMSOL top-up generation`: target top-up `N=96`, assembled `N=112`, split `72/20/20`, using two/three-component Boolean subtract with Bx/By/Bz export and a failure ledger for Boolean, mesh, solver, component-count, merged-domain, and label/union mismatch. `CURRENT_BASELINE.md` remains unchanged, and any training or baseline transition remains a later explicitly gated stage.
+
 ## 2026-06-02 route sync: 25.8 surface forward-refinement report package
 
 25.8 turns the verified 25.7 runner into a report and visualization package. The important route judgment is unchanged: frozen 20.85 remains the current surface RBC baseline, the forward-refinement runner is a companion/post-hoc repair layer, and the RBC oracle is an evaluation ceiling, not a runtime model or baseline replacement.

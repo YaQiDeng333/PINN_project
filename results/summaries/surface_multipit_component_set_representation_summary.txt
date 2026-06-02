@@ -1,0 +1,23 @@
+25.9 surface multi-pit component-set representation design
+
+primary_representation: C1 fixed_K_component_set
+K_default: 3
+current_seed_component_count: 2
+current_16_C1_seed_ready: True
+per_component_output: existence_prob, center_x_m, center_y_m, L_m, W_m, D_m, rotation_angle, shape_family, local_profile_params
+matching: Hungarian matching with permutation-invariant component losses.
+loss: existence BCE + component parameter SmoothL1 + shape-family CE + union projected-mask Dice/BCE + depth-grid Huber.
+negative_control_policy: 20.85 single-RBC and forward-refinement runner remain comparators only for multi-pit.
+
+schema_gaps_to_close_in_topup:
+- per_component_rotation_angle
+- per_component_projected_mask_2d
+- per_component_depth_grid_m
+- component_separation_m/component_overlap_status/component_topology_relation
+
+route_order:
+1. C1 fixed-K component-set.
+2. C2 component-set plus raster if C1 geometry is valid but union mask/depth is weak.
+3. C3 heatmap plus param head if close/touching cases cause slot confusion.
+4. C4 depth-grid decoder baseline only if component labels cannot be stabilized.
+representation_matrix: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_multipit_component_set_representation_matrix.csv

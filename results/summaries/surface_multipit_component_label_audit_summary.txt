@@ -1,0 +1,24 @@
+25.9 surface multi-pit component label audit
+
+multi_pit_sample_count: 16
+split_counts: {'train': 9, 'val': 3, 'test': 4}
+component_count_values: {'2': 16}
+component_json_count_values: {'2': 16}
+label_sufficiency_counts: {'sufficient_for_C1_seed_with_schema_gaps': 16}
+separation_bucket_counts: {'separated': 16}
+topology_bucket_counts: {'disconnected': 16}
+orientation_bucket_counts: {'aligned_x': 16}
+
+audit_result: existing 16 multi-pit samples are usable as a C1 fixed-K seed if all rows remain sufficient_for_C1_seed_with_schema_gaps.
+schema_gap_policy: rotation, component-level masks/depth grids, and explicit separation/topology labels must be added to the top-up schema.
+rbc_boundary: these rows stay excluded_negative_control for six-parameter RBC refinement success accounting.
+
+audit_csv: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_multipit_component_label_audit.csv
+missing_fields_csv: C:\Users\19166\Desktop\PINN_project\results\metrics\surface_multipit_component_label_missing_fields.csv
+
+missing_field_summary:
+- per_component_rotation_angle: missing_from_component_params_json; global rotation_angle exists (topup_required_not_blocking_seed_audit)
+- per_component_projected_mask_2d: missing; union projected_mask_2d exists (important_schema_gap)
+- per_component_depth_grid_m: missing; union depth_grid_m exists (important_schema_gap)
+- component_separation_m/component_overlap_status/component_topology_relation: not explicit; derived in this audit from component centers and bounding boxes (derivable_but_should_be_manifest_label)
+- C1_seed_status: ready (not_blocking)

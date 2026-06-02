@@ -1,0 +1,24 @@
+dimension,level,target_count,topup_or_assembled,rationale
+component_count,2,84,topup,K=3 fixed slots with two-component main coverage and small three-component stress coverage
+component_count,3,12,topup,K=3 fixed slots with two-component main coverage and small three-component stress coverage
+separation,separated,24,topup,component merge and missed-component failure modes need balanced spacing
+separation,close,24,topup,component merge and missed-component failure modes need balanced spacing
+separation,touching,24,topup,component merge and missed-component failure modes need balanced spacing
+separation,partially_overlapping,24,topup,component merge and missed-component failure modes need balanced spacing
+relative_depth,similar_depth,48,topup,depth contrast tests whether secondary shallow pits disappear
+relative_depth,deep_and_shallow,48,topup,depth contrast tests whether secondary shallow pits disappear
+orientation,aligned_x,32,topup,avoid orientation leakage from scan-line geometry
+orientation,aligned_y,32,topup,avoid orientation leakage from scan-line geometry
+orientation,diagonal,32,topup,avoid orientation leakage from scan-line geometry
+topology,disconnected,36,topup,stress topology where union mask no longer cleanly separates instances
+topology,merged_projected_mask,24,topup,stress topology where union mask no longer cleanly separates instances
+topology,touching_boundary,24,topup,stress topology where union mask no longer cleanly separates instances
+topology,partially_overlapping,12,topup,stress topology where union mask no longer cleanly separates instances
+size_pair,small-small,24,topup,cover small secondary pits and balanced medium pairs
+size_pair,small-large,24,topup,cover small secondary pits and balanced medium pairs
+size_pair,medium-medium,24,topup,cover small secondary pits and balanced medium pairs
+size_pair,medium-large,24,topup,cover small secondary pits and balanced medium pairs
+primitive_mix,smooth-smooth,36,topup,connect 25.1 non-RBC taxonomy to component-set branch
+primitive_mix,flat-flat,24,topup,connect 25.1 non-RBC taxonomy to component-set branch
+primitive_mix,smooth-flat,18,topup,connect 25.1 non-RBC taxonomy to component-set branch
+primitive_mix,asymmetric_mix,18,topup,connect 25.1 non-RBC taxonomy to component-set branch
