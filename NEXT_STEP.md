@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-06-03 after Stage 25.12b surface multi-pit component raster/depth target redesign
+
+Next step: run **A. 25.13 target-v2 training gate using the 25.10 loss mainline**. Do not continue the 25.11/25.12 rebalance stack: target ownership, not more loss pressure, is the next controlled variable.
+
+25.12b found that v1 labels are globally consistent but component-local targets are ambiguous in overlap pixels. Component OR exactly reconstructs the union mask, max(component depth) exactly reconstructs union depth, empty slots are zero, and center-to-mask-centroid error is small. The blocking issue is duplicated component ownership: `25/112` samples have overlap, including `18/24` partially-overlapping rows and `10/12` three-component rows.
+
+25.13 should transform targets at loader/training time without writing a new NPZ: build `component_ownership_map`, train `component_mask_target_v2` and `component_depth_target_v2` as ownership-resolved foreground targets, keep union mask/depth as OR/max diagnostics, and report three-component rows separately. `CURRENT_BASELINE.md` remains unchanged.
+
 ## 2026-06-02 after Stage 25.12 surface multi-pit component-separation-aware rebalance training
 
 Next step: run **C. rollback to 25.10 loss mainline and redesign component raster/depth targets before further training**. The component-separation-aware loss reduced merged rate from `0.900000` to `0.700000`, but it bought that by worsening recall, missed rate, extra rate, and union Dice, so it is not a viable training route.

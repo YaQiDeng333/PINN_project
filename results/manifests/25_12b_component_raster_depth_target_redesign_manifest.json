@@ -1,0 +1,39 @@
+{
+  "allowed_use": [
+    "target_redesign_audit",
+    "25.13_target_v2_training_gate_input"
+  ],
+  "audit_id": "25_12b_surface_multipit_component_raster_depth_target_redesign",
+  "baseline_ready": false,
+  "comsol_run": false,
+  "current_baseline_updated": false,
+  "data_npz_modified": false,
+  "dataset_id": "comsol_surface_multipit_component_set_pilot_v1",
+  "dataset_manifest": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\manifests\\comsol_surface_multipit_component_set_pilot_v1.manifest.json",
+  "forbidden_use": [
+    "baseline_update",
+    "current_baseline_replacement",
+    "automatic_mainline_training",
+    "latest_newest_auto_discovery"
+  ],
+  "generated_at": "2026-06-03T00:11:29",
+  "git": {
+    "branch": "codex/25-12b-component-raster-depth-target-redesign",
+    "head_before_commit": "cb777bbfbdddaa637645e3c1b9467d581f601413",
+    "protected_path_diff_before_write": ""
+  },
+  "metrics_path": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\metrics\\25_12b_component_raster_depth_target_redesign.json",
+  "route_decision": "A. enter 25.13 target-v2 training gate using the 25.10 loss mainline; do not use the 25.11/25.12 rebalance stack",
+  "source_metrics": {
+    "audit_25_10b": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\metrics\\25_10b_component_set_failure_audit.json",
+    "audit_25_11b": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\metrics\\25_11b_component_set_merge_collapse_audit.json",
+    "metrics_25_10": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\metrics\\25_10_component_set_training_gate_metrics.json",
+    "metrics_25_11": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\metrics\\25_11_mask_depth_loss_rebalance_training_metrics.json",
+    "metrics_25_12": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\metrics\\25_12_component_separation_rebalance_training_metrics.json"
+  },
+  "stage": "25.12b",
+  "status": "target_redesign_complete",
+  "summary_path": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\summaries\\25_12b_component_raster_depth_target_redesign_summary.md",
+  "target_redesign_acceptance_decision": "READY_FOR_25.13_TRAINING",
+  "training_run": false
+}

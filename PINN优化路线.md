@@ -1,5 +1,13 @@
 # PINN 优化路线
 
+## 2026-06-03 route sync: 25.12b surface multi-pit component raster/depth target redesign
+
+25.12b narrows the blocker from "mask/depth loss is weak" to a target-semantics issue. The v1 dataset is not broadly corrupt: component OR equals the sample union mask, max(component depth) equals union depth, empty slots are clean, and component centers agree with mask centroids. That rules out the main generator/evaluator bug path.
+
+The real split is component-local ownership. `25/112` samples contain duplicated component foreground ownership, with `297` duplicated component target pixels and `271` overlap-depth-conflict pixels. This is concentrated in partially-overlapping rows (`18/24`) and three-component rows (`10/12`). Union supervision can hide the ambiguity because OR/max remains correct, which explains why 25.11 improved union Dice while merging components and why 25.12 loss penalties did not recover stable separation.
+
+The route implication is `READY_FOR_25.13_TRAINING`: use `component_mask_target_v2`, `component_depth_target_v2`, and `component_ownership_map` as loader/training-time target transforms, return to the 25.10 loss mainline, keep union OR/max as diagnostics, and report three-component rows separately. Do not update `CURRENT_BASELINE.md` and do not treat this as a baseline replacement.
+
 ## 2026-06-02 route sync: 25.12 surface multi-pit component-separation-aware rebalance training
 
 25.12 tests the most direct fix for the 25.11b diagnosis: keep the same model and representation, but add component-separation and anti-merge pressure while delaying/capping union loss. The result is a `FAIL`, which is useful because it narrows the blocker: the current component raster/depth targets are not being repaired by loss weighting alone.

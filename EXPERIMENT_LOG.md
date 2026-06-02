@@ -1,5 +1,15 @@
 # 实验工作日志
 
+## 2026-06-03 Stage 25.12b surface multi-pit component raster/depth target redesign
+
+- Scope: audited and redesigned component raster/depth targets after the 25.12 `FAIL`. This stage read the 25.10/25.10b/25.11/25.11b/25.12 metrics and the explicit `comsol_surface_multipit_component_set_pilot_v1` manifest only; it did not train, run COMSOL, mutate data/NPZ files, expand model capacity, export checkpoints/previews/notes, or update `CURRENT_BASELINE.md`.
+- Main finding: v1 generator labels are globally consistent, but component-level raster/depth supervision lacks explicit ownership in overlapping/touching pixels. Component OR reconstructs the union mask exactly, max(component depth) reconstructs union depth exactly, empty slots are zero, and center-to-mask-centroid error is small; therefore this is not a generator corruption finding.
+- V1 target audit: component OR to union Dice mean/min is `1.000000/1.000000`; max(component depth) to union depth RMSE mean/max is `0.000000000/0.000000000 m`; empty-slot mask/depth violations are `0`; center-to-mask-centroid error mean/p95/max is `0.000059604/0.000108224/0.001045136 m`.
+- Ownership issue: `25/112` samples have duplicated component foreground ownership, with `297` duplicated component target pixels and `271` overlap-depth-conflict pixels. The problem is concentrated in `partially_overlapping` (`18/24`) and component_count=3 (`10/12`), while union OR/max hides the conflict from sample-level targets.
+- Target v2 design: introduce `component_mask_target_v2`, `component_depth_target_v2`, and `component_ownership_map`; separated/close rows must be mutually exclusive, touching rows may share continuous boundaries but not raster ownership, partially-overlapping rows keep raw overlap diagnostics but train on ownership-resolved component targets, and union mask/depth remain OR/max from components.
+- Acceptance decision: `READY_FOR_25.13_TRAINING`.
+- Route decision: unique next step is `A. enter 25.13 target-v2 training gate using the 25.10 loss mainline; do not use the 25.11/25.12 rebalance stack`. This is not a baseline transition.
+
 ## 2026-06-02 Stage 25.12 surface multi-pit component-separation-aware rebalance training
 
 - Scope: executed the component-separation-aware rebalance gate on `comsol_surface_multipit_component_set_pilot_v1`. The architecture, fixed `K=3` component-set representation, fixed split `72/20/20`, and Hungarian matching were unchanged.
