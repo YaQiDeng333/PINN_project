@@ -1,5 +1,16 @@
 # 实验工作日志
 
+## 2026-06-02 Stage 25.10 surface multi-pit component-set training gate
+
+- Scope: executed a minimal component-set training gate on `comsol_surface_multipit_component_set_pilot_v1`. This trained and evaluated a lightweight C1 fixed-K component-set model only; it did not update `CURRENT_BASELINE.md`, did not export an inference artifact, and did not commit checkpoint/data/NPZ artifacts.
+- Data gate: consumed the explicit manifest `results/manifests/comsol_surface_multipit_component_set_pilot_v1.manifest.json`, verified `N=112`, split `72/20/20`, `K=3`, `train_ready_candidate=true`, `baseline_ready=false`, disabled auto/latest discovery, and sha256-matched the ignored assembled NPZ.
+- Model gate: implemented `scripts/train_surface_multipit_component_set_gate.py` with Bx/By/Bz `delta_b` input plus `sensor_z_m`, K=3 existence/geometry/rotation/shape-family/mask/depth outputs, and a min-over-slot-permutations loss for existence BCE, active component parameter regression, shape CE, mask BCE/Dice, and depth loss.
+- Training result: fixed seed `42`, `180` epochs, selected existence threshold `0.25` on validation. Train loss decreased from `3.014077` to `0.090511`; best validation loss was `1.992049` at epoch `6`.
+- Gate decision: `PARTIAL`. Test component recall was `0.837209`, missed rate `0.162791`, extra rate `0.142857`, merged rate `0.200000`, mean center error `0.004284 m`, mean L/W/D relative error `0.154556`, and mean rotation error `0.575410 rad`.
+- Signal and failure split: the gate is clearly better than empty / one-slot prior on component recall, and it avoids empty or single-component collapse on average (`pred_component_count_mean=2.1`). However, component mask Dice is only `0.109562`, union mask Dice is `0.130480`, validation union mask Dice is weak (`0.071413`), depth RMSE barely beats empty/prior, and test three-component rows show merged rate `1.0`.
+- Route decision: unique next step is `B. run 25.10b failure audit for merged/missed, overlap/touching, slot permutation, and three-component rows`. Do not enter stronger training or baseline discussion until the failure audit explains the raster/merge weaknesses.
+- Review: independent read-only review is required before commit and will check implementation, metrics, forbidden artifacts, and baseline boundaries.
+
 ## 2026-06-02 Stage 25.9b surface multi-pit component-set top-up pack
 
 - Scope: executed the approved surface multi-pit component-set COMSOL top-up generation and validation. No training, no model gate, no checkpoint/preview/notes artifact commit, and no `CURRENT_BASELINE.md` update.

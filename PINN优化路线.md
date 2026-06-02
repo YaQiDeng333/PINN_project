@@ -1,5 +1,13 @@
 # PINN 优化路线
 
+## 2026-06-02 route sync: 25.10 surface multi-pit component-set training gate
+
+25.10 answers the first component-set learning-signal question: the `C1_fixed_K_component_set` route is not dead, but it is not yet a stable model route. The lightweight gate trained on `comsol_surface_multipit_component_set_pilot_v1` learns component existence and coarse geometry better than empty or one-slot degenerate predictors; test recall is `0.837209`, missed rate `0.162791`, extra rate `0.142857`, and mean predicted component count is `2.1`.
+
+The limiting mechanism is the raster/topology side. Component mask Dice remains `0.109562`, union Dice `0.130480`, validation union Dice only `0.071413`, and depth-grid RMSE is only marginally better than degenerate baselines. The hardest evidence is in the three-component test subset: recall drops to `0.666667` and merged rate is `1.0`. That makes the gate decision `PARTIAL`, not PASS.
+
+The next route is `B. run 25.10b failure audit`: inspect merged/missed rows, overlap/touching subsets, slot permutation, and three-component samples before any 25.11 stronger training protocol. This remains separate from the surface RBC baseline; frozen 20.85 and the surface forward-refinement runner are comparators only, and `CURRENT_BASELINE.md` remains unchanged.
+
 ## 2026-06-02 route sync: 25.9b surface multi-pit component-set top-up pack
 
 25.9b converts the multi-pit component-set plan into a validated dataset candidate. The generated top-up pack is `comsol_surface_multipit_topup_pack_v1`: `96/96` successful COMSOL rows, split `63/17/16`, component counts `2=84` and `3=12`, balanced separation across separated/close/touching/partially-overlapping cases, and explicit component masks/depth grids.

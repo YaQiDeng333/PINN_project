@@ -471,3 +471,4 @@ This registry records generated COMSOL dataset identities and allowed usage. It 
 - validation_script: `scripts/validate_surface_multipit_component_set_pilot_pack.py`
 - npz_sha256: 80508a51600d68d12a7a202688d9826bf9f2382230b840ea149f801ac9dde197
 - notes: Metadata only. Generated NPZ/data files are not committed; multi-pit is component-set data, not a CURRENT_BASELINE transition.
+- 25.10 training_gate_consumed: gate_id=25_10_surface_multipit_component_set_training_gate; decision=PARTIAL; metrics=`C:\Users\19166\Desktop\PINN_project\results\metrics\25_10_component_set_training_gate_metrics.json`; baseline_ready=false; CURRENT_BASELINE.md unchanged.

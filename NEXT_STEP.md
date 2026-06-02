@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-06-02 after Stage 25.10 surface multi-pit component-set training gate
+
+Next step: run **B. 25.10b failure audit for merged/missed, overlap/touching, slot permutation, and three-component rows**. Do not continue directly to stronger training until the audit explains why component existence/geometry learned while mask/depth and merged-component behavior stayed weak.
+
+25.10 trained a lightweight `C1_fixed_K_component_set` gate on `comsol_surface_multipit_component_set_pilot_v1` with fixed split `72/20/20` and `K=3`. The result is `PARTIAL`: test component recall reached `0.837209`, missed rate `0.162791`, extra rate `0.142857`, and mean predicted component count `2.1`, so the model is not empty or single-component collapsed. The blocker is raster/topology quality: test component mask Dice is only `0.109562`, union mask Dice `0.130480`, validation union mask Dice `0.071413`, depth RMSE barely beats degenerate baselines, and three-component test rows have merged rate `1.0`.
+
+25.10b should inspect matched/unmatched samples by separation, topology, component_count, and slot assignment. The key questions are whether the mask/depth head is underpowered, whether the loss is over-weighting component existence/geometry, whether overlap/touching labels need separate supervision, and whether K=3 slot permutation is unstable. `CURRENT_BASELINE.md` remains unchanged.
+
 ## 2026-06-02 after Stage 25.9b surface multi-pit component-set top-up pack
 
 Next step: run **A. enter 25.10 component-set training gate**. This is the only recommended next step after the 25.9b pack validation, but it must be a separately gated training stage; do not auto-train and do not update `CURRENT_BASELINE.md`.
