@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-06-02 after Stage 25.11b surface multi-pit component-set merge-collapse audit
+
+Next step: run **A. 25.12 component-separation-aware rebalance training**. The 25.11b audit shows the blocker is not generic capacity and not just touching/overlap topology: the rebalance made union-level agreement easier while component-level separation stayed underconstrained.
+
+The key evidence is direct: 25.11 improved union Dice (`0.130480 -> 0.166233`), recall (`0.837209 -> 0.860465`), missed rate, and extra rate, but merged rate collapsed from `0.200000` to `0.900000`, component Dice stayed flat/slightly worse, and depth RMSE worsened. Test newly merged rate is `0.700000`; separated rows also newly merge at `0.750000`, so the issue is not confined to touching or overlapping cases.
+
+25.12 should keep the same representation and model size unless separately justified, but change the objective schedule: delay or cap union mask loss, add component-separation regularization, penalize predicted component-mask overlap, keep topology-aware merge penalties for touching/overlap, and stage foreground-normalized depth after masks separate. `CURRENT_BASELINE.md` remains unchanged.
+
 ## 2026-06-02 after Stage 25.11 surface multi-pit component-set mask/depth loss rebalance training
 
 Next step: run **B. 25.11b targeted rebalance or topology-focused failure audit**. The first mask/depth rebalance produced a real but incomplete signal: union mask Dice improved, component recall improved, and extra/missed rates improved, but component masks, depth, and merge behavior are still not stable.

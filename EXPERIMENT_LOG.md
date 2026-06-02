@@ -1,5 +1,17 @@
 # 实验工作日志
 
+## 2026-06-02 Stage 25.11b surface multi-pit component-set merge-collapse audit
+
+- Scope: audited the 25.11 `PARTIAL` mask/depth rebalance result only. No new training, no COMSOL, no model-capacity expansion, no data/NPZ mutation, no checkpoint/preview/notes artifact commit, no baseline transition, and no `CURRENT_BASELINE.md` update.
+- Inputs: compared `results/metrics/25_10_component_set_training_gate_metrics.json`, `results/metrics/25_10b_component_set_failure_audit.json`, `results/metrics/25_11_mask_depth_loss_rebalance_training_metrics.json`, and `results/manifests/25_11_mask_depth_loss_rebalance_training_manifest.json`.
+- Main finding: 25.11 induced union-over-component merge collapse. Union Dice improved (`0.130480 -> 0.166233`) and recall/extra/missed improved, but merged rate worsened (`0.200000 -> 0.900000`), component Dice stayed flat/slightly worse (`0.109562 -> 0.108737`), and depth RMSE worsened (`0.000243315 -> 0.000673627 m`).
+- Loss-scale audit: final train/val mask-depth weighted ratios were `0.973279` and `0.929449`; final validation union terms were `0.339797` of mask/depth weighted mass. Component mask weighted loss was also much larger than geometry terms, showing mask/depth supervision dominated the objective after rebalance.
+- Collapse split: test newly merged rate was `0.700000`; union-over-component collapse rate was `0.500000`. The collapse is not only topology-driven: separated rows had newly merged rate `0.750000` and disconnected topology had newly merged rate `0.750000`.
+- Secondary issues: depth-supervision dilution rate was `0.600000`; touching_boundary and partially_overlapping rows still had merged rate `1.0`; three-component rows remain a required audit slice.
+- Threshold audit: selected threshold shifted `0.25 -> 0.35`, but 25.11 validation merged rate stayed `0.9` across candidate thresholds, so this is not just a threshold-selection bug.
+- Targeted design: delay/cap union mask loss, add explicit component-separation regularization, add topology-aware merge penalties, redesign/stage depth loss with component-normalized foreground masks, and keep three-component rows separately reported.
+- Route decision: unique next step is `A. enter 25.12 component-separation-aware rebalance training`. Do not simply increase model capacity and do not discuss baseline replacement.
+
 ## 2026-06-02 Stage 25.11 surface multi-pit component-set mask/depth loss rebalance training
 
 - Scope: executed a bounded mask/depth loss rebalance training gate on `comsol_surface_multipit_component_set_pilot_v1`. The model architecture, fixed `K=3` component-set representation, fixed split `72/20/20`, and min-over-slot-permutations Hungarian matching stayed unchanged.

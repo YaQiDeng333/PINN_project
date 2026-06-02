@@ -1,0 +1,25 @@
+{
+  "allowed_use": [
+    "component_set_failure_audit",
+    "targeted_rebalance_design"
+  ],
+  "audit_conclusion": "25.11 primarily induced union-over-component merge collapse: union Dice improved while component separation and depth consistency degraded.",
+  "audit_id": "25_11b_surface_multipit_merge_collapse_audit",
+  "baseline_ready": false,
+  "checkpoint_saved": false,
+  "current_baseline_updated": false,
+  "dataset_id": "comsol_surface_multipit_component_set_pilot_v1",
+  "forbidden_use": [
+    "baseline_update",
+    "current_baseline_replacement",
+    "automatic_mainline_training",
+    "formal_inference_artifact"
+  ],
+  "inference_artifact_exported": false,
+  "metrics_path": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\metrics\\25_11b_component_set_merge_collapse_audit.json",
+  "new_training_run": false,
+  "route_decision": "A. enter 25.12 component-separation-aware rebalance training",
+  "script": "scripts/audit_surface_multipit_merge_collapse_after_rebalance.py",
+  "stage": "25.11b",
+  "summary_path": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\summaries\\25_11b_component_set_merge_collapse_audit_summary.md"
+}

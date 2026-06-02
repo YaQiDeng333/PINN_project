@@ -1,5 +1,13 @@
 # PINN 优化路线
 
+## 2026-06-02 route sync: 25.11b surface multi-pit component-set merge-collapse audit
+
+25.11b pins down why the first rebalance stayed `PARTIAL`: the objective improved union-level agreement without preserving component separation. That is why the headline looks contradictory: union Dice improved from `0.130480` to `0.166233`, recall improved from `0.837209` to `0.860465`, and extra/missed rates improved, while merged rate jumped from `0.200000` to `0.900000`.
+
+The collapse is not just a hard topology subset. Separated test rows had newly merged rate `0.750000`, disconnected topology had newly merged rate `0.750000`, and final validation mask/depth terms still consumed `0.929449` of the weighted objective. Depth also moved the wrong way (`0.000243315 -> 0.000673627 m`), so the current foreground depth design is coupled to the same merged-mask behavior.
+
+The route implication is now narrow: do not add model capacity as the next move. The unique next route is `A. 25.12 component-separation-aware rebalance training`: cap or delay union mask loss, add component separation / anti-overlap penalties, add topology-aware merge penalties, and stage component-normalized depth after mask separation. `CURRENT_BASELINE.md` remains unchanged.
+
 ## 2026-06-02 route sync: 25.11 surface multi-pit component-set mask/depth loss rebalance training
 
 25.11 tests the direct answer to the 25.10b diagnosis: rebalance the objective before changing representation or model capacity. The route stayed constrained to the existing lightweight `C1_fixed_K_component_set` architecture, fixed `K=3`, fixed split `72/20/20`, and the same min-over-slot-permutations Hungarian matching.
