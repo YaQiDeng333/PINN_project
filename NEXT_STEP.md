@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-06-03 after Stage 25.14 surface multi-pit label-v3 derivation + validator
+
+Next step: run **A. 25.15 label-v3 training gate using the 25.10 loss mainline + label-v3 supervision**. Do not use the 25.11/25.12 rebalance stack, do not update `CURRENT_BASELINE.md`, and do not frame this as a baseline transition.
+
+The key result is that v3 directly addresses the v2 sparsity mechanism without changing data files. V2 hard component support averaged `99.851695` pixels with minimum `47`; v3 soft/local support averages `210.110169` pixels with minimum `126`, so the mean support ratio is `2.203184` and the minimum ratio is `1.697183`. Empty slots remain clean, existing slots keep depth-valid support, duplicate hard ownership stays resolved (`297 -> 0`), and raw OR/max still reproduces union mask/depth exactly.
+
+25.15 should train only the controlled next gate: same dataset, same split, same component-set representation, same architecture family, and 25.10 loss mainline adapted to `component_mask_target_v3_soft`, `component_sdf_target_v3`, `component_valid_region_mask`, and `component_depth_target_v3`. Three-component, partially-overlapping, and touching-boundary rows must stay separately reported.
+
 ## 2026-06-03 after Stage 25.13b surface multi-pit generator/label schema audit after target-v2 collapse
 
 Next step: run **A. 25.14 label-v3 derivation + validator, no training**. The 25.13b audit shows the raw labels are sufficient to derive better supervision inside `PINN_project`; do not return to COMSOL yet and do not continue loss tuning.

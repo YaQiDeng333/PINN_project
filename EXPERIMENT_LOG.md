@@ -1,5 +1,16 @@
 # 实验工作日志
 
+## 2026-06-03 Stage 25.14 surface multi-pit label-v3 derivation + validator
+
+- Scope: derived and validated label schema v3 targets in memory from `comsol_surface_multipit_component_set_pilot_v1`. This stage read 25.12b/25.13/25.13b evidence and the explicit dataset manifest/NPZ; it did not train, tune losses, run COMSOL, mutate data/NPZ files, expand model capacity, export checkpoints/previews/notes, or update `CURRENT_BASELINE.md`.
+- Main finding: label v3 can be derived inside `PINN_project` from existing raw component masks/depths. Hard ownership remains unique, union/depth invariants remain intact, and soft/local valid-region support substantially increases the component-mask learning signal that collapsed under target v2.
+- V3 support audit: active components `236`; v2 hard foreground pixels mean/min `99.851695/47`; v3 soft positive pixels mean/min/p05 `210.110169/126/147.750000`; v3/v2 positive support ratio mean/min `2.203184/1.697183`; existing v3 tiny/empty count `0`; existing depth-valid empty count `0`; inactive slot violations `0`.
+- Group slices: component_count=3 v3/v2 support ratio mean/min `2.445849/1.972789`; partially_overlapping `2.210708/1.795775`; touching_boundary `2.279145/1.842105`.
+- Invariants: duplicate hard ownership remains resolved (`297 -> 0`), overlap-depth-conflict remains resolved under hard ownership (`271 -> 0`), raw OR and v2 OR both reproduce union masks with mismatch `0`, and raw max(component depth) reproduces union depth with max RMSE `0.000000000000 m`.
+- Label v3 schema: preserve `raw_component_mask_raw` and `component_ownership_map`; add `component_mask_target_v3_soft`, `component_sdf_target_v3`, `component_valid_region_mask`, `component_depth_target_v3` with explicit depth-valid region, plus `overlap_region_mask` and `contact_boundary_mask`.
+- Acceptance decision: `READY_FOR_25.15_TRAINING`.
+- Route decision: unique next step is `A. enter 25.15 label-v3 training gate using 25.10 loss mainline + label-v3 supervision; do not use the 25.11/25.12 rebalance stack`. This is not a baseline transition.
+
 ## 2026-06-03 Stage 25.13b surface multi-pit generator/label schema audit after target-v2 collapse
 
 - Scope: audited generator/label schema after the 25.13 target-v2 `FAIL`. This stage read the 25.12b redesign metrics, 25.13 gate metrics/manifest, and the explicit `comsol_surface_multipit_component_set_pilot_v1` manifest/NPZ. It did not train, tune losses, run COMSOL, mutate data/NPZ files, expand model capacity, export checkpoints/previews/notes, or update `CURRENT_BASELINE.md`.

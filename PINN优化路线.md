@@ -1,5 +1,13 @@
 # PINN 优化路线
 
+## 2026-06-03 route sync: 25.14 surface multi-pit label-v3 derivation + validator
+
+25.14 turns the 25.13b schema diagnosis into a concrete loader-side target design. The important result is that the existing raw component labels are sufficient: no COMSOL generator/export fix is needed yet, and no NPZ/data mutation is required to test the next route.
+
+The evidence is direct. V2 hard ownership is still the hard evaluation anchor and keeps duplicate ownership at `0`, while v3 adds soft/local support around each raw component. Active components are `236`; v2 hard foreground support averages `99.851695` pixels and bottoms out at `47`, while v3 soft positive support averages `210.110169` pixels and bottoms out at `126`. The mean v3/v2 support ratio is `2.203184`, with component_count=3 at `2.445849`, partially-overlapping at `2.210708`, and touching-boundary at `2.279145`.
+
+The route implication is `READY_FOR_25.15_TRAINING`: run a label-v3 training gate using the 25.10 loss mainline plus `component_mask_target_v3_soft`, `component_sdf_target_v3`, `component_valid_region_mask`, and `component_depth_target_v3`. Do not reuse the 25.11/25.12 rebalance stack, do not enlarge the model by default, and do not update `CURRENT_BASELINE.md`.
+
 ## 2026-06-03 route sync: 25.13b surface multi-pit generator/label schema audit after target-v2 collapse
 
 25.13b separates two things that looked mixed after 25.13. The ownership transform is valid as a label-cleaning step, but it is not enough as a training target: it clears duplicate pixels without giving the model richer component-local raster support.
