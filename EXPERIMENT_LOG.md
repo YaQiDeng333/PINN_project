@@ -1,5 +1,15 @@
 # 实验工作日志
 
+## 2026-06-02 Stage 25.11 surface multi-pit component-set mask/depth loss rebalance training
+
+- Scope: executed a bounded mask/depth loss rebalance training gate on `comsol_surface_multipit_component_set_pilot_v1`. The model architecture, fixed `K=3` component-set representation, fixed split `72/20/20`, and min-over-slot-permutations Hungarian matching stayed unchanged.
+- Boundary: no COMSOL, no data/NPZ mutation, no checkpoint/preview/notes artifact commit, no model-capacity expansion, no formal inference artifact export, no baseline transition, and no `CURRENT_BASELINE.md` update.
+- Loss config: added `mask_depth_rebalance_v1`, keeping existence/center/LWD/rotation/shape losses while adding foreground/background-balanced component mask BCE/Dice, union mask BCE/Dice, and valid-target-mask-only component/union depth losses. JSON outputs use strict serialization with non-finite values mapped to null.
+- Training: fixed seed `42`, `180` epochs, selected existence threshold `0.35`, best validation loss at epoch `3`. Train loss decreased from `6.458076` to `0.454230`; final train/val mask-depth weighted ratios were `0.973279` and `0.929449`.
+- Gate decision: `PARTIAL`. Versus 25.10, test component recall improved `0.837209 -> 0.860465`, missed rate improved `0.162791 -> 0.139535`, extra rate improved `0.142857 -> 0.097561`, and union mask Dice improved `0.130480 -> 0.166233`.
+- Remaining blockers: component mask Dice did not improve (`0.109562 -> 0.108737`), depth-grid RMSE worsened (`0.000243315 -> 0.000673627 m`), merged rate worsened (`0.200000 -> 0.900000`), and the three-component test subset remains merged (`merged_rate=1.0`).
+- Route decision: unique next step is `B. run 25.11b targeted rebalance or topology-focused failure audit`. Do not continue by simply increasing model capacity and do not discuss baseline replacement.
+
 ## 2026-06-02 Stage 25.10b surface multi-pit component-set failure audit
 
 - Scope: audited the 25.10 `PARTIAL` component-set training gate only. No new training, no COMSOL, no data/NPZ mutation, no checkpoint/preview/notes artifact commit, no baseline transition, and no `CURRENT_BASELINE.md` update.

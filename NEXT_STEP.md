@@ -1,5 +1,13 @@
 # NEXT_STEP
 
+## 2026-06-02 after Stage 25.11 surface multi-pit component-set mask/depth loss rebalance training
+
+Next step: run **B. 25.11b targeted rebalance or topology-focused failure audit**. The first mask/depth rebalance produced a real but incomplete signal: union mask Dice improved, component recall improved, and extra/missed rates improved, but component masks, depth, and merge behavior are still not stable.
+
+25.11 kept the component-set route fixed: same architecture, same `K=3`, same `72/20/20` split, same manifest-driven dataset loading, and same Hungarian matching. The `mask_depth_rebalance_v1` loss added foreground-balanced component mask supervision, union mask supervision, and valid-mask-only depth losses without exporting checkpoints or touching `CURRENT_BASELINE.md`.
+
+The gate remains `PARTIAL`: test recall `0.837209 -> 0.860465`, missed rate `0.162791 -> 0.139535`, extra rate `0.142857 -> 0.097561`, and union mask Dice `0.130480 -> 0.166233`; however component mask Dice is flat/slightly worse (`0.109562 -> 0.108737`), depth RMSE worsened (`0.000243315 -> 0.000673627 m`), merged rate worsened (`0.200000 -> 0.900000`), and three-component test rows still merge (`merged_rate=1.0`). 25.11b should isolate whether the union-mask term is encouraging merged blobs, whether depth should be staged/renormalized, and whether topology-aware penalties are needed before another training route.
+
 ## 2026-06-02 after Stage 25.10b surface multi-pit component-set failure audit
 
 Next step: run **B. enter 25.11 mask/depth loss rebalance training**. The audit found that component existence and coarse geometry have learning signal, while projected-mask/depth supervision is not being converted into aligned component masks; do not jump to a larger model or baseline transition.

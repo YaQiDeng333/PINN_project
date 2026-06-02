@@ -37,12 +37,14 @@ DEFAULT_METRICS = ROOT / "results/metrics/25_10_component_set_training_gate_metr
 DEFAULT_SUMMARY = ROOT / "results/summaries/25_10_component_set_training_gate_summary.md"
 DEFAULT_GATE_MANIFEST = ROOT / "results/manifests/25_10_component_set_training_gate_manifest.json"
 DEFAULT_REGISTRY = ROOT / "COMSOL_DATA_REGISTRY.md"
+DEFAULT_COMPARISON_METRICS = ROOT / "results/metrics/25_10_component_set_training_gate_metrics.json"
 
 TARGET_SPLIT = {"train": 72, "val": 20, "test": 20}
 K_MAX = 3
 LOW_H = 32
 LOW_W = 64
 PERMS = list(permutations(range(K_MAX)))
+MASK_DEPTH_TERMS = ("component_mask", "union_mask", "component_depth", "union_depth")
 FORBIDDEN_DIFF_PATHS = [
     "CURRENT_BASELINE.md",
     "data",
@@ -53,6 +55,49 @@ FORBIDDEN_DIFF_PATHS = [
 ]
 
 
+@dataclass(frozen=True)
+class LossConfig:
+    name: str
+    description: str
+    weights: dict[str, float]
+    mask_supervision: str
+    depth_supervision: str
+
+
+LOSS_CONFIGS = {
+    "component_set_gate_v1": LossConfig(
+        name="component_set_gate_v1",
+        description="25.10 control loss: existence + active params/shape + component mask BCE/Dice + full-grid weighted depth proxy.",
+        weights={
+            "exist": 1.0,
+            "param": 1.8,
+            "shape": 0.25,
+            "component_mask": 0.8,
+            "union_mask": 0.0,
+            "component_depth": 0.9,
+            "union_depth": 0.0,
+        },
+        mask_supervision="component_mean_bce_plus_dice",
+        depth_supervision="component_full_grid_target_weight_0p15_background",
+    ),
+    "mask_depth_rebalance_v1": LossConfig(
+        name="mask_depth_rebalance_v1",
+        description="25.11 rebalance: keep existence/geometry losses but emphasize active component and union mask/depth terms with foreground-normalized supervision.",
+        weights={
+            "exist": 0.75,
+            "param": 1.05,
+            "shape": 0.18,
+            "component_mask": 2.00,
+            "union_mask": 1.20,
+            "component_depth": 1.00,
+            "union_depth": 0.55,
+        },
+        mask_supervision="existing_slots_balanced_foreground_background_bce_plus_dice_with_union_loss",
+        depth_supervision="existing_slots_and_union_smooth_l1_only_inside_valid_target_mask",
+    ),
+}
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Train/evaluate the 25.10 multi-pit component-set gate.")
     parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST)
@@ -60,6 +105,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--summary", type=Path, default=DEFAULT_SUMMARY)
     parser.add_argument("--gate-manifest", type=Path, default=DEFAULT_GATE_MANIFEST)
     parser.add_argument("--registry", type=Path, default=DEFAULT_REGISTRY)
+    parser.add_argument("--comparison-metrics", type=Path, default=DEFAULT_COMPARISON_METRICS)
+    parser.add_argument("--stage", default="25.10")
+    parser.add_argument("--gate-id", default=GATE_ID)
+    parser.add_argument("--loss-config", choices=sorted(LOSS_CONFIGS), default="component_set_gate_v1")
     parser.add_argument("--epochs", type=int, default=180)
     parser.add_argument("--batch-size", type=int, default=12)
     parser.add_argument("--lr", type=float, default=1.0e-3)
@@ -97,7 +146,28 @@ def sha256_file(path: Path) -> str:
 
 def write_json(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    path.write_text(json.dumps(to_jsonable(payload), ensure_ascii=False, indent=2, sort_keys=True, allow_nan=False) + "\n", encoding="utf-8")
+
+
+def read_json(path: Path) -> dict[str, Any]:
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def to_jsonable(value: Any) -> Any:
+    if isinstance(value, dict):
+        return {str(key): to_jsonable(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [to_jsonable(item) for item in value]
+    if isinstance(value, np.ndarray):
+        return to_jsonable(value.tolist())
+    if isinstance(value, np.generic):
+        return to_jsonable(value.item())
+    if isinstance(value, float):
+        return value if math.isfinite(value) else None
+    if isinstance(value, (np.floating,)):
+        as_float = float(value)
+        return as_float if math.isfinite(as_float) else None
+    return value
 
 
 def assert_manifest_and_registry(manifest_path: Path, registry_path: Path) -> tuple[dict[str, Any], Path]:
@@ -171,6 +241,36 @@ def soft_dice_loss(logits: torch.Tensor, target: torch.Tensor, eps: float = 1.0e
     inter = (prob * target).sum(dim=(-2, -1))
     denom = prob.sum(dim=(-2, -1)) + target.sum(dim=(-2, -1))
     return 1.0 - ((2.0 * inter + eps) / (denom + eps))
+
+
+def soft_dice_loss_prob(prob: torch.Tensor, target: torch.Tensor, eps: float = 1.0e-6) -> torch.Tensor:
+    inter = (prob * target).sum(dim=(-2, -1))
+    denom = prob.sum(dim=(-2, -1)) + target.sum(dim=(-2, -1))
+    return 1.0 - ((2.0 * inter + eps) / (denom + eps))
+
+
+def balanced_bce_from_logits(logits: torch.Tensor, target: torch.Tensor, eps: float = 1.0e-6) -> torch.Tensor:
+    bce = F.binary_cross_entropy_with_logits(logits, target, reduction="none")
+    pos = (target > 0.5).float()
+    neg = 1.0 - pos
+    pos_loss = (bce * pos).sum(dim=(-2, -1)) / pos.sum(dim=(-2, -1)).clamp_min(eps)
+    neg_loss = (bce * neg).sum(dim=(-2, -1)) / neg.sum(dim=(-2, -1)).clamp_min(eps)
+    return 0.5 * (pos_loss + neg_loss)
+
+
+def balanced_bce_from_prob(prob: torch.Tensor, target: torch.Tensor, eps: float = 1.0e-6) -> torch.Tensor:
+    prob = prob.clamp(eps, 1.0 - eps)
+    bce = F.binary_cross_entropy(prob, target, reduction="none")
+    pos = (target > 0.5).float()
+    neg = 1.0 - pos
+    pos_loss = (bce * pos).sum(dim=(-2, -1)) / pos.sum(dim=(-2, -1)).clamp_min(eps)
+    neg_loss = (bce * neg).sum(dim=(-2, -1)) / neg.sum(dim=(-2, -1)).clamp_min(eps)
+    return 0.5 * (pos_loss + neg_loss)
+
+
+def valid_region_smooth_l1(pred: torch.Tensor, target: torch.Tensor, valid: torch.Tensor, eps: float = 1.0e-6) -> torch.Tensor:
+    raw = F.smooth_l1_loss(pred, target, reduction="none")
+    return (raw * valid).sum(dim=(-2, -1)) / valid.sum(dim=(-2, -1)).clamp_min(eps)
 
 
 @dataclass
@@ -340,42 +440,101 @@ def move_batch(batch: dict[str, torch.Tensor], device: torch.device) -> dict[str
     return {key: value.to(device) for key, value in batch.items()}
 
 
-def loss_for_perm(pred: dict[str, torch.Tensor], batch: dict[str, torch.Tensor], perm: tuple[int, ...]) -> torch.Tensor:
+def loss_terms_for_perm(pred: dict[str, torch.Tensor], batch: dict[str, torch.Tensor], perm: tuple[int, ...], loss_config: LossConfig) -> dict[str, torch.Tensor]:
     exists = batch["exists"][:, perm]
     params = batch["params"][:, perm]
     shape = batch["shape"][:, perm]
     mask = batch["mask"][:, perm]
     depth = batch["depth"][:, perm]
-    active = exists > 0.5
     b = exists.shape[0]
+    active_count = exists.sum(dim=1).clamp_min(1.0)
 
     exist_loss = F.binary_cross_entropy_with_logits(pred["exist_logits"], exists, reduction="none").mean(dim=1)
 
     param_raw = F.smooth_l1_loss(pred["params"], params, reduction="none").mean(dim=-1)
-    param_loss = (param_raw * exists).sum(dim=1) / exists.sum(dim=1).clamp_min(1.0)
+    param_loss = (param_raw * exists).sum(dim=1) / active_count
 
     shape_flat = F.cross_entropy(
         pred["shape_logits"].reshape(b * K_MAX, -1),
         shape.reshape(b * K_MAX),
         reduction="none",
     ).view(b, K_MAX)
-    shape_loss = (shape_flat * exists).sum(dim=1) / exists.sum(dim=1).clamp_min(1.0)
-
-    mask_bce = F.binary_cross_entropy_with_logits(pred["mask_logits"], mask, reduction="none").mean(dim=(-2, -1))
-    mask_dice = soft_dice_loss(pred["mask_logits"], mask)
-    mask_loss = ((mask_bce + mask_dice) * exists).sum(dim=1) / exists.sum(dim=1).clamp_min(1.0)
+    shape_loss = (shape_flat * exists).sum(dim=1) / active_count
 
     depth_pred = F.softplus(pred["depth_raw"])
-    target_weight = 0.15 + 0.85 * mask
-    depth_mse = (((depth_pred - depth) ** 2) * target_weight).mean(dim=(-2, -1))
-    depth_loss = (depth_mse * exists).sum(dim=1) / exists.sum(dim=1).clamp_min(1.0)
+    if loss_config.name == "mask_depth_rebalance_v1":
+        mask_bce = balanced_bce_from_logits(pred["mask_logits"], mask)
+        mask_dice = soft_dice_loss(pred["mask_logits"], mask)
+        component_mask_loss = ((mask_bce + mask_dice) * exists).sum(dim=1) / active_count
 
-    return exist_loss + 1.8 * param_loss + 0.25 * shape_loss + 0.8 * mask_loss + 0.9 * depth_loss
+        mask_prob = torch.sigmoid(pred["mask_logits"])
+        active_view = exists.unsqueeze(-1).unsqueeze(-1)
+        target_union_mask = mask.max(dim=1).values
+        pred_union_prob = (mask_prob * active_view).max(dim=1).values
+        union_mask_loss = balanced_bce_from_prob(pred_union_prob, target_union_mask) + soft_dice_loss_prob(pred_union_prob, target_union_mask)
+
+        valid = (mask > 0.5).float()
+        component_depth_raw = valid_region_smooth_l1(depth_pred, depth, valid)
+        component_depth_loss = (component_depth_raw * exists).sum(dim=1) / active_count
+
+        target_union_depth = depth.max(dim=1).values
+        pred_union_depth = (depth_pred * mask_prob * active_view).max(dim=1).values
+        valid_union = (target_union_mask > 0.5).float()
+        union_depth_loss = valid_region_smooth_l1(pred_union_depth, target_union_depth, valid_union)
+    else:
+        mask_bce = F.binary_cross_entropy_with_logits(pred["mask_logits"], mask, reduction="none").mean(dim=(-2, -1))
+        mask_dice = soft_dice_loss(pred["mask_logits"], mask)
+        component_mask_loss = ((mask_bce + mask_dice) * exists).sum(dim=1) / active_count
+        union_mask_loss = torch.zeros_like(component_mask_loss)
+
+        target_weight = 0.15 + 0.85 * mask
+        depth_mse = (((depth_pred - depth) ** 2) * target_weight).mean(dim=(-2, -1))
+        component_depth_loss = (depth_mse * exists).sum(dim=1) / active_count
+        union_depth_loss = torch.zeros_like(component_depth_loss)
+
+    return {
+        "exist": exist_loss,
+        "param": param_loss,
+        "shape": shape_loss,
+        "component_mask": component_mask_loss,
+        "union_mask": union_mask_loss,
+        "component_depth": component_depth_loss,
+        "union_depth": union_depth_loss,
+    }
 
 
-def hungarian_training_loss(pred: dict[str, torch.Tensor], batch: dict[str, torch.Tensor]) -> torch.Tensor:
-    losses = torch.stack([loss_for_perm(pred, batch, perm) for perm in PERMS], dim=1)
-    return losses.min(dim=1).values.mean()
+def hungarian_loss_breakdown(pred: dict[str, torch.Tensor], batch: dict[str, torch.Tensor], loss_config: LossConfig) -> tuple[torch.Tensor, dict[str, Any]]:
+    per_perm_terms = [loss_terms_for_perm(pred, batch, perm, loss_config) for perm in PERMS]
+    weighted_totals = []
+    for terms in per_perm_terms:
+        weighted_totals.append(sum(loss_config.weights[name] * terms[name] for name in loss_config.weights))
+    weighted_stack = torch.stack(weighted_totals, dim=1)
+    best_idx = weighted_stack.argmin(dim=1)
+    selected_total = weighted_stack.gather(1, best_idx[:, None]).squeeze(1)
+    selected_terms: dict[str, torch.Tensor] = {}
+    for name in loss_config.weights:
+        stack = torch.stack([terms[name] for terms in per_perm_terms], dim=1)
+        selected_terms[name] = stack.gather(1, best_idx[:, None]).squeeze(1)
+    loss = selected_total.mean()
+    unweighted = {name: float(value.detach().mean().cpu()) for name, value in selected_terms.items()}
+    weighted = {name: float((selected_terms[name] * loss_config.weights[name]).detach().mean().cpu()) for name in loss_config.weights}
+    total_weighted = float(sum(weighted.values()))
+    mask_depth_weighted = float(sum(weighted[name] for name in MASK_DEPTH_TERMS))
+    stats = {
+        "loss": float(loss.detach().cpu()),
+        "unweighted": unweighted,
+        "weighted": weighted,
+        "mask_depth_weighted_sum": mask_depth_weighted,
+        "total_weighted_sum": total_weighted,
+        "mask_depth_weighted_ratio": mask_depth_weighted / total_weighted if total_weighted > 0.0 else math.nan,
+    }
+    return loss, stats
+
+
+def hungarian_training_loss(pred: dict[str, torch.Tensor], batch: dict[str, torch.Tensor], loss_config: LossConfig | None = None) -> torch.Tensor:
+    config = loss_config or LOSS_CONFIGS["component_set_gate_v1"]
+    loss, _stats = hungarian_loss_breakdown(pred, batch, config)
+    return loss
 
 
 def predict(model: nn.Module, arrays: Arrays, indices: np.ndarray, device: torch.device, batch_size: int) -> dict[str, np.ndarray]:
@@ -698,7 +857,33 @@ def select_threshold(arrays: Arrays, val_pred: dict[str, np.ndarray]) -> tuple[f
     return best_threshold, {"selected_threshold": best_threshold, "rows": rows, "selected_val_metrics": best_metrics}
 
 
-def train_model(args: argparse.Namespace, arrays: Arrays, device: torch.device) -> tuple[nn.Module, list[dict[str, Any]], dict[str, Any]]:
+def average_loss_records(records: list[dict[str, Any]]) -> dict[str, Any]:
+    if not records:
+        return {"loss": math.nan, "unweighted": {}, "weighted": {}, "mask_depth_weighted_ratio": math.nan}
+    total_n = sum(int(record["batch_size"]) for record in records)
+    term_names = list(records[0]["unweighted"].keys())
+    unweighted = {
+        name: float(sum(float(record["unweighted"][name]) * int(record["batch_size"]) for record in records) / total_n)
+        for name in term_names
+    }
+    weighted = {
+        name: float(sum(float(record["weighted"][name]) * int(record["batch_size"]) for record in records) / total_n)
+        for name in term_names
+    }
+    loss = float(sum(float(record["loss"]) * int(record["batch_size"]) for record in records) / total_n)
+    total_weighted = float(sum(weighted.values()))
+    mask_depth_weighted = float(sum(weighted[name] for name in MASK_DEPTH_TERMS))
+    return {
+        "loss": loss,
+        "unweighted": unweighted,
+        "weighted": weighted,
+        "mask_depth_weighted_sum": mask_depth_weighted,
+        "total_weighted_sum": total_weighted,
+        "mask_depth_weighted_ratio": mask_depth_weighted / total_weighted if total_weighted > 0.0 else math.nan,
+    }
+
+
+def train_model(args: argparse.Namespace, arrays: Arrays, device: torch.device, loss_config: LossConfig) -> tuple[nn.Module, list[dict[str, Any]], dict[str, Any]]:
     model = ComponentSetGateModel(shape_classes=len(arrays.shape_classes)).to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
     train_ds = ComponentSetDataset(arrays, arrays.split_indices["train"])
@@ -711,25 +896,30 @@ def train_model(args: argparse.Namespace, arrays: Arrays, device: torch.device) 
     history: list[dict[str, Any]] = []
     for epoch in range(1, args.epochs + 1):
         model.train()
-        train_losses = []
+        train_records = []
         for batch in train_loader:
             batch = move_batch(batch, device)
             optimizer.zero_grad(set_to_none=True)
             out = model(batch["signal"], batch["sensor_z"])
-            loss = hungarian_training_loss(out, batch)
+            loss, stats = hungarian_loss_breakdown(out, batch, loss_config)
             loss.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), 5.0)
             optimizer.step()
-            train_losses.append(float(loss.detach().cpu()))
+            stats["batch_size"] = int(batch["signal"].shape[0])
+            train_records.append(stats)
         model.eval()
-        val_losses = []
+        val_records = []
         with torch.no_grad():
             for batch in val_loader:
                 batch = move_batch(batch, device)
                 out = model(batch["signal"], batch["sensor_z"])
-                val_losses.append(float(hungarian_training_loss(out, batch).detach().cpu()))
-        train_loss = float(np.mean(train_losses))
-        val_loss = float(np.mean(val_losses))
+                _loss, stats = hungarian_loss_breakdown(out, batch, loss_config)
+                stats["batch_size"] = int(batch["signal"].shape[0])
+                val_records.append(stats)
+        train_terms = average_loss_records(train_records)
+        val_terms = average_loss_records(val_records)
+        train_loss = float(train_terms["loss"])
+        val_loss = float(val_terms["loss"])
         if val_loss < best_val_loss:
             best_val_loss = val_loss
             best_epoch = epoch
@@ -739,6 +929,12 @@ def train_model(args: argparse.Namespace, arrays: Arrays, device: torch.device) 
                 "epoch": epoch,
                 "train_loss": train_loss,
                 "val_loss": val_loss,
+                "train_unweighted_terms": train_terms["unweighted"],
+                "train_weighted_terms": train_terms["weighted"],
+                "train_mask_depth_weighted_ratio": train_terms["mask_depth_weighted_ratio"],
+                "val_unweighted_terms": val_terms["unweighted"],
+                "val_weighted_terms": val_terms["weighted"],
+                "val_mask_depth_weighted_ratio": val_terms["mask_depth_weighted_ratio"],
                 "best_epoch": best_epoch,
                 "best_val_loss": best_val_loss,
             }
@@ -805,6 +1001,101 @@ def decide_gate(history: list[dict[str, Any]], split_metrics: dict[str, Any], ba
     }
 
 
+def metric_delta(current: dict[str, Any], previous: dict[str, Any], key: str) -> dict[str, float | None]:
+    cur = current.get(key)
+    prev = previous.get(key)
+    if cur is None or prev is None:
+        return {"current": None, "previous": None, "delta": None}
+    cur_f = float(cur)
+    prev_f = float(prev)
+    if not math.isfinite(cur_f) or not math.isfinite(prev_f):
+        return {"current": None, "previous": None, "delta": None}
+    return {"current": cur_f, "previous": prev_f, "delta": cur_f - prev_f}
+
+
+def compare_to_previous(metrics_by_split: dict[str, Any], comparison_metrics_path: Path) -> dict[str, Any]:
+    previous_payload = read_json(comparison_metrics_path)
+    previous_test = previous_payload["metrics_by_split"]["test"]
+    current_test = metrics_by_split["test"]
+    keys = [
+        "component_recall",
+        "missed_rate",
+        "merged_rate",
+        "extra_rate",
+        "center_error_m_mean",
+        "lwd_relative_error_mean",
+        "rotation_error_rad_mean",
+        "component_mask_dice_mean",
+        "component_mask_iou_mean",
+        "union_mask_dice_mean",
+        "union_mask_iou_mean",
+        "depth_grid_rmse_m_mean",
+    ]
+    return {
+        "comparison_metrics_path": str(comparison_metrics_path),
+        "previous_gate_id": previous_payload.get("gate_id"),
+        "previous_gate_decision": previous_payload.get("gate_decision"),
+        "test_deltas": {key: metric_delta(current_test, previous_test, key) for key in keys},
+        "previous_test_metrics": {key: previous_test.get(key) for key in keys},
+    }
+
+
+def decide_rebalance_gate(history: list[dict[str, Any]], split_metrics: dict[str, Any], comparison: dict[str, Any]) -> dict[str, Any]:
+    first_train = float(history[0]["train_loss"])
+    final_train = float(history[-1]["train_loss"])
+    best_val = min(float(row["val_loss"]) for row in history)
+    test = split_metrics["test"]
+    deltas = comparison["test_deltas"]
+
+    component_dice_delta = float(deltas["component_mask_dice_mean"]["delta"])
+    union_dice_delta = float(deltas["union_mask_dice_mean"]["delta"])
+    recall_delta = float(deltas["component_recall"]["delta"])
+    center_delta = float(deltas["center_error_m_mean"]["delta"])
+    lwd_delta = float(deltas["lwd_relative_error_mean"]["delta"])
+    depth_delta = float(deltas["depth_grid_rmse_m_mean"]["delta"])
+
+    loss_descended = final_train < 0.80 * first_train and best_val < first_train
+    mask_clearly_improved = component_dice_delta >= 0.03 and union_dice_delta >= 0.03
+    mask_somewhat_improved = component_dice_delta > 0.005 or union_dice_delta > 0.005
+    recall_not_collapsed = recall_delta >= -0.08 and float(test["component_recall"]) >= 0.70
+    geometry_not_degraded = center_delta <= 0.0025 and lwd_delta <= 0.05
+    depth_not_worse = depth_delta <= 0.00005
+    severe_merge_or_miss = float(test["merged_rate"]) >= 0.30 or float(test["missed_rate"]) >= 0.25
+    three_component = test.get("groups", {}).get("component_count", {}).get("3", {})
+    three_component_still_merged = bool(three_component and float(three_component.get("merged_rate", 0.0)) >= 0.75)
+
+    if loss_descended and mask_clearly_improved and recall_not_collapsed and geometry_not_degraded and depth_not_worse:
+        decision = "IMPROVED"
+        next_route = "A. enter 25.12 topology-aware / three-component focused training, no baseline transition"
+    elif loss_descended and (mask_somewhat_improved or depth_delta < 0.0) and recall_not_collapsed:
+        decision = "PARTIAL"
+        next_route = "B. run 25.11b targeted rebalance or topology-focused failure audit"
+    else:
+        decision = "FAIL"
+        next_route = "C. return to loss formulation / mask-depth target design before more model capacity"
+
+    return {
+        "decision": decision,
+        "next_route": next_route,
+        "criteria": {
+            "loss_descended": loss_descended,
+            "mask_clearly_improved": mask_clearly_improved,
+            "mask_somewhat_improved": mask_somewhat_improved,
+            "recall_not_collapsed": recall_not_collapsed,
+            "geometry_not_degraded": geometry_not_degraded,
+            "depth_not_worse": depth_not_worse,
+            "severe_merge_or_miss": severe_merge_or_miss,
+            "three_component_still_merged": three_component_still_merged,
+            "component_mask_dice_delta": component_dice_delta,
+            "union_mask_dice_delta": union_dice_delta,
+            "component_recall_delta": recall_delta,
+            "center_error_delta_m": center_delta,
+            "lwd_relative_error_delta": lwd_delta,
+            "depth_grid_rmse_delta_m": depth_delta,
+        },
+    }
+
+
 def update_registry_note(path: Path, gate_manifest: dict[str, Any]) -> None:
     text = path.read_text(encoding="utf-8")
     marker = f"## {DATASET_ID}"
@@ -828,22 +1119,37 @@ def update_registry_note(path: Path, gate_manifest: dict[str, Any]) -> None:
     path.write_text(text, encoding="utf-8")
 
 
+def fmt_metric(value: Any, digits: int = 6) -> str:
+    if value is None:
+        return "null"
+    value_f = float(value)
+    if not math.isfinite(value_f):
+        return "null"
+    return f"{value_f:.{digits}f}"
+
+
 def write_summary(path: Path, payload: dict[str, Any]) -> None:
     decision = payload["gate_decision"]
     test = payload["metrics_by_split"]["test"]
     val = payload["metrics_by_split"]["val"]
+    comparison = payload.get("comparison_to_25_10", {})
+    deltas = comparison.get("test_deltas", {})
+    title = "25.11 Mask/Depth Loss Rebalance Training" if payload["stage"] == "25.11" else "25.10 Surface Multi-Pit Component-Set Training Gate"
     lines = [
-        "# 25.10 Surface Multi-Pit Component-Set Training Gate",
+        f"# {title}",
         "",
         f"- gate_decision: `{decision}`",
         f"- dataset_id: `{payload['dataset_id']}`",
         f"- model_route: `{payload['model']['route']}`",
+        f"- loss_config: `{payload['model']['loss_config']}`",
         f"- split: `{payload['data']['split_counts']}`",
         f"- selected_existence_threshold: `{payload['selection']['selected_threshold']}`",
         f"- best_epoch: `{payload['training']['best_epoch']}`",
         f"- first_train_loss: `{payload['training']['first_train_loss']:.6f}`",
         f"- final_train_loss: `{payload['training']['final_train_loss']:.6f}`",
         f"- best_val_loss: `{payload['training']['best_val_loss']:.6f}`",
+        f"- final_train_mask_depth_weighted_ratio: `{fmt_metric(payload['training']['final_train_mask_depth_weighted_ratio'])}`",
+        f"- final_val_mask_depth_weighted_ratio: `{fmt_metric(payload['training']['final_val_mask_depth_weighted_ratio'])}`",
         "",
         "## Validation Metrics",
         "",
@@ -867,10 +1173,20 @@ def write_summary(path: Path, payload: dict[str, Any]) -> None:
         f"- union_mask_dice: `{test['union_mask_dice_mean']:.6f}`",
         f"- depth_grid_RMSE_m: `{test['depth_grid_rmse_m_mean']:.9f}`",
         "",
+        "## 25.10 Comparison",
+        "",
+        f"- component_recall_delta: `{fmt_metric(deltas.get('component_recall', {}).get('delta'))}`",
+        f"- component_mask_dice_delta: `{fmt_metric(deltas.get('component_mask_dice_mean', {}).get('delta'))}`",
+        f"- union_mask_dice_delta: `{fmt_metric(deltas.get('union_mask_dice_mean', {}).get('delta'))}`",
+        f"- center_error_delta_m: `{fmt_metric(deltas.get('center_error_m_mean', {}).get('delta'), 9)}`",
+        f"- lwd_relative_error_delta: `{fmt_metric(deltas.get('lwd_relative_error_mean', {}).get('delta'))}`",
+        f"- depth_grid_RMSE_delta_m: `{fmt_metric(deltas.get('depth_grid_rmse_m_mean', {}).get('delta'), 9)}`",
+        "",
         "## Boundary",
         "",
         "- This is a training gate, not a baseline replacement.",
         "- No `CURRENT_BASELINE.md` transition is authorized.",
+        "- Model architecture, K=3 component-set representation, fixed split, and Hungarian matching are unchanged.",
         "- No checkpoint or generated data artifact is committed by this gate.",
         f"- next_route: `{payload['route_decision']}`",
     ]
@@ -881,11 +1197,12 @@ def write_summary(path: Path, payload: dict[str, Any]) -> None:
 def main() -> int:
     args = parse_args()
     set_seed(args.seed)
+    loss_config = LOSS_CONFIGS[args.loss_config]
     manifest, npz_path = assert_manifest_and_registry(args.manifest, args.registry)
     pack = load_npz(npz_path)
     arrays = build_arrays(pack)
     device = torch.device("cuda" if torch.cuda.is_available() and not args.cpu else "cpu")
-    model, history, training_info = train_model(args, arrays, device)
+    model, history, training_info = train_model(args, arrays, device, loss_config)
     val_pred = predict(model, arrays, arrays.split_indices["val"], device, args.batch_size)
     threshold, selection = select_threshold(arrays, val_pred)
     predictions = {
@@ -898,12 +1215,13 @@ def main() -> int:
         "empty": {split: empty_baseline(arrays, split) for split in ["train", "val", "test"]},
         "one_slot_prior": {split: one_slot_prior_baseline(arrays, split) for split in ["train", "val", "test"]},
     }
-    gate = decide_gate(history, metrics_by_split, baselines)
+    comparison = compare_to_previous(metrics_by_split, args.comparison_metrics) if args.loss_config == "mask_depth_rebalance_v1" else {}
+    gate = decide_rebalance_gate(history, metrics_by_split, comparison) if args.loss_config == "mask_depth_rebalance_v1" else decide_gate(history, metrics_by_split, baselines)
     split_counts = {split: int(indices.size) for split, indices in arrays.split_indices.items()}
     family_counts = dict(Counter(arrays.raw["component_shape_family"].astype(str).reshape(-1).tolist()))
     payload = {
-        "stage": "25.10",
-        "gate_id": GATE_ID,
+        "stage": args.stage,
+        "gate_id": args.gate_id,
         "dataset_id": DATASET_ID,
         "dataset_manifest": str(args.manifest),
         "dataset_npz_path": str(npz_path),
@@ -911,6 +1229,7 @@ def main() -> int:
         "gate_decision": gate["decision"],
         "route_decision": gate["next_route"],
         "criteria": gate["criteria"],
+        "comparison_to_25_10": comparison,
         "data": {
             "n_samples": int(arrays.raw["sample_ids"].shape[0]),
             "split_counts": split_counts,
@@ -929,7 +1248,14 @@ def main() -> int:
             "outputs": "K=3 existence, center_xy, L/W/D, rotation, shape_family, component mask, component depth grid",
             "checkpoint_saved": False,
             "shape_classes": arrays.shape_classes,
-            "loss": "min-over-3-slot-permutations existence BCE + active component SmoothL1 params + shape CE + mask BCE/Dice + depth RMSE proxy",
+            "loss": loss_config.description,
+            "loss_config": loss_config.name,
+            "loss_weights": loss_config.weights,
+            "mask_supervision": loss_config.mask_supervision,
+            "depth_supervision": loss_config.depth_supervision,
+            "architecture_changed_from_25_10": False,
+            "component_set_representation_changed": False,
+            "hungarian_matching_changed": False,
         },
         "training": {
             "seed": args.seed,
@@ -942,6 +1268,14 @@ def main() -> int:
             "best_val_loss": training_info["best_val_loss"],
             "first_train_loss": float(history[0]["train_loss"]),
             "final_train_loss": float(history[-1]["train_loss"]),
+            "first_train_unweighted_terms": history[0]["train_unweighted_terms"],
+            "first_train_weighted_terms": history[0]["train_weighted_terms"],
+            "final_train_unweighted_terms": history[-1]["train_unweighted_terms"],
+            "final_train_weighted_terms": history[-1]["train_weighted_terms"],
+            "final_train_mask_depth_weighted_ratio": history[-1]["train_mask_depth_weighted_ratio"],
+            "final_val_unweighted_terms": history[-1]["val_unweighted_terms"],
+            "final_val_weighted_terms": history[-1]["val_weighted_terms"],
+            "final_val_mask_depth_weighted_ratio": history[-1]["val_mask_depth_weighted_ratio"],
             "history": history,
         },
         "selection": selection,
@@ -954,6 +1288,8 @@ def main() -> int:
             "formal_inference_artifact_exported": False,
             "checkpoint_committed": False,
             "data_npz_committed": False,
+            "model_capacity_expanded": False,
+            "component_set_representation_changed": False,
         },
         "git": {
             "branch": git_value(["branch", "--show-current"]),
@@ -963,8 +1299,8 @@ def main() -> int:
     }
     write_json(args.metrics, payload)
     gate_manifest = {
-        "stage": "25.10",
-        "gate_id": GATE_ID,
+        "stage": args.stage,
+        "gate_id": args.gate_id,
         "dataset_id": DATASET_ID,
         "dataset_manifest": str(args.manifest),
         "metrics_path": str(args.metrics),
@@ -972,19 +1308,20 @@ def main() -> int:
         "script": "scripts/train_surface_multipit_component_set_gate.py",
         "gate_decision": gate["decision"],
         "route_decision": gate["next_route"],
+        "loss_config": loss_config.name,
         "train_ready_candidate_consumed": True,
         "baseline_ready": False,
         "current_baseline_updated": False,
         "checkpoint_saved": False,
         "inference_artifact_exported": False,
-        "allowed_use": ["component_set_training_gate_evaluation", "failure_audit_input"],
+        "allowed_use": ["component_set_training_gate_evaluation", "mask_depth_loss_rebalance_training", "failure_audit_input"],
         "forbidden_use": ["baseline_update", "current_baseline_replacement", "automatic_mainline_training", "formal_inference_artifact"],
     }
     write_json(args.gate_manifest, gate_manifest)
     write_summary(args.summary, payload)
     if not args.no_registry_note:
         update_registry_note(args.registry, gate_manifest)
-    print(json.dumps({"gate_decision": gate["decision"], "next_route": gate["next_route"], "metrics": str(args.metrics)}, ensure_ascii=False))
+    print(json.dumps(to_jsonable({"gate_decision": gate["decision"], "next_route": gate["next_route"], "metrics": str(args.metrics)}), ensure_ascii=False, allow_nan=False))
     return 0
 
 

@@ -1,0 +1,28 @@
+{
+  "allowed_use": [
+    "component_set_training_gate_evaluation",
+    "mask_depth_loss_rebalance_training",
+    "failure_audit_input"
+  ],
+  "baseline_ready": false,
+  "checkpoint_saved": false,
+  "current_baseline_updated": false,
+  "dataset_id": "comsol_surface_multipit_component_set_pilot_v1",
+  "dataset_manifest": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\manifests\\comsol_surface_multipit_component_set_pilot_v1.manifest.json",
+  "forbidden_use": [
+    "baseline_update",
+    "current_baseline_replacement",
+    "automatic_mainline_training",
+    "formal_inference_artifact"
+  ],
+  "gate_decision": "PARTIAL",
+  "gate_id": "25_11_mask_depth_loss_rebalance_training",
+  "inference_artifact_exported": false,
+  "loss_config": "mask_depth_rebalance_v1",
+  "metrics_path": "results\\metrics\\25_11_mask_depth_loss_rebalance_training_metrics.json",
+  "route_decision": "B. run 25.11b targeted rebalance or topology-focused failure audit",
+  "script": "scripts/train_surface_multipit_component_set_gate.py",
+  "stage": "25.11",
+  "summary_path": "results\\summaries\\25_11_mask_depth_loss_rebalance_training_summary.md",
+  "train_ready_candidate_consumed": true
+}

@@ -1,5 +1,13 @@
 # PINN 优化路线
 
+## 2026-06-02 route sync: 25.11 surface multi-pit component-set mask/depth loss rebalance training
+
+25.11 tests the direct answer to the 25.10b diagnosis: rebalance the objective before changing representation or model capacity. The route stayed constrained to the existing lightweight `C1_fixed_K_component_set` architecture, fixed `K=3`, fixed split `72/20/20`, and the same min-over-slot-permutations Hungarian matching.
+
+The result is useful but not enough: `mask_depth_rebalance_v1` improves union-level shape signal and component detection, but it does not solve component separation. Test recall improves from `0.837209` to `0.860465`, missed rate from `0.162791` to `0.139535`, extra rate from `0.142857` to `0.097561`, and union mask Dice from `0.130480` to `0.166233`. At the same time, component mask Dice is essentially flat/slightly worse (`0.109562 -> 0.108737`), depth-grid RMSE worsens (`0.000243315 -> 0.000673627 m`), and merged rate jumps to `0.900000`.
+
+The route implication is that the next problem is not generic capacity. It is the interaction between union-mask supervision, component separation, depth normalization/staging, and touching/overlap topology. The unique next route is `B. 25.11b targeted rebalance or topology-focused failure audit`; `CURRENT_BASELINE.md` remains unchanged, and multi-pit still receives no six-parameter RBC success credit.
+
 ## 2026-06-02 route sync: 25.10b surface multi-pit component-set failure audit
 
 25.10b explains the 25.10 `PARTIAL` result without changing the baseline boundary. The component-set gate learned existence and coarse geometry (`test recall=0.837209`, `center_error_mean=0.004284 m`, `L/W/D relative error=0.154552`), but it did not learn useful raster masks (`component Dice=0.109562`, `union Dice=0.130480`) and depth-grid RMSE only marginally beat degenerate baselines.
