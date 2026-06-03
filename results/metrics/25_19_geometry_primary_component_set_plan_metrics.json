@@ -1,0 +1,202 @@
+{
+  "stage": "25.19",
+  "generated_at": "2026-06-03T16:47:29.2274850+08:00",
+  "source_route_reset": {
+    "stage": "25.18",
+    "commit": "579e81acab66fc7fad253519e4b46071944c1d1b",
+    "route_stop_acceptance_decision": "STOP_RASTER_TARGET_MAINLINE",
+    "route_reset_main_conclusion": "Stop the per-component raster-target mainline and move to geometry-primary component-set design.",
+    "input_files": [
+      {
+        "path": "results/metrics/25_18_raster_target_route_reset_metrics.json",
+        "present": true
+      },
+      {
+        "path": "results/summaries/25_18_raster_target_route_reset_summary.md",
+        "present": true
+      },
+      {
+        "path": "results/manifests/25_18_raster_target_route_reset_manifest.json",
+        "present": true
+      }
+    ],
+    "missing_input_files": []
+  },
+  "boundary": {
+    "training_run": false,
+    "loss_tuning": false,
+    "model_capacity_expanded": false,
+    "comsol_run": false,
+    "data_npz_modified": false,
+    "checkpoint_or_preview_exported": false,
+    "current_baseline_updated": false,
+    "baseline_transition": false,
+    "raster_target_training_continued": false
+  },
+  "main_conclusion": "25.19 converts the stopped raster-target mainline into a geometry-primary component-set future-work package. Component identity is predicted as geometry slots first; masks and depth maps are derived artifacts for evaluation, weak diagnostics, and later forward consistency.",
+  "geometry_primary_component_set_schema": {
+    "representation": "fixed_max_slots",
+    "K": 3,
+    "K_meaning": "K=3 is the maximum number of component slots in the surface multi-pit component set; it is not a Piao kernel count.",
+    "two_component_slot_policy": "Two-component samples use two active slots and one non-existing slot. The inactive slot has existence target 0 and is excluded from component geometry losses except for the empty-slot existence term.",
+    "slot_fields": [
+      {
+        "name": "existence_prob",
+        "role": "active component probability",
+        "target_policy": "1 for real component slots, 0 for padded empty slots"
+      },
+      {
+        "name": "center_x_m",
+        "role": "component center x coordinate in meters",
+        "target_policy": "derived from raw component geometry labels; masked when slot is non-existing"
+      },
+      {
+        "name": "center_y_m",
+        "role": "component center y coordinate in meters",
+        "target_policy": "derived from raw component geometry labels; masked when slot is non-existing"
+      },
+      {
+        "name": "L_m",
+        "role": "component length scale in meters",
+        "target_policy": "positive geometry target; relative-error metric"
+      },
+      {
+        "name": "W_m",
+        "role": "component width scale in meters",
+        "target_policy": "positive geometry target; relative-error metric"
+      },
+      {
+        "name": "D_m",
+        "role": "component depth scale in meters",
+        "target_policy": "positive geometry target; relative-error metric"
+      },
+      {
+        "name": "rotation_angle",
+        "role": "component in-plane orientation",
+        "target_policy": "periodic angular target; near-circular or weak-rotation components may use uncertainty-aware scoring"
+      },
+      {
+        "name": "shape_family",
+        "role": "compact categorical shape family",
+        "target_policy": "component-level family label when available; otherwise recorded as missing rather than guessed"
+      },
+      {
+        "name": "compact_shape_parameters",
+        "role": "family-specific compact parameter vector",
+        "target_policy": "derived only from explicit raw labels or deterministic geometry metadata; missing fields are recorded, not inferred"
+      }
+    ],
+    "label_derivation_sources": [
+      "existing raw component geometry labels",
+      "component_params_json",
+      "component-level raw masks/depths as diagnostic cross-checks",
+      "COMSOL top-up labels as future explicit source data"
+    ],
+    "missing_label_policy": "If a required geometry field is absent, record the missing field in the derivation audit and block that sample or field from supervised geometry loss; do not synthesize labels from latest/newest artifacts."
+  },
+  "geometry_derived_targets_and_evaluator": {
+    "derived_outputs": [
+      "derived_component_mask",
+      "derived_union_mask",
+      "derived_component_depth",
+      "derived_union_depth"
+    ],
+    "derivation_source": "geometry slots",
+    "per_component_raster_supervision_boundary": "Per-component raster mask/depth are no longer the main supervision target.",
+    "raw_component_raster_use": [
+      "evaluation",
+      "weak diagnostic",
+      "derivation sanity check"
+    ],
+    "union_evaluator_use": "Derived union mask/depth are the primary geometric quality check for whether predicted slots reconstruct the observed surface footprint and depth field.",
+    "required_groups": [
+      "separated",
+      "close",
+      "touching",
+      "partially_overlapping"
+    ]
+  },
+  "matching_cost": {
+    "algorithm": "Hungarian matching",
+    "primary_terms": [
+      "existence",
+      "center_distance",
+      "L_m_relative_error",
+      "W_m_relative_error",
+      "D_m_relative_error",
+      "rotation_error",
+      "optional_shape_family_consistency"
+    ],
+    "excluded_as_primary_cost": [
+      "raster_mask_loss",
+      "per_component_depth_grid_loss"
+    ],
+    "empty_slot_policy": "Empty slots are matched through explicit non-existence targets and are not penalized as missed real components.",
+    "rotation_uncertainty_policy": "Near-circular or weak-rotation components may down-weight rotation error or use confidence-aware angular scoring to avoid false failures when orientation is not identifiable."
+  },
+  "first_gate_25_20": {
+    "route": "25.20 separated/close two-component geometry-primary training gate",
+    "scope": "Only separated and close two-component samples are eligible.",
+    "excluded_scope": [
+      "touching samples",
+      "partially_overlapping samples",
+      "three-component samples",
+      "baseline transition"
+    ],
+    "purpose": "Verify whether the most observable and topologically simplest component geometry can be learned before expanding to hard topology.",
+    "metrics": [
+      "component_count_accuracy",
+      "component_recall",
+      "missed_rate",
+      "extra_rate",
+      "merged_rate",
+      "center_error_m",
+      "L_m_relative_error",
+      "W_m_relative_error",
+      "D_m_relative_error",
+      "rotation_error",
+      "derived_union_dice",
+      "derived_union_iou",
+      "derived_depth_rmse_m"
+    ],
+    "pass_conditions": [
+      "component geometry metrics clearly beat degenerate predictors",
+      "merged_rate does not return to 1.0",
+      "component recall does not collapse",
+      "derived union mask/depth are geometrically reasonable"
+    ],
+    "fail_conditions": [
+      "separated and close two-component cases still cannot be separated",
+      "geometry slots collapse",
+      "empty slot false positives are frequent",
+      "derived union mask/depth are clearly inconsistent with raw union targets"
+    ]
+  },
+  "forward_consistency_entry": {
+    "training_loop_boundary": "COMSOL is not placed inside the training loop.",
+    "planned_path": "geometry slots -> derived profile/mask/depth -> lightweight forward surrogate or feature-space residual -> Bx/By/Bz residual",
+    "initial_role": [
+      "evaluator",
+      "refinement referee"
+    ],
+    "loss_role": "Only after evaluator/referee value is demonstrated should forward consistency be considered as a training loss.",
+    "relationship_to_surface_forward_refinement_companion": "The existing surface forward-refinement companion is RBC-representable and does not replace 20.85. Multi-pit needs a geometry-primary forward-consistency companion after the slot route is validated; it also does not replace 20.85."
+  },
+  "project_completion_package": {
+    "multi_pit_stable_inference_required_now": false,
+    "completion_conditions": [
+      "20.85 baseline remains stable",
+      "liftoff companion is built",
+      "forward-refinement companion is closed",
+      "multi-pit dataset and failure evidence are complete",
+      "raster-target mainline is stopped",
+      "geometry-primary next-stage route is explicit"
+    ],
+    "forbidden_claims": [
+      "multi-pit baseline success",
+      "CURRENT_BASELINE.md update",
+      "baseline transition"
+    ]
+  },
+  "route_decision": "A. enter 25.20 separated/close two-component geometry-primary training gate only if continuing beyond current completion package; no baseline transition"
+}

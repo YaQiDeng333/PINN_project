@@ -3537,6 +3537,18 @@ Review agent 已完成只读复核，无 must-fix。review 建议把 audit/decis
 - 新路线：geometry-primary component-set。slot 主输出改为 existence、center、`L/W/D`、rotation、shape family 和 compact shape parameters；mask/depth 改为由 geometry slot 派生的评价、弱监督或 forward-consistency 诊断对象，不再作为主 raster loss。
 - 路线决策：`A. 进入 25.19 geometry-primary component-set 设计与标签派生计划；不训练`。
 
+## 2026-06-03 Stage 25.19 surface multi-pit geometry-primary component-set plan
+
+- 范围：只做 geometry-primary component-set schema、derived evaluator、matching cost、25.20 first gate 和 closeout boundary 设计；没有训练、没有调 loss、没有扩大模型、没有运行 COMSOL、没有生成或修改 data/NPZ、没有提交 checkpoint/preview/notes，没有 baseline transition，也没有更新 `CURRENT_BASELINE.md`。
+- 输入证据：读取 25.18 route reset 三个指定产物，`results/metrics/25_18_raster_target_route_reset_metrics.json`、`results/summaries/25_18_raster_target_route_reset_summary.md` 和 `results/manifests/25_18_raster_target_route_reset_manifest.json` 均存在，缺失数为 `0`。
+- 主结论：25.19 把 `STOP_RASTER_TARGET_MAINLINE` 落成 future-work package。component identity 先预测为 geometry slots；mask/depth 改为从 geometry 派生的 evaluator、weak diagnostic 或后续 forward-consistency 对象，不再作为主 per-component raster loss。
+- schema：固定 `K=3` 最大 component slots，不是 Piao kernel。每个 slot 输出 `existence_prob`、`center_x_m`、`center_y_m`、`L_m`、`W_m`、`D_m`、`rotation_angle`、`shape_family` 和 `compact_shape_parameters`；two-component 样本第三个 slot 必须是 non-existing，并从真实 component geometry loss 中屏蔽。
+- evaluator / matching：由 geometry slots 派生 `derived_component_mask`、`derived_union_mask`、`derived_component_depth` 和 `derived_union_depth`；raw component masks/depths 只用于 evaluation / weak diagnostic。Hungarian matching 以 existence、center、`L/W/D`、rotation 和可选 shape-family consistency 为主，raster mask loss 不再作为主 matching cost；near-circular / weak-rotation 样本允许 rotation uncertainty。
+- 25.20 gate：唯一后续训练 gate 是 `separated/close two-component geometry-primary training gate`，只使用 separated / close 的 two-component samples，暂不训练 touching / partially_overlapping / three-component。PASS/FAIL 以 component count、recall、missed/extra/merged、center、`L/W/D`、rotation、derived union Dice/IoU 和 derived depth RMSE 判断。
+- forward consistency：不把 COMSOL 放进训练环；后续路径是 `geometry slots -> derived profile/mask/depth -> lightweight forward surrogate or feature-space residual -> Bx/By/Bz residual`，先作 evaluator / refinement referee，再考虑进入 loss。它是 multi-pit 的 geometry-primary companion，不替代 20.85。
+- 当前项目收口：不要求 multi-pit stable inference。完成口径是 20.85 baseline 保持稳定、liftoff companion 已打通、forward-refinement companion 已收口、multi-pit dataset 和失败证据完整、raster-target 主线已判停、geometry-primary 下一阶段路线明确；不能写成 multi-pit baseline success。
+- 路线决策：`A. enter 25.20 separated/close two-component geometry-primary training gate only if continuing beyond current completion package; no baseline transition`。
+
 ## 2026-06-03 surface RBC +120 assembly/training gate
 
 - scope: independent surface / near-surface RBC-style expansion gate only. No internal/buried defect logic, no 25.x multi-pit logic, no real-data intake, no baseline transition, and no `CURRENT_BASELINE.md` update.

@@ -996,6 +996,14 @@ v3b target design 部分修复了 25.13 near-empty failure，但还没有恢复 
 
 下一阶段是 25.19 geometry-primary component-set 设计与标签派生计划。25.20 之后只允许先测试最可辨识的 two-component separated / close 子集；touching、overlap 和 three-component 扩展留到后续 topology-aware gates。没有后续 formal benchmark 和用户明确确认，任何阶段都不更新 `CURRENT_BASELINE.md`。
 
+## 2026-06-03 route sync: 25.19 geometry-primary component-set plan
+
+25.19 把 25.18 的 stop decision 写成可执行路线：multi-pit 不再围绕 per-component raster ownership 继续调 target / loss，而是转成 geometry-primary component-set。核心 schema 是固定最大 `K=3` slots，每个 slot 预测 `existence_prob`、`center_x_m`、`center_y_m`、`L_m`、`W_m`、`D_m`、`rotation_angle`、`shape_family` 和 `compact_shape_parameters`；`K=3` 只表示最多三个 component slots，不是 Piao kernel。
+
+关键分界点是 mask/depth 的角色变化。`derived_component_mask`、`derived_union_mask`、`derived_component_depth` 和 `derived_union_depth` 都由 geometry slots 派生，用于 evaluator、weak diagnostic 和后续 forward-consistency referee；raw component masks/depths 不再作为主监督。Hungarian matching 也以 existence、center、`L/W/D`、rotation 和可选 shape-family consistency 为主，raster mask loss 不再主导 matching。
+
+唯一后续 route decision 是 `25.20 separated/close two-component geometry-primary training gate`，而且只在继续当前 completion package 之外才执行。它只测 separated / close two-component 样本，暂不训练 touching、partially_overlapping 或 three-component；当前项目收口不要求 multi-pit stable inference，也不能写成 multi-pit baseline success，`CURRENT_BASELINE.md` 保持不变。
+
 ## 2026-06-03 route sync: surface RBC +120 expansion gate
 
 surface RBC targeted top-up 可以组装并通过 validation，但没有通过 training gate，不能作为 baseline-expansion candidate。assembled dataset 明确是 `v3_240 + topup_v1_120`，dataset_id 为 `comsol_true_3d_rbc_surface_expansion_v1_360`，N=`360`，split=`242/59/59`；它仍只是显式 candidate dataset，`baseline_ready=false`。

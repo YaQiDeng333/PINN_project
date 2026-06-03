@@ -1,0 +1,52 @@
+{
+  "stage": "25.19",
+  "generated_at": "2026-06-03T16:47:29.2274850+08:00",
+  "generated_by": "manual future-work package from 25.18 route-reset artifacts",
+  "source_commit": "579e81acab66fc7fad253519e4b46071944c1d1b",
+  "metrics_path": "results/metrics/25_19_geometry_primary_component_set_plan_metrics.json",
+  "summary_path": "results/summaries/25_19_geometry_primary_component_set_plan_summary.md",
+  "manifest_path": "results/manifests/25_19_geometry_primary_component_set_plan_manifest.json",
+  "input_paths": [
+    {
+      "path": "results/metrics/25_18_raster_target_route_reset_metrics.json",
+      "role": "route_reset_metrics",
+      "present": true
+    },
+    {
+      "path": "results/summaries/25_18_raster_target_route_reset_summary.md",
+      "role": "route_reset_summary",
+      "present": true
+    },
+    {
+      "path": "results/manifests/25_18_raster_target_route_reset_manifest.json",
+      "role": "route_reset_manifest",
+      "present": true
+    }
+  ],
+  "missing_input_paths": [],
+  "allowed_use": [
+    "future_work_package",
+    "geometry_primary_schema_contract",
+    "25_20_gate_design_input",
+    "route_sync_record"
+  ],
+  "forbidden_use": [
+    "baseline_update",
+    "current_baseline_replacement",
+    "training_result",
+    "loss_tuning_evidence",
+    "raster_target_training_continuation"
+  ],
+  "boundary": {
+    "training_run": false,
+    "loss_tuning": false,
+    "model_capacity_expanded": false,
+    "comsol_run": false,
+    "data_npz_modified": false,
+    "checkpoint_or_preview_exported": false,
+    "current_baseline_updated": false,
+    "baseline_transition": false
+  },
+  "route_decision": "A. enter 25.20 separated/close two-component geometry-primary training gate only if continuing beyond current completion package; no baseline transition",
+  "next_step": "25.20 separated/close two-component geometry-primary training gate; only if continuing beyond current completion package; no baseline transition"
+}
