@@ -1,9 +1,9 @@
 # NEXT_STEP
 
-## 2026-06-03 after Stage 25.19 geometry-primary component-set plan
+## 2026-06-03 after Stage 25.19b final completion package
 
-唯一下一步：**25.20 separated/close two-component geometry-primary training gate；only if continuing beyond current completion package；no baseline transition。**
+当前完成包已收口：20.85 `CURRENT_BASELINE` 保持不变，liftoff companion 和 surface forward-refinement companion 已打通，multi-pit component-set 数据、训练探索、失败归因和 geometry-primary 后续路线已整理成 handoff。
 
-25.19 已把 `STOP_RASTER_TARGET_MAINLINE` 转成 geometry-primary component-set future-work package。下一步只有在继续当前 completion package 之外的新阶段时才进入训练 gate，而且只能先测 separated / close two-component 子集。
+若继续研究，下一步才是：**25.20 separated/close two-component geometry-primary training gate; optional beyond current completion package; no baseline transition.**
 
-边界：不训练 touching / partially_overlapping / three-component，不做 raster-target mainline continuation，不运行 COMSOL，不生成或修改 data/NPZ，不更新 `CURRENT_BASELINE.md`，不做 baseline transition，不把 multi-pit 写成 baseline success。
+边界：25.20 只测 separated / close two-component，不训练 touching / partially_overlapping / three-component；不做 raster-target mainline continuation；不运行 COMSOL；不生成或修改 data/NPZ；不更新 `CURRENT_BASELINE.md`；不把 multi-pit 写成 baseline success。

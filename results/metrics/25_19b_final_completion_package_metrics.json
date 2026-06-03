@@ -1,0 +1,260 @@
+{
+  "stage": "25.19b",
+  "generated_at": "2026-06-03T17:16:06.3220124+08:00",
+  "package_type": "final_completion_package_and_handoff",
+  "final_deliverable_statement": "COMSOL-simulation and deep-learning based MFL surface RBC-like defect inversion study with liftoff companion, surface forward-refinement companion, and multi-pit extension boundary analysis.",
+  "current_baseline": "20.85 nominal true 3D RBC profile-depth baseline",
+  "current_baseline_authoritative_file": "CURRENT_BASELINE.md",
+  "baseline_transition": false,
+  "current_baseline_updated": false,
+  "completion_ready": true,
+  "source_commits": {
+    "stage_25_18": "579e81acab66fc7fad253519e4b46071944c1d1b",
+    "stage_25_19": "995e5c1be29fa0d75b6b57f4b602613314782655"
+  },
+  "required_input_files": [
+    {
+      "path": "results/metrics/25_18_raster_target_route_reset_metrics.json",
+      "present": true
+    },
+    {
+      "path": "results/summaries/25_18_raster_target_route_reset_summary.md",
+      "present": true
+    },
+    {
+      "path": "results/manifests/25_18_raster_target_route_reset_manifest.json",
+      "present": true
+    },
+    {
+      "path": "results/metrics/25_19_geometry_primary_component_set_plan_metrics.json",
+      "present": true
+    },
+    {
+      "path": "results/summaries/25_19_geometry_primary_component_set_plan_summary.md",
+      "present": true
+    },
+    {
+      "path": "results/manifests/25_19_geometry_primary_component_set_plan_manifest.json",
+      "present": true
+    },
+    {
+      "path": "EXPERIMENT_LOG.md",
+      "present": true
+    },
+    {
+      "path": "NEXT_STEP.md",
+      "present": true
+    },
+    {
+      "path": "PINN优化路线.md",
+      "present": true
+    },
+    {
+      "path": "CURRENT_BASELINE.md",
+      "present": true,
+      "read_only_check": true
+    }
+  ],
+  "missing_required_files": [],
+  "boundary": {
+    "training_run": false,
+    "loss_tuning": false,
+    "model_capacity_expanded": false,
+    "comsol_run": false,
+    "data_npz_modified": false,
+    "checkpoint_or_preview_exported": false,
+    "current_baseline_updated": false,
+    "baseline_transition": false,
+    "entered_25_20_training_gate": false
+  },
+  "current_baseline_status": {
+    "status": "unchanged",
+    "baseline_id": "20.85 / 20.86 true 3D RBC-style profile-depth reconstruction",
+    "dataset_id": "comsol_true_3d_rbc_imported_watertight_pilot_v3_240",
+    "selected_seed": 42,
+    "test_normalized_mae": 0.678014,
+    "profile_depth_rmse_m": 0.000387737,
+    "er_like_profile_error": 0.340544,
+    "projected_mask_dice": 0.847727,
+    "scope": "RBC-like / RBC-representable single-component surface defects under the validated COMSOL simulation contract"
+  },
+  "liftoff_companion_status": {
+    "status": "companion_ready",
+    "stage": "20.95 / 20.96",
+    "selected_adapter": "A2_latent_residual_adapter",
+    "selected_seed": 2026,
+    "role": "liftoff robustness companion module, not CURRENT_BASELINE replacement",
+    "nominal_profile_rmse_m": 0.000335821,
+    "non_nominal_profile_rmse_m": 0.000437214,
+    "non_nominal_rmse_change_vs_frozen_baseline_pct": -49.993,
+    "non_nominal_dice": 0.842378,
+    "required_metadata": [
+      "sensor_z_m",
+      "delta_b",
+      "Bx/By/Bz axis order"
+    ],
+    "missing_sensor_z_behavior": "hard error; no guessing"
+  },
+  "forward_refinement_companion_status": {
+    "status": "companion_closed",
+    "stage": "25.7 / 25.8",
+    "role": "post-hoc surface forward-refinement companion over frozen 20.85, not baseline replacement",
+    "target_subset": "rbc_representable_but_model_fail",
+    "target_subset_count": 82,
+    "selected_surrogate": "ridge_param_only_linear_alpha_10",
+    "target_profile_rmse_m_before": 0.000509518351056,
+    "target_profile_rmse_m_after": 0.000220386413188,
+    "target_er_like_before": 2.80015739379,
+    "target_er_like_after": 0.909941363416,
+    "target_dice_before": 0.480524080842,
+    "target_dice_after": 0.709451842351,
+    "not_applicable_scope": [
+      "multi-pit",
+      "component-set",
+      "multi-component",
+      "clearly non-RBC-representable defects"
+    ]
+  },
+  "surface_rbc_representable_capability": {
+    "stable_baseline_plus_companion_system": true,
+    "allowed_claim": "RBC-like / RBC-representable surface defect inversion pipeline has a stable 20.85 baseline plus liftoff and forward-refinement companion paths.",
+    "scope_limits": [
+      "COMSOL simulation domain",
+      "RBC-style / Piao-inspired approximation, not exact Piao 2019 reproduction",
+      "not validated for real experimental deployment",
+      "not arbitrary free-form or production-ready"
+    ]
+  },
+  "multipit_dataset_status": {
+    "status": "pilot_generated_and_explored",
+    "dataset_id": "comsol_surface_multipit_component_set_pilot_v1",
+    "n_samples": 112,
+    "split_counts": {
+      "train": 72,
+      "val": 20,
+      "test": 20
+    },
+    "component_count_counts": {
+      "2": 100,
+      "3": 12
+    },
+    "separation_counts": {
+      "separated": 40,
+      "close": 24,
+      "touching": 24,
+      "partially_overlapping": 24
+    },
+    "train_ready_candidate": true,
+    "baseline_ready": false,
+    "auto_discovery_allowed": false
+  },
+  "multipit_exploration_status": {
+    "status": "data_training_failure_attribution_and_next_route_complete",
+    "stage_25_10_gate_decision": "PARTIAL",
+    "stage_25_17_gate_decision": "PARTIAL",
+    "stage_25_17_test_component_recall": 0.674419,
+    "stage_25_17_test_merged_rate": 1.0,
+    "stage_25_17_test_component_dice": 0.034007,
+    "stage_25_17_test_union_dice": 0.060961,
+    "not_claimed": "multi-pit stable inference model"
+  },
+  "raster_target_route_status": "stopped",
+  "raster_target_stop_reason": {
+    "decision": "STOP_RASTER_TARGET_MAINLINE",
+    "route_level_pattern": [
+      "target-v2 near-empty mask collapse",
+      "label-v3 union-like merged collapse",
+      "label-v3b hard-core/halo/SDF route keeps merged_rate at 1.0"
+    ],
+    "stopped_routes": [
+      "label-v2 target-v2 training route",
+      "label-v3 soft support training route",
+      "label-v3b hard-core/halo/SDF raster-supervision route",
+      "loss rebalance / label-v4 raster-target tuning as mainline"
+    ]
+  },
+  "geometry_primary_route_status": "planned",
+  "geometry_primary_route_summary": {
+    "stage": "25.19",
+    "slot_outputs": [
+      "existence_prob",
+      "center_x_m",
+      "center_y_m",
+      "L_m",
+      "W_m",
+      "D_m",
+      "rotation_angle",
+      "shape_family",
+      "compact_shape_parameters"
+    ],
+    "derived_outputs": [
+      "derived_component_mask",
+      "derived_union_mask",
+      "derived_component_depth",
+      "derived_union_depth"
+    ],
+    "forward_consistency_path": "geometry slots -> derived profile/mask/depth -> lightweight forward surrogate or feature-space residual -> Bx/By/Bz residual"
+  },
+  "final_deliverable_checklist": [
+    {
+      "item": "20.85 stable CURRENT_BASELINE remains unchanged",
+      "done": true
+    },
+    {
+      "item": "liftoff-conditioned companion is available",
+      "done": true
+    },
+    {
+      "item": "surface forward-refinement companion is closed",
+      "done": true
+    },
+    {
+      "item": "RBC-like / RBC-representable single-component surface branch has stable baseline plus companion system",
+      "done": true
+    },
+    {
+      "item": "multi-pit component-set pilot dataset is complete",
+      "done": true
+    },
+    {
+      "item": "multi-pit raster-target mainline has been explored and stopped",
+      "done": true
+    },
+    {
+      "item": "geometry-primary plus forward-consistency next route is explicit",
+      "done": true
+    }
+  ],
+  "limitations_not_claimed": [
+    "multi-pit stable inference model",
+    "touching / overlap / three-component stable separation",
+    "arbitrary non-RBC stable inference",
+    "engineering deployment-grade robustness",
+    "real experimental MFL validation",
+    "baseline transition"
+  ],
+  "next_optional_route": "25.20 separated/close two-component geometry-primary training gate; optional beyond current completion package; no baseline transition",
+  "forbidden_artifact_check": {
+    "protected_paths_checked": [
+      "CURRENT_BASELINE.md",
+      "data/",
+      "checkpoints/",
+      "notes/",
+      "results/previews/",
+      "scripts/visualize_current_baseline.py"
+    ],
+    "forbidden_artifacts_modified_before_write": false,
+    "forbidden_artifacts_staged_before_write": false
+  },
+  "current_baseline_diff_check": {
+    "path": "CURRENT_BASELINE.md",
+    "diff_before_write": false,
+    "staged_before_write": false,
+    "read_only_check": true
+  },
+  "json_policy": {
+    "strict_json": true,
+    "allow_nan": false,
+    "unavailable_value": null
+  }
+}

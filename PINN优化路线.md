@@ -1004,6 +1004,14 @@ v3b target design 部分修复了 25.13 near-empty failure，但还没有恢复 
 
 唯一后续 route decision 是 `25.20 separated/close two-component geometry-primary training gate`，而且只在继续当前 completion package 之外才执行。它只测 separated / close two-component 样本，暂不训练 touching、partially_overlapping 或 three-component；当前项目收口不要求 multi-pit stable inference，也不能写成 multi-pit baseline success，`CURRENT_BASELINE.md` 保持不变。
 
+## 2026-06-03 route sync: 25.19b final completion package
+
+25.19b 把当前 MFL surface inversion 项目收成阶段性交付包，而不是继续开新训练。可以交付的主线是：20.85 / 20.86 的 true 3D RBC-style profile-depth `CURRENT_BASELINE` 保持稳定；20.95 / 20.96 的 A2 liftoff companion 处理 non-nominal liftoff；25.7 / 25.8 的 surface forward-refinement companion 对 `rbc_representable_but_model_fail` single-component surface rows 提供 post-hoc repair；multi-pit 分支完成了 pilot dataset、component-set training exploration、失败归因和下一阶段 geometry-primary 设计。
+
+真正的能力边界也必须同时写清：RBC-like / RBC-representable surface defect inversion pipeline 已形成 stable baseline + companion 体系；liftoff robustness 有 companion-level 处理；forward-refinement 对部分 non-canonical but RBC-representable single-component surface defects 有明显改善；multi-pit 已完成数据、训练探索、失败归因和下一阶段路线设计。但这不等于 multi-pit / touching / overlap / three-component stable inference 已解决，也不等于 arbitrary non-RBC stable inference、工程部署级鲁棒性或真实实验验证完成。
+
+当前 completion package 已收口。后续如果继续研究，唯一可选路线是 `25.20 separated/close two-component geometry-primary training gate; optional beyond current completion package; no baseline transition`。25.20 不是当前完成条件，也不是 baseline transition；`CURRENT_BASELINE.md` 保持不变，multi-pit 不能写成 baseline success。
+
 ## 2026-06-03 route sync: surface RBC +120 expansion gate
 
 surface RBC targeted top-up 可以组装并通过 validation，但没有通过 training gate，不能作为 baseline-expansion candidate。assembled dataset 明确是 `v3_240 + topup_v1_120`，dataset_id 为 `comsol_true_3d_rbc_surface_expansion_v1_360`，N=`360`，split=`242/59/59`；它仍只是显式 candidate dataset，`baseline_ready=false`。

@@ -1,0 +1,94 @@
+{
+  "stage": "25.19b",
+  "generated_at": "2026-06-03T17:16:06.3220124+08:00",
+  "generated_by": "manual final completion package and handoff",
+  "source_commits": {
+    "stage_25_18": "579e81acab66fc7fad253519e4b46071944c1d1b",
+    "stage_25_19": "995e5c1be29fa0d75b6b57f4b602613314782655"
+  },
+  "metrics_path": "results/metrics/25_19b_final_completion_package_metrics.json",
+  "summary_path": "results/summaries/25_19b_final_completion_package_summary.md",
+  "manifest_path": "results/manifests/25_19b_final_completion_package_manifest.json",
+  "input_paths": [
+    {
+      "path": "results/metrics/25_18_raster_target_route_reset_metrics.json",
+      "role": "25_18_route_reset_metrics",
+      "present": true
+    },
+    {
+      "path": "results/summaries/25_18_raster_target_route_reset_summary.md",
+      "role": "25_18_route_reset_summary",
+      "present": true
+    },
+    {
+      "path": "results/manifests/25_18_raster_target_route_reset_manifest.json",
+      "role": "25_18_route_reset_manifest",
+      "present": true
+    },
+    {
+      "path": "results/metrics/25_19_geometry_primary_component_set_plan_metrics.json",
+      "role": "25_19_geometry_primary_metrics",
+      "present": true
+    },
+    {
+      "path": "results/summaries/25_19_geometry_primary_component_set_plan_summary.md",
+      "role": "25_19_geometry_primary_summary",
+      "present": true
+    },
+    {
+      "path": "results/manifests/25_19_geometry_primary_component_set_plan_manifest.json",
+      "role": "25_19_geometry_primary_manifest",
+      "present": true
+    },
+    {
+      "path": "CURRENT_BASELINE.md",
+      "role": "read_only_baseline_check",
+      "present": true,
+      "read_only": true
+    },
+    {
+      "path": "EXPERIMENT_LOG.md",
+      "role": "roadmap_sync",
+      "present": true
+    },
+    {
+      "path": "NEXT_STEP.md",
+      "role": "next_step_sync",
+      "present": true
+    },
+    {
+      "path": "PINN优化路线.md",
+      "role": "route_sync",
+      "present": true
+    }
+  ],
+  "missing_input_paths": [],
+  "allowed_use": [
+    "final_completion_package",
+    "handoff_summary",
+    "capability_boundary_record",
+    "future_optional_route_record"
+  ],
+  "forbidden_use": [
+    "baseline_update",
+    "current_baseline_replacement",
+    "multi_pit_baseline_success_claim",
+    "training_result",
+    "loss_tuning_evidence",
+    "25_20_gate_result"
+  ],
+  "boundary": {
+    "training_run": false,
+    "loss_tuning": false,
+    "model_capacity_expanded": false,
+    "comsol_run": false,
+    "data_npz_modified": false,
+    "checkpoint_or_preview_exported": false,
+    "current_baseline_updated": false,
+    "baseline_transition": false,
+    "entered_25_20_training_gate": false
+  },
+  "completion_ready": true,
+  "next_optional_route": "25.20 separated/close two-component geometry-primary training gate; optional beyond current completion package; no baseline transition",
+  "baseline_transition_statement": "No baseline transition. CURRENT_BASELINE.md remains unchanged."
+}

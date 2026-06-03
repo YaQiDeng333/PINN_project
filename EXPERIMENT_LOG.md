@@ -3549,6 +3549,17 @@ Review agent 已完成只读复核，无 must-fix。review 建议把 audit/decis
 - 当前项目收口：不要求 multi-pit stable inference。完成口径是 20.85 baseline 保持稳定、liftoff companion 已打通、forward-refinement companion 已收口、multi-pit dataset 和失败证据完整、raster-target 主线已判停、geometry-primary 下一阶段路线明确；不能写成 multi-pit baseline success。
 - 路线决策：`A. enter 25.20 separated/close two-component geometry-primary training gate only if continuing beyond current completion package; no baseline transition`。
 
+## 2026-06-03 Stage 25.19b final MFL surface inversion completion package
+
+- 范围：只做最终完成包 summary / metrics / manifest 和路线 handoff；没有训练、没有调 loss、没有扩大模型、没有运行 COMSOL、没有生成或修改 data/NPZ、没有提交 checkpoint/preview/notes，不进入 25.20 training gate，不做 baseline transition，也不更新 `CURRENT_BASELINE.md`。
+- 输入证据：25.18 route reset 三个产物、25.19 geometry-primary plan 三个产物、`EXPERIMENT_LOG.md`、`NEXT_STEP.md`、`PINN优化路线.md` 和 `CURRENT_BASELINE.md` 均存在；缺失数为 `0`。`CURRENT_BASELINE.md` 只读检查，未修改。
+- 主结论：当前项目可以阶段性交付为“基于 COMSOL 仿真与深度学习的 MFL 表面 RBC-like 缺陷反演方法研究，含 liftoff companion、surface forward-refinement companion 与 multi-pit 扩展边界分析”。收口目标是能力边界清楚，不是声明 arbitrary surface defect 全部解决。
+- 当前可交付能力：20.85 / 20.86 true 3D RBC-style profile-depth baseline 保持稳定；20.95 / 20.96 A2 liftoff companion 已打通；25.7 / 25.8 surface forward-refinement companion 已收口；RBC-like / RBC-representable single-component surface defects 形成 stable baseline + companion 体系。
+- companion 证据：A2 在 non-nominal liftoff 上把 profile RMSE 从 `0.000874310 m` 降到 `0.000437214 m`；surface forward-refinement 在 `82` 条 `rbc_representable_but_model_fail` rows 上把 profile RMSE 从 `0.000509518351056 m` 降到 `0.000220386413188 m`，Dice 从 `0.480524080842` 升到 `0.709451842351`。
+- multi-pit 状态：`comsol_surface_multipit_component_set_pilot_v1` 已完成，`N=112`，split `72/20/20`，`K_max=3`，component count `2=100`、`3=12`，separated/close/touching/partially_overlapping 覆盖完整；数据、训练探索、失败归因和下一阶段 geometry-primary route 都已记录。
+- 停止与限制：multi-pit raster-target 主线已判停，原因是 target-v2 near-empty、label-v3 union-like merge、label-v3b merged rate `1.000000` 的路线级模式。不能声称 multi-pit stable inference、touching / overlap / three-component stable separation、arbitrary non-RBC stable inference、工程部署级鲁棒性或 baseline transition。
+- 当前收口条件：已满足。25.20 `separated/close two-component geometry-primary training gate` 只是 completion package 之外的后续可选增补实验，不是当前交付必需项，也不是 baseline transition。
+
 ## 2026-06-03 surface RBC +120 assembly/training gate
 
 - scope: independent surface / near-surface RBC-style expansion gate only. No internal/buried defect logic, no 25.x multi-pit logic, no real-data intake, no baseline transition, and no `CURRENT_BASELINE.md` update.
