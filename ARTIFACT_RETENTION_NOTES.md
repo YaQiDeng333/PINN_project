@@ -136,4 +136,6 @@ GitHub 里继续保留当前主线、liftoff companion、surface forward-refinem
 
 同日第二轮 GitHub 结构清理又移除了根目录旧 COMSOL data-domain baseline 文档，以及 92 个已停止路线脚本。清理后 GitHub tracked 文件数为 950，`scripts/` 保留 280 个文件；当前可运行入口继续以 true 3D RBC、liftoff companion、surface forward-refinement、surface multi-pit geometry-primary、internal-defect 代表性脚本为主。
 
+同日第三轮 GitHub metrics 清理移除了 103 个非 internal 中间指标表。`internal_defect*` / `internal_*` metrics 全部保留；25.18 / 25.19 / 25.19b handoff、20.77 formal benchmark、liftoff、surface forward-refinement 代表 metrics 也全部保留。清理后 GitHub tracked 文件数为 847，`results/metrics/` 保留 332 个文件，约 4.76 MiB。
+
 `.tmp/`、`__pycache__/`、`results/archive/` 以及清理后空目录已删除。

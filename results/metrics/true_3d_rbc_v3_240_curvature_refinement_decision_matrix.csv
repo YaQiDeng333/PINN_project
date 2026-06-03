@@ -1,9 +1,0 @@
-criterion,value,evidence,pass
-curvature_improved_at_least_0p01,False,0.01050825861211005,False
-LWD_dimension_stable,False,0.1055769698980909,False
-projected_mask_stable,True,0.8345969696140306,True
-total_normalized_mae_not_worse,False,0.07537295382756459,False
-refined_beats_feature_baseline_total,False,0.03799206400528932,False
-refined_beats_feature_baseline_curvature,False,0.016537881313035102,False
-selected_by_validation_only,True,42,True
-decision,E_severe_regression_revert_to_20_77_candidate,revert to 20.77 benchmark candidate,True

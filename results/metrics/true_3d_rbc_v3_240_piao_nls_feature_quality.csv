@@ -1,7 +1,0 @@
-feature_group,feature_count,finite_fraction,nan_count,inf_count,fit_success_rate,notes
-F0_existing_handcrafted,135,1.0,0,0,nan,
-F1_peak_shape,216,1.0,0,0,nan,
-F2_gradient_asymmetry,90,1.0,0,0,nan,
-F3_cross_axis,51,1.0,0,0,nan,
-F4_nls_curve_fit,108,1.0,0,0,1.0,F4 optional; fit failures are represented by success flags and train-only imputation downstream
-F5_curvature_focused,42,1.0,0,0,nan,

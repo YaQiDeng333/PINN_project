@@ -1,4 +1,0 @@
-dataset_id,manifest_exists,allowed_use_present,forbidden_use_present,baseline_ready_false,data_path_untracked,validation_pass
-comsol_true_3d_rbc_imported_watertight_pilot_v1_assembled,True,True,True,True,True,True
-comsol_true_3d_rbc_imported_watertight_pilot_v2_topup_20_74,True,True,True,True,True,True
-comsol_true_3d_rbc_imported_watertight_pilot_v2_120,True,True,True,True,True,True

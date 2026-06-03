@@ -1,3 +1,0 @@
-decision_option,selected,condition,observed,next_step
-A_true_3d_training_gate,True,"assembled N>=54, split>=36/9/9, LD/WD represented, validation pass","N=56, split={'val': 10, 'test': 10, 'train': 36}, curvature={'sharp': 11, 'round': 11, 'boxy': 12, 'LD_dominant': 11, 'WD_dominant': 11}",true 3D training gate
-B_second_top_up,False,assembled pack remains partial below train-ready-candidate gate,"N=56, split={'val': 10, 'test': 10, 'train': 36}, curvature={'sharp': 11, 'round': 11, 'boxy': 12, 'LD_dominant': 11, 'WD_dominant': 11}",second top-up generation

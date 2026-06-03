@@ -1,4 +1,0 @@
-decision_option,selected,condition,observed,next_step
-A_variable_depth_pass,False,smooth true variable-depth solid succeeds with schema validation,stepped_depth_smoke_pass,design 60-sample true 3D RBC pilot
-B_stepped_depth_smoke_pass,True,stepped-depth layered approximation succeeds but smooth variable-depth is not verified,stepped_depth_smoke_pass,decide whether to improve smooth variable-depth geometry or accept stepped-depth as pilot approximation
-C_geometry_failed,False,"constant-depth only, fewer than 3 valid samples, geometry construction failure, or schema failure",stepped_depth_smoke_pass,fix COMSOL geometry generator before any pilot or training

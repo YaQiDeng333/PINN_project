@@ -322,3 +322,18 @@
 - 92 个已停止路线脚本，覆盖旧 2D mask/boundary、v4/smallpoly、rect/rot profile-forward、multiheight/multiaxis/multidirection profile residual、starconvex、shape-prior、oracle/deformable、旧 COMSOL data-domain candidate 等实验入口。
 
 保护范围：未删除 `CURRENT_BASELINE.md`、`COMSOL_DATA_REGISTRY.md`、`results/manifests/`、`results/templates/`、当前 true 3D RBC / liftoff / surface forward-refinement / surface multi-pit geometry-primary / internal-defect 代表性脚本，也未删除 25.18 / 25.19 / 25.19b completion package。清理后 GitHub tracked 文件数从 1046 降到 950，`scripts/` 从 372 个文件降到 280 个文件。
+
+## 2026-06-03 第三轮 GitHub tracked metrics 清理
+
+本轮继续压缩 GitHub `main` 中的非 internal 中间 metrics。用户明确要求保留“用 RBC 测 internal”的 internal-defect 部分，因此所有 `internal_defect*` / `internal_*` metrics 均保留。
+
+已删除：103 个 GitHub tracked metrics 文件。
+
+删除范围：
+
+- NLS / surface RBC raw feature and correlation tables。
+- 25.10-25.17 raster-target training / audit 大 JSON；25.18 route reset 和 25.19 / 25.19b handoff 保留。
+- true 3D RBC v1 / v2_120 / v3_240 curvature / feature-fusion / Piao-NLS / profile-primary / pilot / topup / smoke 中间指标表。
+- surface RBC targeted expansion 中间 plan / mesh / validation metrics。
+
+保护范围：未删除任何 `internal_defect*` / `internal_*` metrics，未删除 25.18 / 25.19 / 25.19b completion package metrics，未删除 20.77 formal benchmark、formal liftoff benchmark、liftoff-conditioned inference、surface forward-refinement formal / inference 代表 metrics。清理后 GitHub tracked 文件数从 950 降到 847；`results/` 从 654 个文件降到 551 个文件；`results/metrics/` 从 435 个文件降到 332 个文件，约 4.76 MiB。
