@@ -3525,6 +3525,15 @@ Review agent 已完成只读复核，无 must-fix。review 建议把 audit/decis
 - acceptance decision: `READY_FOR_25_17_TRAINING`.
 - route decision: `A. enter 25.17 label-v3b training gate using 25.10 loss mainline + label-v3b supervision; do not use the 25.11/25.12 rebalance stack`.
 
+## 2026-06-03 Stage 25.17 surface multi-pit label-v3b training gate
+
+- scope: gate-level training only for `comsol_surface_multipit_component_set_pilot_v1`; no COMSOL, no data/NPZ generation, no architecture expansion, no 25.11/25.12 rebalance stack, no baseline transition, and no `CURRENT_BASELINE.md` update.
+- protocol: reused the 25.10 component-set architecture, fixed `72/20/20` split, `K=3`, Hungarian matching, and `component_set_gate_v1` loss mainline with `target_version=v3b`.
+- label supervision: used `component_hard_core_mask_v3b`, `component_boundary_halo_mask_v3b`, `component_ignore_overlap_mask_v3b`, `component_mask_target_v3b_soft`, `component_sdf_target_v3b`, `component_valid_region_mask_v3b`, `component_depth_target_v3b`, and `component_identity_conflict_mask_v3b`; union targets remained evaluation/diagnostic only.
+- result: gate decision `PARTIAL`. Test recall `0.674419`, missed `0.325581`, extra `0.292683`, merged `1.000000`, component Dice `0.034007`, union Dice `0.060961`, and depth RMSE `0.001178764 m`.
+- comparison: v3b improved the near-empty 25.13 mask collapse (`component Dice 0.005536 -> 0.034007`, `union Dice 0.002829 -> 0.060961`) but did not resolve the 25.15 union-like merged collapse (`merged 1.000000 -> 1.000000`).
+- route decision: `B. enter 25.17b label-v3b failure audit focused on hard-core/halo/SDF/depth-valid-region usage`.
+
 ## 2026-06-03 surface RBC +120 assembly/training gate
 
 - scope: independent surface / near-surface RBC-style expansion gate only. No internal/buried defect logic, no 25.x multi-pit logic, no real-data intake, no baseline transition, and no `CURRENT_BASELINE.md` update.

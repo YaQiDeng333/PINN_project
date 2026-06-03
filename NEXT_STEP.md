@@ -872,6 +872,14 @@ Only next step: **enter 25.17 label-v3b training gate using the 25.10 loss mainl
 
 This authorizes only an explicit 25.17 training gate. It is not a baseline transition, does not update `CURRENT_BASELINE.md`, and should not continue loss tuning from the failed 25.11/25.12 rebalance stack.
 
+## 2026-06-03 after Stage 25.17 label-v3b training gate
+
+Only next step: **enter 25.17b label-v3b failure audit focused on hard-core/halo/SDF/depth-valid-region usage**.
+
+25.17 used the 25.10 component-set architecture, split, Hungarian matching, and `component_set_gate_v1` loss mainline with `target_version=v3b`; it did not use the failed 25.11/25.12 rebalance stack and did not update `CURRENT_BASELINE.md`. The gate decision is `PARTIAL`: near-empty collapse improved versus 25.13, but merged rate stayed `1.000000` as in 25.15, so v3b still behaves like a union-like merged branch under this gate.
+
+Do not continue by tuning loss weights or expanding model capacity. The next audit must check whether hard-core identity supervision, halo/SDF support, depth valid regions, and overlap ignore masks are actually used in the loader/loss/metrics as intended.
+
 ## 2026-06-03 after surface RBC +120 assembly/training gate
 
 Only next step for the surface RBC expansion line: do not promote `comsol_true_3d_rbc_surface_expansion_v1_360`; analyze why the +120 train split improves top-up test but regresses old v3_240 test before any further assembly/training attempt.

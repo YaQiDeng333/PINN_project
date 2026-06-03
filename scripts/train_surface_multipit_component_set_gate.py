@@ -41,14 +41,19 @@ DEFAULT_COMPARISON_METRICS = ROOT / "results/metrics/25_10_component_set_trainin
 DEFAULT_COMPARISON_METRICS_25_11 = ROOT / "results/metrics/25_11_mask_depth_loss_rebalance_training_metrics.json"
 DEFAULT_COMPARISON_METRICS_25_12 = ROOT / "results/metrics/25_12_component_separation_rebalance_training_metrics.json"
 DEFAULT_COMPARISON_METRICS_25_13 = ROOT / "results/metrics/25_13_target_v2_training_gate_metrics.json"
+DEFAULT_COMPARISON_METRICS_25_15 = ROOT / "results/metrics/25_15_label_v3_training_gate_metrics.json"
 DEFAULT_TARGET_REDESIGN_MANIFEST = ROOT / "results/manifests/25_12b_component_raster_depth_target_redesign_manifest.json"
 DEFAULT_LABEL_V3_MANIFEST = ROOT / "results/manifests/25_14_label_v3_derivation_validator_manifest.json"
+DEFAULT_LABEL_V3B_MANIFEST = ROOT / "results/manifests/25_16_label_v3b_derivation_validator_manifest.json"
 
 TARGET_SPLIT = {"train": 72, "val": 20, "test": 20}
 K_MAX = 3
 LOW_H = 32
 LOW_W = 64
 PERMS = list(permutations(range(K_MAX)))
+V3B_SOFT_OR_RAW_UNION_RATIO_TARGET = 1.35
+V3B_HALO_CAP_FRACTION_OF_RAW_UNION = 0.25
+V3B_SPARSE_LOWER_BOUND_PX = 20
 MASK_DEPTH_TERMS = ("component_mask", "union_mask", "component_depth", "union_depth")
 COMPONENT_SEPARATION_TERMS = ("separation_penalty", "merge_penalty")
 FORBIDDEN_DIFF_PATHS = [
@@ -146,12 +151,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--comparison-metrics-25-11", type=Path, default=DEFAULT_COMPARISON_METRICS_25_11)
     parser.add_argument("--comparison-metrics-25-12", type=Path, default=DEFAULT_COMPARISON_METRICS_25_12)
     parser.add_argument("--comparison-metrics-25-13", type=Path, default=DEFAULT_COMPARISON_METRICS_25_13)
+    parser.add_argument("--comparison-metrics-25-15", type=Path, default=DEFAULT_COMPARISON_METRICS_25_15)
     parser.add_argument("--target-redesign-manifest", type=Path, default=DEFAULT_TARGET_REDESIGN_MANIFEST)
     parser.add_argument("--label-v3-manifest", type=Path, default=DEFAULT_LABEL_V3_MANIFEST)
+    parser.add_argument("--label-v3b-manifest", type=Path, default=DEFAULT_LABEL_V3B_MANIFEST)
     parser.add_argument("--stage", default="25.10")
     parser.add_argument("--gate-id", default=GATE_ID)
     parser.add_argument("--loss-config", choices=sorted(LOSS_CONFIGS), default="component_set_gate_v1")
-    parser.add_argument("--target-version", choices=["v1", "v2", "v3"], default="v1")
+    parser.add_argument("--target-version", choices=["v1", "v2", "v3", "v3b"], default="v1")
     parser.add_argument("--epochs", type=int, default=180)
     parser.add_argument("--batch-size", type=int, default=12)
     parser.add_argument("--lr", type=float, default=1.0e-3)
@@ -404,14 +411,20 @@ def grid_xy(height: int, width: int) -> tuple[np.ndarray, np.ndarray]:
     return np.meshgrid(x, y, indexing="xy")
 
 
-def dilate_bool(mask: np.ndarray, radius: int = 1) -> np.ndarray:
+def dilate_bool(mask: np.ndarray, radius: int = 1, mode: str = "square") -> np.ndarray:
     result = np.asarray(mask, dtype=bool).copy()
+    if mode not in {"square", "cross"}:
+        raise ValueError(f"unsupported dilation mode: {mode}")
+    offsets = [(0, 0), (-1, 0), (1, 0), (0, -1), (0, 1)]
+    if mode == "square":
+        offsets = [(dy, dx) for dy in (-1, 0, 1) for dx in (-1, 0, 1)]
     for _ in range(radius):
         padded = np.pad(result, 1, mode="constant", constant_values=False)
         expanded = np.zeros_like(result)
-        for dy in range(3):
-            for dx in range(3):
-                expanded |= padded[dy : dy + result.shape[0], dx : dx + result.shape[1]]
+        for dy, dx in offsets:
+            y0 = 1 + dy
+            x0 = 1 + dx
+            expanded |= padded[y0 : y0 + result.shape[0], x0 : x0 + result.shape[1]]
         result = expanded
     return result
 
@@ -646,6 +659,233 @@ def build_target_v3(pack: dict[str, Any]) -> tuple[dict[str, np.ndarray], dict[s
     )
 
 
+def build_contact_boundary(raw_masks: np.ndarray, exists: np.ndarray, overlap_region: np.ndarray) -> np.ndarray:
+    n, _k, height, width = raw_masks.shape
+    contact = np.zeros((n, height, width), dtype=bool)
+    for i in range(n):
+        active_slots = [int(slot) for slot in np.where(exists[i])[0]]
+        for left_index, left in enumerate(active_slots):
+            left_band = dilate_bool(raw_masks[i, left], radius=1, mode="cross")
+            for right in active_slots[left_index + 1 :]:
+                right_band = dilate_bool(raw_masks[i, right], radius=1, mode="cross")
+                contact[i] |= left_band & right_band
+        contact[i] &= ~overlap_region[i]
+    return contact
+
+
+def fill_halo_depth_from_nearest_core(core: np.ndarray, halo: np.ndarray, raw_depth: np.ndarray) -> np.ndarray:
+    depth = np.zeros(raw_depth.shape, dtype=np.float32)
+    depth[core] = raw_depth[core]
+    core_points = np.argwhere(core)
+    if core_points.size == 0:
+        return depth
+    core_values = raw_depth[tuple(core_points.T)].astype(np.float32)
+    for y, x in np.argwhere(halo):
+        delta = core_points - np.array([y, x], dtype=np.int64)
+        nearest = int(np.argmin(np.sum(delta * delta, axis=1)))
+        depth[y, x] = core_values[nearest]
+    return depth
+
+
+def cap_halo_candidates(candidates: np.ndarray, raw_union_px: int) -> np.ndarray:
+    capped = np.zeros_like(candidates, dtype=bool)
+    total_candidate = int(candidates.sum())
+    if total_candidate == 0:
+        return capped
+    allowed = int(math.floor(raw_union_px * V3B_HALO_CAP_FRACTION_OF_RAW_UNION))
+    allowed = max(0, min(allowed, total_candidate))
+    if allowed == 0:
+        return capped
+    counts = candidates.reshape(candidates.shape[0], -1).sum(axis=1)
+    quotas = np.floor(allowed * counts / max(total_candidate, 1)).astype(int)
+    active_candidate_count = int((counts > 0).sum())
+    if allowed >= active_candidate_count:
+        quotas = np.where((counts > 0) & (quotas == 0), 1, quotas)
+    while int(quotas.sum()) > allowed:
+        slot = int(np.argmax(quotas))
+        quotas[slot] -= 1
+    while int(quotas.sum()) < allowed:
+        remainders = allowed * counts / max(total_candidate, 1) - quotas
+        remainders[counts == 0] = -1.0
+        slot = int(np.argmax(remainders))
+        if remainders[slot] < 0.0:
+            break
+        quotas[slot] += 1
+    for slot, quota in enumerate(quotas):
+        if quota <= 0:
+            continue
+        coords = np.argwhere(candidates[slot])
+        for y, x in coords[: int(quota)]:
+            capped[slot, y, x] = True
+    return capped
+
+
+def build_target_v3b(pack: dict[str, Any]) -> tuple[dict[str, np.ndarray], dict[str, Any]]:
+    masks_v2, _depths_v2, ownership, v2_summary = build_target_v2(pack)
+    exists = np.asarray(pack["component_exists"], dtype=bool)
+    raw_masks = np.asarray(pack["component_projected_masks_2d"], dtype=bool)
+    raw_depths = np.asarray(pack["component_depth_grids_m"], dtype=np.float32)
+    n, k, height, width = raw_masks.shape
+    hard_core = masks_v2.astype(bool)
+    boundary_halo = np.zeros((n, k, height, width), dtype=bool)
+    ignore_overlap = np.zeros((n, k, height, width), dtype=bool)
+    soft = np.zeros((n, k, height, width), dtype=np.float32)
+    sdf = np.zeros((n, k, height, width), dtype=np.float32)
+    valid = np.zeros((n, k, height, width), dtype=bool)
+    depth_v3b = np.zeros((n, k, height, width), dtype=np.float32)
+    depth_valid = np.zeros((n, k, height, width), dtype=bool)
+    overlap_region = raw_masks.sum(axis=1) > 1
+    contact_boundary = build_contact_boundary(raw_masks, exists, overlap_region)
+    identity_conflict = np.zeros((n, height, width), dtype=bool)
+    rows: list[dict[str, Any]] = []
+    sample_rows: list[dict[str, Any]] = []
+
+    for i in range(n):
+        active_slots = [int(slot) for slot in np.where(exists[i])[0]]
+        raw_union = raw_masks[i, active_slots].max(axis=0) if active_slots else np.zeros((height, width), dtype=bool)
+        preliminary_halo = np.zeros((k, height, width), dtype=bool)
+        for slot in active_slots:
+            other_slots = [other for other in active_slots if other != slot]
+            other_raw = raw_masks[i, other_slots].max(axis=0) if other_slots else np.zeros((height, width), dtype=bool)
+            candidate = dilate_bool(hard_core[i, slot], radius=1, mode="cross") & ~hard_core[i, slot]
+            candidate &= ~other_raw
+            candidate &= ~overlap_region[i]
+            preliminary_halo[slot] = candidate
+        halo_claims = preliminary_halo.sum(axis=0)
+        identity_conflict[i] = overlap_region[i] | contact_boundary[i] | (halo_claims > 1)
+        exclusive_halo = preliminary_halo & (halo_claims[None, :, :] == 1)
+        exclusive_halo &= ~identity_conflict[i][None, :, :]
+        capped_halo = cap_halo_candidates(exclusive_halo, int(raw_union.sum()))
+        boundary_halo[i] = capped_halo
+        for slot in active_slots:
+            ignored = (raw_masks[i, slot] | preliminary_halo[slot]) & identity_conflict[i] & ~hard_core[i, slot]
+            ignore_overlap[i, slot] = ignored
+            soft[i, slot, hard_core[i, slot]] = 1.0
+            soft[i, slot, capped_halo[slot]] = 0.35
+            valid[i, slot] = hard_core[i, slot] | capped_halo[slot]
+            sdf[i, slot] = normalized_signed_distance(hard_core[i, slot])
+            depth_valid[i, slot] = valid[i, slot]
+            depth_v3b[i, slot] = fill_halo_depth_from_nearest_core(hard_core[i, slot], capped_halo[slot], raw_depths[i, slot])
+            hard_px = int(hard_core[i, slot].sum())
+            halo_px = int(capped_halo[slot].sum())
+            soft_px = int((soft[i, slot] > 0.0).sum())
+            rows.append(
+                {
+                    "sample_id": str(pack["sample_ids"][i]),
+                    "source_index": int(i),
+                    "slot": int(slot),
+                    "split": str(pack["split"][i]),
+                    "component_count": int(pack["component_count"][i]),
+                    "separation_type": str(pack["separation_type"][i]),
+                    "topology_relation": str(pack["topology_relation"][i]),
+                    "v3b_hard_core_px": hard_px,
+                    "v3b_boundary_halo_px": halo_px,
+                    "v3b_soft_support_px": soft_px,
+                    "v3b_valid_region_px": int(valid[i, slot].sum()),
+                    "v3b_depth_valid_px": int(depth_valid[i, slot].sum()),
+                    "v3b_soft_vs_hard_ratio": float(soft_px / max(hard_px, 1)),
+                    "existing_v3b_empty_or_tiny": bool(soft_px < V3B_SPARSE_LOWER_BOUND_PX),
+                    "existing_v3b_hard_core_empty": bool(hard_px == 0),
+                    "existing_v3b_depth_valid_empty": bool(int(depth_valid[i, slot].sum()) == 0),
+                }
+            )
+        soft_or = (soft[i, active_slots] > 0.0).max(axis=0) if active_slots else np.zeros((height, width), dtype=bool)
+        hard_or = hard_core[i, active_slots].max(axis=0) if active_slots else np.zeros((height, width), dtype=bool)
+        sample_rows.append(
+            {
+                "sample_id": str(pack["sample_ids"][i]),
+                "source_index": int(i),
+                "split": str(pack["split"][i]),
+                "component_count": int(pack["component_count"][i]),
+                "separation_type": str(pack["separation_type"][i]),
+                "topology_relation": str(pack["topology_relation"][i]),
+                "raw_union_px": int(raw_union.sum()),
+                "v3b_hard_or_px": int(hard_or.sum()),
+                "v3b_soft_or_px": int(soft_or.sum()),
+                "v3b_soft_or_to_raw_union_ratio": float(soft_or.sum() / max(int(raw_union.sum()), 1)),
+                "v3b_identity_conflict_px": int(identity_conflict[i].sum()),
+                "v3b_ignore_overlap_px": int(ignore_overlap[i, active_slots].max(axis=0).sum()) if active_slots else 0,
+                "v3b_hard_duplicate_px": int(np.maximum(hard_core[i, active_slots].sum(axis=0) - 1, 0).sum()) if active_slots else 0,
+                "v3b_depth_valid_duplicate_px": int(np.maximum(depth_valid[i, active_slots].sum(axis=0) - 1, 0).sum()) if active_slots else 0,
+                "raw_or_to_v3b_hard_or_mismatch_px": int(np.logical_xor(raw_union, hard_or).sum()),
+            }
+        )
+
+    inactive = ~exists
+    inactive_violations = int(np.logical_or.reduce((soft[inactive] > 0.0, valid[inactive], depth_valid[inactive], ignore_overlap[inactive])).sum()) if inactive.any() else 0
+    hard_px_values = [int(row["v3b_hard_core_px"]) for row in rows]
+    halo_px_values = [int(row["v3b_boundary_halo_px"]) for row in rows]
+    soft_px_values = [int(row["v3b_soft_support_px"]) for row in rows]
+    valid_px_values = [int(row["v3b_valid_region_px"]) for row in rows]
+    depth_valid_px_values = [int(row["v3b_depth_valid_px"]) for row in rows]
+    support_ratios = [float(row["v3b_soft_vs_hard_ratio"]) for row in rows]
+    soft_or_ratios = [float(row["v3b_soft_or_to_raw_union_ratio"]) for row in sample_rows]
+    summary = {
+        **v2_summary,
+        "target_version": "v3b",
+        "component_mask_target_v2": False,
+        "component_depth_target_v2": False,
+        "component_mask_target_v3_soft": False,
+        "component_sdf_target_v3": False,
+        "component_valid_region_mask": False,
+        "component_depth_target_v3": False,
+        "component_hard_core_mask_v3b": True,
+        "component_boundary_halo_mask_v3b": True,
+        "component_ignore_overlap_mask_v3b": True,
+        "component_mask_target_v3b_soft": True,
+        "component_sdf_target_v3b": True,
+        "component_valid_region_mask_v3b": True,
+        "component_depth_target_v3b": True,
+        "component_depth_valid_region_mask_v3b": True,
+        "component_identity_conflict_mask_v3b": True,
+        "raw_component_mask_raw": True,
+        "component_ownership_map": True,
+        "v3b_target_loaded_count": int(n),
+        "v3b_active_component_count": int(len(rows)),
+        "v3b_hard_core_pixel_mean": float(np.mean(hard_px_values)) if hard_px_values else math.nan,
+        "v3b_hard_core_pixel_min": int(min(hard_px_values)) if hard_px_values else 0,
+        "v3b_boundary_halo_pixel_mean": float(np.mean(halo_px_values)) if halo_px_values else math.nan,
+        "v3b_boundary_halo_pixel_min": int(min(halo_px_values)) if halo_px_values else 0,
+        "v3b_soft_support_pixel_mean": float(np.mean(soft_px_values)) if soft_px_values else math.nan,
+        "v3b_soft_support_pixel_min": int(min(soft_px_values)) if soft_px_values else 0,
+        "v3b_valid_region_pixel_mean": float(np.mean(valid_px_values)) if valid_px_values else math.nan,
+        "v3b_valid_region_pixel_min": int(min(valid_px_values)) if valid_px_values else 0,
+        "v3b_depth_valid_region_pixel_mean": float(np.mean(depth_valid_px_values)) if depth_valid_px_values else math.nan,
+        "v3b_depth_valid_region_pixel_min": int(min(depth_valid_px_values)) if depth_valid_px_values else 0,
+        "v3b_soft_vs_hard_support_ratio_mean": float(np.mean(support_ratios)) if support_ratios else math.nan,
+        "v3b_soft_or_raw_union_ratio_mean": float(np.mean(soft_or_ratios)) if soft_or_ratios else math.nan,
+        "v3b_soft_or_raw_union_ratio_max": float(np.max(soft_or_ratios)) if soft_or_ratios else math.nan,
+        "v3b_empty_slot_violation_count": inactive_violations,
+        "empty_slot_violation_count": inactive_violations,
+        "existing_v3b_empty_or_tiny_count": int(sum(bool(row["existing_v3b_empty_or_tiny"]) for row in rows)),
+        "existing_v3b_hard_core_empty_count": int(sum(bool(row["existing_v3b_hard_core_empty"]) for row in rows)),
+        "existing_v3b_depth_valid_empty_count": int(sum(bool(row["existing_v3b_depth_valid_empty"]) for row in rows)),
+        "v3b_identity_conflict_pixel_sum": int(identity_conflict.sum()),
+        "v3b_ignore_overlap_pixel_sum": int(ignore_overlap.sum()),
+        "v3b_hard_duplicate_pixel_sum": int(sum(row["v3b_hard_duplicate_px"] for row in sample_rows)),
+        "v3b_depth_valid_duplicate_pixel_sum": int(sum(row["v3b_depth_valid_duplicate_px"] for row in sample_rows)),
+        "v3b_soft_or_union_like_sample_count": int(sum(float(row["v3b_soft_or_to_raw_union_ratio"]) >= V3B_SOFT_OR_RAW_UNION_RATIO_TARGET for row in sample_rows)),
+        "v3b_raw_union_mismatch_pixel_sum": int(sum(row["raw_or_to_v3b_hard_or_mismatch_px"] for row in sample_rows)),
+        "label_v3b_training_rule": "25.10 loss weights; hard-core/halo/SDF valid-region component supervision; union mask/depth evaluation-only and unweighted",
+        "by_component_rows": rows,
+        "by_sample_rows": sample_rows,
+    }
+    return (
+        {
+            "soft_mask": soft.astype(np.float32),
+            "hard_core": hard_core.astype(np.float32),
+            "boundary_halo": boundary_halo.astype(np.float32),
+            "ignore_overlap": ignore_overlap.astype(np.float32),
+            "identity_conflict": identity_conflict.astype(np.float32),
+            "sdf": sdf.astype(np.float32),
+            "valid_region": valid.astype(np.float32),
+            "depth": depth_v3b.astype(np.float32),
+            "depth_valid": depth_valid.astype(np.float32),
+        },
+        summary,
+    )
+
+
 def build_arrays(pack: dict[str, Any], target_version: str = "v1") -> Arrays:
     n = int(pack["sample_ids"].shape[0])
     split = np.asarray(pack["split"]).astype(str)
@@ -716,6 +956,15 @@ def build_arrays(pack: dict[str, Any], target_version: str = "v1") -> Arrays:
         depth_valid_full = v3_targets["depth_valid"].astype(np.float32)
         eval_component_masks_full = np.asarray(pack["component_projected_masks_2d"], dtype=np.float32)
         eval_component_depths_full = np.asarray(pack["component_depth_grids_m"], dtype=np.float32)
+    elif target_version == "v3b":
+        v3b_targets, target_summary = build_target_v3b(pack)
+        training_masks_full = v3b_targets["soft_mask"].astype(np.float32)
+        training_depths_full = v3b_targets["depth"].astype(np.float32)
+        sdf_full = v3b_targets["sdf"].astype(np.float32)
+        mask_valid_full = v3b_targets["valid_region"].astype(np.float32)
+        depth_valid_full = v3b_targets["depth_valid"].astype(np.float32)
+        eval_component_masks_full = v3b_targets["hard_core"].astype(np.float32)
+        eval_component_depths_full = v3b_targets["depth"].astype(np.float32)
     else:
         training_masks_full = np.asarray(pack["component_projected_masks_2d"], dtype=np.float32)
         training_depths_full = np.asarray(pack["component_depth_grids_m"], dtype=np.float32)
@@ -793,7 +1042,7 @@ class ComponentSetDataset(Dataset):
             "mask_valid": torch.from_numpy(self.arrays.mask_valid_low[i]).float(),
             "depth": torch.from_numpy(self.arrays.depth_low_norm[i]).float(),
             "depth_valid": torch.from_numpy(self.arrays.depth_valid_low[i]).float(),
-            "label_v3": torch.tensor(1.0 if self.arrays.target_version == "v3" else 0.0, dtype=torch.float32),
+            "label_v3": torch.tensor(1.0 if self.arrays.target_version in {"v3", "v3b"} else 0.0, dtype=torch.float32),
         }
 
 
@@ -1916,6 +2165,156 @@ def decide_label_v3_gate(
     }
 
 
+def decide_label_v3b_gate(
+    history: list[dict[str, Any]],
+    split_metrics: dict[str, Any],
+    comparison_25_10: dict[str, Any],
+    comparison_25_13: dict[str, Any],
+    comparison_25_15: dict[str, Any],
+    target_summary: dict[str, Any],
+) -> dict[str, Any]:
+    first_train = float(history[0]["train_loss"])
+    final_train = float(history[-1]["train_loss"])
+    best_val = min(float(row["val_loss"]) for row in history)
+    test = split_metrics["test"]
+    d10 = comparison_25_10["test_deltas"]
+    d13 = comparison_25_13["test_deltas"]
+    d15 = comparison_25_15["test_deltas"]
+
+    component_dice_delta_vs_25_13 = float(d13["component_mask_dice_mean"]["delta"])
+    union_dice_delta_vs_25_13 = float(d13["union_mask_dice_mean"]["delta"])
+    depth_delta_vs_25_13 = float(d13["depth_grid_rmse_m_mean"]["delta"])
+    component_dice_delta_vs_25_10 = float(d10["component_mask_dice_mean"]["delta"])
+    union_dice_delta_vs_25_10 = float(d10["union_mask_dice_mean"]["delta"])
+    recall_delta_vs_25_10 = float(d10["component_recall"]["delta"])
+    missed_delta_vs_25_10 = float(d10["missed_rate"]["delta"])
+    extra_delta_vs_25_10 = float(d10["extra_rate"]["delta"])
+    depth_delta_vs_25_10 = float(d10["depth_grid_rmse_m_mean"]["delta"])
+    merged_delta_vs_25_10 = float(d10["merged_rate"]["delta"])
+    component_dice_delta_vs_25_15 = float(d15["component_mask_dice_mean"]["delta"])
+    union_dice_delta_vs_25_15 = float(d15["union_mask_dice_mean"]["delta"])
+    merged_delta_vs_25_15 = float(d15["merged_rate"]["delta"])
+    depth_delta_vs_25_15 = float(d15["depth_grid_rmse_m_mean"]["delta"])
+
+    three_component = test.get("groups", {}).get("component_count", {}).get("3", {})
+    partially_overlapping = test.get("groups", {}).get("separation_type", {}).get("partially_overlapping", {})
+    touching_boundary = test.get("groups", {}).get("topology_relation", {}).get("touching_boundary", {})
+
+    label_v3b_loaded = (
+        target_summary.get("component_hard_core_mask_v3b") is True
+        and target_summary.get("component_boundary_halo_mask_v3b") is True
+        and target_summary.get("component_ignore_overlap_mask_v3b") is True
+        and target_summary.get("component_mask_target_v3b_soft") is True
+        and target_summary.get("component_sdf_target_v3b") is True
+        and target_summary.get("component_valid_region_mask_v3b") is True
+        and target_summary.get("component_depth_target_v3b") is True
+        and target_summary.get("component_identity_conflict_mask_v3b") is True
+        and int(target_summary.get("v3b_empty_slot_violation_count", -1)) == 0
+        and int(target_summary.get("v3b_hard_duplicate_pixel_sum", -1)) == 0
+        and float(target_summary.get("v3b_soft_or_raw_union_ratio_max", 999.0)) <= V3B_SOFT_OR_RAW_UNION_RATIO_TARGET
+    )
+    loss_descended = final_train < 0.85 * first_train and best_val < first_train
+    near_empty_alleviated_vs_25_13 = (
+        float(test["component_mask_dice_mean"]) >= 0.03
+        and float(test["union_mask_dice_mean"]) >= 0.03
+        and component_dice_delta_vs_25_13 >= 0.025
+        and union_dice_delta_vs_25_13 >= 0.025
+        and float(test["pred_component_count_mean"]) >= 1.5
+    )
+    union_like_merged_alleviated_vs_25_15 = float(test["merged_rate"]) <= 0.70 and merged_delta_vs_25_15 <= -0.25
+    recall_not_collapsed_vs_25_10 = recall_delta_vs_25_10 >= -0.15 and float(test["component_recall"]) >= 0.68
+    missed_extra_not_collapsed_vs_25_10 = missed_delta_vs_25_10 <= 0.17 and extra_delta_vs_25_10 <= 0.22
+    depth_not_severely_worse_vs_25_10 = depth_delta_vs_25_10 <= 0.00055
+    three_component_still_failed = bool(
+        three_component
+        and (
+            float(three_component.get("merged_rate", 0.0)) >= 0.75
+            or float(three_component.get("component_mask_dice_mean", 0.0)) < 0.03
+        )
+    )
+    partially_overlapping_still_failed = bool(
+        partially_overlapping
+        and (
+            float(partially_overlapping.get("merged_rate", 0.0)) >= 0.75
+            or float(partially_overlapping.get("component_mask_dice_mean", 0.0)) < 0.03
+        )
+    )
+    touching_boundary_still_failed = bool(
+        touching_boundary
+        and (
+            float(touching_boundary.get("merged_rate", 0.0)) >= 0.75
+            or float(touching_boundary.get("component_mask_dice_mean", 0.0)) < 0.03
+        )
+    )
+
+    if (
+        label_v3b_loaded
+        and loss_descended
+        and near_empty_alleviated_vs_25_13
+        and union_like_merged_alleviated_vs_25_15
+        and recall_not_collapsed_vs_25_10
+        and missed_extra_not_collapsed_vs_25_10
+        and depth_not_severely_worse_vs_25_10
+        and not three_component_still_failed
+    ):
+        decision = "IMPROVED"
+        next_route = "A. enter 25.18 topology/three-component focused training gate, no baseline transition"
+    elif label_v3b_loaded and loss_descended and (near_empty_alleviated_vs_25_13 or union_like_merged_alleviated_vs_25_15):
+        decision = "PARTIAL"
+        next_route = "B. enter 25.17b label-v3b failure audit focused on hard-core/halo/SDF/depth-valid-region usage"
+    else:
+        decision = "FAIL"
+        next_route = "C. return to label-v3b derivation or generator/export schema; do not continue loss tuning"
+
+    return {
+        "decision": decision,
+        "next_route": next_route,
+        "criteria": {
+            "label_v3b_loaded": label_v3b_loaded,
+            "loss_descended": loss_descended,
+            "near_empty_alleviated_vs_25_13": near_empty_alleviated_vs_25_13,
+            "union_like_merged_alleviated_vs_25_15": union_like_merged_alleviated_vs_25_15,
+            "recall_not_collapsed_vs_25_10": recall_not_collapsed_vs_25_10,
+            "missed_extra_not_collapsed_vs_25_10": missed_extra_not_collapsed_vs_25_10,
+            "depth_not_severely_worse_vs_25_10": depth_not_severely_worse_vs_25_10,
+            "three_component_still_failed": three_component_still_failed,
+            "partially_overlapping_still_failed": partially_overlapping_still_failed,
+            "touching_boundary_still_failed": touching_boundary_still_failed,
+            "component_mask_dice_delta_vs_25_13": component_dice_delta_vs_25_13,
+            "union_mask_dice_delta_vs_25_13": union_dice_delta_vs_25_13,
+            "depth_grid_rmse_delta_vs_25_13_m": depth_delta_vs_25_13,
+            "component_mask_dice_delta_vs_25_10": component_dice_delta_vs_25_10,
+            "union_mask_dice_delta_vs_25_10": union_dice_delta_vs_25_10,
+            "component_recall_delta_vs_25_10": recall_delta_vs_25_10,
+            "missed_rate_delta_vs_25_10": missed_delta_vs_25_10,
+            "extra_rate_delta_vs_25_10": extra_delta_vs_25_10,
+            "merged_rate_delta_vs_25_10": merged_delta_vs_25_10,
+            "depth_grid_rmse_delta_vs_25_10_m": depth_delta_vs_25_10,
+            "component_mask_dice_delta_vs_25_15": component_dice_delta_vs_25_15,
+            "union_mask_dice_delta_vs_25_15": union_dice_delta_vs_25_15,
+            "merged_rate_delta_vs_25_15": merged_delta_vs_25_15,
+            "depth_grid_rmse_delta_vs_25_15_m": depth_delta_vs_25_15,
+        },
+    }
+
+
+def allowed_use_for_stage(stage: str) -> list[str]:
+    if stage == "25.17":
+        return [
+            "label_v3b_training_gate_evaluation",
+            "label_v3b_failure_audit_input",
+            "component_set_training_gate_comparison_only",
+        ]
+    return [
+        "component_set_training_gate_evaluation",
+        "target_v2_training_gate_evaluation",
+        "label_v3_training_gate_evaluation",
+        "label_v3b_training_gate_evaluation",
+        "mask_depth_loss_rebalance_training",
+        "failure_audit_input",
+    ]
+
+
 def update_registry_note(path: Path, gate_manifest: dict[str, Any]) -> None:
     text = path.read_text(encoding="utf-8")
     marker = f"## {DATASET_ID}"
@@ -1959,15 +2358,19 @@ def write_summary(path: Path, payload: dict[str, Any]) -> None:
     comparison = payload.get("comparison_to_25_10", {})
     comparison_25_11 = payload.get("comparison_to_25_11", {})
     comparison_25_12 = payload.get("comparison_to_25_12", {})
+    comparison_25_15 = payload.get("comparison_to_25_15", {})
     deltas = comparison.get("test_deltas", {})
     deltas_25_11 = comparison_25_11.get("test_deltas", {})
     deltas_25_12 = comparison_25_12.get("test_deltas", {})
+    deltas_25_15 = comparison_25_15.get("test_deltas", {})
     if payload["stage"] == "25.12":
         title = "25.12 Component-Separation-Aware Rebalance Training"
     elif payload["stage"] == "25.13":
         title = "25.13 Target-V2 Component-Set Training Gate"
     elif payload["stage"] == "25.15":
         title = "25.15 Label-V3 Component-Set Training Gate"
+    elif payload["stage"] == "25.17":
+        title = "25.17 Label-V3B Component-Set Training Gate"
     elif payload["stage"] == "25.11":
         title = "25.11 Mask/Depth Loss Rebalance Training"
     else:
@@ -2004,6 +2407,20 @@ def write_summary(path: Path, payload: dict[str, Any]) -> None:
         f"- component_sdf_target_v3: `{payload['target_v2'].get('component_sdf_target_v3')}`",
         f"- component_valid_region_mask: `{payload['target_v2'].get('component_valid_region_mask')}`",
         f"- component_depth_target_v3: `{payload['target_v2'].get('component_depth_target_v3')}`",
+        f"- component_hard_core_mask_v3b: `{payload['target_v2'].get('component_hard_core_mask_v3b')}`",
+        f"- component_boundary_halo_mask_v3b: `{payload['target_v2'].get('component_boundary_halo_mask_v3b')}`",
+        f"- component_ignore_overlap_mask_v3b: `{payload['target_v2'].get('component_ignore_overlap_mask_v3b')}`",
+        f"- component_mask_target_v3b_soft: `{payload['target_v2'].get('component_mask_target_v3b_soft')}`",
+        f"- component_sdf_target_v3b: `{payload['target_v2'].get('component_sdf_target_v3b')}`",
+        f"- component_valid_region_mask_v3b: `{payload['target_v2'].get('component_valid_region_mask_v3b')}`",
+        f"- component_depth_target_v3b: `{payload['target_v2'].get('component_depth_target_v3b')}`",
+        f"- component_identity_conflict_mask_v3b: `{payload['target_v2'].get('component_identity_conflict_mask_v3b')}`",
+        f"- v3b_hard_core_pixel_mean/min: `{fmt_metric(payload['target_v2'].get('v3b_hard_core_pixel_mean'))}` / `{payload['target_v2'].get('v3b_hard_core_pixel_min')}`",
+        f"- v3b_boundary_halo_pixel_mean/min: `{fmt_metric(payload['target_v2'].get('v3b_boundary_halo_pixel_mean'))}` / `{payload['target_v2'].get('v3b_boundary_halo_pixel_min')}`",
+        f"- v3b_soft_support_pixel_mean/min: `{fmt_metric(payload['target_v2'].get('v3b_soft_support_pixel_mean'))}` / `{payload['target_v2'].get('v3b_soft_support_pixel_min')}`",
+        f"- v3b_soft_or_raw_union_ratio_mean/max: `{fmt_metric(payload['target_v2'].get('v3b_soft_or_raw_union_ratio_mean'))}` / `{fmt_metric(payload['target_v2'].get('v3b_soft_or_raw_union_ratio_max'))}`",
+        f"- v3b_identity_conflict_pixel_sum: `{payload['target_v2'].get('v3b_identity_conflict_pixel_sum')}`",
+        f"- v3b_ignore_overlap_pixel_sum: `{payload['target_v2'].get('v3b_ignore_overlap_pixel_sum')}`",
         f"- v3_target_loaded_count: `{payload['target_v2'].get('v3_target_loaded_count')}`",
         f"- v3_soft_support_pixel_mean/min: `{fmt_metric(payload['target_v2'].get('v3_soft_support_pixel_mean'))}` / `{payload['target_v2'].get('v3_soft_support_pixel_min')}`",
         f"- v3_valid_region_pixel_mean/min: `{fmt_metric(payload['target_v2'].get('v3_valid_region_pixel_mean'))}` / `{payload['target_v2'].get('v3_valid_region_pixel_min')}`",
@@ -2087,12 +2504,22 @@ def write_summary(path: Path, payload: dict[str, Any]) -> None:
         f"- union_mask_dice_delta: `{fmt_metric(payload.get('comparison_to_25_13', {}).get('test_deltas', {}).get('union_mask_dice_mean', {}).get('delta'))}`",
         f"- depth_grid_RMSE_delta_m: `{fmt_metric(payload.get('comparison_to_25_13', {}).get('test_deltas', {}).get('depth_grid_rmse_m_mean', {}).get('delta'), 9)}`",
         "",
+        "## 25.15 Comparison",
+        "",
+        f"- component_recall_delta: `{fmt_metric(deltas_25_15.get('component_recall', {}).get('delta'))}`",
+        f"- missed_rate_delta: `{fmt_metric(deltas_25_15.get('missed_rate', {}).get('delta'))}`",
+        f"- extra_rate_delta: `{fmt_metric(deltas_25_15.get('extra_rate', {}).get('delta'))}`",
+        f"- merged_rate_delta: `{fmt_metric(deltas_25_15.get('merged_rate', {}).get('delta'))}`",
+        f"- component_mask_dice_delta: `{fmt_metric(deltas_25_15.get('component_mask_dice_mean', {}).get('delta'))}`",
+        f"- union_mask_dice_delta: `{fmt_metric(deltas_25_15.get('union_mask_dice_mean', {}).get('delta'))}`",
+        f"- depth_grid_RMSE_delta_m: `{fmt_metric(deltas_25_15.get('depth_grid_rmse_m_mean', {}).get('delta'), 9)}`",
+        "",
         "## Boundary",
         "",
         "- This is a training gate, not a baseline replacement.",
         "- No `CURRENT_BASELINE.md` transition is authorized.",
         "- Model architecture, K=3 component-set representation, fixed split, and Hungarian matching are unchanged.",
-        "- 25.15 uses the 25.10 loss mainline with label-v3 loader targets, not the 25.11/25.12 rebalance stack.",
+        f"- {payload['stage']} uses the 25.10 loss mainline with explicit label supervision, not the 25.11/25.12 rebalance stack.",
         "- No checkpoint or generated data artifact is committed by this gate.",
         f"- next_route: `{payload['route_decision']}`",
     ]
@@ -2120,6 +2547,16 @@ def main() -> int:
             raise ValueError("25.15 must use the 25.10 component_set_gate_v1 loss mainline")
         if args.target_version != "v3":
             raise ValueError("25.15 must use --target-version v3")
+    if args.stage == "25.17":
+        label_v3b_manifest = read_json(args.label_v3b_manifest)
+        if label_v3b_manifest.get("acceptance_decision") != "READY_FOR_25_17_TRAINING":
+            raise ValueError("25.17 requires 25.16 READY_FOR_25_17_TRAINING label-v3b manifest")
+        if label_v3b_manifest.get("ready_for_training_v3b") is not True:
+            raise ValueError("25.17 requires ready_for_training_v3b=true")
+        if args.loss_config != "component_set_gate_v1":
+            raise ValueError("25.17 must use the 25.10 component_set_gate_v1 loss mainline")
+        if args.target_version != "v3b":
+            raise ValueError("25.17 must use --target-version v3b")
     manifest, npz_path = assert_manifest_and_registry(args.manifest, args.registry)
     pack = load_npz(npz_path)
     arrays = build_arrays(pack, target_version=args.target_version)
@@ -2139,7 +2576,7 @@ def main() -> int:
     }
     comparison = (
         compare_to_previous(metrics_by_split, args.comparison_metrics)
-        if args.loss_config in {"mask_depth_rebalance_v1", "component_separation_rebalance_v1"} or args.stage in {"25.13", "25.15"}
+        if args.loss_config in {"mask_depth_rebalance_v1", "component_separation_rebalance_v1"} or args.stage in {"25.13", "25.15", "25.17"}
         else {}
     )
     comparison_25_11 = (
@@ -2148,11 +2585,14 @@ def main() -> int:
         else {}
     )
     comparison_25_12 = compare_to_previous(metrics_by_split, args.comparison_metrics_25_12) if args.stage == "25.13" else {}
-    comparison_25_13 = compare_to_previous(metrics_by_split, args.comparison_metrics_25_13) if args.stage == "25.15" else {}
+    comparison_25_13 = compare_to_previous(metrics_by_split, args.comparison_metrics_25_13) if args.stage in {"25.15", "25.17"} else {}
+    comparison_25_15 = compare_to_previous(metrics_by_split, args.comparison_metrics_25_15) if args.stage == "25.17" else {}
     if args.stage == "25.13":
         gate = decide_target_v2_gate(history, metrics_by_split, comparison, comparison_25_11, comparison_25_12, arrays.target_transform_summary)
     elif args.stage == "25.15":
         gate = decide_label_v3_gate(history, metrics_by_split, comparison, comparison_25_13, arrays.target_transform_summary)
+    elif args.stage == "25.17":
+        gate = decide_label_v3b_gate(history, metrics_by_split, comparison, comparison_25_13, comparison_25_15, arrays.target_transform_summary)
     elif args.loss_config == "component_separation_rebalance_v1":
         gate = decide_component_separation_gate(history, metrics_by_split, comparison, comparison_25_11)
     elif args.loss_config == "mask_depth_rebalance_v1":
@@ -2164,9 +2604,10 @@ def main() -> int:
             "vs_25_10": compare_sample_rows(sample_rows, args.comparison_metrics, "25.10"),
             "vs_25_11": compare_sample_rows(sample_rows, args.comparison_metrics_25_11, "25.11"),
             **({"vs_25_12": compare_sample_rows(sample_rows, args.comparison_metrics_25_12, "25.12")} if args.stage == "25.13" else {}),
-            **({"vs_25_13": compare_sample_rows(sample_rows, args.comparison_metrics_25_13, "25.13")} if args.stage == "25.15" else {}),
+            **({"vs_25_13": compare_sample_rows(sample_rows, args.comparison_metrics_25_13, "25.13")} if args.stage in {"25.15", "25.17"} else {}),
+            **({"vs_25_15": compare_sample_rows(sample_rows, args.comparison_metrics_25_15, "25.15")} if args.stage == "25.17" else {}),
         }
-        if args.loss_config == "component_separation_rebalance_v1" or args.stage in {"25.13", "25.15"}
+        if args.loss_config == "component_separation_rebalance_v1" or args.stage in {"25.13", "25.15", "25.17"}
         else {}
     )
     split_counts = {split: int(indices.size) for split, indices in arrays.split_indices.items()}
@@ -2185,6 +2626,7 @@ def main() -> int:
         "comparison_to_25_11": comparison_25_11,
         "comparison_to_25_12": comparison_25_12,
         "comparison_to_25_13": comparison_25_13,
+        "comparison_to_25_15": comparison_25_15,
         "sample_comparisons": sample_comparisons,
         "target_v2": arrays.target_transform_summary,
         "data": {
@@ -2216,6 +2658,7 @@ def main() -> int:
             "architecture_changed_from_25_10": False,
             "component_set_representation_changed": False,
             "hungarian_matching_changed": False,
+            "label_v3b_manifest": str(args.label_v3b_manifest),
             "uses_25_10_loss_mainline": loss_config.name == "component_set_gate_v1",
             "uses_25_11_rebalance_stack": loss_config.name == "mask_depth_rebalance_v1",
             "uses_25_12_rebalance_stack": loss_config.name == "component_separation_rebalance_v1",
@@ -2284,8 +2727,10 @@ def main() -> int:
         "target_version": args.target_version,
         "target_redesign_manifest": str(args.target_redesign_manifest),
         "label_v3_manifest": str(args.label_v3_manifest),
+        "label_v3b_manifest": str(args.label_v3b_manifest),
         "target_v2_loaded": arrays.target_transform_summary.get("component_mask_target_v2") is True,
         "target_v3_loaded": arrays.target_transform_summary.get("component_mask_target_v3_soft") is True,
+        "target_v3b_loaded": arrays.target_transform_summary.get("component_mask_target_v3b_soft") is True,
         "model_capacity_expanded": False,
         "component_set_representation_changed": False,
         "train_ready_candidate_consumed": True,
@@ -2293,7 +2738,7 @@ def main() -> int:
         "current_baseline_updated": False,
         "checkpoint_saved": False,
         "inference_artifact_exported": False,
-        "allowed_use": ["component_set_training_gate_evaluation", "target_v2_training_gate_evaluation", "label_v3_training_gate_evaluation", "mask_depth_loss_rebalance_training", "failure_audit_input"],
+        "allowed_use": allowed_use_for_stage(args.stage),
         "forbidden_use": ["baseline_update", "current_baseline_replacement", "automatic_mainline_training", "formal_inference_artifact"],
     }
     write_json(args.gate_manifest, gate_manifest)

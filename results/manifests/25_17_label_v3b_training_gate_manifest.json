@@ -1,0 +1,37 @@
+{
+  "allowed_use": [
+    "label_v3b_training_gate_evaluation",
+    "label_v3b_failure_audit_input",
+    "component_set_training_gate_comparison_only"
+  ],
+  "baseline_ready": false,
+  "checkpoint_saved": false,
+  "component_set_representation_changed": false,
+  "current_baseline_updated": false,
+  "dataset_id": "comsol_surface_multipit_component_set_pilot_v1",
+  "dataset_manifest": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\manifests\\comsol_surface_multipit_component_set_pilot_v1.manifest.json",
+  "forbidden_use": [
+    "baseline_update",
+    "current_baseline_replacement",
+    "automatic_mainline_training",
+    "formal_inference_artifact"
+  ],
+  "gate_decision": "PARTIAL",
+  "gate_id": "25_17_surface_multipit_label_v3b_training_gate",
+  "inference_artifact_exported": false,
+  "label_v3_manifest": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\manifests\\25_14_label_v3_derivation_validator_manifest.json",
+  "label_v3b_manifest": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\manifests\\25_16_label_v3b_derivation_validator_manifest.json",
+  "loss_config": "component_set_gate_v1",
+  "metrics_path": "results\\metrics\\25_17_label_v3b_training_gate_metrics.json",
+  "model_capacity_expanded": false,
+  "route_decision": "B. enter 25.17b label-v3b failure audit focused on hard-core/halo/SDF/depth-valid-region usage",
+  "script": "scripts/train_surface_multipit_component_set_gate.py",
+  "stage": "25.17",
+  "summary_path": "results\\summaries\\25_17_label_v3b_training_gate_summary.md",
+  "target_redesign_manifest": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\manifests\\25_12b_component_raster_depth_target_redesign_manifest.json",
+  "target_v2_loaded": false,
+  "target_v3_loaded": false,
+  "target_v3b_loaded": true,
+  "target_version": "v3b",
+  "train_ready_candidate_consumed": true
+}

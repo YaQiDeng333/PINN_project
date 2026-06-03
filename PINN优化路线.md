@@ -987,6 +987,14 @@ The v3b rule is the new branch contract: exclusive hard core preserves component
 
 Validator outcome is `READY_FOR_25_17_TRAINING`: hard-core min `47 px`, soft support min `57 px`, soft OR/raw union mean/max `1.247726 / 1.250000`, v3b/v3 shrink ratio mean `0.627196`, duplicate hard ownership `0`, and empty slot violations `0`. The only route now is 25.17 label-v3b training gate with the 25.10 loss mainline; do not resume the failed 25.11/25.12 rebalance stack and do not update `CURRENT_BASELINE.md`.
 
+## 2026-06-03 route sync: 25.17 label-v3b training gate
+
+The v3b target design fixes the 25.13 near-empty failure partially, but it does not yet restore component separation. With the 25.10 loss mainline and no architecture expansion, 25.17 reaches test recall `0.674419`, missed `0.325581`, extra `0.292683`, merged `1.000000`, component Dice `0.034007`, union Dice `0.060961`, and depth RMSE `0.001178764 m`.
+
+Mechanism: hard-core/halo/SDF supervision gives more non-empty mask support than target v2, so Dice is higher than 25.13, but the model still collapses into the 25.15-style union-like merged solution. This is not a baseline candidate and it does not justify returning to the 25.11/25.12 rebalance stack.
+
+Route boundary: next stage is 25.17b label-v3b failure audit focused on loader/loss/metric use of hard-core identity, halo support, SDF support, depth valid regions, and overlap ignore masks. `CURRENT_BASELINE.md` remains unchanged.
+
 ## 2026-06-03 route sync: surface RBC +120 expansion gate
 
 The surface RBC targeted top-up can be assembled and validated, but it does not pass the training gate as a baseline-expansion candidate. The assembled dataset is explicitly `v3_240 + topup_v1_120`, dataset_id `comsol_true_3d_rbc_surface_expansion_v1_360`, N=`360`, split=`242/59/59`; it remains an explicit candidate dataset with `baseline_ready=false`.
