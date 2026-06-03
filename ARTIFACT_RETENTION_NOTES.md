@@ -115,9 +115,9 @@
 
 已删除 `claude_review_*`、`review_*`，以及大量 preflight、failure audit、training gate、route decision 的重复 `.txt` 记录。后续 review 结果默认不保存为项目产物；确有长期价值时，应整理进正式 Markdown 文档。
 
-## 清理后实际规模
+## GitHub 追踪产物规模
 
-2026-05-28 清理后，本文档对应的非代码产物规模为：
+2026-05-28 清理后，本地非代码产物规模为：
 
 - `results/previews/`：33 个文件。
 - `results/loss_curves/`：7 个文件。
@@ -126,10 +126,12 @@
 
 第一轮清理后曾暂留空目录；第二轮已按用户确认删除空目录，保留说明以文件为准。
 
-第二轮清理后继续保留：
+2026-06-03 针对 GitHub `main` 又执行了一轮 tracked 产物清理，删除 review / preflight / route-decision summary，以及 epoch log、逐样本 profile metrics、failure cases、gallery index 等过程文件。清理后 GitHub 追踪规模为：
 
-- `results/metrics/`：199 个文件，约 8.70 MiB；只保留当前 true 3D RBC 主线非 plan 指标和 `comsol_true_3d_profile_capability_matrix.csv`。
-- `results/summaries/`：29 个文件，约 89.74 KiB；只保留当前主线和少量历史代表入口，不再保留 review 文档。
-- `results/manifests/`：11 个文件，约 0.03 MiB；保留为数据包和 artifact 定位入口。
+- `results/metrics/`：435 个文件，约 26.40 MiB。
+- `results/summaries/`：174 个文件，约 280.54 KiB。
+- `results/manifests/`：43 个文件；保留为数据包和 artifact 定位入口。
+
+GitHub 里继续保留当前主线、liftoff companion、surface forward-refinement companion、multi-pit handoff、internal-defect historical representative records，以及各阶段 manifest。默认不再追踪 review / preflight / route-decision summary，也不再追踪 epoch log、逐样本 failure case 和 gallery index；如确有长期价值，应整理进正式 Markdown 文档。
 
 `.tmp/`、`__pycache__/`、`results/archive/` 以及清理后空目录已删除。

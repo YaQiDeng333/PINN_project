@@ -1,9 +1,0 @@
-22.4 shape-preserving tail strategy preflight
-scope: analysis artifact generator；只读取既有 metrics/manifest 并写 summary/metrics，不训练，不运行 COMSOL，不生成或修改 data/NPZ，不更新 CURRENT_BASELINE.md。
-repo_root: C:\Users\19166\Desktop\PINN_project
-critical_files_present: True
-missing_critical: []
-missing_optional: []
-forbidden_artifact_status_empty: True
-forbidden_artifact_status: clean
-baseline_status: internal branch 不是 CURRENT_BASELINE；CURRENT_BASELINE.md 只读检查。

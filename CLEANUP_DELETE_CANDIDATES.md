@@ -284,3 +284,24 @@
 - 5 个 `.md` 路线、合同或预处理说明。
 
 后续默认不再保存 review 结果文档；如确有长期价值，应整理进 `CURRENT_BASELINE.md`、`EXPERIMENT_LOG.md` 或专门的 Markdown 说明，而不是继续堆在 `results/summaries/`。
+
+## 2026-06-03 GitHub tracked 产物清理
+
+本轮清理目标是压缩 GitHub `main` 中已经追踪的过程文件，不处理本机 ignored 的 `data/`、`checkpoints/`、`results/previews/` 或个人工具目录。
+
+已删除：175 个 GitHub tracked 文件。
+
+删除范围：
+
+- `results/summaries/review_*.txt`
+- `results/summaries/*preflight*`
+- `results/summaries/*route_decision*`
+- `results/summaries/*decision_summary*`
+- `results/metrics/*epoch_log*`
+- `results/metrics/*candidate_profile_metrics.csv`
+- `results/metrics/*selected_predictions.csv`
+- `results/metrics/*reference_predictions.csv`
+- `results/metrics/*failure_cases.csv`
+- `results/metrics/*gallery_index.csv`
+
+保护范围：未删除 `CURRENT_BASELINE.md`、`COMSOL_DATA_REGISTRY.md`、`results/manifests/`、`results/templates/`，也未删除 25.18 / 25.19 / 25.19b completion package。清理后 GitHub tracked 文件数从 1221 降到 1046；`results/metrics/` 保留 435 个文件，`results/summaries/` 保留 174 个文件，`results/manifests/` 保留 43 个文件。

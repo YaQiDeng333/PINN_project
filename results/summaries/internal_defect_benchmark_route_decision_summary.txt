@@ -1,5 +1,0 @@
-21.5 internal defect benchmark route decision
-next_step: B_improve_burial_depth_head_model
-reason: neural candidate is positive for total/shape/center, but burial_depth remains feature-baseline stronger.
-baseline_decision: no baseline transition; CURRENT_BASELINE remains surface/near-surface true 3D RBC baseline.
-recommended_scope: burial-depth-focused model / feature-fusion diagnostic, with shape-conditioned model as secondary ablation.

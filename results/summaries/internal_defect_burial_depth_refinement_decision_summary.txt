@@ -1,9 +1,0 @@
-21.6 internal defect burial-depth refinement route decision
-dataset_id: comsol_internal_defect_pilot_pack_v2_240
-selected_candidate: B2_feature_fusion_burial_head
-burial_depth_mae_mm: refined=0.413; 21.4_neural=0.595; feature_baseline=0.472
-secondary_metrics: total=0.395256; center=1.466mm; shape_f1=0.975309
-forms_internal_refinement_candidate: true
-next_step: A_internal_benchmark_rerun_candidate_upgrade
-reason: burial_depth beats the feature baseline without material secondary collapse.
-baseline_decision: no CURRENT_BASELINE update; internal defect remains independent branch.
