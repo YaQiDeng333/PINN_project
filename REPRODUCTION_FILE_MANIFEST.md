@@ -31,7 +31,7 @@
 - `REPRODUCTION_FILE_MANIFEST.md`
 - `scripts/`
 
-根目录旧入口 `train_pinn.py`、`evaluate_pinn.py`、`data_generator_v2.py` 已移除。它们主要服务早期 synthetic / v3_complex / v4 2D mask 或 μ-field 路线，不是当前 true 3D RBC baseline 的最小运行依赖。当前主线复现入口在 `scripts/` 下，尤其是 manifest loader、artifact loader 和 liftoff-conditioned inference 相关脚本。
+根目录旧入口 `train_pinn.py`、`evaluate_pinn.py`、`data_generator_v2.py` 已移除。旧 2D mask/boundary、v4/smallpoly、rect/rot profile-forward、starconvex、shape-prior、oracle/deformable、旧 COMSOL data-domain candidate 等已停止路线脚本也已精简。当前主线复现入口在 `scripts/` 下，尤其是 manifest loader、artifact loader 和 liftoff-conditioned inference 相关脚本。
 
 ### 当前主线数据
 

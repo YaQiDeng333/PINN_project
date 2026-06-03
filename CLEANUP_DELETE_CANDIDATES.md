@@ -15,7 +15,7 @@
 - `PINN优化路线.md`
 - `术语说明.md`
 - `REAL_DATA_INTAKE_SCHEMA.md`
-- `scripts/`
+- `scripts/` 中当前 true 3D RBC、liftoff、surface forward-refinement、surface multi-pit geometry-primary、internal-defect 代表性脚本
 - `results/manifests/comsol_true_3d_rbc_imported_watertight_pilot_v3_240.manifest.json`
 - `results/manifests/comsol_true_3d_rbc_liftoff_aug_pack_v1.manifest.json`
 - `results/manifests/true_3d_rbc_baseline_inference_artifact_manifest.json`
@@ -305,3 +305,20 @@
 - `results/metrics/*gallery_index.csv`
 
 保护范围：未删除 `CURRENT_BASELINE.md`、`COMSOL_DATA_REGISTRY.md`、`results/manifests/`、`results/templates/`，也未删除 25.18 / 25.19 / 25.19b completion package。清理后 GitHub tracked 文件数从 1221 降到 1046；`results/metrics/` 保留 435 个文件，`results/summaries/` 保留 174 个文件，`results/manifests/` 保留 43 个文件。
+
+## 2026-06-03 第二轮 GitHub tracked 结构清理
+
+本轮继续压缩 GitHub `main` 中与当前 25.19b 进度不符的历史入口。
+
+已删除：96 个 GitHub tracked 文件。
+
+删除范围：
+
+- 根目录旧 COMSOL data-domain baseline 文档：
+  - `COMSOL_DATA_BASELINE.md`
+  - `COMSOL_DATA_BASELINE_V2.md`
+  - `COMSOL_MULTI_DEFECT_DATA_BASELINE.md`
+  - `COMSOL_THREE_COMPONENT_DATA_BASELINE.md`
+- 92 个已停止路线脚本，覆盖旧 2D mask/boundary、v4/smallpoly、rect/rot profile-forward、multiheight/multiaxis/multidirection profile residual、starconvex、shape-prior、oracle/deformable、旧 COMSOL data-domain candidate 等实验入口。
+
+保护范围：未删除 `CURRENT_BASELINE.md`、`COMSOL_DATA_REGISTRY.md`、`results/manifests/`、`results/templates/`、当前 true 3D RBC / liftoff / surface forward-refinement / surface multi-pit geometry-primary / internal-defect 代表性脚本，也未删除 25.18 / 25.19 / 25.19b completion package。清理后 GitHub tracked 文件数从 1046 降到 950，`scripts/` 从 372 个文件降到 280 个文件。
