@@ -1,0 +1,49 @@
+{
+  "acceptance_decision": "READY_FOR_25_17_TRAINING",
+  "allowed_use": [
+    "explicit_25_17_label_v3b_training_gate_planning",
+    "component_set_label_validation"
+  ],
+  "baseline_ready": false,
+  "boundary": {
+    "baseline_transition": false,
+    "checkpoint_or_preview_exported": false,
+    "comsol_run": false,
+    "current_baseline_updated": false,
+    "data_npz_modified": false,
+    "derived_label_arrays_written": false,
+    "loss_tuning": false,
+    "model_capacity_expanded": false,
+    "training_run": false
+  },
+  "current_baseline_updated": false,
+  "dataset_id": "comsol_surface_multipit_component_set_pilot_v1",
+  "derivation_id": "25_16_surface_multipit_label_v3b_derivation_validator",
+  "forbidden_use": [
+    "baseline_update",
+    "current_baseline_replacement",
+    "latest_newest_auto_discovery",
+    "formal_inference_artifact"
+  ],
+  "generated_at": "2026-06-03T08:51:59",
+  "git": {
+    "branch": "codex/25-16-label-v3b-derivation-validator",
+    "head_before_commit": "549ef3c3521eda9624861eb6d8664295bbf2805b",
+    "protected_path_diff_before_write": ""
+  },
+  "metrics_path": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\metrics\\25_16_label_v3b_derivation_validator.json",
+  "ready_for_training_v3b": true,
+  "route_decision": "A. enter 25.17 label-v3b training gate using 25.10 loss mainline + label-v3b supervision; do not use the 25.11/25.12 rebalance stack",
+  "source_files": {
+    "dataset_manifest": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\manifests\\comsol_surface_multipit_component_set_pilot_v1.manifest.json",
+    "dataset_npz_path": "C:\\Users\\19166\\Desktop\\PINN_project\\data\\comsol_mfl\\prepared\\experimental\\surface_multipit_component_set\\comsol_surface_multipit_component_set_pilot_v1.npz",
+    "manifest_25_14": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\manifests\\25_14_label_v3_derivation_validator_manifest.json",
+    "manifest_25_15b": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\manifests\\25_15b_label_v3_failure_audit_manifest.json",
+    "metrics_25_14": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\metrics\\25_14_label_v3_derivation_validator.json",
+    "metrics_25_15": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\metrics\\25_15_label_v3_training_gate_metrics.json",
+    "metrics_25_15b": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\metrics\\25_15b_label_v3_failure_audit.json"
+  },
+  "stage": "25.16",
+  "status": "label_v3b_derivation_validated",
+  "summary_path": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\summaries\\25_16_label_v3b_derivation_validator_summary.md"
+}

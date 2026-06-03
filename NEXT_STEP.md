@@ -863,3 +863,11 @@ Only next step: create deterministic replacements for the two calibration blocke
 Stage 25.14 generated the 120-row top-up plan and verified the COMSOL orchestrator dry-run/chunk isolation, but real `workers=1` calibration stopped the route: `22/24` samples passed and two sample-level geometry failures were classified as `sample_geometry_failure`. The required replacement signatures are `balanced_interior|medium|narrow|sharp|interior` for `surface_rbc_targeted_008_balanced_interior_sharp_medium_narrow` and `balanced_interior|deep|balanced|round|interior` for `surface_rbc_targeted_022_balanced_interior_round_deep_balanced`.
 
 Do not run full 120, do not run `+120 training gate`, and do not assemble `v3_240 + topup_v1_120` until calibration is zero-failure and validation passes. `CURRENT_BASELINE.md` remains unchanged.
+
+## 2026-06-03 after Stage 25.16 surface multi-pit label-v3b derivation
+
+Only next step: **enter 25.17 label-v3b training gate using the 25.10 loss mainline plus label-v3b supervision; do not use the 25.11/25.12 rebalance stack**.
+
+25.16 resolved the immediate label-target blocker without touching data/NPZ: v3b keeps the v2 exclusive hard identity, adds a capped one-pixel soft halo for anti-sparsity, and prevents v3-style union-like support leakage. The validator passed with v3b soft OR/raw union mean/max `1.247726 / 1.250000`, v3b/v3 shrink ratio mean `0.627196`, duplicate hard ownership `0`, and empty slot violations `0`.
+
+This authorizes only an explicit 25.17 training gate. It is not a baseline transition, does not update `CURRENT_BASELINE.md`, and should not continue loss tuning from the failed 25.11/25.12 rebalance stack.

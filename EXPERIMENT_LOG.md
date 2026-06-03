@@ -3514,3 +3514,13 @@ Review agent 已完成只读复核，无 must-fix。review 建议把 audit/decis
 - blocker decision: calibration is not zero-failure, so full generation was not run. `workers=2/4` calibration and full 120 are blocked until same-signature replacements are proposed and rerun.
 - replacement signatures: 008 requires `balanced_interior|medium|narrow|sharp|interior`; 022 requires `balanced_interior|deep|balanced|round|interior`. Replacement must preserve role, depth_bin, aspect_bin, curvature_template, and edge_position_bin.
 - route decision: `can_enter_plus120_training_gate=false`; `creates_assembled_dataset=false`; `CURRENT_BASELINE_update=false`.
+
+## 2026-06-03 Stage 25.16 surface multi-pit label-v3b derivation validator
+
+- scope: label derivation / validator only. No training, no loss tuning, no model expansion, no COMSOL run, no data/NPZ mutation, no checkpoint/preview artifact, no baseline transition, and no `CURRENT_BASELINE.md` update.
+- input evidence: 25.15b concluded `NEEDS_PINN_LABEL_DERIVATION_V3B` after label-v3 fixed v2 sparsity but created union-like soft support leakage and merged-mask collapse.
+- derivation: added `scripts/derive_surface_multipit_label_v3b_targets.py`, deriving targets in memory only from `comsol_surface_multipit_component_set_pilot_v1`.
+- v3b schema: keeps `raw_component_mask_raw` and `component_ownership_map`; adds exclusive `component_hard_core_mask_v3b`, capped narrow `component_boundary_halo_mask_v3b`, `component_ignore_overlap_mask_v3b`, `component_mask_target_v3b_soft`, `component_sdf_target_v3b`, `component_valid_region_mask_v3b`, `component_depth_target_v3b`, and `component_identity_conflict_mask_v3b`.
+- validator result: hard-core mean/min `99.851695 / 47 px`, halo mean/min `24.728814 / 10 px`, soft support mean/min `124.580508 / 57 px`, v3b soft OR/raw union mean/max `1.247726 / 1.250000`, v3b/v3 shrink ratio mean `0.627196`, duplicate hard ownership `0`, empty slot violations `0`.
+- acceptance decision: `READY_FOR_25_17_TRAINING`.
+- route decision: `A. enter 25.17 label-v3b training gate using 25.10 loss mainline + label-v3b supervision; do not use the 25.11/25.12 rebalance stack`.
