@@ -1,0 +1,23 @@
+{
+  "allowed_use": [
+    "route_reset_record",
+    "geometry_primary_design_input",
+    "25_19_plan_input"
+  ],
+  "baseline_transition": false,
+  "current_baseline_updated": false,
+  "forbidden_use": [
+    "baseline_update",
+    "current_baseline_replacement",
+    "raster_target_training_continuation"
+  ],
+  "loss_tuning": false,
+  "metrics_path": "results\\metrics\\25_18_raster_target_route_reset_metrics.json",
+  "model_capacity_expanded": false,
+  "route_decision": "A. enter 25.19 geometry-primary component-set design + label derivation plan; no training",
+  "route_stop_acceptance_decision": "STOP_RASTER_TARGET_MAINLINE",
+  "script": "scripts/design_surface_multipit_raster_target_route_reset.py",
+  "stage": "25.18",
+  "summary_path": "results\\summaries\\25_18_raster_target_route_reset_summary.md",
+  "training_run": false
+}

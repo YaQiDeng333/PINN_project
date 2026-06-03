@@ -1,0 +1,320 @@
+{
+  "boundary": {
+    "baseline_transition": false,
+    "comsol_run": false,
+    "continues_label_v4_or_loss_v5_raster_training": false,
+    "current_baseline_updated": false,
+    "data_npz_modified": false,
+    "loss_tuning": false,
+    "model_capacity_expanded": false,
+    "training_run": false
+  },
+  "evidence_records": [
+    {
+      "acceptance_decision": null,
+      "gate_decision": "PARTIAL",
+      "main_conclusion": null,
+      "path": "results\\metrics\\25_10_component_set_training_gate_metrics.json",
+      "present": true,
+      "role": "training_gate",
+      "route_decision": "B. run 25.10b failure audit for merged/missed, overlap/touching, slot permutation, and three-component rows",
+      "stage": "25.10",
+      "test_metrics": {
+        "component_mask_dice_mean": 0.10956192801248262,
+        "component_recall": 0.8372093023255814,
+        "depth_grid_rmse_m_mean": 0.00024331484055860995,
+        "extra_rate": 0.14285714285714285,
+        "merged_rate": 0.2,
+        "missed_rate": 0.16279069767441862,
+        "union_mask_dice_mean": 0.13047977906468847
+      }
+    },
+    {
+      "acceptance_decision": null,
+      "gate_decision": null,
+      "main_conclusion": "Primary failure is loss imbalance: component existence and coarse geometry learned, but raster/depth supervision did not translate into aligned masks.",
+      "path": "results\\metrics\\25_10b_component_set_failure_audit.json",
+      "present": true,
+      "role": "failure_audit",
+      "route_decision": "B. enter 25.11 mask/depth loss rebalance training",
+      "stage": "25.10b",
+      "test_metrics": {}
+    },
+    {
+      "acceptance_decision": null,
+      "gate_decision": "PARTIAL",
+      "main_conclusion": null,
+      "path": "results\\metrics\\25_11_mask_depth_loss_rebalance_training_metrics.json",
+      "present": true,
+      "role": "mask_depth_rebalance_training",
+      "route_decision": "B. run 25.11b targeted rebalance or topology-focused failure audit",
+      "stage": "25.11",
+      "test_metrics": {
+        "component_mask_dice_mean": 0.10873677056782904,
+        "component_recall": 0.8604651162790697,
+        "depth_grid_rmse_m_mean": 0.0006736270686713249,
+        "extra_rate": 0.0975609756097561,
+        "merged_rate": 0.9,
+        "missed_rate": 0.13953488372093023,
+        "union_mask_dice_mean": 0.16623253043963032
+      }
+    },
+    {
+      "acceptance_decision": null,
+      "gate_decision": null,
+      "main_conclusion": "25.11 primarily induced union-over-component merge collapse: union Dice improved while component separation and depth consistency degraded.",
+      "path": "results\\metrics\\25_11b_component_set_merge_collapse_audit.json",
+      "present": true,
+      "role": "merge_collapse_audit",
+      "route_decision": "A. enter 25.12 component-separation-aware rebalance training",
+      "stage": "25.11b",
+      "test_metrics": {}
+    },
+    {
+      "acceptance_decision": null,
+      "gate_decision": "FAIL",
+      "main_conclusion": null,
+      "path": "results\\metrics\\25_12_component_separation_rebalance_training_metrics.json",
+      "present": true,
+      "role": "component_separation_rebalance_training",
+      "route_decision": "C. rollback to 25.10 loss mainline and redesign component raster/depth targets before further training",
+      "stage": "25.12",
+      "test_metrics": {
+        "component_mask_dice_mean": 0.10879026946335761,
+        "component_recall": 0.7441860465116279,
+        "depth_grid_rmse_m_mean": 0.0005010226123121629,
+        "extra_rate": 0.2,
+        "merged_rate": 0.7,
+        "missed_rate": 0.2558139534883721,
+        "union_mask_dice_mean": 0.13807542481725177
+      }
+    },
+    {
+      "acceptance_decision": "READY_FOR_25.13_TRAINING",
+      "gate_decision": null,
+      "main_conclusion": "v1 generator labels are globally consistent, but component-level raster/depth supervision lacks explicit ownership in overlap/touching pixels; target v2 should resolve ownership before further training and return to the 25.10 loss mainline.",
+      "path": "results\\metrics\\25_12b_component_raster_depth_target_redesign.json",
+      "present": true,
+      "role": "target_redesign_audit",
+      "route_decision": "A. enter 25.13 target-v2 training gate using the 25.10 loss mainline; do not use the 25.11/25.12 rebalance stack",
+      "stage": "25.12b",
+      "test_metrics": {}
+    },
+    {
+      "acceptance_decision": null,
+      "gate_decision": "FAIL",
+      "main_conclusion": null,
+      "path": "results\\metrics\\25_13_target_v2_training_gate_metrics.json",
+      "present": true,
+      "role": "target_v2_training_gate",
+      "route_decision": "C. return to generator/label schema; do not continue loss tuning",
+      "stage": "25.13",
+      "test_metrics": {
+        "component_mask_dice_mean": 0.005535553554844283,
+        "component_recall": 0.6744186046511628,
+        "depth_grid_rmse_m_mean": 0.00024289081105620885,
+        "extra_rate": 0.2926829268292683,
+        "merged_rate": 0.0,
+        "missed_rate": 0.32558139534883723,
+        "union_mask_dice_mean": 0.0028290594354358186
+      }
+    },
+    {
+      "acceptance_decision": "NEEDS_PINN_LABEL_DERIVATION_V3",
+      "gate_decision": null,
+      "main_conclusion": "25.13 target-v2 collapse is not caused by empty v2 components or broad generator corruption; the current hard binary component-local labels are too sparse/unsupported for stable mask learning, so derive label schema v3 soft/valid-region targets in PINN_project before any further training.",
+      "path": "results\\metrics\\25_13b_generator_label_schema_audit.json",
+      "present": true,
+      "role": "generator_label_schema_audit",
+      "route_decision": "A. enter 25.14 label-v3 derivation + validator, no training",
+      "stage": "25.13b",
+      "test_metrics": {}
+    },
+    {
+      "acceptance_decision": "READY_FOR_25.15_TRAINING",
+      "gate_decision": null,
+      "main_conclusion": "Label-v3 can be derived inside PINN_project from existing raw component masks/depths: hard ownership remains unique, union/depth invariants remain intact, and soft/local valid-region support substantially increases the component-mask learning signal that collapsed under target-v2.",
+      "path": "results\\metrics\\25_14_label_v3_derivation_validator.json",
+      "present": true,
+      "role": "label_v3_derivation_validator",
+      "route_decision": "A. enter 25.15 label-v3 training gate using 25.10 loss mainline + label-v3 supervision; do not use the 25.11/25.12 rebalance stack",
+      "stage": "25.14",
+      "test_metrics": {}
+    },
+    {
+      "acceptance_decision": null,
+      "gate_decision": "FAIL",
+      "main_conclusion": null,
+      "path": "results\\metrics\\25_15_label_v3_training_gate_metrics.json",
+      "present": true,
+      "role": "label_v3_training_gate",
+      "route_decision": "C. return to label-v3 derivation or generator/export schema; do not continue loss tuning",
+      "stage": "25.15",
+      "test_metrics": {
+        "component_mask_dice_mean": 0.034245433596064564,
+        "component_recall": 0.6744186046511628,
+        "depth_grid_rmse_m_mean": 0.0011062229502975692,
+        "extra_rate": 0.3409090909090909,
+        "merged_rate": 1.0,
+        "missed_rate": 0.32558139534883723,
+        "union_mask_dice_mean": 0.061694320806748346
+      }
+    },
+    {
+      "acceptance_decision": "NEEDS_PINN_LABEL_DERIVATION_V3B",
+      "gate_decision": null,
+      "main_conclusion": "25.15 label-v3 relieved near-empty masks but converted the failure into union-like merged masks: soft/valid support is too broad relative to component identity, while raw labels remain sufficient for a stricter v3b derivation.",
+      "path": "results\\metrics\\25_15b_label_v3_failure_audit.json",
+      "present": true,
+      "role": "label_v3_failure_audit",
+      "route_decision": "A. enter 25.16 label-v3b derivation + validator, no training",
+      "stage": "25.15b",
+      "test_metrics": {}
+    },
+    {
+      "acceptance_decision": "READY_FOR_25_17_TRAINING",
+      "gate_decision": null,
+      "main_conclusion": "Label-v3b is derivable inside PINN_project from existing raw masks/depths: it keeps v2-style exclusive hard identity, adds capped narrow soft halo support to avoid v2 near-empty sparsity, and removes the broad v3 union-like support leakage.",
+      "path": "results\\metrics\\25_16_label_v3b_derivation_validator.json",
+      "present": true,
+      "role": "label_v3b_derivation_validator",
+      "route_decision": "A. enter 25.17 label-v3b training gate using 25.10 loss mainline + label-v3b supervision; do not use the 25.11/25.12 rebalance stack",
+      "stage": "25.16",
+      "test_metrics": {}
+    },
+    {
+      "acceptance_decision": null,
+      "gate_decision": "PARTIAL",
+      "main_conclusion": null,
+      "path": "results\\metrics\\25_17_label_v3b_training_gate_metrics.json",
+      "present": true,
+      "role": "label_v3b_training_gate",
+      "route_decision": "B. enter 25.17b label-v3b failure audit focused on hard-core/halo/SDF/depth-valid-region usage",
+      "stage": "25.17",
+      "test_metrics": {
+        "component_mask_dice_mean": 0.03400687250253813,
+        "component_recall": 0.6744186046511628,
+        "depth_grid_rmse_m_mean": 0.0011787870408780715,
+        "extra_rate": 0.2926829268292683,
+        "merged_rate": 1.0,
+        "missed_rate": 0.32558139534883723,
+        "union_mask_dice_mean": 0.06096102086761949
+      }
+    }
+  ],
+  "evidence_sufficient": true,
+  "failure_attribution_ranked": [
+    {
+      "cause": "per-component raster ownership main supervision mismatches MFL observability",
+      "evidence": "Exclusive ownership collapses toward near-empty masks, while softened support collapses toward union-like merged masks.",
+      "rank": 1
+    },
+    {
+      "cause": "touching / overlap / three-component cases amplify component identity ambiguity",
+      "evidence": "25.10-25.17 audits repeatedly isolate touching, overlap, and three-component subsets as unstable.",
+      "rank": 2
+    },
+    {
+      "cause": "loader/loss/matching risk remains worth auditing but is not a reason to continue raster-target tuning",
+      "evidence": "25.17 requires a failure audit of hard-core/halo/SDF/depth-valid-region usage, but the route-level pattern spans v2, v3, and v3b.",
+      "rank": 3
+    }
+  ],
+  "generated_at": "2026-06-03T07:29:01.022968+00:00",
+  "geometry_primary_component_set_design": {
+    "derived_outputs": [
+      "derived_component_mask",
+      "derived_union_mask",
+      "derived_component_depth",
+      "derived_union_depth"
+    ],
+    "forward_consistency": "geometry slots -> derived profile/mask/depth -> lightweight forward surrogate or feature-space residual -> Bx/By/Bz residual; COMSOL is not placed inside the training loop.",
+    "matching_priority": [
+      "existence",
+      "center",
+      "L/W/D",
+      "rotation",
+      "optional derived union consistency"
+    ],
+    "slot_primary_outputs": [
+      "existence_prob",
+      "center_x_m",
+      "center_y_m",
+      "L_m",
+      "W_m",
+      "D_m",
+      "rotation_angle",
+      "shape_family",
+      "compact_shape_parameters"
+    ],
+    "supervision_boundary": "per-component raster targets may remain auxiliary diagnostics or weak supervision, but are no longer the main loss."
+  },
+  "git": {
+    "branch": "codex/25-18-raster-target-route-reset",
+    "head_before_commit": "7f2f270d1bc043b7ee869cb8426bed42b82d8f23",
+    "protected_path_diff_before_write": ""
+  },
+  "missing_evidence_files": [],
+  "non_primary_causes": [
+    "global COMSOL dataset failure",
+    "CURRENT_BASELINE.md or baseline-transition issue",
+    "training epochs alone",
+    "model capacity alone"
+  ],
+  "preserved_routes": [
+    "multi-pit component-set direction",
+    "K=3 slot representation",
+    "component geometry prediction",
+    "future forward consistency",
+    "raw labels and COMSOL top-up dataset as evidence/source data"
+  ],
+  "roadmap": [
+    {
+      "route": "geometry-primary component-set design + label derivation plan",
+      "stage": "25.19",
+      "training": false
+    },
+    {
+      "route": "two-component separated/close geometry-primary training gate",
+      "scope": "most identifiable subset only",
+      "stage": "25.20",
+      "training": true
+    },
+    {
+      "route": "geometry-derived mask/depth evaluator + forward-consistency surrogate plan",
+      "stage": "25.21",
+      "training": false
+    },
+    {
+      "route": "topology-aware expansion for touching/overlap/three-component",
+      "stage": "25.22",
+      "training": "gate-dependent"
+    }
+  ],
+  "route_decision": "A. enter 25.19 geometry-primary component-set design + label derivation plan; no training",
+  "route_reset_main_conclusion": "Stop the per-component raster-target mainline and move to geometry-primary component-set design.",
+  "route_stop_acceptance_decision": "STOP_RASTER_TARGET_MAINLINE",
+  "stage": "25.18",
+  "stopped_routes": [
+    {
+      "decision": "STOP",
+      "evidence": "25.13 target-v2 training gate FAIL: ownership cleanup removed duplicate/overlap conflict but produced near-empty mask collapse.",
+      "route": "label-v2 target-v2 training route"
+    },
+    {
+      "decision": "STOP",
+      "evidence": "25.15 label-v3 training gate FAIL: soft support relieved sparsity but produced union-like merged collapse.",
+      "route": "label-v3 soft support training route"
+    },
+    {
+      "decision": "STOP",
+      "evidence": "25.17 label-v3b training gate PARTIAL: near-empty was partly relieved, but merged_rate remained 1.000000.",
+      "route": "label-v3b hard-core/halo/SDF raster-supervision route"
+    },
+    {
+      "decision": "STOP",
+      "evidence": "25.11/25.12 rebalance attempts either caused merge collapse or failed; the route now points away from raster-target main supervision.",
+      "route": "loss rebalance / label-v4 raster-target tuning as the mainline"
+    }
+  ]
+}

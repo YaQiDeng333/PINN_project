@@ -2,287 +2,279 @@
 
 ## 2026-06-03 Stage 25.15b surface multi-pit label-v3 target failure audit after merge collapse
 
-- Scope: audited the 25.15 label-v3 `FAIL` result only. This stage read the 25.14/25.15/25.10/25.13 metrics and manifests plus the explicit `comsol_surface_multipit_component_set_pilot_v1` dataset manifest/NPZ. It did not train, tune losses, run COMSOL, mutate data/NPZ files, expand model capacity, export checkpoints/previews/notes, or update `CURRENT_BASELINE.md`.
-- Main finding: label v3 relieved near-empty mask collapse but converted the failure into union-like merged masks. The current soft/valid support is too broad relative to component identity, while raw component masks/depths remain sufficient for a stricter v3b derivation inside `PINN_project`.
-- Metric evidence: 25.15 test recall `0.674419`, missed `0.325581`, extra `0.340909`, merged `1.000000`, component Dice `0.034245`, union Dice `0.061694`, depth RMSE `0.001106223 m`. Versus 25.13, component Dice improved by `+0.028710` and union Dice by `+0.058865`, but merged worsened by `+1.000000` and depth RMSE by `+0.000863332 m`.
-- V3 target leakage: soft OR/raw union ratio mean/p95/max `2.010499/2.397522/2.451613`; soft duplicate fraction mean/p95/max `0.061993/0.243511/0.327496`; valid duplicate fraction mean/p95/max `0.061993/0.243511/0.327496`; all `112/112` samples have union-like soft support. Separated rows still have nonzero soft overlap, and close rows reach soft duplicate max `0.253333`.
-- Failure grouping: test merged rate is `1.000000` for component_count=2, component_count=3, separated, close, touching, and partially_overlapping rows. This rules out a topology-only explanation and does not support an evaluator/threshold artifact.
-- Cause ranking: primary `soft support too broad`, secondary `valid region leakage`, tertiary `SDF identity too weak in multi-valid boundary zones`; depth target leakage is secondary because nonzero depth outside depth-valid is `0`, but duplicated depth-valid pixels remain in raw overlap regions.
-- Acceptance decision: `NEEDS_PINN_LABEL_DERIVATION_V3B`.
-- Route decision: unique next step is `A. enter 25.16 label-v3b derivation + validator, no training`. Do not continue loss tuning and do not enter a baseline transition.
+- 范围：只审计 25.15 label-v3 的 `FAIL` 结果。读取 25.14/25.15/25.10/25.13 metrics 与 manifests，以及显式 `comsol_surface_multipit_component_set_pilot_v1` dataset manifest/NPZ；没有训练、没有调 loss、没有运行 COMSOL、没有修改 data/NPZ、没有扩大模型容量、没有导出 checkpoint/preview/notes，也没有更新 `CURRENT_BASELINE.md`。
+- 主结论：label v3 缓解了 near-empty mask collapse，但把失败转成 union-like merged masks。当前 soft/valid support 相对 component identity 过宽；raw component masks/depths 仍足够在 `PINN_project` 内派生更严格的 v3b。
+- 指标证据：25.15 test recall `0.674419`，missed `0.325581`，extra `0.340909`，merged `1.000000`，component Dice `0.034245`，union Dice `0.061694`，depth RMSE `0.001106223 m`。相对 25.13，component Dice 改善 `+0.028710`，union Dice 改善 `+0.058865`，但 merged 恶化 `+1.000000`，depth RMSE 恶化 `+0.000863332 m`。
+- v3 target leakage：soft OR/raw union ratio mean/p95/max 为 `2.010499/2.397522/2.451613`；soft duplicate fraction mean/p95/max 为 `0.061993/0.243511/0.327496`；valid duplicate fraction mean/p95/max 为 `0.061993/0.243511/0.327496`；全部 `112/112` 样本都有 union-like soft support。separated rows 仍有非零 soft overlap，close rows 的 soft duplicate max 达到 `0.253333`。
+- 失败分组：component_count=2、component_count=3、separated、close、touching、partially_overlapping rows 的 test merged rate 都是 `1.000000`。这排除了 topology-only 解释，也不支持 evaluator/threshold artifact 解释。
+- 原因排序：主因是 `soft support too broad`，次因是 `valid region leakage`，第三是 `SDF identity too weak in multi-valid boundary zones`。depth target leakage 属于次级问题，因为 depth-valid 外的 nonzero depth 为 `0`，但 raw overlap regions 中仍存在 duplicated depth-valid pixels。
+- acceptance decision：`NEEDS_PINN_LABEL_DERIVATION_V3B`。
+- 路线决策：唯一下一步是 `A. 进入 25.16 label-v3b 派生与 validator；不训练`。不要继续 loss tuning，也不要进入 baseline transition。
 
 ## 2026-06-03 Stage 25.15 surface multi-pit label-v3 training gate
 
-- Scope: executed the label-v3 training gate on `comsol_surface_multipit_component_set_pilot_v1`. The model architecture, fixed `K=3` component-set representation, fixed split `72/20/20`, Hungarian matching, and `component_set_gate_v1` 25.10 loss mainline were kept unchanged. This stage did not use the 25.11/25.12 rebalance stack, did not run COMSOL, did not mutate data/NPZ files, did not export a formal inference artifact, and did not update `CURRENT_BASELINE.md`.
-- Label-v3 usage: loaded `component_mask_target_v3_soft`, `component_sdf_target_v3`, `component_valid_region_mask`, and `component_depth_target_v3`; active samples `112`, soft support mean/min `210.110169/126 px`, valid-region mean/min `210.110169/126 px`, depth-valid mean/min `101.110169/58 px`, empty slot violations `0`, duplicate hard ownership `297 -> 0`.
-- Training diagnostics: fixed seed `42`, `180` epochs, selected threshold `0.25`, best epoch `3`, first/final train loss `2.670443 -> 0.468332`, best val loss `2.113839`. Final label-v3 diagnostics were train/val SDF loss `0.055944/0.255177`, soft-BCE `0.362142/0.896596`, and valid-depth loss `0.000829/0.044922`.
-- Gate decision: `FAIL`. Label v3 partly escaped 25.13 near-empty collapse (`component Dice 0.005536 -> 0.034245`, `union Dice 0.002829 -> 0.061694`), but the learned masks became merged blobs instead of separated components.
-- Test metrics: recall `0.674419`, missed `0.325581`, extra `0.340909`, merged `1.000000`, center error `0.004201829 m`, L/W/D relative error `0.170478`, rotation error `0.598689 rad`, component Dice `0.034245`, union Dice `0.061694`, depth RMSE `0.001106223 m`.
-- Comparison: versus 25.10, recall worsened by `-0.162791`, component Dice by `-0.075316`, union Dice by `-0.068785`, merged by `+0.800000`, and depth RMSE by `+0.000862908 m`. Versus 25.13, component/union Dice improved but merged worsened by `+1.000000` and depth RMSE worsened by `+0.000863332 m`.
-- Required subsets: component_count=3 merged `1.000000`, partially_overlapping merged `1.000000`, and touching_boundary merged `1.000000`, so topology/component separation remains unresolved.
-- Route decision: unique next step is `C. return to label-v3 derivation or generator/export schema; do not continue loss tuning`. This is not a baseline transition.
+- 范围：在 `comsol_surface_multipit_component_set_pilot_v1` 上执行 label-v3 training gate。model architecture、固定 `K=3` component-set representation、固定 split `72/20/20`、Hungarian matching 和 `component_set_gate_v1` 25.10 loss mainline 都保持不变。本阶段没有使用 25.11/25.12 rebalance stack，没有运行 COMSOL，没有修改 data/NPZ，没有导出正式 inference artifact，也没有更新 `CURRENT_BASELINE.md`。
+- label-v3 使用情况：加载 `component_mask_target_v3_soft`、`component_sdf_target_v3`、`component_valid_region_mask` 和 `component_depth_target_v3`；active samples `112`，soft support mean/min `210.110169/126 px`，valid-region mean/min `210.110169/126 px`，depth-valid mean/min `101.110169/58 px`，empty slot violations `0`，duplicate hard ownership `297 -> 0`。
+- 训练诊断：固定 seed `42`，`180` epochs，selected threshold `0.25`，best epoch `3`，first/final train loss `2.670443 -> 0.468332`，best val loss `2.113839`。最终 label-v3 diagnostics 中 train/val SDF loss `0.055944/0.255177`，soft-BCE `0.362142/0.896596`，valid-depth loss `0.000829/0.044922`。
+- gate 判定：`FAIL`。label v3 部分摆脱了 25.13 near-empty collapse（component Dice `0.005536 -> 0.034245`，union Dice `0.002829 -> 0.061694`），但学到的 masks 变成 merged blobs，而不是 separated components。
+- test metrics：recall `0.674419`，missed `0.325581`，extra `0.340909`，merged `1.000000`，center error `0.004201829 m`，L/W/D relative error `0.170478`，rotation error `0.598689 rad`，component Dice `0.034245`，union Dice `0.061694`，depth RMSE `0.001106223 m`。
+- 对比：相对 25.10，recall 恶化 `-0.162791`，component Dice 恶化 `-0.075316`，union Dice 恶化 `-0.068785`，merged 恶化 `+0.800000`，depth RMSE 恶化 `+0.000862908 m`。相对 25.13，component/union Dice 有改善，但 merged 恶化 `+1.000000`，depth RMSE 恶化 `+0.000863332 m`。
+- 必报子集：component_count=3 merged `1.000000`，partially_overlapping merged `1.000000`，touching_boundary merged `1.000000`，因此 topology/component separation 仍未解决。
+- 路线决策：唯一下一步是 `C. 回到 label-v3 派生或 generator/export schema；不要继续 loss tuning`。这不是 baseline transition。
 
 ## 2026-06-03 Stage 25.14 surface multi-pit label-v3 derivation + validator
 
-- Scope: derived and validated label schema v3 targets in memory from `comsol_surface_multipit_component_set_pilot_v1`. This stage read 25.12b/25.13/25.13b evidence and the explicit dataset manifest/NPZ; it did not train, tune losses, run COMSOL, mutate data/NPZ files, expand model capacity, export checkpoints/previews/notes, or update `CURRENT_BASELINE.md`.
-- Main finding: label v3 can be derived inside `PINN_project` from existing raw component masks/depths. Hard ownership remains unique, union/depth invariants remain intact, and soft/local valid-region support substantially increases the component-mask learning signal that collapsed under target v2.
-- V3 support audit: active components `236`; v2 hard foreground pixels mean/min `99.851695/47`; v3 soft positive pixels mean/min/p05 `210.110169/126/147.750000`; v3/v2 positive support ratio mean/min `2.203184/1.697183`; existing v3 tiny/empty count `0`; existing depth-valid empty count `0`; inactive slot violations `0`.
-- Group slices: component_count=3 v3/v2 support ratio mean/min `2.445849/1.972789`; partially_overlapping `2.210708/1.795775`; touching_boundary `2.279145/1.842105`.
-- Invariants: duplicate hard ownership remains resolved (`297 -> 0`), overlap-depth-conflict remains resolved under hard ownership (`271 -> 0`), raw OR and v2 OR both reproduce union masks with mismatch `0`, and raw max(component depth) reproduces union depth with max RMSE `0.000000000000 m`.
-- Label v3 schema: preserve `raw_component_mask_raw` and `component_ownership_map`; add `component_mask_target_v3_soft`, `component_sdf_target_v3`, `component_valid_region_mask`, `component_depth_target_v3` with explicit depth-valid region, plus `overlap_region_mask` and `contact_boundary_mask`.
-- Acceptance decision: `READY_FOR_25.15_TRAINING`.
-- Route decision: unique next step is `A. enter 25.15 label-v3 training gate using 25.10 loss mainline + label-v3 supervision; do not use the 25.11/25.12 rebalance stack`. This is not a baseline transition.
+- 范围：从 `comsol_surface_multipit_component_set_pilot_v1` 在内存中派生并验证 label schema v3 targets。本阶段读取 25.12b/25.13/25.13b 证据和显式 dataset manifest/NPZ；没有训练、没有调 loss、没有运行 COMSOL、没有修改 data/NPZ、没有扩大模型容量、没有导出 checkpoint/preview/notes，也没有更新 `CURRENT_BASELINE.md`。
+- 主结论：label v3 可以在 `PINN_project` 内从现有 raw component masks/depths 派生。hard ownership 保持唯一，union/depth invariants 保持完整，soft/local valid-region support 明显增加了 target v2 下崩塌的 component-mask 学习信号。
+- v3 support audit：active components `236`；v2 hard foreground pixels mean/min `99.851695/47`；v3 soft positive pixels mean/min/p05 `210.110169/126/147.750000`；v3/v2 positive support ratio mean/min `2.203184/1.697183`；existing v3 tiny/empty count `0`；existing depth-valid empty count `0`；inactive slot violations `0`。
+- 分组切片：component_count=3 的 v3/v2 support ratio mean/min 为 `2.445849/1.972789`；partially_overlapping 为 `2.210708/1.795775`；touching_boundary 为 `2.279145/1.842105`。
+- invariants：duplicate hard ownership 继续保持已解决（`297 -> 0`），hard ownership 下 overlap-depth-conflict 继续保持已解决（`271 -> 0`），raw OR 和 v2 OR 都以 mismatch `0` 重建 union masks，raw max(component depth) 以 max RMSE `0.000000000000 m` 重建 union depth。
+- label v3 schema：保留 `raw_component_mask_raw` 和 `component_ownership_map`；新增 `component_mask_target_v3_soft`、`component_sdf_target_v3`、`component_valid_region_mask`、带 explicit depth-valid region 的 `component_depth_target_v3`，以及 `overlap_region_mask` 和 `contact_boundary_mask`。
+- acceptance decision：`READY_FOR_25.15_TRAINING`。
+- 路线决策：唯一下一步是 `A. enter 25.15 label-v3 training gate using 25.10 loss mainline + label-v3 supervision; do not use the 25.11/25.12 rebalance stack`。这不是 baseline transition。
 
 ## 2026-06-03 Stage 25.13b surface multi-pit generator/label schema audit after target-v2 collapse
 
-- Scope: audited generator/label schema after the 25.13 target-v2 `FAIL`. This stage read the 25.12b redesign metrics, 25.13 gate metrics/manifest, and the explicit `comsol_surface_multipit_component_set_pilot_v1` manifest/NPZ. It did not train, tune losses, run COMSOL, mutate data/NPZ files, expand model capacity, export checkpoints/previews/notes, or update `CURRENT_BASELINE.md`.
-- Main finding: near-empty mask collapse is not caused by empty v2 components or broad generator corruption. Target v2 clears duplicate ownership (`297 -> 0`) and overlap-depth-conflict (`271 -> 0`) while keeping existing component masks non-empty.
-- Positive-support audit: active components `236`; v2 foreground pixels mean/min/p05 are `99.851695/47/58.750000`; v2 positive fraction mean is only `0.012188928` of the `64x128` grid; v2/v1 shrink ratio mean/min is `0.985320/0.746032`; empty existing v2 masks `0`, tiny existing v2 masks `<20 px` `0`, and shrink ratio `<0.80` occurs in only `3` components.
-- Collapse evidence from 25.13: recall `0.674419`, missed `0.325581`, extra `0.292683`, merged `0.000000`, component Dice `0.005536`, union Dice `0.002829`, depth RMSE `0.000242891 m`. The zero merged rate is a near-empty mask artifact, not valid component separation.
-- Diagnosis: hard binary ownership-resolved labels remain too sparse and unsupported for stable component-local mask learning. The current schema lacks component-local soft mask/SDF, valid-region masks, overlap-region masks, contact-boundary masks, and ownership/boundary confidence.
-- Acceptance decision: `NEEDS_PINN_LABEL_DERIVATION_V3`; existing raw masks/depths and geometry labels are sufficient to derive v3 labels inside `PINN_project`, so no COMSOL generator/export fix is required yet.
-- Route decision: unique next step is `A. enter 25.14 label-v3 derivation + validator, no training`. Do not continue loss tuning and do not discuss baseline transition.
+- 范围：审计 25.13 target-v2 `FAIL` 后的 generator/label schema。本阶段读取 25.12b redesign metrics、25.13 gate metrics/manifest 和显式 `comsol_surface_multipit_component_set_pilot_v1` manifest/NPZ；没有训练、没有调 loss、没有运行 COMSOL、没有修改 data/NPZ、没有扩大模型容量、没有导出 checkpoints/previews/notes，也没有更新 `CURRENT_BASELINE.md`。
+- 主结论：near-empty mask collapse 不是由 empty v2 components 或 broad generator corruption 造成。target v2 清除了 duplicate ownership（`297 -> 0`）和 overlap-depth-conflict（`271 -> 0`），同时 existing component masks 仍非空。
+- positive-support audit：active components `236`；v2 foreground pixels mean/min/p05 为 `99.851695/47/58.750000`；v2 positive fraction mean 只占 `64x128` grid 的 `0.012188928`；v2/v1 shrink ratio mean/min 为 `0.985320/0.746032`；empty existing v2 masks 为 `0`，tiny existing v2 masks `<20 px` 为 `0`，shrink ratio `<0.80` 只出现在 `3` 个 components。
+- 25.13 collapse evidence：recall `0.674419`，missed `0.325581`，extra `0.292683`，merged `0.000000`，component Dice `0.005536`，union Dice `0.002829`，depth RMSE `0.000242891 m`。zero merged rate 是 near-empty mask artifact，不是有效 component separation。
+- diagnosis：hard binary ownership-resolved labels 对稳定 component-local mask learning 仍太稀疏、支撑不足。当前 schema 缺少 component-local soft mask/SDF、valid-region masks、overlap-region masks、contact-boundary masks 和 ownership/boundary confidence。
+- acceptance decision：`NEEDS_PINN_LABEL_DERIVATION_V3`；现有 raw masks/depths 和 geometry labels 足以在 `PINN_project` 内派生 v3 labels，因此暂时不需要 COMSOL generator/export fix。
+- 路线决策：唯一下一步是 `A. enter 25.14 label-v3 derivation + validator, no training`。不要继续 loss tuning，也不要讨论 baseline transition。
 
 ## 2026-06-03 Stage 25.13 surface multi-pit component-set target-v2 training gate
 
-- Scope: executed the target-v2 training gate on `comsol_surface_multipit_component_set_pilot_v1`. The architecture, fixed `K=3` component-set representation, fixed split `72/20/20`, Hungarian matching, and `component_set_gate_v1` 25.10 loss mainline were kept unchanged. The 25.11/25.12 rebalance stacks were not used.
-- Boundary: no COMSOL, no data/NPZ mutation, no checkpoint/preview/notes artifact commit, no model-capacity expansion, no formal inference artifact export, no baseline transition, and no `CURRENT_BASELINE.md` update.
-- Target v2 usage: `component_mask_target_v2=true`, `component_depth_target_v2=true`, and `component_ownership_map=true`; loaded `112` samples, resolved `23565` foreground ownership pixels and `290` raw overlap pixels; duplicate ownership moved `297 -> 0`, and overlap-depth-conflict moved `271 -> 0`.
-- Gate decision: `FAIL`. Target v2 removed ownership conflicts, but the 25.10 loss mainline learned near-empty component/union masks rather than useful component-level separation.
-- Test metrics: recall `0.674419`, missed `0.325581`, extra `0.292683`, merged `0.000000`, component Dice `0.005536`, union Dice `0.002829`, depth RMSE `0.000242891 m`.
-- Comparison: versus 25.10, recall worsened by `-0.162791`, missed worsened by `+0.162791`, extra worsened by `+0.149826`, component Dice collapsed by `-0.104026`, union Dice collapsed by `-0.127651`, while depth RMSE was effectively unchanged (`-0.000000424 m`). Versus 25.11/25.12, merged rate improves numerically, but this is not success because mask/union Dice collapsed.
-- Subsets: component_count=3 test rows have merged `0.000000` but component Dice `0.000000` and union Dice `0.000000`; partially_overlapping rows have recall `0.555556`, missed `0.444444`, component Dice `0.004950`, and union Dice `0.002463`.
-- Route decision: unique next step is `C. return to generator/label schema; do not continue loss tuning`. Treat the v2 ownership transform as diagnostically useful but insufficient as a training target under the current component-level supervision.
+- 范围：在 `comsol_surface_multipit_component_set_pilot_v1` 上执行 target-v2 training gate。architecture、固定 `K=3` component-set representation、固定 split `72/20/20`、Hungarian matching 和 `component_set_gate_v1` 25.10 loss mainline 保持不变；没有使用 25.11/25.12 rebalance stacks。
+- 边界：没有运行 COMSOL，没有修改 data/NPZ，没有提交 checkpoint/preview/notes artifact，没有扩大模型容量，没有导出正式 inference artifact，没有 baseline transition，也没有更新 `CURRENT_BASELINE.md`。
+- target v2 使用情况：`component_mask_target_v2=true`、`component_depth_target_v2=true`、`component_ownership_map=true`；加载 `112` 个样本，resolved `23565` foreground ownership pixels 和 `290` raw overlap pixels；duplicate ownership 从 `297` 变成 `0`，overlap-depth-conflict 从 `271` 变成 `0`。
+- gate 判定：`FAIL`。target v2 移除了 ownership conflicts，但 25.10 loss mainline 学到的是 near-empty component/union masks，而不是有用的 component-level separation。
+- test metrics：recall `0.674419`，missed `0.325581`，extra `0.292683`，merged `0.000000`，component Dice `0.005536`，union Dice `0.002829`，depth RMSE `0.000242891 m`。
+- 对比：相对 25.10，recall 恶化 `-0.162791`，missed 恶化 `+0.162791`，extra 恶化 `+0.149826`，component Dice 崩塌 `-0.104026`，union Dice 崩塌 `-0.127651`，depth RMSE 基本不变（`-0.000000424 m`）。相对 25.11/25.12，merged rate 数值上改善，但这不是成功，因为 mask/union Dice 崩塌了。
+- 子集：component_count=3 test rows 的 merged `0.000000`，但 component Dice `0.000000`、union Dice `0.000000`；partially_overlapping rows 的 recall `0.555556`，missed `0.444444`，component Dice `0.004950`，union Dice `0.002463`。
+- 路线决策：唯一下一步是 `C. return to generator/label schema; do not continue loss tuning`。v2 ownership transform 具有诊断价值，但在当前 component-level supervision 下还不足以作为 training target。
 
 ## 2026-06-03 Stage 25.12b surface multi-pit component raster/depth target redesign
 
-- Scope: audited and redesigned component raster/depth targets after the 25.12 `FAIL`. This stage read the 25.10/25.10b/25.11/25.11b/25.12 metrics and the explicit `comsol_surface_multipit_component_set_pilot_v1` manifest only; it did not train, run COMSOL, mutate data/NPZ files, expand model capacity, export checkpoints/previews/notes, or update `CURRENT_BASELINE.md`.
-- Main finding: v1 generator labels are globally consistent, but component-level raster/depth supervision lacks explicit ownership in overlapping/touching pixels. Component OR reconstructs the union mask exactly, max(component depth) reconstructs union depth exactly, empty slots are zero, and center-to-mask-centroid error is small; therefore this is not a generator corruption finding.
-- V1 target audit: component OR to union Dice mean/min is `1.000000/1.000000`; max(component depth) to union depth RMSE mean/max is `0.000000000/0.000000000 m`; empty-slot mask/depth violations are `0`; center-to-mask-centroid error mean/p95/max is `0.000059604/0.000108224/0.001045136 m`.
-- Ownership issue: `25/112` samples have duplicated component foreground ownership, with `297` duplicated component target pixels and `271` overlap-depth-conflict pixels. The problem is concentrated in `partially_overlapping` (`18/24`) and component_count=3 (`10/12`), while union OR/max hides the conflict from sample-level targets.
-- Target v2 design: introduce `component_mask_target_v2`, `component_depth_target_v2`, and `component_ownership_map`; separated/close rows must be mutually exclusive, touching rows may share continuous boundaries but not raster ownership, partially-overlapping rows keep raw overlap diagnostics but train on ownership-resolved component targets, and union mask/depth remain OR/max from components.
-- Acceptance decision: `READY_FOR_25.13_TRAINING`.
-- Route decision: unique next step is `A. enter 25.13 target-v2 training gate using the 25.10 loss mainline; do not use the 25.11/25.12 rebalance stack`. This is not a baseline transition.
+- 范围：在 25.12 `FAIL` 后审计并重设计 component raster/depth targets。本阶段只读取 25.10/25.10b/25.11/25.11b/25.12 metrics 和显式 `comsol_surface_multipit_component_set_pilot_v1` manifest；没有训练、没有运行 COMSOL、没有修改 data/NPZ、没有扩大模型容量、没有导出 checkpoints/previews/notes，也没有更新 `CURRENT_BASELINE.md`。
+- 主结论：v1 generator labels 全局一致，但 component-level raster/depth supervision 在 overlapping/touching pixels 上缺少 explicit ownership。component OR 能精确重建 union mask，max(component depth) 能精确重建 union depth，empty slots 为零，center-to-mask-centroid error 很小，所以这不是 generator corruption finding。
+- v1 target audit：component OR 到 union Dice 的 mean/min 为 `1.000000/1.000000`；max(component depth) 到 union depth 的 RMSE mean/max 为 `0.000000000/0.000000000 m`；empty-slot mask/depth violations 为 `0`；center-to-mask-centroid error 的 mean/p95/max 为 `0.000059604/0.000108224/0.001045136 m`。
+- Ownership issue：`25/112` 个样本存在 duplicated component foreground ownership，对应 `297` 个 duplicated component target pixels 和 `271` 个 overlap-depth-conflict pixels。问题集中在 `partially_overlapping`（`18/24`）和 component_count=3（`10/12`），而 union OR/max 会在 sample-level targets 中隐藏这个冲突。
+- target v2 design：新增 `component_mask_target_v2`、`component_depth_target_v2` 和 `component_ownership_map`；separated/close rows 必须互斥，touching rows 可以共享连续边界但不能共享 raster ownership，partially-overlapping rows 保留 raw overlap diagnostics 但训练使用 ownership-resolved component targets，union mask/depth 继续由 components OR/max 得到。
+- acceptance decision：`READY_FOR_25.13_TRAINING`。
+- 路线决策：唯一下一步是 `A. enter 25.13 target-v2 training gate using the 25.10 loss mainline; do not use the 25.11/25.12 rebalance stack`。这不是 baseline transition。
 
 ## 2026-06-02 Stage 25.12 surface multi-pit component-separation-aware rebalance training
 
-- Scope: executed the component-separation-aware rebalance gate on `comsol_surface_multipit_component_set_pilot_v1`. The architecture, fixed `K=3` component-set representation, fixed split `72/20/20`, and Hungarian matching were unchanged.
-- Boundary: no COMSOL, no data/NPZ mutation, no checkpoint/preview/notes artifact commit, no model-capacity expansion, no formal inference artifact export, no baseline transition, and no `CURRENT_BASELINE.md` update.
-- Loss config: added `component_separation_rebalance_v1`, with delayed/low union mask loss, higher component-mask emphasis, component-normalized foreground depth, logged background depth diagnostics, pairwise separation consistency, and anti-merge penalty.
-- Gate decision: `FAIL`. Merged collapse was only partially reduced versus 25.11 (`0.900000 -> 0.700000`) but remained far worse than 25.10 (`0.200000`), while recall/missed/extra collapsed relative to 25.11.
-- Test metrics: recall `0.744186`, missed `0.255814`, extra `0.200000`, merged `0.700000`, component Dice `0.108790`, union Dice `0.138075`, depth RMSE `0.000501023 m`.
-- Comparison: versus 25.10, recall worsened by `-0.093023`, component Dice stayed slightly below (`-0.000772`), and depth RMSE remained worse by `+0.000257708 m`. Versus 25.11, merged improved by `-0.200000` and depth improved by `-0.000172604 m`, but recall worsened by `-0.116279`, missed worsened by `+0.116279`, extra worsened by `+0.102439`, and union Dice fell by `-0.028157`.
-- Three-component slice: still failed, with merged rate `1.0`, recall `0.555556`, missed `0.444444`, and predicted component count mean `2.0`.
-- Route decision: unique next step is `C. rollback to 25.10 loss mainline and redesign component raster/depth targets before further training`. Do not continue with more capacity or stacked training.
+- 范围：在 `comsol_surface_multipit_component_set_pilot_v1` 上执行 component-separation-aware rebalance gate。architecture、固定 `K=3` component-set representation、固定 split `72/20/20` 和 Hungarian matching 都保持不变。
+- 边界：没有运行 COMSOL，没有修改 data/NPZ，没有提交 checkpoint/preview/notes artifact，没有扩大 model capacity，没有导出正式 inference artifact，没有 baseline transition，也没有更新 `CURRENT_BASELINE.md`。
+- loss config：新增 `component_separation_rebalance_v1`，包括 delayed/low union mask loss、更高的 component-mask emphasis、component-normalized foreground depth、background depth diagnostics logging、pairwise separation consistency 和 anti-merge penalty。
+- gate decision：`FAIL`。相对 25.11，merged collapse 只从 `0.900000` 降到 `0.700000`，仍远差于 25.10 的 `0.200000`；同时 recall/missed/extra 相对 25.11 明显塌缩。
+- test metrics：recall `0.744186`，missed `0.255814`，extra `0.200000`，merged `0.700000`，component Dice `0.108790`，union Dice `0.138075`，depth RMSE `0.000501023 m`。
+- comparison：相对 25.10，recall 恶化 `-0.093023`，component Dice 仍略低（`-0.000772`），depth RMSE 仍恶化 `+0.000257708 m`。相对 25.11，merged 改善 `-0.200000`、depth 改善 `-0.000172604 m`，但 recall 恶化 `-0.116279`，missed 恶化 `+0.116279`，extra 恶化 `+0.102439`，union Dice 下降 `-0.028157`。
+- three-component slice：仍然失败，merged rate `1.0`，recall `0.555556`，missed `0.444444`，predicted component count mean `2.0`。
+- 路线决策：唯一下一步是 `C. rollback to 25.10 loss mainline and redesign component raster/depth targets before further training`。不要继续加 capacity 或堆 stacked training。
 
 ## 2026-06-02 Stage 25.11b surface multi-pit component-set merge-collapse audit
 
-- Scope: audited the 25.11 `PARTIAL` mask/depth rebalance result only. No new training, no COMSOL, no model-capacity expansion, no data/NPZ mutation, no checkpoint/preview/notes artifact commit, no baseline transition, and no `CURRENT_BASELINE.md` update.
-- Inputs: compared `results/metrics/25_10_component_set_training_gate_metrics.json`, `results/metrics/25_10b_component_set_failure_audit.json`, `results/metrics/25_11_mask_depth_loss_rebalance_training_metrics.json`, and `results/manifests/25_11_mask_depth_loss_rebalance_training_manifest.json`.
-- Main finding: 25.11 induced union-over-component merge collapse. Union Dice improved (`0.130480 -> 0.166233`) and recall/extra/missed improved, but merged rate worsened (`0.200000 -> 0.900000`), component Dice stayed flat/slightly worse (`0.109562 -> 0.108737`), and depth RMSE worsened (`0.000243315 -> 0.000673627 m`).
-- Loss-scale audit: final train/val mask-depth weighted ratios were `0.973279` and `0.929449`; final validation union terms were `0.339797` of mask/depth weighted mass. Component mask weighted loss was also much larger than geometry terms, showing mask/depth supervision dominated the objective after rebalance.
-- Collapse split: test newly merged rate was `0.700000`; union-over-component collapse rate was `0.500000`. The collapse is not only topology-driven: separated rows had newly merged rate `0.750000` and disconnected topology had newly merged rate `0.750000`.
-- Secondary issues: depth-supervision dilution rate was `0.600000`; touching_boundary and partially_overlapping rows still had merged rate `1.0`; three-component rows remain a required audit slice.
-- Threshold audit: selected threshold shifted `0.25 -> 0.35`, but 25.11 validation merged rate stayed `0.9` across candidate thresholds, so this is not just a threshold-selection bug.
-- Targeted design: delay/cap union mask loss, add explicit component-separation regularization, add topology-aware merge penalties, redesign/stage depth loss with component-normalized foreground masks, and keep three-component rows separately reported.
-- Route decision: unique next step is `A. enter 25.12 component-separation-aware rebalance training`. Do not simply increase model capacity and do not discuss baseline replacement.
+- 范围：只审计 25.11 的 `PARTIAL` mask/depth rebalance 结果。没有新训练、没有 COMSOL、没有扩大 model capacity、没有修改 data/NPZ、没有提交 checkpoint/preview/notes artifact、没有 baseline transition，也没有更新 `CURRENT_BASELINE.md`。
+- inputs：对比 `results/metrics/25_10_component_set_training_gate_metrics.json`、`results/metrics/25_10b_component_set_failure_audit.json`、`results/metrics/25_11_mask_depth_loss_rebalance_training_metrics.json` 和 `results/manifests/25_11_mask_depth_loss_rebalance_training_manifest.json`。
+- main finding：25.11 诱发 union-over-component merge collapse。Union Dice 改善（`0.130480 -> 0.166233`），recall/extra/missed 也改善，但 merged rate 恶化（`0.200000 -> 0.900000`），component Dice 持平或略差（`0.109562 -> 0.108737`），depth RMSE 恶化（`0.000243315 -> 0.000673627 m`）。
+- loss-scale audit：final train/val mask-depth weighted ratios 分别为 `0.973279` 和 `0.929449`；final validation union terms 占 mask/depth weighted mass 的 `0.339797`。component mask weighted loss 也明显大于 geometry terms，说明 rebalance 后 mask/depth supervision 支配了 objective。
+- collapse split：test newly merged rate 为 `0.700000`；union-over-component collapse rate 为 `0.500000`。collapse 不只是 topology-driven：separated rows 的 newly merged rate 为 `0.750000`，disconnected topology 的 newly merged rate 也是 `0.750000`。
+- secondary issues：depth-supervision dilution rate 为 `0.600000`；touching_boundary 和 partially_overlapping rows 的 merged rate 仍是 `1.0`；three-component rows 仍必须作为单独 audit slice。
+- threshold audit：selected threshold 从 `0.25` 移到 `0.35`，但 25.11 validation merged rate 在候选 thresholds 上都保持 `0.9`，所以这不只是 threshold-selection bug。
+- targeted design：delay/cap union mask loss，加入 explicit component-separation regularization，加入 topology-aware merge penalties，使用 component-normalized foreground masks 重新设计或 staged depth loss，并继续单独报告 three-component rows。
+- 路线决策：唯一下一步是 `A. enter 25.12 component-separation-aware rebalance training`。不要简单增加 model capacity，也不要讨论 baseline replacement。
 
 ## 2026-06-02 Stage 25.11 surface multi-pit component-set mask/depth loss rebalance training
 
-- Scope: executed a bounded mask/depth loss rebalance training gate on `comsol_surface_multipit_component_set_pilot_v1`. The model architecture, fixed `K=3` component-set representation, fixed split `72/20/20`, and min-over-slot-permutations Hungarian matching stayed unchanged.
-- Boundary: no COMSOL, no data/NPZ mutation, no checkpoint/preview/notes artifact commit, no model-capacity expansion, no formal inference artifact export, no baseline transition, and no `CURRENT_BASELINE.md` update.
-- Loss config: added `mask_depth_rebalance_v1`, keeping existence/center/LWD/rotation/shape losses while adding foreground/background-balanced component mask BCE/Dice, union mask BCE/Dice, and valid-target-mask-only component/union depth losses. JSON outputs use strict serialization with non-finite values mapped to null.
-- Training: fixed seed `42`, `180` epochs, selected existence threshold `0.35`, best validation loss at epoch `3`. Train loss decreased from `6.458076` to `0.454230`; final train/val mask-depth weighted ratios were `0.973279` and `0.929449`.
-- Gate decision: `PARTIAL`. Versus 25.10, test component recall improved `0.837209 -> 0.860465`, missed rate improved `0.162791 -> 0.139535`, extra rate improved `0.142857 -> 0.097561`, and union mask Dice improved `0.130480 -> 0.166233`.
-- Remaining blockers: component mask Dice did not improve (`0.109562 -> 0.108737`), depth-grid RMSE worsened (`0.000243315 -> 0.000673627 m`), merged rate worsened (`0.200000 -> 0.900000`), and the three-component test subset remains merged (`merged_rate=1.0`).
-- Route decision: unique next step is `B. run 25.11b targeted rebalance or topology-focused failure audit`. Do not continue by simply increasing model capacity and do not discuss baseline replacement.
+- 范围：在 `comsol_surface_multipit_component_set_pilot_v1` 上执行受限 mask/depth loss rebalance training gate。model architecture、固定 `K=3` component-set representation、固定 split `72/20/20` 和 min-over-slot-permutations Hungarian matching 都保持不变。
+- 边界：没有运行 COMSOL，没有修改 data/NPZ，没有提交 checkpoint/preview/notes artifact，没有扩大 model capacity，没有导出正式 inference artifact，没有 baseline transition，也没有更新 `CURRENT_BASELINE.md`。
+- loss config：新增 `mask_depth_rebalance_v1`，保留 existence/center/LWD/rotation/shape losses，同时加入 foreground/background-balanced component mask BCE/Dice、union mask BCE/Dice，以及 valid-target-mask-only component/union depth losses。JSON 输出使用 strict serialization，non-finite values 写成 null。
+- 训练：固定 seed `42`，`180` epochs，selected existence threshold `0.35`，best validation loss 在 epoch `3`。train loss 从 `6.458076` 降到 `0.454230`；final train/val mask-depth weighted ratios 为 `0.973279` 和 `0.929449`。
+- gate decision：`PARTIAL`。component recall、missed/extra 和 union Dice 改善，但 merged rate 明显恶化，component Dice 未提升，depth RMSE 也恶化。
+- test metrics：recall `0.860465`，missed `0.139535`，extra `0.097561`，merged `0.900000`，component Dice `0.108737`，union Dice `0.166233`，depth RMSE `0.000673627 m`。
+- 路线决策：唯一下一步是 `B. run 25.11b targeted rebalance or topology-focused failure audit`。不要简单增加 model capacity，也不要讨论 baseline replacement。
 
 ## 2026-06-02 Stage 25.10b surface multi-pit component-set failure audit
 
-- Scope: audited the 25.10 `PARTIAL` component-set training gate only. No new training, no COMSOL, no data/NPZ mutation, no checkpoint/preview/notes artifact commit, no baseline transition, and no `CURRENT_BASELINE.md` update.
-- Inputs: read `results/metrics/25_10_component_set_training_gate_metrics.json`, `results/manifests/25_10_component_set_training_gate_manifest.json`, `results/summaries/25_10_component_set_training_gate_summary.md`, and the explicit dataset manifest for `comsol_surface_multipit_component_set_pilot_v1`.
-- Main finding: the primary failure is mask/depth loss imbalance, not slot matching or target-coordinate corruption. Component existence and coarse geometry learned (`test component_recall=0.837209`, `center_error_mean=0.004284 m`, `L/W/D relative error=0.154552`), while component mask Dice stayed `0.109562`, union mask Dice `0.130480`, and depth RMSE barely beat degenerate baselines.
-- Target integrity: component-union target masks are aligned (`target_union_mask_iou_mean=1.000000`), center-to-mask centroid error is `0.000059604 m`, and empty-slot mask/depth sums are `0.0`, so a raster/coordinate bug is not the leading explanation.
-- Slot/matching audit: the 25.10 training script uses min-over-slot-permutations and masks parameter, shape, mask, and depth losses by existing slots. Empty slots are included for existence BCE only, which keeps empty-slot treatment structurally correct.
-- Three-component audit: three-component coverage is small (`train=7`, `val=2`, `test=3`), and all three test rows predicted two components, giving `merged_rate=1.0`. This is a secondary data-scarcity/topology issue rather than the primary global failure.
-- Route decision: unique next step is `B. enter 25.11 mask/depth loss rebalance training`. Do not simply increase model size, and do not discuss baseline replacement before a later formal benchmark and review.
+- 范围：只审计 25.10 `PARTIAL` component-set training gate。没有新训练、没有 COMSOL、没有修改 data/NPZ、没有提交 checkpoint/preview/notes artifact、没有 baseline transition，也没有更新 `CURRENT_BASELINE.md`。
+- 输入：读取 25.10 metrics、summary、manifest 和显式 `comsol_surface_multipit_component_set_pilot_v1` manifest，汇总 test/val 失败分组。
+- 主结论：主要失败是 mask/depth loss imbalance，不是 slot matching 或 target-coordinate corruption。component existence 和 coarse geometry 有学习信号（`test component_recall=0.837209`，`center_error_mean=0.004284 m`，`L/W/D relative error=0.154552`），但 component mask Dice 只有 `0.109562`，union mask Dice `0.130480`，depth RMSE 只略好于 degenerate baselines。
+- 已排除问题：target component masks 重建 union mask 的 IoU 为 `1.000000`，center-to-mask centroid error 均值 `0.000059604 m`，empty slots 的 mask/depth target 为零；trainer 使用 min-over-slot-permutations 并屏蔽 non-existing slots，因此 slot permutation 和 empty-slot punishment 不是主因。
+- failure taxonomy：主因 `loss imbalance`；次因 three-component rows 的 `data scarcity failure`；第三是 touching/overlap 的 `genuine hard topology failure`。
+- 路线决策：唯一下一步是 `B. enter 25.11 mask/depth loss rebalance training`。不要简单增加模型尺寸，也不要在后续 formal benchmark 和 review 前讨论 baseline replacement。
 
 ## 2026-06-02 Stage 25.10 surface multi-pit component-set training gate
 
-- Scope: executed a minimal component-set training gate on `comsol_surface_multipit_component_set_pilot_v1`. This trained and evaluated a lightweight C1 fixed-K component-set model only; it did not update `CURRENT_BASELINE.md`, did not export an inference artifact, and did not commit checkpoint/data/NPZ artifacts.
-- Data gate: consumed the explicit manifest `results/manifests/comsol_surface_multipit_component_set_pilot_v1.manifest.json`, verified `N=112`, split `72/20/20`, `K=3`, `train_ready_candidate=true`, `baseline_ready=false`, disabled auto/latest discovery, and sha256-matched the ignored assembled NPZ.
-- Model gate: implemented `scripts/train_surface_multipit_component_set_gate.py` with Bx/By/Bz `delta_b` input plus `sensor_z_m`, K=3 existence/geometry/rotation/shape-family/mask/depth outputs, and a min-over-slot-permutations loss for existence BCE, active component parameter regression, shape CE, mask BCE/Dice, and depth loss.
-- Training result: fixed seed `42`, `180` epochs, selected existence threshold `0.25` on validation. Train loss decreased from `3.014077` to `0.090511`; best validation loss was `1.992049` at epoch `6`.
-- Gate decision: `PARTIAL`. Test component recall was `0.837209`, missed rate `0.162791`, extra rate `0.142857`, merged rate `0.200000`, mean center error `0.004284 m`, mean L/W/D relative error `0.154556`, and mean rotation error `0.575410 rad`.
-- Signal and failure split: the gate is clearly better than empty / one-slot prior on component recall, and it avoids empty or single-component collapse on average (`pred_component_count_mean=2.1`). However, component mask Dice is only `0.109562`, union mask Dice is `0.130480`, validation union mask Dice is weak (`0.071413`), depth RMSE barely beats empty/prior, and test three-component rows show merged rate `1.0`.
-- Route decision: unique next step is `B. run 25.10b failure audit for merged/missed, overlap/touching, slot permutation, and three-component rows`. Do not enter stronger training or baseline discussion until the failure audit explains the raster/merge weaknesses.
-- Review: independent read-only review is required before commit and will check implementation, metrics, forbidden artifacts, and baseline boundaries.
+- 范围：执行最小但完整的 component-set training gate。没有运行 COMSOL，没有修改 data/NPZ，没有提交 checkpoint/preview/notes artifact，没有导出正式 inference artifact，没有 baseline transition，也没有更新 `CURRENT_BASELINE.md`。
+- data gate：使用显式 manifest `results/manifests/comsol_surface_multipit_component_set_pilot_v1.manifest.json`，验证 `N=112`、split `72/20/20`、`K=3`、`train_ready_candidate=true`、`baseline_ready=false`，禁用 auto/latest discovery，并对 ignored assembled NPZ 做 sha256 匹配。
+- model gate：实现 `scripts/train_surface_multipit_component_set_gate.py`，输入为 Bx/By/Bz `delta_b` 加 `sensor_z_m`，输出 K=3 existence/geometry/rotation/shape-family/mask/depth，并使用 min-over-slot-permutations loss 覆盖 existence BCE、active component parameter regression、shape CE、mask BCE/Dice 和 depth loss。
+- training result：固定 seed `42`，`180` epochs，validation 选择 existence threshold `0.25`。train loss 从 `3.014077` 降到 `0.090511`；best validation loss 为 epoch `6` 的 `1.992049`。
+- gate decision：`PARTIAL`。test component recall `0.837209`，missed rate `0.162791`，extra rate `0.142857`，merged rate `0.200000`，mean center error `0.004284 m`，mean L/W/D relative error `0.154556`，mean rotation error `0.575410 rad`。
+- signal and failure split：gate 在 component recall 上明显优于 empty / one-slot prior，并且平均上没有 empty 或 single-component collapse（`pred_component_count_mean=2.1`）。但 component mask Dice 只有 `0.109562`，union mask Dice `0.130480`，validation union mask Dice 较弱（`0.071413`），depth RMSE 只略优于 empty/prior，test three-component rows 的 merged rate 为 `1.0`。
+- 路线决策：唯一下一步是 `B. run 25.10b failure audit for merged/missed, overlap/touching, slot permutation, and three-component rows`。在 failure audit 解释 raster/merge 弱点前，不进入更强训练或 baseline 讨论。
+- review：独立只读 review 需要在提交前检查 implementation、metrics、forbidden artifacts 和 baseline boundaries。
 
 ## 2026-06-02 Stage 25.9b surface multi-pit component-set top-up pack
 
-- Scope: executed the approved surface multi-pit component-set COMSOL top-up generation and validation. No training, no model gate, no checkpoint/preview/notes artifact commit, and no `CURRENT_BASELINE.md` update.
-- COMSOL result: generated `comsol_surface_multipit_topup_pack_v1` with planned/success `96/96`, failed `0`, split `63/17/16`, finite `Bx/By/Bz`, no-defect reference reuse, and `delta_b=b_defect-b_no_defect`.
-- Coverage: top-up component counts are `2=84` and `3=12`; separation is balanced across `separated/close/touching/partially_overlapping=24` each; topology covers `disconnected=48`, `touching_boundary=24`, and `partially_overlapping=24`; orientation covers `aligned_x/aligned_y/diagonal=32` each.
-- Assembly: created explicit dataset identity `comsol_surface_multipit_component_set_pilot_v1` from the old 25.2 multi-pit seed `16` plus top-up `96`, for assembled `N=112`, split `72/20/20`, fixed `K=3`, and source counts `16/96`.
-- Label completeness: validation found `component_label_missing_count=0`; per-component centers, L/W/D, rotation, shape family, component masks, component depth grids, union masks, and union depth grids passed.
-- Registry/manifest: `COMSOL_DATA_REGISTRY.md` and `results/manifests/comsol_surface_multipit_component_set_pilot_v1.manifest.json` mark `train_ready_candidate=true`, `baseline_ready=false`, `auto_discovery_allowed=false`, and forbid baseline replacement, latest/newest discovery, and six-parameter RBC success credit.
-- Data policy: generated NPZ/data remain ignored and uncommitted. The committed record is limited to generator, inventory/summary, validation/assembly/decision scripts, registry/manifest, and this run's summaries/metrics.
-- Review: independent read-only review passed after one scope-control fix. The COMSOL repo had pre-existing unrelated dirty files; they were left untouched and excluded from the staged 25.9b commit boundary.
-- Route decision: unique next step is `A. enter 25.10 component-set training gate`. This next step is an explicit future gate, not an automatic training run or baseline transition.
+- 范围：执行已批准的 surface multi-pit component-set COMSOL top-up generation 和 validation。没有训练、没有 model gate、没有提交 checkpoint/preview/notes artifact，也没有更新 `CURRENT_BASELINE.md`。
+- COMSOL result：生成 `comsol_surface_multipit_topup_pack_v1`，planned/success `96/96`，failed `0`，split `63/17/16`，finite `Bx/By/Bz`，复用 no-defect reference，并使用 `delta_b=b_defect-b_no_defect`。
+- coverage：top-up component counts 为 `2=84` 和 `3=12`；separation 在 `separated/close/touching/partially_overlapping=24` 上均衡；topology 覆盖 `disconnected=48`、`touching_boundary=24` 和 `partially_overlapping=24`；orientation 覆盖 `aligned_x/aligned_y/diagonal=32`。
+- assembly：由旧 25.2 multi-pit seed `16` 加 top-up `96` 创建显式 dataset identity `comsol_surface_multipit_component_set_pilot_v1`，assembled `N=112`，split `72/20/20`，固定 `K=3`，source counts `16/96`。
+- label completeness：validation 发现 `component_label_missing_count=0`；per-component centers、L/W/D、rotation、shape family、component masks、component depth grids、union masks 和 union depth grids 均通过。
+- registry/manifest：`COMSOL_DATA_REGISTRY.md` 和 `results/manifests/comsol_surface_multipit_component_set_pilot_v1.manifest.json` 标记 `train_ready_candidate=true`、`baseline_ready=false`、`auto_discovery_allowed=false`，并禁止 baseline replacement、latest/newest discovery 和 six-parameter RBC success credit。
+- data policy：生成的 NPZ/data 继续 ignored 且不提交。提交记录只限 generator、inventory/summary、validation/assembly/decision scripts、registry/manifest 和本轮 summaries/metrics。
+- review：独立只读 review 在一次 scope-control 修复后通过。COMSOL repo 存在预先的 unrelated dirty files，保持 untouched 并排除在 staged 25.9b commit 边界之外。
+- 路线决策：唯一下一步是 `A. enter 25.10 component-set training gate`。这是后续显式 gate，不是自动训练或 baseline transition。
 
 ## 2026-06-02 Stage 25.9 surface multi-pit component-set branch plan
 
-- Scope: completed a plan-only component-set branch design for `multi_pit_two_component_surface_defect`. No COMSOL, no training, no data/NPZ generation or mutation, no checkpoint/preview/notes artifact, and no `CURRENT_BASELINE.md` update.
-- Preflight: used explicit 25.1 taxonomy/schema/COMSOL feasibility, the 25.2 `comsol_surface_shape_extension_pilot_v1` manifest, the 25.3 oracle-vs-baseline diagnosis, and the 25.8 report route decision. `COMSOL_Multiphysics_MCP` was used only as read-only generator context.
-- Label audit: existing multi-pit seed rows are `16` samples with split `9/3/4`; all have `component_count=2`, two component JSON entries, component centers, L/W/depth, union `projected_mask_2d`, and union `depth_grid_m`. They are usable as `C1` fixed-K seed rows but not sufficient for training.
-- Schema gaps: top-up must add per-component `rotation_angle`, component-level projected masks, component-level depth grids, and explicit separation/touching/overlap/topology labels. Current seed coverage is all separated/aligned_x/disconnected, so close/touching/overlap coverage is missing.
-- Representation: selected `C1 fixed_K_component_set` with `K=3` as first route. Per slot output is `existence_prob`, `center_x_m`, `center_y_m`, `L_m`, `W_m`, `D_m`, `rotation_angle`, `shape_family`, and local profile parameters. Training should use Hungarian matching and permutation-invariant component losses in a later stage.
-- Top-up plan: target top-up `N=96`, fallback `N=60`, assembled target `N=112`, default split `72/20/20`, top-up split `63/17/16`. Coverage must balance component count, separation, relative depth, size pair, orientation, topology, and primitive mix.
-- COMSOL feasibility: preferred future route is two/three-component Boolean subtract with Bx/By/Bz export, no-defect reference reuse when solver/domain settings match, and explicit failure ledger for Boolean, mesh, solver, component-count, merged-domain, and label/union mismatch.
-- Acceptance gates: component recall, missed/merged/extra rates, matched center and L/W/D errors, projected mask Dice/IoU, depth-grid RMSE, single-component control non-collapse, and no six-parameter RBC success credit for multi-pit. Baseline transition remains blocked.
-- Route decision: unique next step is `A. execute multi-pit COMSOL top-up generation`. This is a later approved generation stage, not part of 25.9.
-- Review: independent read-only review passed with no must-fix and confirmed no COMSOL/training/data mutation, no `CURRENT_BASELINE.md` diff, clear component-set boundary, route uniqueness, and no forbidden artifacts.
-
+- 范围：完成 `multi_pit_two_component_surface_defect` 的 plan-only component-set branch design。没有 COMSOL、没有训练、没有生成或修改 data/NPZ、没有 checkpoint/preview/notes artifact，也没有更新 `CURRENT_BASELINE.md`。
+- preflight：使用显式 25.1 taxonomy/schema/COMSOL feasibility、25.2 `comsol_surface_shape_extension_pilot_v1` manifest、25.3 oracle-vs-baseline diagnosis 和 25.8 report route decision。`COMSOL_Multiphysics_MCP` 只作为只读 generator context。
+- label audit：现有 multi-pit seed rows 为 `16` 个样本，split `9/3/4`；全部 `component_count=2`，有两个 component JSON entries、component centers、L/W/depth、union `projected_mask_2d` 和 union `depth_grid_m`。它们可作为 `C1` fixed-K seed rows，但不足以训练。
+- schema gaps：top-up 必须补 per-component `rotation_angle`、component-level projected masks、component-level depth grids，以及显式 separation/touching/overlap/topology labels。当前 seed coverage 全是 separated/aligned_x/disconnected，缺少 close/touching/overlap coverage。
+- representation：选择 `C1 fixed_K_component_set` with `K=3` 作为第一路线。每个 slot 输出 `existence_prob`、`center_x_m`、`center_y_m`、`L_m`、`W_m`、`D_m`、`rotation_angle`、`shape_family` 和 local profile parameters。后续训练应使用 Hungarian matching 和 permutation-invariant component losses。
+- top-up plan：target top-up `N=96`，fallback `N=60`，assembled target `N=112`，default split `72/20/20`，top-up split `63/17/16`。coverage 必须平衡 component count、separation、relative depth、size pair、orientation、topology 和 primitive mix。
+- COMSOL feasibility：未来优先 route 是 two/three-component Boolean subtract，导出 Bx/By/Bz，在 solver/domain settings 匹配时复用 no-defect reference，并显式记录 Boolean、mesh、solver、component-count、merged-domain 和 label/union mismatch failure ledger。
+- acceptance gates：覆盖 component recall、missed/merged/extra rates、matched center 与 L/W/D errors、projected mask Dice/IoU、depth-grid RMSE、single-component control non-collapse，以及 multi-pit 不获得 six-parameter RBC success credit。baseline transition 继续 blocked。
+- 路线决策：唯一下一步是 `A. execute multi-pit COMSOL top-up generation`。这是后续已批准 generation stage，不属于 25.9 本身。
+- review：独立只读 review 通过，无 must-fix；确认无 COMSOL/training/data mutation、无 `CURRENT_BASELINE.md` diff、component-set 边界清楚、route 唯一且无 forbidden artifacts。
 ## 2026-06-02 Stage 25.8 surface forward-refinement report / visualization package
 
-- Scope: prepared the surface forward-refinement report / visualization package from the locked 25.7 inference runner outputs. No COMSOL, no training, no data/NPZ mutation, no checkpoint artifact commit, no preview PNG commit, no notes artifact, and no `CURRENT_BASELINE.md` update.
-- Report package: `scripts/build_surface_forward_refinement_report_package.py` wrote the preflight, report summary, report metrics, and candidate comparison matrix. The report keeps the roles separate: frozen 20.85 is the current baseline, the 25.7 runner is a post-hoc companion, and RBC oracle is an evaluation ceiling only.
-- Improvement audit: `scripts/audit_surface_forward_refinement_improvement_cases.py` recorded best improvements, worst remaining target failures, degraded rows, RBC-like controls, multi-pit negative controls, and group audits by `shape_type`, `representation_target`, and failure reason.
-- Gallery: `scripts/export_surface_forward_refinement_gallery.py` wrote `results/metrics/surface_forward_refinement_gallery_index.csv` with `42` gallery rows and generated `42` preview PNGs under ignored `results/previews/surface_forward_refinement_gallery/`. PNG previews are not committed.
-- Reported results: target subset remained `82` rows. Profile RMSE was `0.000509518351056 -> 0.000220386413188 m`, Er-like was `2.80015739379 -> 0.909941363416`, IoU/Dice moved from `0.32360140234/0.480524080842` to `0.578523465369/0.709451842351`, and forward residual moved from `70.5944261489` to `0.564105036956`.
-- Case audit: best profile RMSE improvements were led by `surf_shape_003_rbc_like_smooth_pit`, `surf_shape_005_rbc_like_smooth_pit`, and `surf_shape_065_asymmetric_corrosion`. Worst remaining target failures were led by `surf_shape_073_elongated_crack_like_surface_defect`, `surf_shape_031_flat_bottom_pit`, and `surf_shape_083_elongated_crack_like_surface_defect`.
-- Controls and failures: RBC-like control stayed stable (`RMSE 0.000501181023155 -> 0.000165198934316`, `Dice 0.493556208833 -> 0.689754743215`). The audit recorded `17` degraded target rows and `37` degraded-any rows. Multi-pit/component-set rows remain `not_suitable_for_rbc_refinement` and receive no RBC success credit.
-- Route decision: unique next step is `A. component-set branch for multi-pit`. Baseline transition remains forbidden unless separately requested and reviewed; `CURRENT_BASELINE.md` remains the 20.85 surface RBC baseline.
-- Review: independent read-only review passed with no must-fix. It confirmed no COMSOL/training/data mutation, no `CURRENT_BASELINE.md` diff, no preview PNG staging, clear baseline/companion/oracle roles, and no multi-pit RBC success claim.
+- 范围：基于锁定的 25.7 inference runner 输出，准备 surface forward-refinement report / visualization package。没有 COMSOL、没有训练、没有修改 data/NPZ、没有提交 checkpoint artifact、没有提交 preview PNG、没有 notes artifact，也没有更新 `CURRENT_BASELINE.md`。
+- report package：`scripts/build_surface_forward_refinement_report_package.py` 写入 preflight、report summary、report metrics 和 candidate comparison matrix。报告保持角色分离：frozen 20.85 是当前 baseline，25.7 runner 是 post-hoc companion，RBC oracle 只作为 evaluation ceiling。
+- improvement audit：`scripts/audit_surface_forward_refinement_improvement_cases.py` 记录 best improvements、worst remaining target failures、degraded rows、RBC-like controls、multi-pit negative controls，以及按 `shape_type`、`representation_target`、failure reason 的 group audits。
+- gallery：`scripts/export_surface_forward_refinement_gallery.py` 写入 `results/metrics/surface_forward_refinement_gallery_index.csv`，并在 ignored `results/previews/surface_forward_refinement_gallery/` 下生成 `42` 张 preview PNG。PNG previews 不提交。
+- reported results：target subset 仍为 `82` 行。profile RMSE 为 `0.000509518351056 -> 0.000220386413188 m`，Er-like 为 `2.80015739379 -> 0.909941363416`，IoU/Dice 从 `0.32360140234/0.480524080842` 到 `0.578523465369/0.709451842351`，forward residual 从 `70.5944261489` 到 `0.564105036956`。
+- case audit：best profile RMSE improvements 由 `surf_shape_003_rbc_like_smooth_pit`、`surf_shape_005_rbc_like_smooth_pit` 和 `surf_shape_065_asymmetric_corrosion` 领先。worst remaining target failures 由 `surf_shape_073_elongated_crack_like_surface_defect`、`surf_shape_031_flat_bottom_pit` 和 `surf_shape_083_elongated_crack_like_surface_defect` 领先。
+- controls and failures：RBC-like control 保持稳定（RMSE `0.000501181023155 -> 0.000165198934316`，Dice `0.493556208833 -> 0.689754743215`）。audit 记录 `17` 条 degraded target rows 和 `37` 条 degraded-any rows。multi-pit/component-set rows 仍为 `not_suitable_for_rbc_refinement`，不获得 RBC success credit。
+- 路线决策：唯一下一步是 `A. component-set branch for multi-pit`。baseline transition 仍被禁止，除非另行明确请求并 review；`CURRENT_BASELINE.md` 仍是 20.85 surface RBC baseline。
+- review：独立只读 review 通过，无 must-fix；确认无 COMSOL/training/data mutation、无 `CURRENT_BASELINE.md` diff、无 preview PNG staging、baseline/companion/oracle 角色清楚，且没有 multi-pit RBC success claim。
 
 ## 2026-06-02 Stage 25.7 surface forward-refinement inference artifact / runner
 
-- Scope: exported the fixed 25.6 surface forward-refinement inference artifact and implemented the runtime runner. No COMSOL, no main neural training, no data/NPZ mutation, no checkpoint artifact commit, no preview/notes artifact, and no `CURRENT_BASELINE.md` update.
-- Artifact: wrote the runtime body to ignored `checkpoints/surface_forward_refinement_artifacts/surface_forward_refinement_inference_artifact_v1.json` and committed only `results/manifests/surface_forward_refinement_inference_artifact_manifest.json`. The manifest records `allowed_use=explicit_surface_forward_refinement_inference` and forbids `current_baseline_replacement` / `automatic_baseline_update`.
-- Fixed protocol: preserved `ridge_param_only_linear_alpha_10`, `alpha=10.0`, `lambda_profile=1.0`, `lambda_param=1.0`, `R1_low_dim_param_refinement`, frozen 20.85 predicted six-parameter initialization, and optimization over `L_m/W_m/D_m/wLD/wWD/wLW`.
-- Runner boundary: runtime refinement inputs are observed `delta_b`-derived features, frozen 20.85 predicted six params, and the exported artifact. Labels, oracle params, true masks, and true depth are used only after refinement for metrics on the labeled pilot.
-- Verification: runner reproduced 25.6 per-sample checked fields with `max_abs_diff=0`. Target subset remained `82` rows, with profile RMSE `0.000509518351056 -> 0.000220386413188 m`, Er-like `2.80015739379 -> 0.909941363416`, IoU/Dice `0.32360140234/0.480524080842 -> 0.578523465369/0.709451842351`, and forward residual `70.5944261489 -> 0.564105036956`.
-- Controls: RBC-like control did not degrade (`RMSE 0.000501181023155 -> 0.000165198934316`, `Dice 0.493556208833 -> 0.689754743215`). Multi-pit/component-set rows are marked `not_suitable_for_rbc_refinement`, skip six-parameter optimization, and receive no RBC success credit.
-- Contract: `results/summaries/surface_forward_refinement_inference_contract.md` states the runner is a companion/post-hoc refinement layer, not a baseline replacement. Unknown real samples may report `refinement_applied`, not representable success, without oracle/label or human confirmation.
-- Route decision: unique next step is `A. surface refinement visualization/report package`. Multi-pit remains a future `component_set` branch, and any baseline transition still requires a separate explicit request.
-- Review: independent read-only review passed with no must-fix. It confirmed no forbidden artifact staging, clean runtime input boundary, sufficient manifest identity/protocol, and no `CURRENT_BASELINE.md` diff.
+- 范围：导出固定 25.6 surface forward-refinement inference artifact，并实现 runtime runner。没有 COMSOL、没有主神经网络训练、没有修改 data/NPZ、没有提交 checkpoint artifact、没有 preview/notes artifact，也没有更新 `CURRENT_BASELINE.md`。
+- artifact：runtime body 写入 ignored `checkpoints/surface_forward_refinement_artifacts/surface_forward_refinement_inference_artifact_v1.json`，只提交 `results/manifests/surface_forward_refinement_inference_artifact_manifest.json`。manifest 记录 `allowed_use=explicit_surface_forward_refinement_inference`，并禁止 `current_baseline_replacement` / `automatic_baseline_update`。
+- fixed protocol：保留 `ridge_param_only_linear_alpha_10`、`alpha=10.0`、`lambda_profile=1.0`、`lambda_param=1.0`、`R1_low_dim_param_refinement`、frozen 20.85 predicted six-parameter initialization，以及对 `L_m/W_m/D_m/wLD/wWD/wLW` 的优化。
+- runner boundary：runtime refinement 输入是 observed `delta_b` 派生特征、frozen 20.85 predicted six params 和导出的 artifact。labels、oracle params、true masks、true depth 只在 labeled pilot 上 refinement 后用于 metrics。
+- verification：runner 在 per-sample checked fields 上复现 25.6，`max_abs_diff=0`。target subset 仍为 `82` 行，profile RMSE `0.000509518351056 -> 0.000220386413188 m`，Er-like `2.80015739379 -> 0.909941363416`，IoU/Dice `0.32360140234/0.480524080842 -> 0.578523465369/0.709451842351`，forward residual `70.5944261489 -> 0.564105036956`。
+- controls：RBC-like control 未退化（RMSE `0.000501181023155 -> 0.000165198934316`，Dice `0.493556208833 -> 0.689754743215`）。multi-pit/component-set rows 标为 `not_suitable_for_rbc_refinement`，跳过 six-parameter optimization，且不获得 RBC success credit。
+- contract：`results/summaries/surface_forward_refinement_inference_contract.md` 说明 runner 是 companion/post-hoc refinement layer，不是 baseline replacement。未知真实样本在没有 oracle/label 或人工确认前，只能报告 `refinement_applied`，不能报告 representable success。
+- 路线决策：唯一下一步是 `A. surface refinement visualization/report package`。multi-pit 仍是未来 `component_set` 分支，任何 baseline transition 仍需要单独明确请求。
+- review：独立只读 review 通过，无 must-fix；确认无 forbidden artifact staging、runtime input boundary 清楚、manifest identity/protocol 足够，且无 `CURRENT_BASELINE.md` diff。
 
 ## 2026-06-02 Stage 25.6 surface forward-refinement formal benchmark
 
-- Scope: formalized the 25.5 `F0_feature_space_consistency + R1_low_dim_param_refinement` candidate as a no-baseline-transition benchmark. No COMSOL, no main neural training, no data/NPZ mutation, no checkpoint/preview/notes artifact, and no `CURRENT_BASELINE.md` update.
-- Preflight: confirmed `comsol_surface_shape_extension_pilot_v1` registry/manifest loading, 25.3 oracle/baseline/diagnosis metrics, 25.5 refinement metrics and gates, 20.85 baseline artifact manifest, RBC profile generator helpers, and reusable 25.5 scripts. The loader still verifies the ignored NPZ by sha256 and forbids latest/newest discovery.
-- Fixed protocol: replayed `ridge_param_only_linear_alpha_10`, `alpha=10.0`, `lambda_param=1.0`, `R1_low_dim_param_refinement`, frozen 20.85 six-parameter initialization, and `L_m/W_m/D_m/wLD/wWD/wLW` optimization. No surrogate-family, alpha, loss-weight, or optimizer hyperparameter search was performed.
-- Formal replay: per-sample formal benchmark metrics exactly matched the 25.5 refinement metrics on checked fields (`120` rows, max absolute difference `0.0`). Target subset remained `82` `rbc_representable_but_model_fail` rows.
-- Target results: baseline/refined/oracle profile RMSE was `0.000509518351056 / 0.000220386413188 / 0.0000784896954944 m`; Er-like was `2.80015739379 / 0.909941363416 / 0.28925522333`; IoU/Dice moved from `0.32360140234/0.480524080842` to `0.578523465369/0.709451842351`; forward residual moved from `70.5944261489` to `0.564105036956`.
-- Formal gates: all `10/10` gates passed. RBC-like control did not degrade (`RMSE 0.000501181023155 -> 0.000165198934316`, `Dice 0.493556208833 -> 0.689754743215`). Multi-pit / `rbc_not_representable` rows stayed negative controls with no RBC success credit.
-- Candidate report: the candidate applies to `rbc_representable_but_model_fail` only. It is frozen 20.85 baseline plus post-hoc parameter refinement, not a baseline replacement. Multi-pit still needs a future component-set branch.
-- Route decision: unique next step is `A. export surface forward-refinement inference artifact / runner`. `CURRENT_BASELINE.md` remains the 20.85 surface RBC baseline and is unchanged.
-- Review: independent read-only review passed with no must-fix. Residual risks are 17 target rows with local non-improvement modes and already-pass references worsening on mean RMSE; a future runner should guard against degrading already-good cases.
+- 范围：把 25.5 的 `F0_feature_space_consistency + R1_low_dim_param_refinement` candidate 固化为 no-baseline-transition benchmark。没有 COMSOL、没有主神经网络训练、没有修改 data/NPZ、没有 checkpoint/preview/notes artifact，也没有更新 `CURRENT_BASELINE.md`。
+- preflight：确认 `comsol_surface_shape_extension_pilot_v1` registry/manifest loading、25.3 oracle/baseline/diagnosis metrics、25.5 refinement metrics 与 gates、20.85 baseline artifact manifest、当前 RBC profile generator helpers 和可复用 25.5 scripts。loader 仍通过 sha256 验证 ignored NPZ，并禁止 latest/newest discovery。
+- fixed protocol：重放 `ridge_param_only_linear_alpha_10`、`alpha=10.0`、`lambda_param=1.0`、`R1_low_dim_param_refinement`、frozen 20.85 six-parameter initialization 和 `L_m/W_m/D_m/wLD/wWD/wLW` optimization。没有做 surrogate-family、alpha、loss-weight 或 optimizer hyperparameter search。
+- formal replay：per-sample formal benchmark metrics 在 checked fields 上与 25.5 refinement metrics 完全一致（`120` rows，max absolute difference `0.0`）。target subset 仍是 `82` 条 `rbc_representable_but_model_fail` rows。
+- target results：baseline/refined/oracle profile RMSE 为 `0.000509518351056 / 0.000220386413188 / 0.0000784896954944 m`；Er-like 为 `2.80015739379 / 0.909941363416 / 0.28925522333`；IoU/Dice 从 `0.32360140234/0.480524080842` 到 `0.578523465369/0.709451842351`；forward residual 从 `70.5944261489` 到 `0.564105036956`。
+- formal gates：全部 `10/10` gates 通过。RBC-like control 未退化（RMSE `0.000501181023155 -> 0.000165198934316`，Dice `0.493556208833 -> 0.689754743215`）。multi-pit / `rbc_not_representable` rows 保持 negative controls，不获得 RBC success credit。
+- candidate report：candidate 只适用于 `rbc_representable_but_model_fail`。它是 frozen 20.85 baseline 加 post-hoc parameter refinement，不是 baseline replacement。multi-pit 仍需要未来 component-set branch。
+- 路线决策：唯一下一步是 `A. export surface forward-refinement inference artifact / runner`。`CURRENT_BASELINE.md` 仍是 20.85 surface RBC baseline，保持不变。
+- review：独立只读 review 通过，无 must-fix。残余风险是 `17` 条 target rows 有 local non-improvement modes，already-pass references 在 mean RMSE 上可能变差；未来 runner 应防止已好样本被退化。
 
 ## 2026-06-02 Stage 25.5 surface feature-space forward-consistency refinement diagnostic
 
-- Scope: executed the bounded surface feature-space forward-consistency refinement diagnostic. No COMSOL, no main neural training, no data/NPZ mutation, no checkpoint/preview/notes artifact, and no `CURRENT_BASELINE.md` update. The only fitting was the allowed lightweight train-split feature-space ridge surrogate/scaler.
-- Preflight: loaded `comsol_surface_shape_extension_pilot_v1` only through `COMSOL_DATA_REGISTRY.md` plus `results/manifests/comsol_surface_shape_extension_pilot_v1.manifest.json`; the loader sha256-verified the ignored NPZ and kept latest/newest discovery forbidden.
-- Target materialization: carried forward the 25.4 split as `82` refinement targets, `22` already-pass references, and `16` excluded negative controls. Multi-pit / component-set rows were not refined and received no RBC-refinement success credit.
-- Surrogate: validation-only selection chose `ridge_param_only_linear_alpha_10`, trained on `63` train-split RBC-representable rows and selected on `21` validation rows. Test rows were final-reporting only.
-- Refinement: selected `lambda_param=1.0`. The test-time objective used only observed `delta_b`-derived features and frozen 20.85 predicted `L_m/W_m/D_m/wLD/wWD/wLW`; labels/oracle params were used only for validation selection metrics and final reports.
-- Target results: profile RMSE improved from `0.000509518351056 m` to `0.000220386413188 m`; Er-like improved from `2.80015739379` to `0.909941363416`; IoU/Dice improved from `0.32360140234/0.480524080842` to `0.578523465369/0.709451842351`; forward residual improved from `70.5944261489` to `0.564105036956`.
-- Gates: all `10/10` acceptance gates passed. RBC-like control did not degrade: RMSE improved from `0.000501181023155 m` to `0.000165198934316 m`, Dice improved from `0.493556208833` to `0.689754743215`.
-- Route decision: `refinement_candidate_formed=true`; unique next step is `A. lock 25.5 F0/R1 candidate for a formal no-baseline-transition benchmark`. Already-pass references remain a monitoring bucket, and this result still does not authorize a baseline transition.
-- Review: independent read-only review passed with no must-fix. It confirmed explicit manifest loading, split boundaries, test-time input boundaries, multi-pit exclusion, acceptance-gate consistency, and no forbidden artifact or `CURRENT_BASELINE.md` diff.
+- 范围：执行受限 surface feature-space forward-consistency refinement diagnostic。没有 COMSOL、没有主神经网络训练、没有修改 data/NPZ、没有 checkpoint/preview/notes artifact，也没有更新 `CURRENT_BASELINE.md`。唯一 fitting 是允许的 train-split lightweight feature-space ridge surrogate/scaler。
+- preflight：只通过 `COMSOL_DATA_REGISTRY.md` 加 `results/manifests/comsol_surface_shape_extension_pilot_v1.manifest.json` 加载 `comsol_surface_shape_extension_pilot_v1`；loader 对 ignored NPZ 做 sha256 验证，并保持 latest/newest discovery 禁止。
+- target materialization：沿用 25.4 split，把 `82` 条 refinement targets、`22` 条 already-pass references 和 `16` 条 excluded negative controls 明确落地。multi-pit / component-set rows 未被 refinement，也不获得 RBC-refinement success credit。
+- surrogate：validation-only selection 选择 `ridge_param_only_linear_alpha_10`，在 `63` 条 train-split RBC-representable rows 上训练，并在 `21` 条 validation rows 上选择。test rows 只用于最终报告。
+- refinement：选择 `lambda_param=1.0`。test-time objective 只使用 observed `delta_b` 派生特征和 frozen 20.85 predicted `L_m/W_m/D_m/wLD/wWD/wLW`；labels/oracle params 只用于 validation selection metrics 和 final reports。
+- target results：profile RMSE 从 `0.000509518351056 m` 改善到 `0.000220386413188 m`；Er-like 从 `2.80015739379` 改善到 `0.909941363416`；IoU/Dice 从 `0.32360140234/0.480524080842` 改善到 `0.578523465369/0.709451842351`；forward residual 从 `70.5944261489` 改善到 `0.564105036956`。
+- gates：全部 `10/10` acceptance gates 通过。RBC-like control 未退化：RMSE 从 `0.000501181023155 m` 改善到 `0.000165198934316 m`，Dice 从 `0.493556208833` 改善到 `0.689754743215`。
+- 路线决策：`refinement_candidate_formed=true`；唯一下一步是 `A. lock 25.5 F0/R1 candidate for a formal no-baseline-transition benchmark`。already-pass references 仍是 monitoring bucket，本结果仍不授权 baseline transition。
+- review：独立只读 review 通过，无 must-fix；确认 explicit manifest loading、split boundaries、test-time input boundaries、multi-pit exclusion、acceptance-gate consistency，且无 forbidden artifact 或 `CURRENT_BASELINE.md` diff。
 
 ## 2026-06-02 Stage 25.4 surface forward-consistency refinement plan
 
-- Scope: completed a plan-only forward-consistency refinement design for the surface shape-extension branch. No training, no COMSOL, no data/NPZ generation or mutation, no checkpoint/preview/notes artifact, and no `CURRENT_BASELINE.md` update.
-- Preflight: fixed the evidence chain to 25.3 oracle fit, frozen 20.85 baseline inference, oracle-vs-baseline diagnosis, `comsol_surface_shape_extension_pilot_v1` manifest, frozen baseline artifact manifest, current RBC profile generator helpers, NLS-lite / feature baseline context, and `COMSOL_DATA_REGISTRY.md`.
-- Target set: selected `82` `rbc_representable_but_model_fail` rows as refinement targets, kept `22` `rbc_representable_and_model_pass` rows as pass references, and marked the `16` `multi_pit_two_component_surface_defect` / `rbc_not_representable` rows as excluded negative controls.
-- Surrogate plan: selected `F0_feature_space_consistency` as the first route for 25.5. `F1_neural_forward_surrogate`, `F2_cached_COMSOL_local_refinement`, and `F3_direct_COMSOL_refinement` remain later or non-recommended options.
-- Refinement plan: selected `R1_low_dim_param_refinement`, initialized from frozen 20.85 predicted six parameters, optimizing `L_m/W_m/D_m/wLD/wWD/wLW` with forward-feature residual, profile regularity, and parameter-bound terms. Model weights remain unchanged.
-- Acceptance gates: require target-subset profile RMSE and Er-like error reduction, IoU/Dice improvement, no RBC-like control collapse, forward residual alignment with profile metrics, no nonphysical parameters, no multi-pit success credit, and no baseline transition.
-- Route decision: unique next step is `A. execute 25.5 feature-space forward-consistency refinement diagnostic`. Multi-pit remains a future `component_set` branch and does not block the RBC-representable refinement diagnostic.
-- Review: independent read-only review passed with no must-fix and confirmed target counts, multi-pit exclusion, F0/R1 selection, executable gates, output whitelist, and no forbidden artifacts or `CURRENT_BASELINE.md` diff.
-
+- 范围：完成 surface shape-extension branch 的 plan-only forward-consistency refinement design。没有训练、没有 COMSOL、没有生成或修改 data/NPZ、没有 checkpoint/preview/notes artifact，也没有更新 `CURRENT_BASELINE.md`。
+- preflight：把证据链固定到 25.3 oracle fit、frozen 20.85 baseline inference、oracle-vs-baseline diagnosis、`comsol_surface_shape_extension_pilot_v1` manifest、frozen baseline artifact manifest、当前 RBC profile generator helpers、NLS-lite / feature baseline context 和 `COMSOL_DATA_REGISTRY.md`。
+- target set：选择 `82` 条 `rbc_representable_but_model_fail` rows 作为 refinement targets，保留 `22` 条 `rbc_representable_and_model_pass` rows 作为 pass references，并把 `16` 条 `multi_pit_two_component_surface_defect` / `rbc_not_representable` rows 标为 excluded negative controls。
+- surrogate plan：选择 `F0_feature_space_consistency` 作为 25.5 第一条路线。`F1_neural_forward_surrogate`、`F2_cached_COMSOL_local_refinement` 和 `F3_direct_COMSOL_refinement` 保留为 later 或 non-recommended options。
+- refinement plan：选择 `R1_low_dim_param_refinement`，以 frozen 20.85 predicted six parameters 初始化，优化 `L_m/W_m/D_m/wLD/wWD/wLW`，loss 包括 forward-feature residual、profile regularity 和 parameter-bound terms。model weights 保持不变。
+- acceptance gates：要求 target-subset profile RMSE 和 Er-like error 下降、IoU/Dice 改善、无 RBC-like control collapse、forward residual 与 profile metrics 对齐、无 nonphysical parameters、无 multi-pit success credit、无 baseline transition。
+- 路线决策：唯一下一步是 `A. execute 25.5 feature-space forward-consistency refinement diagnostic`。multi-pit 仍是未来 `component_set` branch，不阻塞 RBC-representable refinement diagnostic。
+- review：独立只读 review 通过，无 must-fix；确认 target counts、multi-pit exclusion、F0/R1 selection、executable gates、output whitelist，且无 forbidden artifacts 或 `CURRENT_BASELINE.md` diff。
 ## 2026-06-02 Stage 20.99 internal / buried defect feasibility schema
 
-- Scope: defined the internal / buried defect feasibility schema and data-generation design only. No COMSOL, no training, no data/NPZ generation or mutation, and no `CURRENT_BASELINE.md` update.
-- Preflight: carried forward the 20.98 dry-run blocker state: `ready_for_inference=false`; the user specimen is `internal_or_buried`; required Bx/By/Bz, no-defect reference, `sensor_z_m`, axis order, scan geometry, units, coordinate system, alignment/gain metadata, and internal ground truth are missing.
-- Schema: `INTERNAL_DEFECT_SCHEMA.md` now separates surface / near-surface RBC defects from buried cavity defects. Internal labels require `L_m`, `W_m`, `D_m` or cavity size, `burial_depth_m` / `depth_to_surface_m`, `defect_center_xyz_m`, `shape_type`, profile descriptor or cavity mask, and `ground_truth_method`.
-- Smoke-pack design: `scripts/design_internal_defect_comsol_smoke_pack_plan.py` writes a 12-row plan covering `internal_ellipsoid`, `internal_cuboid`, and `sphere_like`, with shallow/medium/deep burial levels, required Bx/By/Bz, no-defect reference, and `delta_b=b_defect-b_no_defect`. It is design-only and does not run COMSOL.
-- Route decision: `scripts/decide_internal_defect_feasibility_route.py` forbids direct migration from the surface RBC baseline, requires an independent internal COMSOL generator, keeps Bx/By/Bz as the mainline, marks Bz-only as a limited diagnostic branch, and selects the unique next step `A. execute internal COMSOL smoke pack after metadata confirmation`.
-- Review: independent read-only review passed with no must-fix and confirmed the internal/surface boundary, burial-depth labels, script compilation, output whitelist, no `CURRENT_BASELINE.md` diff, and no COMSOL/training/data mutation.
+- 范围：只定义 internal / buried defect feasibility schema 和 data-generation design。没有 COMSOL、没有训练、没有生成或修改 data/NPZ，也没有更新 `CURRENT_BASELINE.md`。
+- preflight：沿用 20.98 dry-run blocker state：`ready_for_inference=false`；用户样本属于 `internal_or_buried`；缺少 required Bx/By/Bz、no-defect reference、`sensor_z_m`、axis order、scan geometry、units、coordinate system、alignment/gain metadata 和 internal ground truth。
+- schema：`INTERNAL_DEFECT_SCHEMA.md` 把 surface / near-surface RBC defects 与 buried cavity defects 分开。internal labels 需要 `L_m`、`W_m`、`D_m` 或 cavity size、`burial_depth_m` / `depth_to_surface_m`、`defect_center_xyz_m`、`shape_type`、profile descriptor 或 cavity mask，以及 `ground_truth_method`。
+- smoke-pack design：`scripts/design_internal_defect_comsol_smoke_pack_plan.py` 写入 12-row plan，覆盖 `internal_ellipsoid`、`internal_cuboid` 和 `sphere_like`，包含 shallow/medium/deep burial levels、required Bx/By/Bz、no-defect reference 和 `delta_b=b_defect-b_no_defect`。它只是 design-only，不运行 COMSOL。
+- route decision：`scripts/decide_internal_defect_feasibility_route.py` 禁止直接从 surface RBC baseline 迁移，要求 independent internal COMSOL generator，保持 Bx/By/Bz 为 mainline，把 Bz-only 标为 limited diagnostic branch，并选择唯一下一步 `A. execute internal COMSOL smoke pack after metadata confirmation`。
+- review：独立只读 review 通过，无 must-fix；确认 internal/surface boundary、burial-depth labels、script compilation、output whitelist、无 `CURRENT_BASELINE.md` diff，且无 COMSOL/training/data mutation。
 
 ## 2026-06-02 Stage 25.3 current surface RBC baseline generalization audit
 
-- Scope: audited frozen 20.85/20.86 surface RBC baseline on `comsol_surface_shape_extension_pilot_v1`. No training, no COMSOL, no data/NPZ mutation, no checkpoint/preview/notes artifact, and no `CURRENT_BASELINE.md` update.
-- Preflight: loaded the pilot only through `COMSOL_DATA_REGISTRY.md` plus `results/manifests/comsol_surface_shape_extension_pilot_v1.manifest.json`; baseline artifact manifest and ignored checkpoint/prediction artifacts were present and sha256-verified.
-- RBC oracle fit: all 120 samples fit without silent skip. Oracle representability was `104/120`; non-RBC representability was `80/96`. `multi_pit_two_component_surface_defect` was the only full representation failure family, with representable rate `0.000000` and component merge proxy `1.000000`.
-- Frozen baseline inference: model pass was `22/120`; non-RBC pass was `19/96`; RBC-like control pass was only `3/24`. Labels were used only for post-inference metrics; model input was `delta_b/BxByBz` only.
-- Diagnosis: `82/120` samples were `rbc_representable_but_model_fail`, `22/120` were `rbc_representable_and_model_pass`, and `16/120` were `rbc_not_representable`. The representation failure bucket was entirely multi-pit; most other failures are 20.85 inversion/generalization failures under the new pilot distribution.
-- Required answers: RBC-like smooth pit did not pass as a frozen-model control; flat-bottom and sharp-wall did not fail at the oracle level; asymmetric, crack-like, flat-bottom, sharp-wall, and irregular were mainly model failures; multi-pit is a component representation failure; current 20.85 cannot serve as a non-RBC-like baseline.
-- Route decision: unique next step is `D. forward-consistency refinement plan`, with component-set decoder retained as an explicit multi-pit sub-branch. Direct 20.85-style non-RBC baseline transition remains forbidden.
-- Review: independent read-only review passed with no must-fix and confirmed no COMSOL/training/data mutation, no label leakage in model inference, no `CURRENT_BASELINE.md` diff, and no forbidden artifacts staged.
+- 范围：在 `comsol_surface_shape_extension_pilot_v1` 上审计 frozen 20.85/20.86 surface RBC baseline。没有训练、没有 COMSOL、没有修改 data/NPZ、没有 checkpoint/preview/notes artifact，也没有更新 `CURRENT_BASELINE.md`。
+- preflight：pilot 只通过 `COMSOL_DATA_REGISTRY.md` 加 `results/manifests/comsol_surface_shape_extension_pilot_v1.manifest.json` 加载；baseline artifact manifest 和 ignored checkpoint/prediction artifacts 存在并已通过 sha256 验证。
+- RBC oracle fit：全部 120 个样本完成 fit，没有 silent skip。oracle representability 为 `104/120`；non-RBC representability 为 `80/96`。`multi_pit_two_component_surface_defect` 是唯一完整 representation failure family，representable rate 为 `0.000000`，component merge proxy 为 `1.000000`。
+- frozen baseline inference：model pass 为 `22/120`；non-RBC pass 为 `19/96`；RBC-like control pass 只有 `3/24`。labels 只用于 post-inference metrics；model input 只有 `delta_b/BxByBz`。
+- diagnosis：`82/120` 个样本是 `rbc_representable_but_model_fail`，`22/120` 是 `rbc_representable_and_model_pass`，`16/120` 是 `rbc_not_representable`。representation failure bucket 全部是 multi-pit；其他大多数 failure 是新 pilot distribution 下的 20.85 inversion/generalization failures。
+- required answers：RBC-like smooth pit 没有作为 frozen-model control 通过；flat-bottom 和 sharp-wall 没有在 oracle level 失败；asymmetric、crack-like、flat-bottom、sharp-wall、irregular 主要是 model failures；multi-pit 是 component representation failure；当前 20.85 不能作为 non-RBC-like baseline。
+- route decision：唯一下一步是 `D. forward-consistency refinement plan`，同时把 component-set decoder 保留为显式 multi-pit sub-branch。direct 20.85-style non-RBC baseline transition 仍被禁止。
+- review：独立只读 review 通过，无 must-fix；确认无 COMSOL/training/data mutation、model inference 无 label leakage、无 `CURRENT_BASELINE.md` diff，且无 forbidden artifacts staged。
 
 ## 2026-06-02 Stage 25.2 surface shape-extension COMSOL pilot pack
 
-- Scope: executed the approved surface shape-extension COMSOL pilot generation only. No training, no checkpoint/preview/notes artifact, no `CURRENT_BASELINE.md` update, and no baseline transition.
-- COMSOL result: generated `comsol_surface_shape_extension_pilot_v1` with planned/success `120/120`, failed `0`, split `72/24/24`, and axes `Bx/By/Bz`.
-- Shape coverage: `rbc_like_smooth_pit=24`; `flat_bottom_pit=16`; `sharp_wall_boxy_corrosion=16`; `asymmetric_corrosion=16`; `elongated_crack_like_surface_defect=16`; `multi_pit_two_component_surface_defect=16`; `irregular_corrosion_non_rbc=16`.
-- Geometry / solve gates: Boolean subtract, mesh precheck, and COMSOL solve all passed for successful rows. The generated pack includes `b_defect`, `b_no_defect`, `delta_b`, depth/profile labels, projected masks, component labels, topology labels, and explicit `representation_target`.
-- Data policy: generated data and NPZ live under ignored `data/comsol_mfl/...` paths and are not committed. The committed record is limited to the generator, inventory/summary, validation/decision scripts, manifest, registry, and this run's summaries/metrics.
-- Validation: PINN validation passed with `n_samples=120`, `delta_b` shape `(120,3,3,201)`, finite `Bx/By/Bz`, `delta_max_abs_error=0.0`, full split/shape/topology coverage, `train_ready_candidate=false`, and `baseline_ready=false`.
-- Route decision: enter `25.3 current baseline generalization audit` using the frozen 20.85/20.86 surface RBC baseline. Training and baseline updates remain forbidden until a later explicit 25.4 gate.
-- Review: independent read-only review passed with no must-fix. It confirmed `CURRENT_BASELINE.md` unchanged, non-RBC labels are not forced into six RBC parameters, and forbidden generated artifacts are not staged.
+- 范围：只执行已批准的 surface shape-extension COMSOL pilot generation。没有训练、没有 checkpoint/preview/notes artifact、没有更新 `CURRENT_BASELINE.md`，也没有 baseline transition。
+- COMSOL result：生成 `comsol_surface_shape_extension_pilot_v1`，planned/success `120/120`，failed `0`，split `72/24/24`，axes 为 `Bx/By/Bz`。
+- shape coverage：`rbc_like_smooth_pit=24`；`flat_bottom_pit=16`；`sharp_wall_boxy_corrosion=16`；`asymmetric_corrosion=16`；`elongated_crack_like_surface_defect=16`；`multi_pit_two_component_surface_defect=16`；`irregular_corrosion_non_rbc=16`。
+- geometry / solve gates：成功 rows 的 Boolean subtract、mesh precheck 和 COMSOL solve 都通过。生成 pack 包含 `b_defect`、`b_no_defect`、`delta_b`、depth/profile labels、projected masks、component labels、topology labels 和 explicit `representation_target`。
+- data policy：generated data 和 NPZ 位于 ignored `data/comsol_mfl/...` 路径，不提交。提交记录只限 generator、inventory/summary、validation/decision scripts、manifest、registry 和本轮 summaries/metrics。
+- validation：PINN validation 通过，`n_samples=120`，`delta_b` shape `(120,3,3,201)`，finite `Bx/By/Bz`，`delta_max_abs_error=0.0`，split/shape/topology coverage 完整，`train_ready_candidate=false`，`baseline_ready=false`。
+- route decision：进入 `25.3 current baseline generalization audit`，使用 frozen 20.85/20.86 surface RBC baseline。训练和 baseline 更新在后续显式 25.4 gate 前仍被禁止。
+- review：独立只读 review 通过，无 must-fix；确认 `CURRENT_BASELINE.md` 未变，non-RBC labels 没有被强塞进 six RBC parameters，forbidden generated artifacts 没有 staged。
 
 ## 2026-06-01 Stage 25.1 surface shape-extension dataset plan
 
-- Scope: completed the plan-only surface / near-surface shape-extension dataset design. No COMSOL, no training, no data/NPZ generation or modification, no checkpoint/preview artifact, and no `CURRENT_BASELINE.md` update.
-- Preflight: fixed the anchor to the current 20.85/20.86 true 3D RBC-style profile-depth baseline on `dataset_id=comsol_true_3d_rbc_imported_watertight_pilot_v3_240`; 25.0 Piao-NLS closeout remains diagnostic/QC/classical-comparator only.
-- Taxonomy: defined seven families: `rbc_like_smooth_pit`, `flat_bottom_pit`, `sharp_wall_boxy_corrosion`, `asymmetric_corrosion`, `elongated_crack_like_surface_defect`, `multi_pit_two_component_surface_defect`, and `irregular_non_rbc_corrosion`.
-- Label schema: kept RBC-like controls on `six_param_rbc`, but non-RBC-like cases use `profile_basis`, `depth_grid`, `component_set`, or `polygon_or_contour`. Multi-pit requires `component_count` and `component_params_json`; crack-like requires `aspect_ratio` and `rotation_angle`; irregular corrosion keeps `depth_grid_m` and `profile_descriptor`.
-- Dataset plan: target pilot `N=120`, split `72/24/24`, with RBC-like control `24` and each non-RBC-like family `16`. `N=84` is marked reduced feasibility only because it cannot satisfy full coverage; minimum full-coverage fallback is `N=96`.
-- COMSOL feasibility: planned per-shape generation routes across COMSOL-native geometry, imported watertight mesh, height/depth-map solid, stacked layer control, and multi-component Boolean subtract. The 20.70 dynamic material/domain/solver fix remains a required safety pattern for imported or Boolean-subtracted defect solids.
-- Model route: fixed the later sequence as 25.2 pilot generation only, 25.3 audit current 20.85 baseline on the pilot, and 25.4 consider training. R0 audit comes before R1/R2/R3/R4/R5 model routes.
-- Acceptance gates: generation, dataset, baseline audit, and model gates now require closed body, Boolean subtract, mesh/solver, finite Bx/By/Bz, delta_b check, label validity, split/topology coverage, no label leakage, component/edge/crack metrics, non-RBC improvement, RBC control stability, and forward residual non-worsening.
-- Review: independent read-only review passed with no must-fix. It confirmed no forbidden tracked modifications and noted that allowed ignored result files must be staged with explicit `git add -f`.
-- Route decision: unique next step is `A_execute_surface_shape_extension_COMSOL_pilot_generation`, after review, still without training or baseline transition.
+- 范围：完成 plan-only surface / near-surface shape-extension dataset design。没有 COMSOL、没有训练、没有生成或修改 data/NPZ、没有 checkpoint/preview artifact，也没有更新 `CURRENT_BASELINE.md`。
+- preflight：anchor 固定到当前 20.85/20.86 true 3D RBC-style profile-depth baseline，`dataset_id=comsol_true_3d_rbc_imported_watertight_pilot_v3_240`；25.0 Piao-NLS closeout 仍只是 diagnostic/QC/classical-comparator。
+- taxonomy：定义七类：`rbc_like_smooth_pit`、`flat_bottom_pit`、`sharp_wall_boxy_corrosion`、`asymmetric_corrosion`、`elongated_crack_like_surface_defect`、`multi_pit_two_component_surface_defect` 和 `irregular_non_rbc_corrosion`。
+- label schema：RBC-like controls 保持 `six_param_rbc`，non-RBC-like cases 使用 `profile_basis`、`depth_grid`、`component_set` 或 `polygon_or_contour`。multi-pit 需要 `component_count` 和 `component_params_json`；crack-like 需要 `aspect_ratio` 和 `rotation_angle`；irregular corrosion 保留 `depth_grid_m` 和 `profile_descriptor`。
+- dataset plan：target pilot `N=120`，split `72/24/24`，RBC-like control `24`，每个 non-RBC-like family `16`。`N=84` 只标为 reduced feasibility，因为无法满足 full coverage；minimum full-coverage fallback 是 `N=96`。
+- COMSOL feasibility：按 shape 规划 COMSOL-native geometry、imported watertight mesh、height/depth-map solid、stacked layer control 和 multi-component Boolean subtract。20.70 dynamic material/domain/solver fix 仍是 imported 或 Boolean-subtracted defect solids 的必要 safety pattern。
+- model route：后续顺序固定为 25.2 pilot generation only，25.3 audit current 20.85 baseline on the pilot，25.4 才考虑 training。R0 audit 必须先于 R1/R2/R3/R4/R5 model routes。
+- acceptance gates：generation、dataset、baseline audit 和 model gates 要求 closed body、Boolean subtract、mesh/solver、finite Bx/By/Bz、delta_b check、label validity、split/topology coverage、no label leakage、component/edge/crack metrics、non-RBC improvement、RBC control stability 和 forward residual non-worsening。
+- review：独立只读 review 通过，无 must-fix；确认无 forbidden tracked modifications，并提醒 allowed ignored result files 必须用显式 `git add -f` staged。
+- route decision：唯一下一步是 `A_execute_surface_shape_extension_COMSOL_pilot_generation`，review 后仍不训练、不做 baseline transition。
 
 ## 2026-06-01 Stage 25.0 surface Piao-NLS diagnostic branch closeout
 
-- Scope: closed the 24.0A / 24.0B / 24.1 / 24.2 surface Piao-NLS branch as a diagnostic/QC/classical-comparator route. No COMSOL, no training, no data/NPZ generation or modification, and no `CURRENT_BASELINE.md` update.
-- Closeout: NLS-lite remains useful as stable delta_b-derived diagnostic/QC features and as a classical comparator input, but it is not an exact Piao 18-feature reproduction. NLS-full-compatible remains a future richer-observation interface because current v3_240 has only `scan_line_count=3`, below the `M>=5` minimum.
-- Baseline decision: 24.1 LS-SVM-like NLS-lite improves total MAE/wMAE/Dice but worsens L/D/profile RMSE/Er-like versus 20.85, so it cannot replace the current profile-depth baseline. 24.2 feature fusion improved the neural metrics, but it remains a diagnostic candidate inside the RBC six-parameter bottleneck and is not the next mainline.
-- Route change: stop NLS feature-fusion small fixes as the main surface route. The blocker is representation coverage for non-RBC-like surface defects, not another handcrafted feature tweak.
-- Next capability target: asymmetric, flat-bottom, crack-like, multi-pit / multi-component surface defects with profile-level reconstruction and forward-consistency gates.
-- 25.1 unique recommendation: `A_surface_shape_extension_dataset_plan`, before any geometry-aware decoder, profile-basis decoder, or forward-surrogate consistency implementation.
+- 范围：关闭 24.0A / 24.0B / 24.1 / 24.2 surface Piao-NLS branch，把它限定为 diagnostic/QC/classical-comparator route。没有 COMSOL、没有训练、没有生成或修改 data/NPZ，也没有更新 `CURRENT_BASELINE.md`。
+- closeout：NLS-lite 继续作为稳定 delta_b-derived diagnostic/QC features 和 classical comparator input，但不是 exact Piao 18-feature reproduction。NLS-full-compatible 仍是未来 richer-observation interface，因为当前 v3_240 只有 `scan_line_count=3`，低于 `M>=5` minimum。
+- baseline decision：24.1 LS-SVM-like NLS-lite 改善 total MAE/wMAE/Dice，但相对 20.85 恶化 L/D/profile RMSE/Er-like，所以不能替换当前 profile-depth baseline。24.2 feature fusion 改善了 neural metrics，但仍只是 RBC six-parameter bottleneck 内的 diagnostic candidate，不是下一主线。
+- route change：停止把 NLS feature-fusion small fixes 作为 surface 主线。blocker 是 non-RBC-like surface defects 的 representation coverage，不是再做一个 handcrafted feature tweak。
+- next capability target：asymmetric、flat-bottom、crack-like、multi-pit / multi-component surface defects，配套 profile-level reconstruction 和 forward-consistency gates。
 
 ## 2026-06-01 Stage 24.2 surface RBC NLS-lite feature-fusion diagnostic
 
-- Scope: fused `delta_b/BxByBz` with the existing 24.0A `nlslite_*` feature matrix on fixed `dataset_id=comsol_true_3d_rbc_imported_watertight_pilot_v3_240`. No COMSOL, no data/NPZ generation or modification, no checkpoint artifact, and no `CURRENT_BASELINE.md` update.
-- Input gate: `scripts/load_surface_rbc_nls_feature_fusion_dataset.py` loads v3_240 only through `COMSOL_DATA_REGISTRY.md + manifest`, joins the 291 `nlslite_*` columns by `sample_id`, keeps `sample_id`/`split` out of model input, and uses train-only standardization for both delta_b and features. Preflight checks passed with zero failed checks.
-- Candidate screen: seed `42`, epochs `220`, batch size `8`; validation-only selection chose `F1_late_fusion`.
-- Multi-seed: seeds `42/123/2026`; validation-only seed selection chose seed `123`. Test final metrics: total normalized MAE `0.598309`, L/W/D MAE `1.816667/1.657295/0.654960 mm`, wMAE `0.183249`, wLD/wWD/wLW `0.203378/0.189823/0.156546`, profile RMSE `0.000317238 m`, Er-like `0.267248`, IoU/Dice `0.793564/0.877942`.
-- Comparison: relative to 20.85/20.77, total `-0.079706`, wMAE `-0.017827`, profile RMSE `-0.000070499 m`, Dice `+0.030215`. Relative to 24.1, total `-0.055738`, wMAE `-0.002475`, profile RMSE `-0.000127943 m`, Dice `+0.014953`.
-- Route decision: 24.2 forms a surface feature-fusion candidate and should go to a formal rerun if continued, but it remains diagnostic and does not replace `CURRENT_BASELINE.md`. 24.0A remains the NLS-lite feature source, 24.0B remains the future NLS-full-compatible interface, and 24.1 remains the feature-only comparator.
+- 范围：在固定 `dataset_id=comsol_true_3d_rbc_imported_watertight_pilot_v3_240` 上融合 `delta_b/BxByBz` 与既有 24.0A `nlslite_*` feature matrix。没有 COMSOL、没有生成或修改 data/NPZ、没有 checkpoint artifact，也没有更新 `CURRENT_BASELINE.md`。
+- input gate：`scripts/load_surface_rbc_nls_feature_fusion_dataset.py` 只通过 `COMSOL_DATA_REGISTRY.md + manifest` 加载 v3_240，按 `sample_id` join 291 个 `nlslite_*` columns，把 `sample_id`/`split` 排除在 model input 外，并对 delta_b 与 features 都使用 train-only standardization。preflight checks 全部通过，failed checks 为零。
+- candidate screen：seed `42`，epochs `220`，batch size `8`；validation-only selection 选择 `F1_late_fusion`。
+- multi-seed：seeds `42/123/2026`；validation-only seed selection 选择 seed `123`。test final metrics：total normalized MAE `0.598309`，L/W/D MAE `1.816667/1.657295/0.654960 mm`，wMAE `0.183249`，wLD/wWD/wLW `0.203378/0.189823/0.156546`，profile RMSE `0.000317238 m`，Er-like `0.267248`，IoU/Dice `0.793564/0.877942`。
+- comparison：相对 20.85/20.77，total `-0.079706`，wMAE `-0.017827`，profile RMSE `-0.000070499 m`，Dice `+0.030215`。相对 24.1，total `-0.055738`，wMAE `-0.002475`，profile RMSE `-0.000127943 m`，Dice `+0.014953`。
+- route decision：24.2 形成 surface feature-fusion candidate，如果继续应进入 formal rerun；但它仍是 diagnostic，不替换 `CURRENT_BASELINE.md`。24.0A 保持为 NLS-lite feature source，24.0B 保持为未来 NLS-full-compatible interface，24.1 保持为 feature-only comparator。
 
 ## 2026-06-01 Stage 24.1 surface RBC Piao-style NLS-lite feature baseline
 
-- 范围：使用 24.0A 已生成的 `nlslite_*` 特征训练 classical feature-to-geometry comparator；输入只允许 `nlslite_*`，`sample_id` 只用于 join/reporting，`split` 只用于 train/val/test 划分。没有运行 COMSOL，没有生成或修改 data/NPZ，没有写 checkpoint，没有更新 `CURRENT_BASELINE.md`。
-- 数据入口：固定 `dataset_id=comsol_true_3d_rbc_imported_watertight_pilot_v3_240`，通过 `COMSOL_DATA_REGISTRY.md + manifest` 显式加载；preflight 确认 24.0A feature manifest/CSV/quality 存在，feature CSV 只有 `sample_id`、`split` 和 291 个 `nlslite_*` 列。
-- 模型选择：新增 `scripts/train_surface_rbc_piao_style_feature_baseline.py`，候选包括 mean、Ridge、closed-form LS-SVM-like RBF、KernelRidge RBF、SVR RBF；使用 train-only feature scaler、train-only target scaler、validation-only selection，test 只对 validation-selected 模型和固定 mean comparator 报告。
-- 结果：validation 选中 `lssvm_rbf_alpha_0p1_gamma_0p00171821`（`LS-SVM-like-RBF`）。test total normalized MAE=`0.654046`，L/W/D MAE=`1.913667/1.991751/0.967491 mm`，wMAE auxiliary=`0.185724`，wLD/wWD/wLW=`0.197556/0.191340/0.168276`，profile RMSE=`0.000445182 m`，Er-like=`0.431187`，IoU/Dice=`0.769353/0.862988`。
-- 对比：相对 20.85/20.77，total MAE、W、wMAE、wLD/wWD/wLW、IoU/Dice 改善，但 L、D、profile RMSE 和 Er-like 退化；相对 20.81，total MAE、L、wMAE、wLD/wWD、profile RMSE 轻微改善，但 W、D、wLW、IoU/Dice 较弱。
-- route decision：新增 `scripts/decide_surface_rbc_piao_style_feature_baseline_route.py`，结论是 `enter_24_2_feature_fusion_candidate`。24.1 有补充价值，可进入 24.2 feature-fusion diagnostic，但不能替代 `CURRENT_BASELINE.md`，也不能声称 exact Piao NLS。
+- 范围：完成 24.1 NLS-lite classical feature baseline。它是 diagnostic/QC/classical comparator，不是 exact Piao NLS，也不是 profile-depth baseline replacement。
+- 结果：validation 选中 `lssvm_rbf_alpha_0p1_gamma_0p00171821`（`LS-SVM-like-RBF`）。test total normalized MAE 为 `0.654046`，优于 20.85/20.77 的 `0.678014`；Dice 为 `0.862988`，优于 20.85/20.77 但略弱于 20.81；profile RMSE 为 `0.000445182 m`，仍弱于 20.85/20.77 的 `0.000387737 m`。
+- 路线判断：24.1 的价值是 classical comparator 与 curvature/w 参数补充信号，不是 baseline replacement。若继续，应进入 bounded 24.2 feature fusion diagnostic；`CURRENT_BASELINE.md` 保持不变。
 
 ## 2026-06-01 Stage 24.0B surface RBC NLS full-compatible feature framework
 
-- Scope: implemented the Piao NLS full-compatible schema, extractor, input adequacy validator, synthetic tests, route decision, and review record. No COMSOL, no training, no data/NPZ generation or modification, and no `CURRENT_BASELINE.md` update.
-- Schema: `NLS_FULL_COMPATIBLE_FEATURE_SCHEMA.md` fixes required input as aligned Bx/By/Bz ROI matrices over axial x and tangential y, with `M>=5` as the full-compatible minimum and `M>=9` as the recommended full-candidate count.
-- Extractor: `scripts/extract_surface_rbc_nls_full_compatible_features.py` emits 82 stable feature columns plus 82 `valid__*` flags, records `feature_schema_version=nls_full_compatible_v1`, and writes degraded/full mode metadata per row.
-- Current v3_240 result: `delta_b` shape is `[240,3,3,201]`, axis order is `[Bx, By, Bz]`, `scan_line_count=3`, `sensor_x_count=201`; therefore `full_feature_ready=false`, `degraded_mode=true`, `degraded_mode_reason=scan_line_count_lt_5`.
-- Route decision: NLS-full-compatible is a future full ROI / richer-observation interface for surface RBC, not exact Piao full NLS and not a replacement for NLS-lite. Existing internal richer-observation 5/9-line pack is only an interface reference, not surface RBC full data.
-- Tests: synthetic tests passed for 3-line degraded mode, 5-line compatible mode, 9-line full-candidate mode, explicit fit failure handling, and feature name stability.
-- Claim boundary: `piao_full_compatible=true`; `exact_piao_full=false` until full ROI data and exact equations are validated.
-
+- 范围：实现 Piao NLS full-compatible schema、extractor、input adequacy validator、synthetic tests、route decision 和 review record。没有 COMSOL、没有训练、没有生成或修改 data/NPZ，也没有更新 `CURRENT_BASELINE.md`。
+- schema：`NLS_FULL_COMPATIBLE_FEATURE_SCHEMA.md` 把 required input 固定为沿 axial x 和 tangential y 对齐的 Bx/By/Bz ROI matrices，`M>=5` 是 full-compatible minimum，`M>=9` 是 recommended full-candidate count。
+- extractor：`scripts/extract_surface_rbc_nls_full_compatible_features.py` 输出 82 个 stable feature columns 加 82 个 `valid__*` flags，记录 `feature_schema_version=nls_full_compatible_v1`，并为每行写 degraded/full mode metadata。
+- current v3_240 result：`delta_b` shape 是 `[240,3,3,201]`，axis order 是 `[Bx, By, Bz]`，`scan_line_count=3`，`sensor_x_count=201`；因此 `full_feature_ready=false`，`degraded_mode=true`，`degraded_mode_reason=scan_line_count_lt_5`。
+- route decision：NLS-full-compatible 是未来 full ROI / richer-observation interface，用于 surface RBC；它不是 exact Piao full NLS，也不是 NLS-lite 的 replacement。现有 internal richer-observation 5/9-line pack 只能作为 interface reference，不是 surface RBC full data。
+- tests：synthetic tests 通过 3-line degraded mode、5-line compatible mode、9-line full-candidate mode、explicit fit failure handling 和 feature name stability。
+- claim boundary：`piao_full_compatible=true`；`exact_piao_full=false`，直到 full ROI data 和 exact equations 被验证。
 ## 2026-06-01 Stage 24.0A surface RBC NLS-lite feature extractor
 
 - 范围：在当前 surface / near-surface true 3D RBC baseline 的固定 `dataset_id=comsol_true_3d_rbc_imported_watertight_pilot_v3_240` 上实现 NLS-lite feature extractor；没有运行 COMSOL、没有训练、没有生成或修改 data/NPZ、没有更新 `CURRENT_BASELINE.md`。
@@ -3533,6 +3525,17 @@ Review agent 已完成只读复核，无 must-fix。review 建议把 audit/decis
 - result: gate decision `PARTIAL`. Test recall `0.674419`, missed `0.325581`, extra `0.292683`, merged `1.000000`, component Dice `0.034007`, union Dice `0.060961`, and depth RMSE `0.001178764 m`.
 - comparison: v3b improved the near-empty 25.13 mask collapse (`component Dice 0.005536 -> 0.034007`, `union Dice 0.002829 -> 0.060961`) but did not resolve the 25.15 union-like merged collapse (`merged 1.000000 -> 1.000000`).
 - route decision: `B. enter 25.17b label-v3b failure audit focused on hard-core/halo/SDF/depth-valid-region usage`.
+
+## 2026-06-03 Stage 25.18 surface multi-pit raster-target route reset
+
+- 范围：只做路线重置和方案设计；不训练、不调 loss、不扩大模型、不运行 COMSOL、不生成或修改 data/NPZ、不提交 checkpoint/preview，不做 baseline transition，也不更新 `CURRENT_BASELINE.md`。
+- 证据输入：读取用户指定的 25.10-25.17 全部 metrics 文件；缺失证据文件数为 `0`。
+- 路线重置判定：`STOP_RASTER_TARGET_MAINLINE`。
+- 停止路线：label-v2 / target-v2 训练路线、label-v3 soft support 训练路线、label-v3b hard-core / halo / SDF raster 监督路线，以及把 loss rebalance / label-v4 raster-target 微调作为主线。
+- 保留路线：multi-pit component-set 总方向、`K=3` slot 表示、component geometry prediction、后续 forward consistency、raw labels / COMSOL top-up dataset 作为证据和源数据。
+- 失败归因：per-component raster ownership 主监督与 MFL 可观测性存在结构性错配；touching、overlap 和 three-component 样本会进一步放大 component identity ambiguity。这不是 COMSOL 数据全局坏、baseline 问题、单纯训练轮数不足或单纯模型容量不足。
+- 新路线：geometry-primary component-set。slot 主输出改为 existence、center、`L/W/D`、rotation、shape family 和 compact shape parameters；mask/depth 改为由 geometry slot 派生的评价、弱监督或 forward-consistency 诊断对象，不再作为主 raster loss。
+- 路线决策：`A. 进入 25.19 geometry-primary component-set 设计与标签派生计划；不训练`。
 
 ## 2026-06-03 surface RBC +120 assembly/training gate
 
