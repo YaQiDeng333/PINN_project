@@ -74,6 +74,99 @@ PLAN_FIELDS = base_plan.PLAN_FIELDS + [
 ]
 COVERAGE_FIELDS = ["coverage_type", "key", "planned_count", "target_count", "target_met"]
 
+COMSOL_SAFE_REPLACEMENTS = {
+    "surface_rbc_targeted_008_balanced_interior_sharp_medium_narrow": {
+        "sample_id": "surface_rbc_targeted_008_balanced_interior_sharp_medium_narrow_repl03",
+        "rbc_params": {"L_m": 0.024, "W_m": 0.0095, "D_m": 0.0031, "wLD": 0.55, "wWD": 0.6105, "wLW": 0.55},
+        "reason": "COMSOL boolean blocker for narrow sharp medium row; relax only depth/width interaction within the same signature",
+    },
+    "surface_rbc_targeted_022_balanced_interior_round_deep_balanced": {
+        "sample_id": "surface_rbc_targeted_022_balanced_interior_round_deep_balanced_repl01",
+        "rbc_params": {"wLD": 0.722, "wWD": 0.6965, "wLW": 0.713},
+        "reason": "COMSOL free-tet blocker for symmetric deep round row; add minimal round-template anisotropy used by neighboring passing rows",
+    },
+    "surface_rbc_targeted_033_balanced_interior_boxy_deep_compact": {
+        "sample_id": "surface_rbc_targeted_033_balanced_interior_boxy_deep_compact_repl01",
+        "rbc_params": {"D_m": 0.0044, "wLD": 1.085, "wWD": 1.1105, "wLW": 1.094},
+        "reason": "COMSOL mesh self-intersection for deep boxy compact row; relax boxy curvature and depth within signature",
+    },
+    "surface_rbc_targeted_034_balanced_interior_boxy_deep_balanced": {
+        "sample_id": "surface_rbc_targeted_034_balanced_interior_boxy_deep_balanced_repl01",
+        "rbc_params": {"D_m": 0.0044, "wLD": 1.1, "wWD": 1.1, "wLW": 1.1},
+        "reason": "COMSOL imported-domain blocker for deep boxy balanced row; use symmetric boxy curvature and lower deep-bin depth",
+    },
+    "surface_rbc_targeted_036_balanced_interior_boxy_deep_narrow": {
+        "sample_id": "surface_rbc_targeted_036_balanced_interior_boxy_deep_narrow_repl01",
+        "rbc_params": {"D_m": 0.0044, "W_m": 0.010, "wLD": 1.1, "wWD": 1.1, "wLW": 1.1},
+        "reason": "COMSOL mesh self-intersection for deep boxy narrow row; relax width-depth and boxy curvature within signature",
+    },
+    "surface_rbc_targeted_042_balanced_interior_LD_dominant_medium_balanced": {
+        "sample_id": "surface_rbc_targeted_042_balanced_interior_LD_dominant_medium_balanced_repl03",
+        "rbc_params": {"L_m": 0.01957, "W_m": 0.01032675, "D_m": 0.0025272, "wLD": 1.17, "wWD": 0.871, "wLW": 0.988},
+        "reason": "COMSOL free-tet boundary conformity blocker for LD-dominant medium balanced row; relax size/depth interaction within signature",
+    },
+    "surface_rbc_targeted_056_balanced_interior_WD_dominant_medium_narrow": {
+        "sample_id": "surface_rbc_targeted_056_balanced_interior_WD_dominant_medium_narrow_repl01",
+        "rbc_params": {"W_m": 0.0095, "D_m": 0.0031, "wLD": 0.895, "wWD": 1.1685, "wLW": 1.018},
+        "reason": "Full run long-solve blocker for WD-dominant medium narrow row; relax width-depth and WD extremity within signature",
+    },
+    "surface_rbc_targeted_074_hard_depth_aspect_round_medium_narrow": {
+        "sample_id": "surface_rbc_targeted_074_hard_depth_aspect_round_medium_narrow_repl01",
+        "rbc_params": {"W_m": 0.0085, "D_m": 0.0031, "wLD": 0.677, "wWD": 0.728, "wLW": 0.695},
+        "reason": "COMSOL imported-domain blocker for hard round medium narrow row; relax width-depth interaction within signature",
+    },
+    "surface_rbc_targeted_080_hard_depth_aspect_boxy_medium_narrow": {
+        "sample_id": "surface_rbc_targeted_080_hard_depth_aspect_boxy_medium_narrow_repl01",
+        "rbc_params": {"L_m": 0.02424, "W_m": 0.0085, "D_m": 0.0031, "wLD": 1.085, "wWD": 1.1105, "wLW": 1.094},
+        "reason": "COMSOL imported-domain blocker for hard boxy medium narrow row; relax hard aspect and boxy curvature within signature",
+    },
+    "surface_rbc_targeted_087_edge_position_sharp_medium_narrow": {
+        "sample_id": "surface_rbc_targeted_087_edge_position_sharp_medium_narrow_repl01",
+        "rbc_params": {"W_m": 0.0095, "D_m": 0.0031, "wLD": 0.55, "wWD": 0.6105, "wLW": 0.55, "center_y_m": -0.0045},
+        "reason": "COMSOL geometry union blocker for edge sharp medium narrow row; relax edge margin and width-depth interaction within signature",
+    },
+    "surface_rbc_targeted_093_edge_position_round_medium_narrow": {
+        "sample_id": "surface_rbc_targeted_093_edge_position_round_medium_narrow_repl01",
+        "rbc_params": {"W_m": 0.0085, "D_m": 0.0031, "wLD": 0.677, "wWD": 0.728, "wLW": 0.695, "center_x_m": -0.021},
+        "reason": "COMSOL mesh boundary blocker for edge round medium narrow row; relax left edge margin and width-depth interaction within signature",
+    },
+    "surface_rbc_targeted_095_edge_position_round_deep_balanced": {
+        "sample_id": "surface_rbc_targeted_095_edge_position_round_deep_balanced_repl01",
+        "rbc_params": {"D_m": 0.0044, "wLD": 0.722, "wWD": 0.6965, "wLW": 0.713, "center_y_m": -0.0045},
+        "reason": "COMSOL geometry union blocker for edge round deep balanced row; relax lower edge margin and depth within signature",
+    },
+    "surface_rbc_targeted_096_edge_position_round_deep_narrow": {
+        "sample_id": "surface_rbc_targeted_096_edge_position_round_deep_narrow_repl01",
+        "rbc_params": {"D_m": 0.0044, "W_m": 0.010, "wLD": 0.737, "wWD": 0.686, "wLW": 0.719, "center_y_m": 0.0045},
+        "reason": "COMSOL geometry union blocker for edge round deep narrow row; relax upper edge margin and width-depth interaction within signature",
+    },
+    "surface_rbc_targeted_099_edge_position_boxy_medium_narrow": {
+        "sample_id": "surface_rbc_targeted_099_edge_position_boxy_medium_narrow_repl01",
+        "rbc_params": {"W_m": 0.0095, "D_m": 0.0031, "wLD": 1.085, "wWD": 1.1105, "wLW": 1.094, "center_y_m": -0.0045},
+        "reason": "COMSOL mesh boundary blocker for edge boxy medium narrow row; relax lower edge margin, width-depth, and boxy curvature within signature",
+    },
+    "surface_rbc_targeted_100_edge_position_boxy_deep_compact": {
+        "sample_id": "surface_rbc_targeted_100_edge_position_boxy_deep_compact_repl01",
+        "rbc_params": {"D_m": 0.0044, "wLD": 1.085, "wWD": 1.1105, "wLW": 1.094, "center_y_m": 0.0045},
+        "reason": "COMSOL geometry union blocker for edge boxy deep compact row; relax upper edge margin, depth, and boxy curvature within signature",
+    },
+    "surface_rbc_targeted_102_edge_position_boxy_deep_narrow": {
+        "sample_id": "surface_rbc_targeted_102_edge_position_boxy_deep_narrow_repl01",
+        "rbc_params": {"D_m": 0.0044, "W_m": 0.010, "wLD": 1.1, "wWD": 1.1, "wLW": 1.1, "center_x_m": 0.021},
+        "reason": "COMSOL mesh boundary blocker for edge boxy deep narrow row; relax right edge margin, width-depth, and boxy curvature within signature",
+    },
+    "surface_rbc_targeted_107_edge_position_LD_dominant_deep_balanced": {
+        "sample_id": "surface_rbc_targeted_107_edge_position_LD_dominant_deep_balanced_repl01",
+        "rbc_params": {"D_m": 0.0044, "wLD": 1.155, "wWD": 0.8815, "wLW": 0.982, "center_y_m": -0.0045},
+        "reason": "COMSOL geometry union blocker for edge LD-dominant deep balanced row; relax lower edge margin, depth, and LD extremity within signature",
+    },
+    "surface_rbc_targeted_108_edge_position_LD_dominant_deep_narrow": {
+        "sample_id": "surface_rbc_targeted_108_edge_position_LD_dominant_deep_narrow_repl01",
+        "rbc_params": {"D_m": 0.0044, "W_m": 0.010, "wLD": 1.17, "wWD": 0.871, "wLW": 0.988, "center_y_m": 0.0045},
+        "reason": "COMSOL geometry union blocker for edge LD-dominant deep narrow row; relax upper edge margin, width-depth, and LD extremity within signature",
+    },
+}
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Design surface RBC targeted expansion top-up plan.")
@@ -170,9 +263,21 @@ def make_row(
     variant: int,
     temp_mesh_dir: Path,
     replacement_of_sample_id: str = "",
+    rbc_param_override: dict[str, float] | None = None,
+    replacement_reason: str = "",
 ) -> dict[str, Any]:
     L, W, D, wLD, wWD, wLW = perturbed(spec, variant, role)
+    if rbc_param_override:
+        L = float(rbc_param_override.get("L_m", L))
+        W = float(rbc_param_override.get("W_m", W))
+        D = float(rbc_param_override.get("D_m", D))
+        wLD = float(rbc_param_override.get("wLD", wLD))
+        wWD = float(rbc_param_override.get("wWD", wWD))
+        wLW = float(rbc_param_override.get("wLW", wLW))
     center_x, center_y = EDGE_CENTERS[edge_position_bin]
+    if rbc_param_override:
+        center_x = float(rbc_param_override.get("center_x_m", center_x))
+        center_y = float(rbc_param_override.get("center_y_m", center_y))
     sample = base_plan.smoke_plan.SmokeSample(
         sample_id=sample_id,
         split_tag=split,
@@ -232,6 +337,7 @@ def make_row(
         "aspect_bin": spec.aspect_bin,
         "curvature_template": spec.curvature_template,
         "replacement_of_sample_id": replacement_of_sample_id,
+        "replacement_reason": replacement_reason,
     }
     row: dict[str, Any] = {
         "dataset_id": DATASET_ID,
@@ -295,7 +401,8 @@ def make_row(
         "geometry_params_json": json_dumps(geometry_params),
         "allowed_use": "schema_validation, explicit_surface_rbc_expansion_training_gate",
         "forbidden_use": "automatic_mainline_training, baseline_update, current_baseline_replacement, latest_newest_auto_discovery, direct_training_without_manifest_gate",
-        "notes": f"surface RBC targeted top-up source only; role={role}; not assembled dataset",
+        "notes": f"surface RBC targeted top-up source only; role={role}; not assembled dataset"
+        + (f"; deterministic COMSOL-safe replacement: {replacement_reason}" if replacement_reason else ""),
         "targeted_role": role,
         "edge_position_bin": edge_position_bin,
         "axis_order": "Bx,By,Bz",
@@ -342,15 +449,20 @@ def build_plan(temp_mesh_dir: Path = DEFAULT_TEMP_MESH_DIR) -> list[dict[str, An
                 edge_cycle = ["near_left_roi", "near_right_roi", "near_lower_scan_window", "near_upper_scan_window"]
                 edge_bin = edge_cycle[(index - 1) % len(edge_cycle)]
             sample_id = f"surface_rbc_targeted_{len(rows) + 1:03d}_{role}_{spec.curvature_template}_{spec.depth_bin}_{spec.aspect_bin}"
+            replacement = COMSOL_SAFE_REPLACEMENTS.get(sample_id)
+            output_sample_id = replacement["sample_id"] if replacement else sample_id
             rows.append(
                 make_row(
-                    sample_id=sample_id,
+                    sample_id=output_sample_id,
                     split=split,
                     spec=spec,
                     role=role,
                     edge_position_bin=edge_bin,
                     variant=role_variant[role],
                     temp_mesh_dir=temp_mesh_dir,
+                    replacement_of_sample_id=sample_id if replacement else "",
+                    rbc_param_override=replacement.get("rbc_params") if replacement else None,
+                    replacement_reason=replacement.get("reason", "") if replacement else "",
                 )
             )
     validate_plan_contract(rows)

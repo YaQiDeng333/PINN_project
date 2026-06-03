@@ -1,0 +1,75 @@
+{
+  "allowed_use": [
+    "schema_validation",
+    "explicit_surface_rbc_expansion_training_gate"
+  ],
+  "auto_discovery_allowed": false,
+  "axes": [
+    "Bx",
+    "By",
+    "Bz"
+  ],
+  "baseline_ready": false,
+  "comsol_commit": "913c8ff654a7df0c8072d699b0a82458709b003b",
+  "creates_assembled_dataset": false,
+  "curvature_counts": {
+    "LD_dominant": 18,
+    "WD_dominant": 12,
+    "boxy": 24,
+    "round": 30,
+    "sharp": 36
+  },
+  "dataset_id": "comsol_true_3d_rbc_surface_targeted_topup_v1_120",
+  "dataset_role": "topup_source",
+  "exact_piao_rbc": false,
+  "forbidden_use": [
+    "automatic_mainline_training",
+    "baseline_update",
+    "current_baseline_replacement",
+    "latest_newest_auto_discovery",
+    "direct_training_without_manifest_gate"
+  ],
+  "generated_at": "2026-06-03T08:56:27",
+  "generator_script": "COMSOL_Multiphysics_MCP/scripts/generate_mfl_surface_rbc_targeted_topup_pack.py",
+  "geometry_method": "imported_watertight_mesh_solid",
+  "latest_newest_discovery_allowed": false,
+  "manifest_path": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\manifests\\comsol_true_3d_rbc_surface_targeted_topup_v1_120.manifest.json",
+  "merge_policy": "none_topup_source_only",
+  "n_samples": 120,
+  "notes": "Top-up source only. Later +120 training gate must explicitly assemble v3_240 + topup_v1_120.",
+  "npz_path": "C:\\Users\\19166\\Desktop\\PINN_project\\data\\comsol_mfl\\prepared\\experimental\\true_3d_rbc_pilot\\comsol_true_3d_rbc_surface_targeted_topup_v1_120.npz",
+  "npz_sha256": "1cd180ca3db6287ed68048fb6b055766bc33ef165f38f333cdb5d8b260aa0a89",
+  "pinn_commit": "549ef3c3521eda9624861eb6d8664295bbf2805b",
+  "rbc_style_approximation": true,
+  "route": "true_3d_rbc_surface_targeted_expansion",
+  "scan_line_y": [
+    -0.001,
+    0.0,
+    0.001
+  ],
+  "schema_version": "true3d_profile_v1_piao_rbc",
+  "sensor_x_count": 201,
+  "sensor_z_m": 0.008,
+  "source_dataset_ids": [
+    "comsol_true_3d_rbc_imported_watertight_pilot_v3_240"
+  ],
+  "source_manifest_paths": [
+    "C:\\Users\\19166\\Desktop\\PINN_project\\results\\manifests\\comsol_true_3d_rbc_imported_watertight_pilot_v3_240.manifest.json"
+  ],
+  "split_counts": {
+    "test": 20,
+    "train": 80,
+    "val": 20
+  },
+  "stage": "surface_rbc_targeted_expansion_v1",
+  "status": "topup_generated",
+  "targeted_role_counts": {
+    "balanced_interior": 60,
+    "edge_position": 24,
+    "hard_depth_aspect": 24,
+    "old_distribution_anchor": 12
+  },
+  "train_ready_candidate": true,
+  "validation_pass": true,
+  "validation_script": "PINN_project/scripts/validate_surface_rbc_targeted_expansion_pack.py"
+}

@@ -472,3 +472,30 @@ This registry records generated COMSOL dataset identities and allowed usage. It 
 - npz_sha256: 80508a51600d68d12a7a202688d9826bf9f2382230b840ea149f801ac9dde197
 - notes: Metadata only. Generated NPZ/data files are not committed; multi-pit is component-set data, not a CURRENT_BASELINE transition.
 - 25.10 training_gate_consumed: gate_id=25_10_surface_multipit_component_set_training_gate; decision=PARTIAL; metrics=`C:\Users\19166\Desktop\PINN_project\results\metrics\25_10_component_set_training_gate_metrics.json`; baseline_ready=false; CURRENT_BASELINE.md unchanged.
+
+## comsol_true_3d_rbc_surface_targeted_topup_v1_120
+
+- dataset_role: topup_source
+- status: topup_generated
+- route: true_3d_rbc_surface_targeted_expansion
+- stage: surface_rbc_targeted_expansion_v1
+- schema_version: true3d_profile_v1_piao_rbc
+- geometry_method: imported_watertight_mesh_solid
+- exact_piao_rbc: false
+- rbc_style_approximation: true
+- path: `C:\Users\19166\Desktop\PINN_project\data\comsol_mfl\prepared\experimental\true_3d_rbc_pilot\comsol_true_3d_rbc_surface_targeted_topup_v1_120.npz`
+- manifest_path: `C:\Users\19166\Desktop\PINN_project\results\manifests\comsol_true_3d_rbc_surface_targeted_topup_v1_120.manifest.json`
+- n_samples: 120
+- split_counts: {'train': 80, 'val': 20, 'test': 20}
+- curvature_counts: {'sharp': 36, 'round': 30, 'boxy': 24, 'LD_dominant': 18, 'WD_dominant': 12}
+- train_ready_candidate: true
+- baseline_ready: false
+- auto_discovery_allowed: false
+- latest_newest_discovery_allowed: false
+- allowed_use: schema_validation, explicit_surface_rbc_expansion_training_gate
+- forbidden_use: automatic_mainline_training, baseline_update, current_baseline_replacement, latest_newest_auto_discovery, direct_training_without_manifest_gate
+- source_dataset_ids: comsol_true_3d_rbc_imported_watertight_pilot_v3_240
+- generator_script: `COMSOL_Multiphysics_MCP/scripts/generate_mfl_surface_rbc_targeted_topup_pack.py`
+- validation_script: `PINN_project/scripts/validate_surface_rbc_targeted_expansion_pack.py`
+- npz_sha256: 1cd180ca3db6287ed68048fb6b055766bc33ef165f38f333cdb5d8b260aa0a89
+- notes: Metadata only. Generated NPZ/data files are not committed and must be loaded only by explicit dataset_id + manifest.

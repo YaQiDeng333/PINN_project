@@ -346,7 +346,7 @@ def build_manifest(
         "source_manifest_paths": [str(DEFAULT_SOURCE_MANIFEST)],
         "merge_policy": "none_topup_source_only",
         "validation_pass": validation_pass,
-        "train_ready_candidate": False,
+        "train_ready_candidate": validation_pass and n_success == 120,
         "baseline_ready": False,
         "auto_discovery_allowed": False,
         "latest_newest_discovery_allowed": False,

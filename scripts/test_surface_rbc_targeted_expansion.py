@@ -38,6 +38,47 @@ def test_replacement_signature_preserves_coverage() -> None:
     assert plan_mod.coverage_signature(replacement) == plan_mod.coverage_signature(row)
 
 
+def test_known_comsol_blockers_use_safe_replacements() -> None:
+    import design_surface_rbc_targeted_expansion_plan as plan_mod
+
+    rows = plan_mod.build_plan()
+    by_original = {row["replacement_of_sample_id"]: row for row in rows if row["replacement_of_sample_id"]}
+    original_rows = []
+    for original_id in plan_mod.COMSOL_SAFE_REPLACEMENTS:
+        table = plan_mod.COMSOL_SAFE_REPLACEMENTS[original_id]
+        replacement = by_original[original_id]
+        original = plan_mod.make_row(
+            sample_id=original_id,
+            split=replacement["split"],
+            spec=next(spec for spec in plan_mod.selected_specs(replacement["targeted_role"]) if spec.depth_bin == replacement["depth_bin"] and spec.aspect_bin == replacement["aspect_bin"] and spec.curvature_template == replacement["curvature_template"]),
+            role=replacement["targeted_role"],
+            edge_position_bin=replacement["edge_position_bin"],
+            variant=1,
+            temp_mesh_dir=plan_mod.DEFAULT_TEMP_MESH_DIR,
+        )
+        original_rows.append(original)
+        assert replacement["sample_id"] == table["sample_id"]
+        assert replacement["replacement_of_sample_id"] == original_id
+        assert replacement["coverage_signature"] == original["coverage_signature"]
+        assert "deterministic COMSOL-safe replacement" in replacement["notes"]
+        assert "multi" not in replacement["sample_id"].lower()
+        assert "internal" not in replacement["sample_id"].lower()
+        assert "buried" not in replacement["sample_id"].lower()
+
+    assert len(original_rows) == len(plan_mod.COMSOL_SAFE_REPLACEMENTS)
+
+    sharp = by_original["surface_rbc_targeted_008_balanced_interior_sharp_medium_narrow"]
+    assert sharp["sample_id"].endswith("_repl03")
+    assert sharp["coverage_signature"] == "balanced_interior|medium|narrow|sharp|interior"
+    assert (float(sharp["L_m"]), float(sharp["W_m"]), float(sharp["D_m"])) == (0.024, 0.0095, 0.0031)
+    assert (float(sharp["wLD"]), float(sharp["wWD"]), float(sharp["wLW"])) == (0.55, 0.6105, 0.55)
+
+    round_deep = by_original["surface_rbc_targeted_022_balanced_interior_round_deep_balanced"]
+    assert round_deep["sample_id"].endswith("_repl01")
+    assert round_deep["coverage_signature"] == "balanced_interior|deep|balanced|round|interior"
+    assert (float(round_deep["wLD"]), float(round_deep["wWD"]), float(round_deep["wLW"])) == (0.722, 0.6965, 0.713)
+
+
 def test_manifest_and_route_are_topup_only() -> None:
     import decide_surface_rbc_targeted_expansion_route as route_mod
     import validate_surface_rbc_targeted_expansion_pack as validate_mod
@@ -51,10 +92,19 @@ def test_manifest_and_route_are_topup_only() -> None:
     )
     assert manifest["dataset_id"] == "comsol_true_3d_rbc_surface_targeted_topup_v1_120"
     assert manifest["dataset_role"] == "topup_source"
-    assert manifest["train_ready_candidate"] is False
+    assert manifest["train_ready_candidate"] is True
     assert manifest["baseline_ready"] is False
     assert "assembled" not in manifest["dataset_role"]
     assert "explicit_surface_rbc_expansion_training_gate" in manifest["allowed_use"]
+    partial_manifest = validate_mod.build_manifest(
+        n_success=119,
+        validation_pass=True,
+        npz_sha256="0" * 64,
+        pinn_commit="pinn",
+        comsol_commit="comsol",
+    )
+    assert partial_manifest["train_ready_candidate"] is False
+    assert partial_manifest["baseline_ready"] is False
 
     decision = route_mod.decide_route(
         calibration_pass=True,
@@ -90,6 +140,7 @@ def run() -> int:
     tests = [
         test_plan_contract,
         test_replacement_signature_preserves_coverage,
+        test_known_comsol_blockers_use_safe_replacements,
         test_manifest_and_route_are_topup_only,
         test_mesh_wrapper_supports_calibration_batches,
     ]
