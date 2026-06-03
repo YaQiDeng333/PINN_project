@@ -1,0 +1,92 @@
+{
+  "N": 360,
+  "allowed_use": [
+    "schema_validation",
+    "explicit_surface_rbc_expansion_training_gate_review"
+  ],
+  "assembled_dataset_id": "comsol_true_3d_rbc_surface_expansion_v1_360",
+  "assembled_npz_path": "C:\\Users\\19166\\Desktop\\PINN_project\\data\\comsol_mfl\\prepared\\experimental\\true_3d_rbc_pilot\\comsol_true_3d_rbc_surface_expansion_v1_360.npz",
+  "assembled_npz_sha256": "b5c0e9170799ac888c337ac96a7b632d20dd4815dac9a6fda829238d4bfb5673",
+  "axes": [
+    "Bx",
+    "By",
+    "Bz"
+  ],
+  "baseline_ready": false,
+  "baseline_transition": false,
+  "current_baseline_update": false,
+  "dataset_role": "assembled_training_gate_candidate",
+  "forbidden_use": [
+    "automatic_mainline_training",
+    "baseline_update",
+    "current_baseline_replacement",
+    "latest_newest_auto_discovery",
+    "direct_training_without_manifest_gate"
+  ],
+  "generated_at": "2026-06-03T14:35:57",
+  "labels": [
+    "L_m",
+    "W_m",
+    "D_m",
+    "wLD",
+    "wWD",
+    "wLW"
+  ],
+  "manifest_path": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\manifests\\surface_rbc_expansion_v1_360_training_gate_manifest.json",
+  "manifest_type": "surface_rbc_expansion_v1_360_training_gate",
+  "metrics_path": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\metrics\\surface_rbc_expansion_v1_360_training_gate_metrics.json",
+  "pinn_commit": "78a2a5300cb6295f1c469ece39f5a34a54e60780",
+  "route": "true_3d_rbc_surface_expansion",
+  "scan_line_y": [
+    -0.001,
+    0.0,
+    0.001
+  ],
+  "schema_version": "true3d_profile_v1_piao_rbc",
+  "sensor_x_count": 201,
+  "sensor_z_m": 0.008,
+  "shape": [
+    360,
+    3,
+    3,
+    201
+  ],
+  "source_dataset_id": "comsol_true_3d_rbc_imported_watertight_pilot_v3_240",
+  "source_manifest_paths": [
+    "C:\\Users\\19166\\Desktop\\PINN_project\\results\\manifests\\comsol_true_3d_rbc_imported_watertight_pilot_v3_240.manifest.json",
+    "C:\\Users\\19166\\Desktop\\PINN_project\\results\\manifests\\comsol_true_3d_rbc_surface_targeted_topup_v1_120.manifest.json"
+  ],
+  "source_manifest_sha256": "d70794a658061c9f431f9efdbb01cba27871a0c015dedca947f9c6548bbb6683",
+  "source_npz_paths": [
+    "C:\\Users\\19166\\Desktop\\PINN_project\\data\\comsol_mfl\\prepared\\experimental\\true_3d_rbc_pilot\\comsol_true_3d_rbc_imported_watertight_pilot_v3_240.npz",
+    "C:\\Users\\19166\\Desktop\\PINN_project\\data\\comsol_mfl\\prepared\\experimental\\true_3d_rbc_pilot\\comsol_true_3d_rbc_surface_targeted_topup_v1_120.npz"
+  ],
+  "source_split_counts": {
+    "test": 39,
+    "train": 162,
+    "val": 39
+  },
+  "split_counts": {
+    "test": 59,
+    "train": 242,
+    "val": 59
+  },
+  "status": "training_gate_fail",
+  "summary_path": "C:\\Users\\19166\\Desktop\\PINN_project\\results\\summaries\\surface_rbc_expansion_v1_360_training_gate_summary.md",
+  "topup_dataset_id": "comsol_true_3d_rbc_surface_targeted_topup_v1_120",
+  "topup_manifest_sha256": "54587d95b69caeeb1a27fc23ba65b275f6d9f47f0450c3ad755768dd8cee2373",
+  "topup_split_counts": {
+    "test": 20,
+    "train": 80,
+    "val": 20
+  },
+  "topup_split_policy": "preserved_manifest_split_80_20_20",
+  "train_ready_candidate": true,
+  "training_gate_outcome": "FAIL",
+  "validation_pass": true,
+  "view_shape": [
+    360,
+    9,
+    201
+  ]
+}

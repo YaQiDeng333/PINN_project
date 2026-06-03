@@ -3524,3 +3524,16 @@ Review agent 已完成只读复核，无 must-fix。review 建议把 audit/decis
 - validator result: hard-core mean/min `99.851695 / 47 px`, halo mean/min `24.728814 / 10 px`, soft support mean/min `124.580508 / 57 px`, v3b soft OR/raw union mean/max `1.247726 / 1.250000`, v3b/v3 shrink ratio mean `0.627196`, duplicate hard ownership `0`, empty slot violations `0`.
 - acceptance decision: `READY_FOR_25_17_TRAINING`.
 - route decision: `A. enter 25.17 label-v3b training gate using 25.10 loss mainline + label-v3b supervision; do not use the 25.11/25.12 rebalance stack`.
+
+## 2026-06-03 surface RBC +120 assembly/training gate
+
+- scope: independent surface / near-surface RBC-style expansion gate only. No internal/buried defect logic, no 25.x multi-pit logic, no real-data intake, no baseline transition, and no `CURRENT_BASELINE.md` update.
+- assembly: explicitly assembled `comsol_true_3d_rbc_imported_watertight_pilot_v3_240` plus `comsol_true_3d_rbc_surface_targeted_topup_v1_120` into `comsol_true_3d_rbc_surface_expansion_v1_360`.
+- split: preserved v3_240 `162/39/39` and preserved the top-up manifest split `80/20/20`, producing assembled split `242/59/59`.
+- validation: assembled dataset passed shape `(360,3,3,201)`, model view `(360,9,201)`, finite `delta_b`, complete `Bx/By/Bz`, six labels `L_m/W_m/D_m/wLD/wWD/wLW`, profile/depth/mask reconstruction, split leakage, duplicate sample-id, and nominal `sensor_z_m=0.008` checks.
+- training gate: same 20.85-style Conv1D six-parameter model, seeds `42/123/2026`, train-only normalization, validation-only checkpoint/seed selection. Selected seed was `2026`.
+- comparator: frozen 20.85 checkpoint from `results/manifests/true_3d_rbc_baseline_inference_artifact_manifest.json`, using frozen v3_240 normalization and train-bound clipping.
+- result: gate outcome `FAIL`. Old v3_240 test non-regression failed: profile RMSE `0.000429130307356 m` > `0.00039936911`, Er-like `0.432564256474` > `0.3575712`, and D MAE `0.921162613500 mm` > `0.8400`.
+- expansion signal: top-up test improved over frozen 20.85 in all four primary metrics, but assembled test improved only projected Dice among the primary metrics, and old-test regression blocks the expansion gate.
+- tracked outputs: `results/metrics/surface_rbc_expansion_v1_360_training_gate_metrics.json`, `results/summaries/surface_rbc_expansion_v1_360_training_gate_summary.md`, and `results/manifests/surface_rbc_expansion_v1_360_training_gate_manifest.json`.
+- artifact policy: assembled NPZ remains generated data under `data/` and is not committed; no checkpoint, preview, notes, raw CSV, `.mph`, or baseline docs are committed.

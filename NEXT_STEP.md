@@ -871,3 +871,11 @@ Only next step: **enter 25.17 label-v3b training gate using the 25.10 loss mainl
 25.16 resolved the immediate label-target blocker without touching data/NPZ: v3b keeps the v2 exclusive hard identity, adds a capped one-pixel soft halo for anti-sparsity, and prevents v3-style union-like support leakage. The validator passed with v3b soft OR/raw union mean/max `1.247726 / 1.250000`, v3b/v3 shrink ratio mean `0.627196`, duplicate hard ownership `0`, and empty slot violations `0`.
 
 This authorizes only an explicit 25.17 training gate. It is not a baseline transition, does not update `CURRENT_BASELINE.md`, and should not continue loss tuning from the failed 25.11/25.12 rebalance stack.
+
+## 2026-06-03 after surface RBC +120 assembly/training gate
+
+Only next step for the surface RBC expansion line: do not promote `comsol_true_3d_rbc_surface_expansion_v1_360`; analyze why the +120 train split improves top-up test but regresses old v3_240 test before any further assembly/training attempt.
+
+The gate assembled v3_240 plus the validated top-up into `comsol_true_3d_rbc_surface_expansion_v1_360`, N=`360`, split=`242/59/59`, and validation passed. Training used the same 20.85-style Conv1D six-parameter model with validation-only seed selection and selected seed `2026`.
+
+Gate outcome is `FAIL`: old v3_240 test profile RMSE `0.000429130307356 m`, Er-like `0.432564256474`, and D MAE `0.921162613500 mm` exceed the required non-regression thresholds. `CURRENT_BASELINE.md` remains the 20.85 nominal true 3D RBC baseline.

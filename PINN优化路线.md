@@ -986,3 +986,11 @@ The `+120 training gate` remains a later independent stage. Only that later gate
 The v3b rule is the new branch contract: exclusive hard core preserves component identity; capped narrow halo restores anti-sparsity; ambiguous overlap/contact pixels become ignore/diagnostic instead of multi-positive supervision; depth valid support follows hard core plus the narrow exclusive halo; union mask/depth stay evaluation-only raw OR/max targets.
 
 Validator outcome is `READY_FOR_25_17_TRAINING`: hard-core min `47 px`, soft support min `57 px`, soft OR/raw union mean/max `1.247726 / 1.250000`, v3b/v3 shrink ratio mean `0.627196`, duplicate hard ownership `0`, and empty slot violations `0`. The only route now is 25.17 label-v3b training gate with the 25.10 loss mainline; do not resume the failed 25.11/25.12 rebalance stack and do not update `CURRENT_BASELINE.md`.
+
+## 2026-06-03 route sync: surface RBC +120 expansion gate
+
+The surface RBC targeted top-up can be assembled and validated, but it does not pass the training gate as a baseline-expansion candidate. The assembled dataset is explicitly `v3_240 + topup_v1_120`, dataset_id `comsol_true_3d_rbc_surface_expansion_v1_360`, N=`360`, split=`242/59/59`; it remains an explicit candidate dataset with `baseline_ready=false`.
+
+The mechanism is mixed rather than uniformly bad: the candidate improves top-up test performance over frozen 20.85 in profile RMSE, Er-like, D MAE, and projected Dice, but it regresses old v3_240 test profile/depth metrics. Old-test non-regression fails on profile RMSE `0.000429130307356 m`, Er-like `0.432564256474`, and D MAE `0.921162613500 mm`.
+
+Route boundary: do not update `CURRENT_BASELINE.md`, do not treat `comsol_true_3d_rbc_surface_expansion_v1_360` as a baseline transition, and do not continue by automatic latest/newest discovery. Any next attempt must explain and control the old-test regression while preserving explicit manifest loading and validation-only selection.
